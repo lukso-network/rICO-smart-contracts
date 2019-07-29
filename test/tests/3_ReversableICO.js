@@ -20,6 +20,7 @@ describe("ReversableICO", function () {
             this.ReversableICO = await helpers.utils.deployNewContractInstance(helpers, "ReversableICO");
             console.log("      Gas used for deployment:", this.ReversableICO.receipt.gasUsed);
             console.log("      Contract Address:", this.ReversableICO.receipt.contractAddress);
+            console.log("");
         });
 
         it("Gas usage should be lower than 6.7m.", function () {

@@ -1,5 +1,7 @@
 async function runTests() {
 
+    const defaultGasPrice = 10000000000; // 10 gwei
+
     const Web3                      = require('web3');
     let web3Instance;
 
@@ -45,6 +47,7 @@ async function runTests() {
     const solidity = {
         ether:ether,
         etherBN:etherBN,
+        gwei: 1000000000,
     };
 
     // https://github.com/0xjac/ERC1820
@@ -85,6 +88,12 @@ async function runTests() {
             assert:assert,
             solidity:solidity,
             ERC1820:ERC1820,
+            defaultGasPrice:defaultGasPrice,
+            addresses:{
+                ERC1820:'0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24',
+                Token: null, 
+                Rico: null, 
+            },
         }
     };
 
@@ -94,10 +103,11 @@ async function runTests() {
     global.assert = assert;
 
     const tests = [
-        // 'external/SafeMath',
+        'external/SafeMath',
         // 'external/ERC777.test',
-        '0_ERC1820',
-        '0_ReversableICO'
+        '1_ERC1820',
+        '2_ERC777_Token',
+        '3_ReversableICO',
     ];
 
     utils.toLog(
@@ -113,6 +123,7 @@ async function runTests() {
         // Instantiate a Mocha instance.
         const mocha = new Mocha();
 
+        mocha.useColors(true);
         mocha.slow(10);
         mocha.timeout(600000);
 

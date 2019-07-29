@@ -3,7 +3,7 @@ const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
-describe("ERC1820", function () {
+describe("ERC1820 - Token Registry", function () {
 
     describe("Step 1 - Before deployment state", function () {
         
@@ -78,6 +78,10 @@ describe("ERC1820", function () {
 
             // sendRawTransaction if upgrading to the latest web3
             deploymentTx = await helpers.web3Instance.eth.sendSignedTransaction( helpers.ERC1820.RawTx );
+
+            console.log("      Gas used for deployment:", deploymentTx.gasUsed);
+            console.log("      Contract Address:", deploymentTx.contractAddress);
+            console.log("");
 
         });
         

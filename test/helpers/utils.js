@@ -148,25 +148,42 @@ module.exports = {
 
         let from = accounts[0];
         let gas = 6700000;
+        let gasPrice = helpers.defaultGasPrice;
+
         if(options && options.from) {
             from = options.from;
         }
+        
         if(options && options.gas) {
             gas = options.gas;
+        }
+
+        if(options && options.gasPrice) {
+            gasPrice = options.gasPrice;
         }
 
         if(options && options.debug) {
             console.log("Deploying new contract ["+name+"]");
         }
+
+        const deployArguments = {
+            data: ContractData.bytecode
+        }
+        if(options && options.arguments) {
+            deployArguments.arguments = options.arguments;
+        }
+        
+
         let ContractReceipt;
         const ContractInstance = await new helpers.web3Instance.eth.Contract(
             ContractData.abi,
             "0x0000000000000000000000000000000000000000"
-        ).deploy({
-            data: ContractData.bytecode
-        }).send({
+        ).deploy(
+            deployArguments
+        ).send({
             from: from,
             gas: gas,
+            gasPrice: gasPrice,
         }, function(error, transactionHash){
             if( error ) {
                 console.log("error", error);

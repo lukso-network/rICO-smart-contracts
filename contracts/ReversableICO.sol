@@ -1,7 +1,7 @@
 /*
- * source       https://github.com/mickys/ricopoc/
+ * source       https://github.com/mickys/rico-poc/
  * @name        RICO
- * @package     ricopoc
+ * @package     rico-poc
  * @author      Micky Socaci <micky@nowlive.ro>
  * @license     MIT
 */

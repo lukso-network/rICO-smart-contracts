@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- This file was created with the aha Ansi HTML Adapter. https://github.com/theZiz/aha -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/xml+xhtml; charset=UTF-8" />
+<title>output/test.log</title>
+</head>
+<body style="color:white; background-color:black">
+<pre>
+
+&gt; ricopoc@0.0.1 test /Volumes/Dev/RICO/poc
+&gt; scripts/run_tests.sh all
+
+Starting new ganache-cli instance at port 8545
+exchange neither monster ethics bless cancel ghost excite business record warfare invite
+
+--------------------------------------------------------------------
+ Running all tests in &quot;test&quot; folder:
+--------------------------------------------------------------------
+
+Compiling your contracts...
+===========================
+&gt; Everything is up to date, there is nothing to compile.
+
+<span style="color:white;font-weight:bold;">  ----------------------------------------------------------------
+  Step 1 - Setting up helpers and globals 
+  ---------------------------------------------------------------- </span>
+<span style="color:white;font-weight:bold;">  ----------------------------------------------------------------
+  Step 2 - Run tests 
+  ---------------------------------------------------------------- </span>
+
+
+  SafeMath
+    add
+    <span style="color:lime;">  ✓</span> adds correctly<span style="color:red;"> (31ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on addition overflow<span style="color:red;"> (41ms)</span>
+    sub
+    <span style="color:lime;">  ✓</span> subtracts correctly<span style="color:red;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span> reverts if subtraction result would be negative<span style="color:red;"> (18ms)</span>
+    mul
+    <span style="color:lime;">  ✓</span> multiplies correctly<span style="color:red;"> (26ms)</span>
+    <span style="color:lime;">  ✓</span> multiplies by zero correctly<span style="color:red;"> (31ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on multiplication overflow<span style="color:red;"> (14ms)</span>
+    div
+    <span style="color:lime;">  ✓</span> divides correctly<span style="color:red;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span> divides zero correctly<span style="color:red;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span> returns complete number result on non-even division<span style="color:red;"> (16ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on division by zero<span style="color:red;"> (14ms)</span>
+    mod
+    <span style="color:lime;">  ✓</span> reverts with a 0 divisor<span style="color:red;"> (16ms)</span>
+      modulos correctly
+      <span style="color:lime;">  ✓</span> when the dividend is smaller than the divisor<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is equal to the divisor<span style="color:red;"> (12ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is larger than the divisor<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is a multiple of the divisor<span style="color:yellow;"> (10ms)</span>
+
+  ERC1820 - Token Registry
+    Step 1 - Before deployment state
+    <span style="color:lime;">  ✓</span> Contract Code at address: 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24 should be 0x
+    <span style="color:lime;">  ✓</span> Deployer address: 0xa990077c3205cbDf861e17Fa532eeB069cE9fF96 balance should be 0 eth
+    <span style="color:lime;">  ✓</span> Funds Supplier address: 0xFE6B56FdCF920382Af1493828E79C017EE090F2a balance should be at least 0.08 eth
+    Step 2 - Deployment preparation
+      New Account balances after Supplier sends value to SenderAddress
+      <span style="color:lime;">  ✓</span> FundsSupplier balance has deploymentCost + tx fee substracted
+      <span style="color:lime;">  ✓</span> SenderAddress balance is equal to deploymentCost
+    Step 3 - ERC1820 Deployment
+      Gas used for deployment: 711453
+      Contract Address: 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24
+
+      Validation after ERC1820 Registry contract deployment
+        Transaction
+        <span style="color:lime;">  ✓</span> status is true
+        <span style="color:lime;">  ✓</span> signature is valid
+        <span style="color:lime;">  ✓</span> from address is correct
+        <span style="color:lime;">  ✓</span> Contract address is 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24
+        Contract
+        <span style="color:lime;">  ✓</span> code at address exists
+        <span style="color:lime;">  ✓</span> contract has the getManager method which can be called<span style="color:red;"> (12ms)</span>
+
+  ERC777 - RICO Token
+    Stage 1 - Deployment
+      Gas used for deployment: 3369411
+      Contract Address: 0x35C310d59E2b7f1F96A5e133Efb20538266e4053
+
+    <span style="color:lime;">  ✓</span> Gas usage should be lower than 3.5m.
+      basic information
+      <span style="color:lime;">  ✓</span> returns the name<span style="color:red;"> (17ms)</span>
+      <span style="color:lime;">  ✓</span> returns the symbol<span style="color:red;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span> returns a granularity of 1<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns the default operators<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> default operators are operators for all accounts
+      <span style="color:lime;">  ✓</span> returns the total supply<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns 18 when decimals is called<span style="color:red;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> the ERC777Token interface is registered in the registry<span style="color:red;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span> the ERC20Token interface is registered in the registry<span style="color:red;"> (15ms)</span>
+      balanceOf
+        for an account with no tokens
+        <span style="color:lime;">  ✓</span> returns zero<span style="color:red;"> (13ms)</span>
+        for an account with tokens
+        <span style="color:lime;">  ✓</span> returns their balance<span style="color:red;"> (12ms)</span>
+
+  ReversableICO
+    Stage 1 - Deployment
+      Gas used for deployment: 813575
+      Contract Address: 0x2A8b1b6AC8A5D4d17F19433907D0E9e779f9B5b8
+
+    <span style="color:lime;">  ✓</span> Gas usage should be lower than 6.7m.
+    <span style="color:lime;">  ✓</span> Property deployerAddress should be accounts[0]<span style="color:yellow;"> (8ms)</span>
+    <span style="color:lime;">  ✓</span> Property initialized should be false<span style="color:red;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span> Property started should be false<span style="color:yellow;"> (10ms)</span>
+    <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (10ms)</span>
+
+
+ <span style="color:lime;"> 44 passing</span> (1s)
+
+Done
+--------------------------------------------------------------------
+
+Killing existing ganache-cli instance at pid 19683.
+
+</pre>
+</body>
+</html>
