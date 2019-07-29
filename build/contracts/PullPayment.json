@@ -41,25 +41,25 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"payee\",\"type\":\"address\"}],\"name\":\"withdrawPayments\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"}],\"name\":\"payments\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"details\":\"Base contract supporting async send for pull payments. Inherit from this contract and use _asyncTransfer instead of send or transfer.\",\"methods\":{\"payments(address)\":{\"details\":\"Returns the credit owed to an address.\",\"params\":{\"dest\":\"The creditor's address.\"}},\"withdrawPayments(address)\":{\"details\":\"Withdraw accumulated balance.\",\"params\":{\"payee\":\"Whose balance will be withdrawn.\"}}},\"title\":\"PullPayment\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/PullPayment.sol\":\"PullPayment\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/poc/contracts/zeppelin/math/SafeMath.sol\":{\"keccak256\":\"0x4ccf2d7b51873db1ccfd54ca2adae5eac3b184f9699911ed4490438419f1c690\",\"urls\":[\"bzzr://1604f5b6d6e916c154efd8c6720cda069e5ba32dfa0a9dedf2b42e5b02d07f89\",\"dweb:/ipfs/QmV3yVktya1s617QmuzQR2CfuJgUi3dR2xEZY9ecmqZ2G1\"]},\"/Volumes/Dev/RICO/poc/contracts/zeppelin/ownership/Secondary.sol\":{\"keccak256\":\"0xa5f5ed53adb91ab6a16bee78b255b4b8ed59945bd5c9a7b360d8a62fc63b8da0\",\"urls\":[\"bzzr://2dd07a98e47fe608668d8d3a6591b27e5bd884cdf2f2e6dbd8e571f3a43ea8e3\",\"dweb:/ipfs/QmSY6W6Z6vyBe3KJUKypM1DCuZ27oViUBxMbLkUVNMSpS1\"]},\"/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/PullPayment.sol\":{\"keccak256\":\"0x941303a6bbdeda9d5a8edebbe719806319ae2e2d6b0f2e8192802e895eaf7bbe\",\"urls\":[\"bzzr://f4853bee390cde243325cdf18a4908d3a0dc76142f35edc06a73cc4d83c6a522\",\"dweb:/ipfs/QmYKjYYoTMEHu9pa2f4M5x7h8zgRcv4QfzshcGMCtow6ba\"]},\"/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/escrow/Escrow.sol\":{\"keccak256\":\"0x50d706eae690fd943acb15f93718932efbb871e6d5cabba8f9d55668c4180978\",\"urls\":[\"bzzr://cbab282856bd375f08edc3b7e7b91a0e84a07b774e6745c9ac8566497fd1633d\",\"dweb:/ipfs/Qmb8PWnKNhnCvRpJw9j1NSGuSNK3bC54qEibs7c4nw1Lsq\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"payee\",\"type\":\"address\"}],\"name\":\"withdrawPayments\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"dest\",\"type\":\"address\"}],\"name\":\"payments\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"details\":\"Base contract supporting async send for pull payments. Inherit from this contract and use _asyncTransfer instead of send or transfer.\",\"methods\":{\"payments(address)\":{\"details\":\"Returns the credit owed to an address.\",\"params\":{\"dest\":\"The creditor's address.\"}},\"withdrawPayments(address)\":{\"details\":\"Withdraw accumulated balance.\",\"params\":{\"payee\":\"Whose balance will be withdrawn.\"}}},\"title\":\"PullPayment\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/PullPayment.sol\":\"PullPayment\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/math/SafeMath.sol\":{\"keccak256\":\"0x4ccf2d7b51873db1ccfd54ca2adae5eac3b184f9699911ed4490438419f1c690\",\"urls\":[\"bzzr://1604f5b6d6e916c154efd8c6720cda069e5ba32dfa0a9dedf2b42e5b02d07f89\",\"dweb:/ipfs/QmV3yVktya1s617QmuzQR2CfuJgUi3dR2xEZY9ecmqZ2G1\"]},\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/ownership/Secondary.sol\":{\"keccak256\":\"0xa5f5ed53adb91ab6a16bee78b255b4b8ed59945bd5c9a7b360d8a62fc63b8da0\",\"urls\":[\"bzzr://2dd07a98e47fe608668d8d3a6591b27e5bd884cdf2f2e6dbd8e571f3a43ea8e3\",\"dweb:/ipfs/QmSY6W6Z6vyBe3KJUKypM1DCuZ27oViUBxMbLkUVNMSpS1\"]},\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/PullPayment.sol\":{\"keccak256\":\"0x941303a6bbdeda9d5a8edebbe719806319ae2e2d6b0f2e8192802e895eaf7bbe\",\"urls\":[\"bzzr://f4853bee390cde243325cdf18a4908d3a0dc76142f35edc06a73cc4d83c6a522\",\"dweb:/ipfs/QmYKjYYoTMEHu9pa2f4M5x7h8zgRcv4QfzshcGMCtow6ba\"]},\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/escrow/Escrow.sol\":{\"keccak256\":\"0x50d706eae690fd943acb15f93718932efbb871e6d5cabba8f9d55668c4180978\",\"urls\":[\"bzzr://cbab282856bd375f08edc3b7e7b91a0e84a07b774e6745c9ac8566497fd1633d\",\"dweb:/ipfs/Qmb8PWnKNhnCvRpJw9j1NSGuSNK3bC54qEibs7c4nw1Lsq\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\nimport \"./escrow/Escrow.sol\";\n\n/**\n * @title PullPayment\n * @dev Base contract supporting async send for pull payments. Inherit from this\n * contract and use _asyncTransfer instead of send or transfer.\n */\ncontract PullPayment {\n    Escrow private _escrow;\n\n    constructor () internal {\n        _escrow = new Escrow();\n    }\n\n    /**\n     * @dev Withdraw accumulated balance.\n     * @param payee Whose balance will be withdrawn.\n     */\n    function withdrawPayments(address payable payee) public {\n        _escrow.withdraw(payee);\n    }\n\n    /**\n     * @dev Returns the credit owed to an address.\n     * @param dest The creditor's address.\n     */\n    function payments(address dest) public view returns (uint256) {\n        return _escrow.depositsOf(dest);\n    }\n\n    /**\n     * @dev Called by the payer to store the sent amount as credit to be pulled.\n     * @param dest The destination address of the funds.\n     * @param amount The amount to transfer.\n     */\n    function _asyncTransfer(address dest, uint256 amount) internal {\n        _escrow.deposit.value(amount)(dest);\n    }\n}\n",
-  "sourcePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/PullPayment.sol",
+  "sourcePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/PullPayment.sol",
   "ast": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/PullPayment.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/PullPayment.sol",
     "exportedSymbols": {
       "PullPayment": [
-        5104
+        5628
       ]
     },
-    "id": 5105,
+    "id": 5629,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5047,
+        "id": 5571,
         "literals": [
           "solidity",
           "^",
@@ -67,56 +67,56 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:46"
+        "src": "0:23:50"
       },
       {
-        "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/escrow/Escrow.sol",
+        "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/escrow/Escrow.sol",
         "file": "./escrow/Escrow.sol",
-        "id": 5048,
+        "id": 5572,
         "nodeType": "ImportDirective",
-        "scope": 5105,
-        "sourceUnit": 5235,
-        "src": "25:29:46",
+        "scope": 5629,
+        "sourceUnit": 5759,
+        "src": "25:29:50",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "baseContracts": [],
         "contractDependencies": [
-          5234
+          5758
         ],
         "contractKind": "contract",
         "documentation": "@title PullPayment\n@dev Base contract supporting async send for pull payments. Inherit from this\ncontract and use _asyncTransfer instead of send or transfer.",
         "fullyImplemented": true,
-        "id": 5104,
+        "id": 5628,
         "linearizedBaseContracts": [
-          5104
+          5628
         ],
         "name": "PullPayment",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 5050,
+            "id": 5574,
             "name": "_escrow",
             "nodeType": "VariableDeclaration",
-            "scope": 5104,
-            "src": "258:22:46",
+            "scope": 5628,
+            "src": "258:22:50",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_Escrow_$5234",
+              "typeIdentifier": "t_contract$_Escrow_$5758",
               "typeString": "contract Escrow"
             },
             "typeName": {
               "contractScope": null,
-              "id": 5049,
+              "id": 5573,
               "name": "Escrow",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5234,
-              "src": "258:6:46",
+              "referencedDeclaration": 5758,
+              "src": "258:6:50",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Escrow_$5234",
+                "typeIdentifier": "t_contract$_Escrow_$5758",
                 "typeString": "contract Escrow"
               }
             },
@@ -125,28 +125,28 @@
           },
           {
             "body": {
-              "id": 5059,
+              "id": 5583,
               "nodeType": "Block",
-              "src": "311:39:46",
+              "src": "311:39:50",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5057,
+                    "id": 5581,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5053,
+                      "id": 5577,
                       "name": "_escrow",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5050,
-                      "src": "321:7:46",
+                      "referencedDeclaration": 5574,
+                      "src": "321:7:50",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Escrow_$5234",
+                        "typeIdentifier": "t_contract$_Escrow_$5758",
                         "typeString": "contract Escrow"
                       }
                     },
@@ -157,31 +157,31 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 5055,
+                        "id": 5579,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "NewExpression",
-                        "src": "331:10:46",
+                        "src": "331:10:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_Escrow_$5234_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_Escrow_$5758_$",
                           "typeString": "function () returns (contract Escrow)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 5054,
+                          "id": 5578,
                           "name": "Escrow",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 5234,
-                          "src": "335:6:46",
+                          "referencedDeclaration": 5758,
+                          "src": "335:6:50",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_Escrow_$5234",
+                            "typeIdentifier": "t_contract$_Escrow_$5758",
                             "typeString": "contract Escrow"
                           }
                         }
                       },
-                      "id": 5056,
+                      "id": 5580,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -189,54 +189,54 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "331:12:46",
+                      "src": "331:12:50",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Escrow_$5234",
+                        "typeIdentifier": "t_contract$_Escrow_$5758",
                         "typeString": "contract Escrow"
                       }
                     },
-                    "src": "321:22:46",
+                    "src": "321:22:50",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_Escrow_$5234",
+                      "typeIdentifier": "t_contract$_Escrow_$5758",
                       "typeString": "contract Escrow"
                     }
                   },
-                  "id": 5058,
+                  "id": 5582,
                   "nodeType": "ExpressionStatement",
-                  "src": "321:22:46"
+                  "src": "321:22:50"
                 }
               ]
             },
             "documentation": null,
-            "id": 5060,
+            "id": 5584,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5051,
+              "id": 5575,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "299:2:46"
+              "src": "299:2:50"
             },
             "returnParameters": {
-              "id": 5052,
+              "id": 5576,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "311:0:46"
+              "src": "311:0:50"
             },
-            "scope": 5104,
-            "src": "287:63:46",
+            "scope": 5628,
+            "src": "287:63:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 5071,
+              "id": 5595,
               "nodeType": "Block",
-              "src": "523:40:46",
+              "src": "523:40:50",
               "statements": [
                 {
                   "expression": {
@@ -244,12 +244,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5068,
+                        "id": 5592,
                         "name": "payee",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5062,
-                        "src": "550:5:46",
+                        "referencedDeclaration": 5586,
+                        "src": "550:5:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -265,32 +265,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 5065,
+                        "id": 5589,
                         "name": "_escrow",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5050,
-                        "src": "533:7:46",
+                        "referencedDeclaration": 5574,
+                        "src": "533:7:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Escrow_$5234",
+                          "typeIdentifier": "t_contract$_Escrow_$5758",
                           "typeString": "contract Escrow"
                         }
                       },
-                      "id": 5067,
+                      "id": 5591,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "withdraw",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5233,
-                      "src": "533:16:46",
+                      "referencedDeclaration": 5757,
+                      "src": "533:16:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_payable_$returns$__$",
                         "typeString": "function (address payable) external"
                       }
                     },
-                    "id": 5069,
+                    "id": 5593,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -298,36 +298,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "533:23:46",
+                    "src": "533:23:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5070,
+                  "id": 5594,
                   "nodeType": "ExpressionStatement",
-                  "src": "533:23:46"
+                  "src": "533:23:50"
                 }
               ]
             },
             "documentation": "@dev Withdraw accumulated balance.\n@param payee Whose balance will be withdrawn.",
-            "id": 5072,
+            "id": 5596,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "withdrawPayments",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5063,
+              "id": 5587,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5062,
+                  "id": 5586,
                   "name": "payee",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5072,
-                  "src": "493:21:46",
+                  "scope": 5596,
+                  "src": "493:21:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -335,10 +335,10 @@
                     "typeString": "address payable"
                   },
                   "typeName": {
-                    "id": 5061,
+                    "id": 5585,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "493:15:46",
+                    "src": "493:15:50",
                     "stateMutability": "payable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
@@ -349,25 +349,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "492:23:46"
+              "src": "492:23:50"
             },
             "returnParameters": {
-              "id": 5064,
+              "id": 5588,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "523:0:46"
+              "src": "523:0:50"
             },
-            "scope": 5104,
-            "src": "467:96:46",
+            "scope": 5628,
+            "src": "467:96:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5084,
+              "id": 5608,
               "nodeType": "Block",
-              "src": "741:48:46",
+              "src": "741:48:50",
               "statements": [
                 {
                   "expression": {
@@ -375,12 +375,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5081,
+                        "id": 5605,
                         "name": "dest",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5074,
-                        "src": "777:4:46",
+                        "referencedDeclaration": 5598,
+                        "src": "777:4:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -396,32 +396,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 5079,
+                        "id": 5603,
                         "name": "_escrow",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5050,
-                        "src": "758:7:46",
+                        "referencedDeclaration": 5574,
+                        "src": "758:7:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Escrow_$5234",
+                          "typeIdentifier": "t_contract$_Escrow_$5758",
                           "typeString": "contract Escrow"
                         }
                       },
-                      "id": 5080,
+                      "id": 5604,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "depositsOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5173,
-                      "src": "758:18:46",
+                      "referencedDeclaration": 5697,
+                      "src": "758:18:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
                       }
                     },
-                    "id": 5082,
+                    "id": 5606,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -429,37 +429,37 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "758:24:46",
+                    "src": "758:24:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5078,
-                  "id": 5083,
+                  "functionReturnParameters": 5602,
+                  "id": 5607,
                   "nodeType": "Return",
-                  "src": "751:31:46"
+                  "src": "751:31:50"
                 }
               ]
             },
             "documentation": "@dev Returns the credit owed to an address.\n@param dest The creditor's address.",
-            "id": 5085,
+            "id": 5609,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "payments",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5075,
+              "id": 5599,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5074,
+                  "id": 5598,
                   "name": "dest",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5085,
-                  "src": "697:12:46",
+                  "scope": 5609,
+                  "src": "697:12:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -467,10 +467,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5073,
+                    "id": 5597,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "697:7:46",
+                    "src": "697:7:50",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -481,19 +481,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "696:14:46"
+              "src": "696:14:50"
             },
             "returnParameters": {
-              "id": 5078,
+              "id": 5602,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5077,
+                  "id": 5601,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5085,
-                  "src": "732:7:46",
+                  "scope": 5609,
+                  "src": "732:7:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -501,10 +501,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5076,
+                    "id": 5600,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "732:7:46",
+                    "src": "732:7:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -514,19 +514,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "731:9:46"
+              "src": "731:9:50"
             },
-            "scope": 5104,
-            "src": "679:110:46",
+            "scope": 5628,
+            "src": "679:110:50",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5102,
+              "id": 5626,
               "nodeType": "Block",
-              "src": "1057:52:46",
+              "src": "1057:52:50",
               "statements": [
                 {
                   "expression": {
@@ -534,12 +534,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5099,
+                        "id": 5623,
                         "name": "dest",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5087,
-                        "src": "1097:4:46",
+                        "referencedDeclaration": 5611,
+                        "src": "1097:4:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -556,12 +556,12 @@
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5097,
+                          "id": 5621,
                           "name": "amount",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5089,
-                          "src": "1089:6:46",
+                          "referencedDeclaration": 5613,
+                          "src": "1089:6:50",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -579,32 +579,32 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 5092,
+                            "id": 5616,
                             "name": "_escrow",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5050,
-                            "src": "1067:7:46",
+                            "referencedDeclaration": 5574,
+                            "src": "1067:7:50",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_Escrow_$5234",
+                              "typeIdentifier": "t_contract$_Escrow_$5758",
                               "typeString": "contract Escrow"
                             }
                           },
-                          "id": 5095,
+                          "id": 5619,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "deposit",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 5202,
-                          "src": "1067:15:46",
+                          "referencedDeclaration": 5726,
+                          "src": "1067:15:50",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_payable$_t_address_$returns$__$",
                             "typeString": "function (address) payable external"
                           }
                         },
-                        "id": 5096,
+                        "id": 5620,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -612,13 +612,13 @@
                         "memberName": "value",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1067:21:46",
+                        "src": "1067:21:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_setvalue_pure$_t_uint256_$returns$_t_function_external_payable$_t_address_$returns$__$value_$",
                           "typeString": "function (uint256) pure returns (function (address) payable external)"
                         }
                       },
-                      "id": 5098,
+                      "id": 5622,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -626,13 +626,13 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1067:29:46",
+                      "src": "1067:29:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_payable$_t_address_$returns$__$value",
                         "typeString": "function (address) payable external"
                       }
                     },
-                    "id": 5100,
+                    "id": 5624,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -640,36 +640,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1067:35:46",
+                    "src": "1067:35:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5101,
+                  "id": 5625,
                   "nodeType": "ExpressionStatement",
-                  "src": "1067:35:46"
+                  "src": "1067:35:50"
                 }
               ]
             },
             "documentation": "@dev Called by the payer to store the sent amount as credit to be pulled.\n@param dest The destination address of the funds.\n@param amount The amount to transfer.",
-            "id": 5103,
+            "id": 5627,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_asyncTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5090,
+              "id": 5614,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5087,
+                  "id": 5611,
                   "name": "dest",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5103,
-                  "src": "1018:12:46",
+                  "scope": 5627,
+                  "src": "1018:12:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -677,10 +677,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5086,
+                    "id": 5610,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1018:7:46",
+                    "src": "1018:7:50",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -692,11 +692,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5089,
+                  "id": 5613,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5103,
-                  "src": "1032:14:46",
+                  "scope": 5627,
+                  "src": "1032:14:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -704,10 +704,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5088,
+                    "id": 5612,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1032:7:46",
+                    "src": "1032:7:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -717,39 +717,39 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1017:30:46"
+              "src": "1017:30:50"
             },
             "returnParameters": {
-              "id": 5091,
+              "id": 5615,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1057:0:46"
+              "src": "1057:0:50"
             },
-            "scope": 5104,
-            "src": "994:115:46",
+            "scope": 5628,
+            "src": "994:115:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 5105,
-        "src": "231:880:46"
+        "scope": 5629,
+        "src": "231:880:50"
       }
     ],
-    "src": "0:1112:46"
+    "src": "0:1112:50"
   },
   "legacyAST": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/PullPayment.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/PullPayment.sol",
     "exportedSymbols": {
       "PullPayment": [
-        5104
+        5628
       ]
     },
-    "id": 5105,
+    "id": 5629,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5047,
+        "id": 5571,
         "literals": [
           "solidity",
           "^",
@@ -757,56 +757,56 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:46"
+        "src": "0:23:50"
       },
       {
-        "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/payment/escrow/Escrow.sol",
+        "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/payment/escrow/Escrow.sol",
         "file": "./escrow/Escrow.sol",
-        "id": 5048,
+        "id": 5572,
         "nodeType": "ImportDirective",
-        "scope": 5105,
-        "sourceUnit": 5235,
-        "src": "25:29:46",
+        "scope": 5629,
+        "sourceUnit": 5759,
+        "src": "25:29:50",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "baseContracts": [],
         "contractDependencies": [
-          5234
+          5758
         ],
         "contractKind": "contract",
         "documentation": "@title PullPayment\n@dev Base contract supporting async send for pull payments. Inherit from this\ncontract and use _asyncTransfer instead of send or transfer.",
         "fullyImplemented": true,
-        "id": 5104,
+        "id": 5628,
         "linearizedBaseContracts": [
-          5104
+          5628
         ],
         "name": "PullPayment",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 5050,
+            "id": 5574,
             "name": "_escrow",
             "nodeType": "VariableDeclaration",
-            "scope": 5104,
-            "src": "258:22:46",
+            "scope": 5628,
+            "src": "258:22:50",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_Escrow_$5234",
+              "typeIdentifier": "t_contract$_Escrow_$5758",
               "typeString": "contract Escrow"
             },
             "typeName": {
               "contractScope": null,
-              "id": 5049,
+              "id": 5573,
               "name": "Escrow",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5234,
-              "src": "258:6:46",
+              "referencedDeclaration": 5758,
+              "src": "258:6:50",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Escrow_$5234",
+                "typeIdentifier": "t_contract$_Escrow_$5758",
                 "typeString": "contract Escrow"
               }
             },
@@ -815,28 +815,28 @@
           },
           {
             "body": {
-              "id": 5059,
+              "id": 5583,
               "nodeType": "Block",
-              "src": "311:39:46",
+              "src": "311:39:50",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5057,
+                    "id": 5581,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5053,
+                      "id": 5577,
                       "name": "_escrow",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5050,
-                      "src": "321:7:46",
+                      "referencedDeclaration": 5574,
+                      "src": "321:7:50",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Escrow_$5234",
+                        "typeIdentifier": "t_contract$_Escrow_$5758",
                         "typeString": "contract Escrow"
                       }
                     },
@@ -847,31 +847,31 @@
                       "arguments": [],
                       "expression": {
                         "argumentTypes": [],
-                        "id": 5055,
+                        "id": 5579,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "NewExpression",
-                        "src": "331:10:46",
+                        "src": "331:10:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_Escrow_$5234_$",
+                          "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_Escrow_$5758_$",
                           "typeString": "function () returns (contract Escrow)"
                         },
                         "typeName": {
                           "contractScope": null,
-                          "id": 5054,
+                          "id": 5578,
                           "name": "Escrow",
                           "nodeType": "UserDefinedTypeName",
-                          "referencedDeclaration": 5234,
-                          "src": "335:6:46",
+                          "referencedDeclaration": 5758,
+                          "src": "335:6:50",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_contract$_Escrow_$5234",
+                            "typeIdentifier": "t_contract$_Escrow_$5758",
                             "typeString": "contract Escrow"
                           }
                         }
                       },
-                      "id": 5056,
+                      "id": 5580,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -879,54 +879,54 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "331:12:46",
+                      "src": "331:12:50",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Escrow_$5234",
+                        "typeIdentifier": "t_contract$_Escrow_$5758",
                         "typeString": "contract Escrow"
                       }
                     },
-                    "src": "321:22:46",
+                    "src": "321:22:50",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_Escrow_$5234",
+                      "typeIdentifier": "t_contract$_Escrow_$5758",
                       "typeString": "contract Escrow"
                     }
                   },
-                  "id": 5058,
+                  "id": 5582,
                   "nodeType": "ExpressionStatement",
-                  "src": "321:22:46"
+                  "src": "321:22:50"
                 }
               ]
             },
             "documentation": null,
-            "id": 5060,
+            "id": 5584,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5051,
+              "id": 5575,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "299:2:46"
+              "src": "299:2:50"
             },
             "returnParameters": {
-              "id": 5052,
+              "id": 5576,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "311:0:46"
+              "src": "311:0:50"
             },
-            "scope": 5104,
-            "src": "287:63:46",
+            "scope": 5628,
+            "src": "287:63:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 5071,
+              "id": 5595,
               "nodeType": "Block",
-              "src": "523:40:46",
+              "src": "523:40:50",
               "statements": [
                 {
                   "expression": {
@@ -934,12 +934,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5068,
+                        "id": 5592,
                         "name": "payee",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5062,
-                        "src": "550:5:46",
+                        "referencedDeclaration": 5586,
+                        "src": "550:5:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -955,32 +955,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 5065,
+                        "id": 5589,
                         "name": "_escrow",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5050,
-                        "src": "533:7:46",
+                        "referencedDeclaration": 5574,
+                        "src": "533:7:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Escrow_$5234",
+                          "typeIdentifier": "t_contract$_Escrow_$5758",
                           "typeString": "contract Escrow"
                         }
                       },
-                      "id": 5067,
+                      "id": 5591,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "withdraw",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5233,
-                      "src": "533:16:46",
+                      "referencedDeclaration": 5757,
+                      "src": "533:16:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_payable_$returns$__$",
                         "typeString": "function (address payable) external"
                       }
                     },
-                    "id": 5069,
+                    "id": 5593,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -988,36 +988,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "533:23:46",
+                    "src": "533:23:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5070,
+                  "id": 5594,
                   "nodeType": "ExpressionStatement",
-                  "src": "533:23:46"
+                  "src": "533:23:50"
                 }
               ]
             },
             "documentation": "@dev Withdraw accumulated balance.\n@param payee Whose balance will be withdrawn.",
-            "id": 5072,
+            "id": 5596,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "withdrawPayments",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5063,
+              "id": 5587,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5062,
+                  "id": 5586,
                   "name": "payee",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5072,
-                  "src": "493:21:46",
+                  "scope": 5596,
+                  "src": "493:21:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1025,10 +1025,10 @@
                     "typeString": "address payable"
                   },
                   "typeName": {
-                    "id": 5061,
+                    "id": 5585,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "493:15:46",
+                    "src": "493:15:50",
                     "stateMutability": "payable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
@@ -1039,25 +1039,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "492:23:46"
+              "src": "492:23:50"
             },
             "returnParameters": {
-              "id": 5064,
+              "id": 5588,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "523:0:46"
+              "src": "523:0:50"
             },
-            "scope": 5104,
-            "src": "467:96:46",
+            "scope": 5628,
+            "src": "467:96:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5084,
+              "id": 5608,
               "nodeType": "Block",
-              "src": "741:48:46",
+              "src": "741:48:50",
               "statements": [
                 {
                   "expression": {
@@ -1065,12 +1065,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5081,
+                        "id": 5605,
                         "name": "dest",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5074,
-                        "src": "777:4:46",
+                        "referencedDeclaration": 5598,
+                        "src": "777:4:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1086,32 +1086,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 5079,
+                        "id": 5603,
                         "name": "_escrow",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5050,
-                        "src": "758:7:46",
+                        "referencedDeclaration": 5574,
+                        "src": "758:7:50",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Escrow_$5234",
+                          "typeIdentifier": "t_contract$_Escrow_$5758",
                           "typeString": "contract Escrow"
                         }
                       },
-                      "id": 5080,
+                      "id": 5604,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "depositsOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 5173,
-                      "src": "758:18:46",
+                      "referencedDeclaration": 5697,
+                      "src": "758:18:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
                       }
                     },
-                    "id": 5082,
+                    "id": 5606,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1119,37 +1119,37 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "758:24:46",
+                    "src": "758:24:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5078,
-                  "id": 5083,
+                  "functionReturnParameters": 5602,
+                  "id": 5607,
                   "nodeType": "Return",
-                  "src": "751:31:46"
+                  "src": "751:31:50"
                 }
               ]
             },
             "documentation": "@dev Returns the credit owed to an address.\n@param dest The creditor's address.",
-            "id": 5085,
+            "id": 5609,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "payments",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5075,
+              "id": 5599,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5074,
+                  "id": 5598,
                   "name": "dest",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5085,
-                  "src": "697:12:46",
+                  "scope": 5609,
+                  "src": "697:12:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1157,10 +1157,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5073,
+                    "id": 5597,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "697:7:46",
+                    "src": "697:7:50",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1171,19 +1171,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "696:14:46"
+              "src": "696:14:50"
             },
             "returnParameters": {
-              "id": 5078,
+              "id": 5602,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5077,
+                  "id": 5601,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5085,
-                  "src": "732:7:46",
+                  "scope": 5609,
+                  "src": "732:7:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1191,10 +1191,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5076,
+                    "id": 5600,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "732:7:46",
+                    "src": "732:7:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1204,19 +1204,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "731:9:46"
+              "src": "731:9:50"
             },
-            "scope": 5104,
-            "src": "679:110:46",
+            "scope": 5628,
+            "src": "679:110:50",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5102,
+              "id": 5626,
               "nodeType": "Block",
-              "src": "1057:52:46",
+              "src": "1057:52:50",
               "statements": [
                 {
                   "expression": {
@@ -1224,12 +1224,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5099,
+                        "id": 5623,
                         "name": "dest",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5087,
-                        "src": "1097:4:46",
+                        "referencedDeclaration": 5611,
+                        "src": "1097:4:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1246,12 +1246,12 @@
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5097,
+                          "id": 5621,
                           "name": "amount",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5089,
-                          "src": "1089:6:46",
+                          "referencedDeclaration": 5613,
+                          "src": "1089:6:50",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1269,32 +1269,32 @@
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 5092,
+                            "id": 5616,
                             "name": "_escrow",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5050,
-                            "src": "1067:7:46",
+                            "referencedDeclaration": 5574,
+                            "src": "1067:7:50",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_Escrow_$5234",
+                              "typeIdentifier": "t_contract$_Escrow_$5758",
                               "typeString": "contract Escrow"
                             }
                           },
-                          "id": 5095,
+                          "id": 5619,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "deposit",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 5202,
-                          "src": "1067:15:46",
+                          "referencedDeclaration": 5726,
+                          "src": "1067:15:50",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_payable$_t_address_$returns$__$",
                             "typeString": "function (address) payable external"
                           }
                         },
-                        "id": 5096,
+                        "id": 5620,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1302,13 +1302,13 @@
                         "memberName": "value",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1067:21:46",
+                        "src": "1067:21:50",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_setvalue_pure$_t_uint256_$returns$_t_function_external_payable$_t_address_$returns$__$value_$",
                           "typeString": "function (uint256) pure returns (function (address) payable external)"
                         }
                       },
-                      "id": 5098,
+                      "id": 5622,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1316,13 +1316,13 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1067:29:46",
+                      "src": "1067:29:50",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_payable$_t_address_$returns$__$value",
                         "typeString": "function (address) payable external"
                       }
                     },
-                    "id": 5100,
+                    "id": 5624,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1330,36 +1330,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1067:35:46",
+                    "src": "1067:35:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5101,
+                  "id": 5625,
                   "nodeType": "ExpressionStatement",
-                  "src": "1067:35:46"
+                  "src": "1067:35:50"
                 }
               ]
             },
             "documentation": "@dev Called by the payer to store the sent amount as credit to be pulled.\n@param dest The destination address of the funds.\n@param amount The amount to transfer.",
-            "id": 5103,
+            "id": 5627,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_asyncTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5090,
+              "id": 5614,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5087,
+                  "id": 5611,
                   "name": "dest",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5103,
-                  "src": "1018:12:46",
+                  "scope": 5627,
+                  "src": "1018:12:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1367,10 +1367,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5086,
+                    "id": 5610,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1018:7:46",
+                    "src": "1018:7:50",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1382,11 +1382,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5089,
+                  "id": 5613,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5103,
-                  "src": "1032:14:46",
+                  "scope": 5627,
+                  "src": "1032:14:50",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1394,10 +1394,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5088,
+                    "id": 5612,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1032:7:46",
+                    "src": "1032:7:50",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1407,26 +1407,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1017:30:46"
+              "src": "1017:30:50"
             },
             "returnParameters": {
-              "id": 5091,
+              "id": 5615,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1057:0:46"
+              "src": "1057:0:50"
             },
-            "scope": 5104,
-            "src": "994:115:46",
+            "scope": 5628,
+            "src": "994:115:50",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 5105,
-        "src": "231:880:46"
+        "scope": 5629,
+        "src": "231:880:50"
       }
     ],
-    "src": "0:1112:46"
+    "src": "0:1112:50"
   },
   "compiler": {
     "name": "solc",
@@ -1434,7 +1434,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-16T10:17:39.058Z",
+  "updatedAt": "2019-07-29T09:56:12.673Z",
   "devdoc": {
     "details": "Base contract supporting async send for pull payments. Inherit from this contract and use _asyncTransfer instead of send or transfer.",
     "methods": {

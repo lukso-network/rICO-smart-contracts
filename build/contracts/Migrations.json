@@ -1,15 +1,15 @@
 {
   "contractName": "Migrations",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/poc/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/poc/contracts/Migrations.sol\":{\"keccak256\":\"0x5be089dc843286e4a2faee3cff69c4866e531c396679280a84e2ff6885b78c0f\",\"urls\":[\"bzzr://eec8415487a649ef35e7d0b988a12bf0abef86628769b5f322649044825ba43e\",\"dweb:/ipfs/QmaTcqb2aceL6f6WVM8ycutznwhjhz1S1m1nFbaTZRCtrR\"]}},\"version\":1}",
-  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72305820522de39c9b4ed718678347b677a6afe17d3af84383f686b9ba2747d4e26afb5364736f6c634300050a0032",
-  "deployedBytecode": "0x6080604052600080fdfea265627a7a72305820522de39c9b4ed718678347b677a6afe17d3af84383f686b9ba2747d4e26afb5364736f6c634300050a0032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/rico-poc/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/rico-poc/contracts/Migrations.sol\":{\"keccak256\":\"0x5be089dc843286e4a2faee3cff69c4866e531c396679280a84e2ff6885b78c0f\",\"urls\":[\"bzzr://eec8415487a649ef35e7d0b988a12bf0abef86628769b5f322649044825ba43e\",\"dweb:/ipfs/QmaTcqb2aceL6f6WVM8ycutznwhjhz1S1m1nFbaTZRCtrR\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723058208a8f9b7bc6e6c7941aaea1fb9a345e3f7359ed721d3c2aaa987f6c0a20b3355c64736f6c634300050a0032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a723058208a8f9b7bc6e6c7941aaea1fb9a345e3f7359ed721d3c2aaa987f6c0a20b3355c64736f6c634300050a0032",
   "sourceMap": "34:23:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;34:23:0;;;;;;;",
   "deployedSourceMap": "34:23:0:-;;;;;",
   "source": "pragma solidity >=0.4.21 <0.6.0;\n\ncontract Migrations {\n}\n",
-  "sourcePath": "/Volumes/Dev/RICO/poc/contracts/Migrations.sol",
+  "sourcePath": "/Volumes/Dev/RICO/rico-poc/contracts/Migrations.sol",
   "ast": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/Migrations.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         2
@@ -52,7 +52,7 @@
     "src": "0:58:0"
   },
   "legacyAST": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/Migrations.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         2
@@ -100,7 +100,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-16T10:17:39.005Z",
+  "updatedAt": "2019-07-29T09:56:12.582Z",
   "devdoc": {
     "methods": {}
   },

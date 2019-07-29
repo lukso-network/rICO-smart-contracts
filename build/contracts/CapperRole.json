@@ -74,25 +74,25 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isCapper\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceCapper\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addCapper\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"account\",\"type\":\"address\"}],\"name\":\"CapperAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"account\",\"type\":\"address\"}],\"name\":\"CapperRemoved\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/poc/contracts/zeppelin/access/roles/CapperRole.sol\":\"CapperRole\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/poc/contracts/zeppelin/access/Roles.sol\":{\"keccak256\":\"0xb002c378d7b82a101bd659c341518953ca0919d342c0a400196982c0e7e7bcdb\",\"urls\":[\"bzzr://bd34c1ce05b5b2b3a62fc02e160f6805b1cadd476854664f433c685b2fda8dad\",\"dweb:/ipfs/QmTEwDbjJNxmMNCDMqtuou3dyM8Wtp8Q9NFvn7SAVM7Jf3\"]},\"/Volumes/Dev/RICO/poc/contracts/zeppelin/access/roles/CapperRole.sol\":{\"keccak256\":\"0xd8fe847c97972de345e7cb50cfe5aa6ac4c73c041c183a9eaeadbc64c8ed8539\",\"urls\":[\"bzzr://0bb82a8e38a4f98e44b40bd6a64cd5025509e2b419aa81f1698b038972e0f296\",\"dweb:/ipfs/QmZPE87geGaU2YUu2PStSdttuwbfsmqd6KD2cTZaaLkKvY\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.10+commit.5a6ea5b1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isCapper\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceCapper\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addCapper\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"account\",\"type\":\"address\"}],\"name\":\"CapperAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"account\",\"type\":\"address\"}],\"name\":\"CapperRemoved\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/roles/CapperRole.sol\":\"CapperRole\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/Roles.sol\":{\"keccak256\":\"0xb002c378d7b82a101bd659c341518953ca0919d342c0a400196982c0e7e7bcdb\",\"urls\":[\"bzzr://bd34c1ce05b5b2b3a62fc02e160f6805b1cadd476854664f433c685b2fda8dad\",\"dweb:/ipfs/QmTEwDbjJNxmMNCDMqtuou3dyM8Wtp8Q9NFvn7SAVM7Jf3\"]},\"/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/roles/CapperRole.sol\":{\"keccak256\":\"0xd8fe847c97972de345e7cb50cfe5aa6ac4c73c041c183a9eaeadbc64c8ed8539\",\"urls\":[\"bzzr://0bb82a8e38a4f98e44b40bd6a64cd5025509e2b419aa81f1698b038972e0f296\",\"dweb:/ipfs/QmZPE87geGaU2YUu2PStSdttuwbfsmqd6KD2cTZaaLkKvY\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\nimport \"../Roles.sol\";\n\ncontract CapperRole {\n    using Roles for Roles.Role;\n\n    event CapperAdded(address indexed account);\n    event CapperRemoved(address indexed account);\n\n    Roles.Role private _cappers;\n\n    constructor () internal {\n        _addCapper(msg.sender);\n    }\n\n    modifier onlyCapper() {\n        require(isCapper(msg.sender), \"CapperRole: caller does not have the Capper role\");\n        _;\n    }\n\n    function isCapper(address account) public view returns (bool) {\n        return _cappers.has(account);\n    }\n\n    function addCapper(address account) public onlyCapper {\n        _addCapper(account);\n    }\n\n    function renounceCapper() public {\n        _removeCapper(msg.sender);\n    }\n\n    function _addCapper(address account) internal {\n        _cappers.add(account);\n        emit CapperAdded(account);\n    }\n\n    function _removeCapper(address account) internal {\n        _cappers.remove(account);\n        emit CapperRemoved(account);\n    }\n}\n",
-  "sourcePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/access/roles/CapperRole.sol",
+  "sourcePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/roles/CapperRole.sol",
   "ast": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/access/roles/CapperRole.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/roles/CapperRole.sol",
     "exportedSymbols": {
       "CapperRole": [
-        458
+        982
       ]
     },
-    "id": 459,
+    "id": 983,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 356,
+        "id": 880,
         "literals": [
           "solidity",
           "^",
@@ -100,16 +100,16 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:3"
+        "src": "0:23:7"
       },
       {
-        "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/access/Roles.sol",
+        "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/Roles.sol",
         "file": "../Roles.sol",
-        "id": 357,
+        "id": 881,
         "nodeType": "ImportDirective",
-        "scope": 459,
-        "sourceUnit": 355,
-        "src": "25:22:3",
+        "scope": 983,
+        "sourceUnit": 879,
+        "src": "25:22:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -119,38 +119,38 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 458,
+        "id": 982,
         "linearizedBaseContracts": [
-          458
+          982
         ],
         "name": "CapperRole",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 360,
+            "id": 884,
             "libraryName": {
               "contractScope": null,
-              "id": 358,
+              "id": 882,
               "name": "Roles",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 354,
-              "src": "81:5:3",
+              "referencedDeclaration": 878,
+              "src": "81:5:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Roles_$354",
+                "typeIdentifier": "t_contract$_Roles_$878",
                 "typeString": "library Roles"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "75:27:3",
+            "src": "75:27:7",
             "typeName": {
               "contractScope": null,
-              "id": 359,
+              "id": 883,
               "name": "Roles.Role",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 280,
-              "src": "91:10:3",
+              "referencedDeclaration": 804,
+              "src": "91:10:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Role_$280_storage_ptr",
+                "typeIdentifier": "t_struct$_Role_$804_storage_ptr",
                 "typeString": "struct Roles.Role"
               }
             }
@@ -158,21 +158,21 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 364,
+            "id": 888,
             "name": "CapperAdded",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 363,
+              "id": 887,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 362,
+                  "id": 886,
                   "indexed": true,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 364,
-                  "src": "126:23:3",
+                  "scope": 888,
+                  "src": "126:23:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -180,10 +180,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 361,
+                    "id": 885,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "126:7:3",
+                    "src": "126:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -194,28 +194,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "125:25:3"
+              "src": "125:25:7"
             },
-            "src": "108:43:3"
+            "src": "108:43:7"
           },
           {
             "anonymous": false,
             "documentation": null,
-            "id": 368,
+            "id": 892,
             "name": "CapperRemoved",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 367,
+              "id": 891,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 366,
+                  "id": 890,
                   "indexed": true,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 368,
-                  "src": "176:23:3",
+                  "scope": 892,
+                  "src": "176:23:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -223,10 +223,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 365,
+                    "id": 889,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "176:7:3",
+                    "src": "176:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -237,32 +237,32 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "175:25:3"
+              "src": "175:25:7"
             },
-            "src": "156:45:3"
+            "src": "156:45:7"
           },
           {
             "constant": false,
-            "id": 370,
+            "id": 894,
             "name": "_cappers",
             "nodeType": "VariableDeclaration",
-            "scope": 458,
-            "src": "207:27:3",
+            "scope": 982,
+            "src": "207:27:7",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_Role_$280_storage",
+              "typeIdentifier": "t_struct$_Role_$804_storage",
               "typeString": "struct Roles.Role"
             },
             "typeName": {
               "contractScope": null,
-              "id": 369,
+              "id": 893,
               "name": "Roles.Role",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 280,
-              "src": "207:10:3",
+              "referencedDeclaration": 804,
+              "src": "207:10:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Role_$280_storage_ptr",
+                "typeIdentifier": "t_struct$_Role_$804_storage_ptr",
                 "typeString": "struct Roles.Role"
               }
             },
@@ -271,9 +271,9 @@
           },
           {
             "body": {
-              "id": 378,
+              "id": 902,
               "nodeType": "Block",
-              "src": "265:39:3",
+              "src": "265:39:7",
               "statements": [
                 {
                   "expression": {
@@ -283,18 +283,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 374,
+                          "id": 898,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9199,
-                          "src": "286:3:3",
+                          "referencedDeclaration": 9723,
+                          "src": "286:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 375,
+                        "id": 899,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -302,7 +302,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "286:10:3",
+                        "src": "286:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -316,18 +316,18 @@
                           "typeString": "address payable"
                         }
                       ],
-                      "id": 373,
+                      "id": 897,
                       "name": "_addCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 441,
-                      "src": "275:10:3",
+                      "referencedDeclaration": 965,
+                      "src": "275:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 376,
+                    "id": 900,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -335,48 +335,48 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "275:22:3",
+                    "src": "275:22:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 377,
+                  "id": 901,
                   "nodeType": "ExpressionStatement",
-                  "src": "275:22:3"
+                  "src": "275:22:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 379,
+            "id": 903,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 371,
+              "id": 895,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "253:2:3"
+              "src": "253:2:7"
             },
             "returnParameters": {
-              "id": 372,
+              "id": 896,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "265:0:3"
+              "src": "265:0:7"
             },
-            "scope": 458,
-            "src": "241:63:3",
+            "scope": 982,
+            "src": "241:63:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 390,
+              "id": 914,
               "nodeType": "Block",
-              "src": "332:109:3",
+              "src": "332:109:7",
               "statements": [
                 {
                   "expression": {
@@ -389,18 +389,18 @@
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 383,
+                              "id": 907,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 9199,
-                              "src": "359:3:3",
+                              "referencedDeclaration": 9723,
+                              "src": "359:3:7",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 384,
+                            "id": 908,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -408,7 +408,7 @@
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "359:10:3",
+                            "src": "359:10:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address_payable",
                               "typeString": "address payable"
@@ -422,18 +422,18 @@
                               "typeString": "address payable"
                             }
                           ],
-                          "id": 382,
+                          "id": 906,
                           "name": "isCapper",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 404,
-                          "src": "350:8:3",
+                          "referencedDeclaration": 928,
+                          "src": "350:8:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
                             "typeString": "function (address) view returns (bool)"
                           }
                         },
-                        "id": 385,
+                        "id": 909,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -441,7 +441,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "350:20:3",
+                        "src": "350:20:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -450,14 +450,14 @@
                       {
                         "argumentTypes": null,
                         "hexValue": "436170706572526f6c653a2063616c6c657220646f6573206e6f742068617665207468652043617070657220726f6c65",
-                        "id": 386,
+                        "id": 910,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "372:50:3",
+                        "src": "372:50:7",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_ed3a4f8e7ffb1c3b157de1bb9793099f4d91d7142cd1011c31806dcc61ac0368",
@@ -477,21 +477,21 @@
                           "typeString": "literal_string \"CapperRole: caller does not have the Capper role\""
                         }
                       ],
-                      "id": 381,
+                      "id": 905,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        9202,
-                        9203
+                        9726,
+                        9727
                       ],
-                      "referencedDeclaration": 9203,
-                      "src": "342:7:3",
+                      "referencedDeclaration": 9727,
+                      "src": "342:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 387,
+                    "id": 911,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -499,41 +499,41 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "342:81:3",
+                    "src": "342:81:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 388,
+                  "id": 912,
                   "nodeType": "ExpressionStatement",
-                  "src": "342:81:3"
+                  "src": "342:81:7"
                 },
                 {
-                  "id": 389,
+                  "id": 913,
                   "nodeType": "PlaceholderStatement",
-                  "src": "433:1:3"
+                  "src": "433:1:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 391,
+            "id": 915,
             "name": "onlyCapper",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 380,
+              "id": 904,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "329:2:3"
+              "src": "329:2:7"
             },
-            "src": "310:131:3",
+            "src": "310:131:7",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 403,
+              "id": 927,
               "nodeType": "Block",
-              "src": "509:45:3",
+              "src": "509:45:7",
               "statements": [
                 {
                   "expression": {
@@ -541,12 +541,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 400,
+                        "id": 924,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 393,
-                        "src": "539:7:3",
+                        "referencedDeclaration": 917,
+                        "src": "539:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -562,32 +562,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 398,
+                        "id": 922,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "526:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "526:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 399,
+                      "id": 923,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "has",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 353,
-                      "src": "526:12:3",
+                      "referencedDeclaration": 877,
+                      "src": "526:12:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$_t_bool_$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$_t_bool_$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address) view returns (bool)"
                       }
                     },
-                    "id": 401,
+                    "id": 925,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -595,37 +595,37 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "526:21:3",
+                    "src": "526:21:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 397,
-                  "id": 402,
+                  "functionReturnParameters": 921,
+                  "id": 926,
                   "nodeType": "Return",
-                  "src": "519:28:3"
+                  "src": "519:28:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 404,
+            "id": 928,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "isCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 394,
+              "id": 918,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 393,
+                  "id": 917,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 404,
-                  "src": "465:15:3",
+                  "scope": 928,
+                  "src": "465:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -633,10 +633,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 392,
+                    "id": 916,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "465:7:3",
+                    "src": "465:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -647,19 +647,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "464:17:3"
+              "src": "464:17:7"
             },
             "returnParameters": {
-              "id": 397,
+              "id": 921,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 396,
+                  "id": 920,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 404,
-                  "src": "503:4:3",
+                  "scope": 928,
+                  "src": "503:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -667,10 +667,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 395,
+                    "id": 919,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "503:4:3",
+                    "src": "503:4:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -680,19 +680,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "502:6:3"
+              "src": "502:6:7"
             },
-            "scope": 458,
-            "src": "447:107:3",
+            "scope": 982,
+            "src": "447:107:7",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 415,
+              "id": 939,
               "nodeType": "Block",
-              "src": "614:36:3",
+              "src": "614:36:7",
               "statements": [
                 {
                   "expression": {
@@ -700,12 +700,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 412,
+                        "id": 936,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 406,
-                        "src": "635:7:3",
+                        "referencedDeclaration": 930,
+                        "src": "635:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -719,18 +719,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 411,
+                      "id": 935,
                       "name": "_addCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 441,
-                      "src": "624:10:3",
+                      "referencedDeclaration": 965,
+                      "src": "624:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 413,
+                    "id": 937,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -738,56 +738,56 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "624:19:3",
+                    "src": "624:19:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 414,
+                  "id": 938,
                   "nodeType": "ExpressionStatement",
-                  "src": "624:19:3"
+                  "src": "624:19:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 416,
+            "id": 940,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
-                "id": 409,
+                "id": 933,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 408,
+                  "id": 932,
                   "name": "onlyCapper",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 391,
-                  "src": "603:10:3",
+                  "referencedDeclaration": 915,
+                  "src": "603:10:7",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "603:10:3"
+                "src": "603:10:7"
               }
             ],
             "name": "addCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 407,
+              "id": 931,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 406,
+                  "id": 930,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 416,
-                  "src": "579:15:3",
+                  "scope": 940,
+                  "src": "579:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -795,10 +795,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 405,
+                    "id": 929,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "579:7:3",
+                    "src": "579:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -809,25 +809,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "578:17:3"
+              "src": "578:17:7"
             },
             "returnParameters": {
-              "id": 410,
+              "id": 934,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "614:0:3"
+              "src": "614:0:7"
             },
-            "scope": 458,
-            "src": "560:90:3",
+            "scope": 982,
+            "src": "560:90:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 424,
+              "id": 948,
               "nodeType": "Block",
-              "src": "689:42:3",
+              "src": "689:42:7",
               "statements": [
                 {
                   "expression": {
@@ -837,18 +837,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 420,
+                          "id": 944,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9199,
-                          "src": "713:3:3",
+                          "referencedDeclaration": 9723,
+                          "src": "713:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 421,
+                        "id": 945,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -856,7 +856,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "713:10:3",
+                        "src": "713:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -870,18 +870,18 @@
                           "typeString": "address payable"
                         }
                       ],
-                      "id": 419,
+                      "id": 943,
                       "name": "_removeCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 457,
-                      "src": "699:13:3",
+                      "referencedDeclaration": 981,
+                      "src": "699:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 422,
+                    "id": 946,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -889,48 +889,48 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "699:25:3",
+                    "src": "699:25:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 423,
+                  "id": 947,
                   "nodeType": "ExpressionStatement",
-                  "src": "699:25:3"
+                  "src": "699:25:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 425,
+            "id": 949,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "renounceCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 417,
+              "id": 941,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "679:2:3"
+              "src": "679:2:7"
             },
             "returnParameters": {
-              "id": 418,
+              "id": 942,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "689:0:3"
+              "src": "689:0:7"
             },
-            "scope": 458,
-            "src": "656:75:3",
+            "scope": 982,
+            "src": "656:75:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 440,
+              "id": 964,
               "nodeType": "Block",
-              "src": "783:73:3",
+              "src": "783:73:7",
               "statements": [
                 {
                   "expression": {
@@ -938,12 +938,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 433,
+                        "id": 957,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 427,
-                        "src": "806:7:3",
+                        "referencedDeclaration": 951,
+                        "src": "806:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -959,32 +959,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 430,
+                        "id": 954,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "793:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "793:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 432,
+                      "id": 956,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "add",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 305,
-                      "src": "793:12:3",
+                      "referencedDeclaration": 829,
+                      "src": "793:12:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address)"
                       }
                     },
-                    "id": 434,
+                    "id": 958,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -992,15 +992,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "793:21:3",
+                    "src": "793:21:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 435,
+                  "id": 959,
                   "nodeType": "ExpressionStatement",
-                  "src": "793:21:3"
+                  "src": "793:21:7"
                 },
                 {
                   "eventCall": {
@@ -1008,12 +1008,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 437,
+                        "id": 961,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 427,
-                        "src": "841:7:3",
+                        "referencedDeclaration": 951,
+                        "src": "841:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1027,18 +1027,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 436,
+                      "id": 960,
                       "name": "CapperAdded",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 364,
-                      "src": "829:11:3",
+                      "referencedDeclaration": 888,
+                      "src": "829:11:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 438,
+                    "id": 962,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1046,36 +1046,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "829:20:3",
+                    "src": "829:20:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 439,
+                  "id": 963,
                   "nodeType": "EmitStatement",
-                  "src": "824:25:3"
+                  "src": "824:25:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 441,
+            "id": 965,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_addCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 428,
+              "id": 952,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 427,
+                  "id": 951,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 441,
-                  "src": "757:15:3",
+                  "scope": 965,
+                  "src": "757:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1083,10 +1083,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 426,
+                    "id": 950,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "757:7:3",
+                    "src": "757:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1097,25 +1097,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "756:17:3"
+              "src": "756:17:7"
             },
             "returnParameters": {
-              "id": 429,
+              "id": 953,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "783:0:3"
+              "src": "783:0:7"
             },
-            "scope": 458,
-            "src": "737:119:3",
+            "scope": 982,
+            "src": "737:119:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 456,
+              "id": 980,
               "nodeType": "Block",
-              "src": "911:78:3",
+              "src": "911:78:7",
               "statements": [
                 {
                   "expression": {
@@ -1123,12 +1123,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 449,
+                        "id": 973,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 443,
-                        "src": "937:7:3",
+                        "referencedDeclaration": 967,
+                        "src": "937:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1144,32 +1144,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 446,
+                        "id": 970,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "921:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "921:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 448,
+                      "id": 972,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "remove",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 329,
-                      "src": "921:15:3",
+                      "referencedDeclaration": 853,
+                      "src": "921:15:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address)"
                       }
                     },
-                    "id": 450,
+                    "id": 974,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1177,15 +1177,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "921:24:3",
+                    "src": "921:24:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 451,
+                  "id": 975,
                   "nodeType": "ExpressionStatement",
-                  "src": "921:24:3"
+                  "src": "921:24:7"
                 },
                 {
                   "eventCall": {
@@ -1193,12 +1193,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 453,
+                        "id": 977,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 443,
-                        "src": "974:7:3",
+                        "referencedDeclaration": 967,
+                        "src": "974:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1212,18 +1212,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 452,
+                      "id": 976,
                       "name": "CapperRemoved",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 368,
-                      "src": "960:13:3",
+                      "referencedDeclaration": 892,
+                      "src": "960:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 454,
+                    "id": 978,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1231,36 +1231,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "960:22:3",
+                    "src": "960:22:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 455,
+                  "id": 979,
                   "nodeType": "EmitStatement",
-                  "src": "955:27:3"
+                  "src": "955:27:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 457,
+            "id": 981,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_removeCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 444,
+              "id": 968,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 443,
+                  "id": 967,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 457,
-                  "src": "885:15:3",
+                  "scope": 981,
+                  "src": "885:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1268,10 +1268,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 442,
+                    "id": 966,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "885:7:3",
+                    "src": "885:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1282,39 +1282,39 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "884:17:3"
+              "src": "884:17:7"
             },
             "returnParameters": {
-              "id": 445,
+              "id": 969,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "911:0:3"
+              "src": "911:0:7"
             },
-            "scope": 458,
-            "src": "862:127:3",
+            "scope": 982,
+            "src": "862:127:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 459,
-        "src": "49:942:3"
+        "scope": 983,
+        "src": "49:942:7"
       }
     ],
-    "src": "0:992:3"
+    "src": "0:992:7"
   },
   "legacyAST": {
-    "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/access/roles/CapperRole.sol",
+    "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/roles/CapperRole.sol",
     "exportedSymbols": {
       "CapperRole": [
-        458
+        982
       ]
     },
-    "id": 459,
+    "id": 983,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 356,
+        "id": 880,
         "literals": [
           "solidity",
           "^",
@@ -1322,16 +1322,16 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:3"
+        "src": "0:23:7"
       },
       {
-        "absolutePath": "/Volumes/Dev/RICO/poc/contracts/zeppelin/access/Roles.sol",
+        "absolutePath": "/Volumes/Dev/RICO/rico-poc/contracts/zeppelin/access/Roles.sol",
         "file": "../Roles.sol",
-        "id": 357,
+        "id": 881,
         "nodeType": "ImportDirective",
-        "scope": 459,
-        "sourceUnit": 355,
-        "src": "25:22:3",
+        "scope": 983,
+        "sourceUnit": 879,
+        "src": "25:22:7",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1341,38 +1341,38 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 458,
+        "id": 982,
         "linearizedBaseContracts": [
-          458
+          982
         ],
         "name": "CapperRole",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 360,
+            "id": 884,
             "libraryName": {
               "contractScope": null,
-              "id": 358,
+              "id": 882,
               "name": "Roles",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 354,
-              "src": "81:5:3",
+              "referencedDeclaration": 878,
+              "src": "81:5:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Roles_$354",
+                "typeIdentifier": "t_contract$_Roles_$878",
                 "typeString": "library Roles"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "75:27:3",
+            "src": "75:27:7",
             "typeName": {
               "contractScope": null,
-              "id": 359,
+              "id": 883,
               "name": "Roles.Role",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 280,
-              "src": "91:10:3",
+              "referencedDeclaration": 804,
+              "src": "91:10:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Role_$280_storage_ptr",
+                "typeIdentifier": "t_struct$_Role_$804_storage_ptr",
                 "typeString": "struct Roles.Role"
               }
             }
@@ -1380,21 +1380,21 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 364,
+            "id": 888,
             "name": "CapperAdded",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 363,
+              "id": 887,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 362,
+                  "id": 886,
                   "indexed": true,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 364,
-                  "src": "126:23:3",
+                  "scope": 888,
+                  "src": "126:23:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1402,10 +1402,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 361,
+                    "id": 885,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "126:7:3",
+                    "src": "126:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1416,28 +1416,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "125:25:3"
+              "src": "125:25:7"
             },
-            "src": "108:43:3"
+            "src": "108:43:7"
           },
           {
             "anonymous": false,
             "documentation": null,
-            "id": 368,
+            "id": 892,
             "name": "CapperRemoved",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 367,
+              "id": 891,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 366,
+                  "id": 890,
                   "indexed": true,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 368,
-                  "src": "176:23:3",
+                  "scope": 892,
+                  "src": "176:23:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1445,10 +1445,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 365,
+                    "id": 889,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "176:7:3",
+                    "src": "176:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1459,32 +1459,32 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "175:25:3"
+              "src": "175:25:7"
             },
-            "src": "156:45:3"
+            "src": "156:45:7"
           },
           {
             "constant": false,
-            "id": 370,
+            "id": 894,
             "name": "_cappers",
             "nodeType": "VariableDeclaration",
-            "scope": 458,
-            "src": "207:27:3",
+            "scope": 982,
+            "src": "207:27:7",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_Role_$280_storage",
+              "typeIdentifier": "t_struct$_Role_$804_storage",
               "typeString": "struct Roles.Role"
             },
             "typeName": {
               "contractScope": null,
-              "id": 369,
+              "id": 893,
               "name": "Roles.Role",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 280,
-              "src": "207:10:3",
+              "referencedDeclaration": 804,
+              "src": "207:10:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Role_$280_storage_ptr",
+                "typeIdentifier": "t_struct$_Role_$804_storage_ptr",
                 "typeString": "struct Roles.Role"
               }
             },
@@ -1493,9 +1493,9 @@
           },
           {
             "body": {
-              "id": 378,
+              "id": 902,
               "nodeType": "Block",
-              "src": "265:39:3",
+              "src": "265:39:7",
               "statements": [
                 {
                   "expression": {
@@ -1505,18 +1505,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 374,
+                          "id": 898,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9199,
-                          "src": "286:3:3",
+                          "referencedDeclaration": 9723,
+                          "src": "286:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 375,
+                        "id": 899,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1524,7 +1524,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "286:10:3",
+                        "src": "286:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -1538,18 +1538,18 @@
                           "typeString": "address payable"
                         }
                       ],
-                      "id": 373,
+                      "id": 897,
                       "name": "_addCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 441,
-                      "src": "275:10:3",
+                      "referencedDeclaration": 965,
+                      "src": "275:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 376,
+                    "id": 900,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1557,48 +1557,48 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "275:22:3",
+                    "src": "275:22:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 377,
+                  "id": 901,
                   "nodeType": "ExpressionStatement",
-                  "src": "275:22:3"
+                  "src": "275:22:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 379,
+            "id": 903,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 371,
+              "id": 895,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "253:2:3"
+              "src": "253:2:7"
             },
             "returnParameters": {
-              "id": 372,
+              "id": 896,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "265:0:3"
+              "src": "265:0:7"
             },
-            "scope": 458,
-            "src": "241:63:3",
+            "scope": 982,
+            "src": "241:63:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 390,
+              "id": 914,
               "nodeType": "Block",
-              "src": "332:109:3",
+              "src": "332:109:7",
               "statements": [
                 {
                   "expression": {
@@ -1611,18 +1611,18 @@
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 383,
+                              "id": 907,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 9199,
-                              "src": "359:3:3",
+                              "referencedDeclaration": 9723,
+                              "src": "359:3:7",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 384,
+                            "id": 908,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1630,7 +1630,7 @@
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "359:10:3",
+                            "src": "359:10:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address_payable",
                               "typeString": "address payable"
@@ -1644,18 +1644,18 @@
                               "typeString": "address payable"
                             }
                           ],
-                          "id": 382,
+                          "id": 906,
                           "name": "isCapper",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 404,
-                          "src": "350:8:3",
+                          "referencedDeclaration": 928,
+                          "src": "350:8:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
                             "typeString": "function (address) view returns (bool)"
                           }
                         },
-                        "id": 385,
+                        "id": 909,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1663,7 +1663,7 @@
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "350:20:3",
+                        "src": "350:20:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1672,14 +1672,14 @@
                       {
                         "argumentTypes": null,
                         "hexValue": "436170706572526f6c653a2063616c6c657220646f6573206e6f742068617665207468652043617070657220726f6c65",
-                        "id": 386,
+                        "id": 910,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "372:50:3",
+                        "src": "372:50:7",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_ed3a4f8e7ffb1c3b157de1bb9793099f4d91d7142cd1011c31806dcc61ac0368",
@@ -1699,21 +1699,21 @@
                           "typeString": "literal_string \"CapperRole: caller does not have the Capper role\""
                         }
                       ],
-                      "id": 381,
+                      "id": 905,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        9202,
-                        9203
+                        9726,
+                        9727
                       ],
-                      "referencedDeclaration": 9203,
-                      "src": "342:7:3",
+                      "referencedDeclaration": 9727,
+                      "src": "342:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 387,
+                    "id": 911,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1721,41 +1721,41 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "342:81:3",
+                    "src": "342:81:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 388,
+                  "id": 912,
                   "nodeType": "ExpressionStatement",
-                  "src": "342:81:3"
+                  "src": "342:81:7"
                 },
                 {
-                  "id": 389,
+                  "id": 913,
                   "nodeType": "PlaceholderStatement",
-                  "src": "433:1:3"
+                  "src": "433:1:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 391,
+            "id": 915,
             "name": "onlyCapper",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 380,
+              "id": 904,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "329:2:3"
+              "src": "329:2:7"
             },
-            "src": "310:131:3",
+            "src": "310:131:7",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 403,
+              "id": 927,
               "nodeType": "Block",
-              "src": "509:45:3",
+              "src": "509:45:7",
               "statements": [
                 {
                   "expression": {
@@ -1763,12 +1763,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 400,
+                        "id": 924,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 393,
-                        "src": "539:7:3",
+                        "referencedDeclaration": 917,
+                        "src": "539:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1784,32 +1784,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 398,
+                        "id": 922,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "526:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "526:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 399,
+                      "id": 923,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "has",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 353,
-                      "src": "526:12:3",
+                      "referencedDeclaration": 877,
+                      "src": "526:12:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$_t_bool_$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$_t_bool_$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address) view returns (bool)"
                       }
                     },
-                    "id": 401,
+                    "id": 925,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1817,37 +1817,37 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "526:21:3",
+                    "src": "526:21:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 397,
-                  "id": 402,
+                  "functionReturnParameters": 921,
+                  "id": 926,
                   "nodeType": "Return",
-                  "src": "519:28:3"
+                  "src": "519:28:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 404,
+            "id": 928,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "isCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 394,
+              "id": 918,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 393,
+                  "id": 917,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 404,
-                  "src": "465:15:3",
+                  "scope": 928,
+                  "src": "465:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1855,10 +1855,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 392,
+                    "id": 916,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "465:7:3",
+                    "src": "465:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1869,19 +1869,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "464:17:3"
+              "src": "464:17:7"
             },
             "returnParameters": {
-              "id": 397,
+              "id": 921,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 396,
+                  "id": 920,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 404,
-                  "src": "503:4:3",
+                  "scope": 928,
+                  "src": "503:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1889,10 +1889,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 395,
+                    "id": 919,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "503:4:3",
+                    "src": "503:4:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1902,19 +1902,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "502:6:3"
+              "src": "502:6:7"
             },
-            "scope": 458,
-            "src": "447:107:3",
+            "scope": 982,
+            "src": "447:107:7",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 415,
+              "id": 939,
               "nodeType": "Block",
-              "src": "614:36:3",
+              "src": "614:36:7",
               "statements": [
                 {
                   "expression": {
@@ -1922,12 +1922,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 412,
+                        "id": 936,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 406,
-                        "src": "635:7:3",
+                        "referencedDeclaration": 930,
+                        "src": "635:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1941,18 +1941,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 411,
+                      "id": 935,
                       "name": "_addCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 441,
-                      "src": "624:10:3",
+                      "referencedDeclaration": 965,
+                      "src": "624:10:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 413,
+                    "id": 937,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1960,56 +1960,56 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "624:19:3",
+                    "src": "624:19:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 414,
+                  "id": 938,
                   "nodeType": "ExpressionStatement",
-                  "src": "624:19:3"
+                  "src": "624:19:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 416,
+            "id": 940,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
-                "id": 409,
+                "id": 933,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 408,
+                  "id": 932,
                   "name": "onlyCapper",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 391,
-                  "src": "603:10:3",
+                  "referencedDeclaration": 915,
+                  "src": "603:10:7",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "603:10:3"
+                "src": "603:10:7"
               }
             ],
             "name": "addCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 407,
+              "id": 931,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 406,
+                  "id": 930,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 416,
-                  "src": "579:15:3",
+                  "scope": 940,
+                  "src": "579:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2017,10 +2017,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 405,
+                    "id": 929,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "579:7:3",
+                    "src": "579:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2031,25 +2031,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "578:17:3"
+              "src": "578:17:7"
             },
             "returnParameters": {
-              "id": 410,
+              "id": 934,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "614:0:3"
+              "src": "614:0:7"
             },
-            "scope": 458,
-            "src": "560:90:3",
+            "scope": 982,
+            "src": "560:90:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 424,
+              "id": 948,
               "nodeType": "Block",
-              "src": "689:42:3",
+              "src": "689:42:7",
               "statements": [
                 {
                   "expression": {
@@ -2059,18 +2059,18 @@
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 420,
+                          "id": 944,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9199,
-                          "src": "713:3:3",
+                          "referencedDeclaration": 9723,
+                          "src": "713:3:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 421,
+                        "id": 945,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2078,7 +2078,7 @@
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "713:10:3",
+                        "src": "713:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address_payable",
                           "typeString": "address payable"
@@ -2092,18 +2092,18 @@
                           "typeString": "address payable"
                         }
                       ],
-                      "id": 419,
+                      "id": 943,
                       "name": "_removeCapper",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 457,
-                      "src": "699:13:3",
+                      "referencedDeclaration": 981,
+                      "src": "699:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 422,
+                    "id": 946,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2111,48 +2111,48 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "699:25:3",
+                    "src": "699:25:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 423,
+                  "id": 947,
                   "nodeType": "ExpressionStatement",
-                  "src": "699:25:3"
+                  "src": "699:25:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 425,
+            "id": 949,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "renounceCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 417,
+              "id": 941,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "679:2:3"
+              "src": "679:2:7"
             },
             "returnParameters": {
-              "id": 418,
+              "id": 942,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "689:0:3"
+              "src": "689:0:7"
             },
-            "scope": 458,
-            "src": "656:75:3",
+            "scope": 982,
+            "src": "656:75:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 440,
+              "id": 964,
               "nodeType": "Block",
-              "src": "783:73:3",
+              "src": "783:73:7",
               "statements": [
                 {
                   "expression": {
@@ -2160,12 +2160,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 433,
+                        "id": 957,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 427,
-                        "src": "806:7:3",
+                        "referencedDeclaration": 951,
+                        "src": "806:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2181,32 +2181,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 430,
+                        "id": 954,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "793:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "793:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 432,
+                      "id": 956,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "add",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 305,
-                      "src": "793:12:3",
+                      "referencedDeclaration": 829,
+                      "src": "793:12:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address)"
                       }
                     },
-                    "id": 434,
+                    "id": 958,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2214,15 +2214,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "793:21:3",
+                    "src": "793:21:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 435,
+                  "id": 959,
                   "nodeType": "ExpressionStatement",
-                  "src": "793:21:3"
+                  "src": "793:21:7"
                 },
                 {
                   "eventCall": {
@@ -2230,12 +2230,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 437,
+                        "id": 961,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 427,
-                        "src": "841:7:3",
+                        "referencedDeclaration": 951,
+                        "src": "841:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2249,18 +2249,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 436,
+                      "id": 960,
                       "name": "CapperAdded",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 364,
-                      "src": "829:11:3",
+                      "referencedDeclaration": 888,
+                      "src": "829:11:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 438,
+                    "id": 962,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2268,36 +2268,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "829:20:3",
+                    "src": "829:20:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 439,
+                  "id": 963,
                   "nodeType": "EmitStatement",
-                  "src": "824:25:3"
+                  "src": "824:25:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 441,
+            "id": 965,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_addCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 428,
+              "id": 952,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 427,
+                  "id": 951,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 441,
-                  "src": "757:15:3",
+                  "scope": 965,
+                  "src": "757:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2305,10 +2305,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 426,
+                    "id": 950,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "757:7:3",
+                    "src": "757:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2319,25 +2319,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "756:17:3"
+              "src": "756:17:7"
             },
             "returnParameters": {
-              "id": 429,
+              "id": 953,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "783:0:3"
+              "src": "783:0:7"
             },
-            "scope": 458,
-            "src": "737:119:3",
+            "scope": 982,
+            "src": "737:119:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 456,
+              "id": 980,
               "nodeType": "Block",
-              "src": "911:78:3",
+              "src": "911:78:7",
               "statements": [
                 {
                   "expression": {
@@ -2345,12 +2345,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 449,
+                        "id": 973,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 443,
-                        "src": "937:7:3",
+                        "referencedDeclaration": 967,
+                        "src": "937:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2366,32 +2366,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 446,
+                        "id": 970,
                         "name": "_cappers",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 370,
-                        "src": "921:8:3",
+                        "referencedDeclaration": 894,
+                        "src": "921:8:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Role_$280_storage",
+                          "typeIdentifier": "t_struct$_Role_$804_storage",
                           "typeString": "struct Roles.Role storage ref"
                         }
                       },
-                      "id": 448,
+                      "id": 972,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "remove",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 329,
-                      "src": "921:15:3",
+                      "referencedDeclaration": 853,
+                      "src": "921:15:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$280_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$280_storage_ptr_$",
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_struct$_Role_$804_storage_ptr_$_t_address_$returns$__$bound_to$_t_struct$_Role_$804_storage_ptr_$",
                         "typeString": "function (struct Roles.Role storage pointer,address)"
                       }
                     },
-                    "id": 450,
+                    "id": 974,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2399,15 +2399,15 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "921:24:3",
+                    "src": "921:24:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 451,
+                  "id": 975,
                   "nodeType": "ExpressionStatement",
-                  "src": "921:24:3"
+                  "src": "921:24:7"
                 },
                 {
                   "eventCall": {
@@ -2415,12 +2415,12 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 453,
+                        "id": 977,
                         "name": "account",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 443,
-                        "src": "974:7:3",
+                        "referencedDeclaration": 967,
+                        "src": "974:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2434,18 +2434,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 452,
+                      "id": 976,
                       "name": "CapperRemoved",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 368,
-                      "src": "960:13:3",
+                      "referencedDeclaration": 892,
+                      "src": "960:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 454,
+                    "id": 978,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2453,36 +2453,36 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "960:22:3",
+                    "src": "960:22:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 455,
+                  "id": 979,
                   "nodeType": "EmitStatement",
-                  "src": "955:27:3"
+                  "src": "955:27:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 457,
+            "id": 981,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "_removeCapper",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 444,
+              "id": 968,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 443,
+                  "id": 967,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 457,
-                  "src": "885:15:3",
+                  "scope": 981,
+                  "src": "885:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2490,10 +2490,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 442,
+                    "id": 966,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "885:7:3",
+                    "src": "885:7:7",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2504,26 +2504,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "884:17:3"
+              "src": "884:17:7"
             },
             "returnParameters": {
-              "id": 445,
+              "id": 969,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "911:0:3"
+              "src": "911:0:7"
             },
-            "scope": 458,
-            "src": "862:127:3",
+            "scope": 982,
+            "src": "862:127:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 459,
-        "src": "49:942:3"
+        "scope": 983,
+        "src": "49:942:7"
       }
     ],
-    "src": "0:992:3"
+    "src": "0:992:7"
   },
   "compiler": {
     "name": "solc",
@@ -2531,7 +2531,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-16T10:17:39.008Z",
+  "updatedAt": "2019-07-29T09:56:12.594Z",
   "devdoc": {
     "methods": {}
   },

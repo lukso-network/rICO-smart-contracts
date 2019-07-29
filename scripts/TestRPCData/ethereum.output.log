@@ -44,203 +44,6 @@ Gas Limit
 Listening on 127.0.0.1:8545
 eth_getBlockByNumber
 eth_getBlockByNumber
-eth_gasPrice
-eth_getTransactionCount
-eth_sendRawTransaction
-
-  Transaction: 0x6658138d241c472be5c773035d8d61ebef929f724097cf0ebeb1885ef65c49d8
-  Contract created: 0x568a90ce7fc1aa56c0d0dacd7f1928b169fafacc
-  Gas usage: 403352
-  Block Number: 1
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0x025f6233309a05da13e35a9dd508c589bfca1b2539a2a637cef92dbf8aa23bf6
-  Contract created: 0x3546d5d4ca705be9a38b33ad21df16373ff4f5b2
-  Gas usage: 403352
-  Block Number: 2
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xc7532e66356d3c38e34e6bca7b63213f8e611d76a4b6ea25d641a95db93ca3f0
-  Contract created: 0x32a8e4c51569a38ff6303ae31c0ca5e476cb85f9
-  Gas usage: 403352
-  Block Number: 3
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0x58c68c18c7493bdf9ff08638391a4578bd442256cdc8be3fb4213bdef71888f1
-  Contract created: 0x9433032de556f8ba27ab564079957603a131ea82
-  Gas usage: 403352
-  Block Number: 4
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xb3fad81946ab1be360a492c69e05e041a5619e42483dfc7735c0a6f9d9bd191f
-  Contract created: 0xaed7f19c24887422f47d3e8c8566c4e5b5e254b6
-  Gas usage: 403352
-  Block Number: 5
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xa99bc8b18900445800ac20bed52c7ac49ba889690bce21aa9aacc93b95a0a1f6
-  Contract created: 0x8ae2f42d62dffdeff8b56169024ec3ad707cc816
-  Gas usage: 403352
-  Block Number: 6
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xdb58e0611ea4bbf366ff48f30f2f112d2e0722eb26149b73df25f058f973e785
-  Contract created: 0x7cce00339bb71658ddfc0631395c9e43cae1ea96
-  Gas usage: 403352
-  Block Number: 7
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xd2da566ca696d1f5fd80af92b5e408bcb8d34e7c2da7b87e688e62b0d50ecbde
-  Contract created: 0x0d09983808d47aeeb2afc4f2ade8d8748651bbf4
-  Gas usage: 403352
-  Block Number: 8
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xb209dff3c61e19aa05f25f55b9d1b383441d64b1f9c2808874366be6d90fe615
-  Contract created: 0x9ee48a3495b4267262a14e3375d251673cf848b8
-  Gas usage: 403352
-  Block Number: 9
-  Block Time: Mon Jul 29 2019 12:39:58 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0x232b559975e7370c8a0c1b5bb7557a2dca2ab23f9803ad58592007120058dc98
-  Contract created: 0xc79480329c2313254b6291f59676f0f1b6a39359
-  Gas usage: 403352
-  Block Number: 10
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xf34371e81b37a1a350dced3b8f3b580c0fd4957d595765089d26af2f1d61d4c5
-  Contract created: 0x4267f645e18ba4118b4effd1a12848a5a62ba294
-  Gas usage: 403352
-  Block Number: 11
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xcec022bd6070dde571c7049048010e75a0f30c551cca7536bc7aae5b8a706d46
-  Contract created: 0xffb565df313e4d7d71e666abe62725e2838f0010
-  Gas usage: 403352
-  Block Number: 12
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xaeeca40b0fff185eb90e21ce1c9f3d245f531fc7942e9adb2175becb8f61b3a8
-  Contract created: 0xd039190cf4eb88ced7bcd1b09ec12247674225ce
-  Gas usage: 403352
-  Block Number: 13
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0x442f44fbfa82faae87a2de9d14c5c8190964bcf0d410eaada8b5fe1315bc75bb
-  Contract created: 0x7a9dbf6f785d8619a294aa358832cb40bd77ea07
-  Gas usage: 403352
-  Block Number: 14
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0x51c47631c990ddc85ecf31e698a5dbec060fa9cd8bf83d840c595660c73e33f9
-  Contract created: 0xb429d6e75adf4a3db839b4ed5d7576bded540dbd
-  Gas usage: 403352
-  Block Number: 15
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
-eth_gasPrice
-eth_sendRawTransaction
-
-  Transaction: 0xbf9629b60d5daa336496b64deabd590dac12a3dc301260c55d2b6f5014754a0b
-  Contract created: 0x17121356fc670c6aeaebdfd35be0aa4e37ff6120
-  Gas usage: 403352
-  Block Number: 16
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
-
-eth_getTransactionReceipt
-eth_getCode
-eth_call
 eth_getCode
 eth_getBalance
 eth_getBalance
@@ -251,8 +54,8 @@ eth_sendRawTransaction
 
   Transaction: 0x8f5fa81f0d06de045e488d95b0222512886e7b23e2b74f2a497801baf8bcb89b
   Gas usage: 21000
-  Block Number: 17
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
+  Block Number: 1
+  Block Time: Mon Jul 29 2019 12:56:25 GMT+0300 (EEST)
 
 eth_getTransactionReceipt
 eth_getBalance
@@ -262,20 +65,21 @@ eth_sendRawTransaction
   Transaction: 0xfefb2da535e927b85fe68eb81cb2e4a5827c905f78381a01ef2322aa9b0aee8e
   Contract created: 0x1820a4b7618bde71dce8cdc73aab6c95905fad24
   Gas usage: 711453
-  Block Number: 18
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
+  Block Number: 2
+  Block Time: Mon Jul 29 2019 12:56:25 GMT+0300 (EEST)
 
 eth_getTransactionReceipt
 eth_getCode
 eth_call
 eth_gasPrice
+eth_getTransactionCount
 eth_sendRawTransaction
 
-  Transaction: 0xa62ceb0d3cd4fbb0f5176e7c6acbb0f0177fedb5c20144c04249d6bdb9b6c92f
-  Contract created: 0x35c310d59e2b7f1f96a5e133efb20538266e4053
+  Transaction: 0x37dae298aba7005f542e87d265a0daf39db9f20a72678b9ac2443af922ce6b6f
+  Contract created: 0x568a90ce7fc1aa56c0d0dacd7f1928b169fafacc
   Gas usage: 813575
-  Block Number: 19
-  Block Time: Mon Jul 29 2019 12:39:59 GMT+0300 (EEST)
+  Block Number: 3
+  Block Time: Mon Jul 29 2019 12:56:25 GMT+0300 (EEST)
 
 eth_getTransactionReceipt
 eth_getCode
