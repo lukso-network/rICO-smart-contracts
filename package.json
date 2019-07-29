@@ -1,0 +1,75 @@
+{
+  "name": "ricopoc",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "compile": "./node_modules/.bin/truffle compile --all",
+    "coverage": "scripts/run_coverage.sh all",
+    "coverage-reuse": "scripts/run_coverage.sh all use-existing",
+    "test": "scripts/run_tests.sh all",
+    "test-reuse": "scripts/run_tests.sh all use-existing",
+    "test-single": "scripts/run_tests.sh single",
+    "test-single-reuse": "scripts/run_tests.sh single use-existing",
+    "testToHtml": "scripts/testOutputToHtml.sh",
+    "start-all-rpcs": "scripts/rpcs/start_all.sh",
+    "stop-all-rpcs": "scripts/rpcs/stop_all.sh"
+  },
+  "bin": {
+    "rpcs": "./scripts/rpc.sh"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": "src",
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "html",
+      "text"
+    ],
+    "all": true
+  },
+  "author": "Micky Socaci <micky@nowlive.ro>",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "cli-table": "^0.3.1",
+    "dateformat": "^3.0.3",
+    "ethereumjs-abi": "^0.6.7",
+    "ethereumjs-util": "^6.1.0",
+    "ganache-cli": "^6.4.4",
+    "openzeppelin-test-helpers": "^0.4.0",
+    "solc": "^0.5.10",
+    "solidity-coverage": "^0.5.11",
+    "truffle": "^5.0.26",
+    "truffle-hdwallet-provider": "^1.0.14",
+    "ts-mocha": "^6.0.0",
+    "web3": "^1.0.0-beta.37"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.6.3",
+    "istanbul": "^0.4.5",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
+    "typescript": "^3.5.3"
+  },
+  "engines": {
+    "node": ">=8.9.4"
+  },
+  "standard": {
+    "env": "mocha",
+    "globals": [
+      "describe",
+      "it"
+    ]
+  }
+}
