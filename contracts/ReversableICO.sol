@@ -17,8 +17,7 @@ contract ReversableICO {
     uint256 public EndBlock;
     uint256 public SaleStageBlockCount;
     uint256 public RicoStageBlockCount;
-
-
+    address public TokenTrackerAddress;
 
     /*
     *   Addresses
@@ -29,8 +28,9 @@ contract ReversableICO {
     *   Internals
     */
     bool public initialized = false;
-    bool public started = false;
+    bool public running = false;
     bool public frozen = false;
+    bool public ended = false;
 
     enum Stages {
         DEPLOYED,
@@ -47,11 +47,11 @@ contract ReversableICO {
 
     // fallback function
     function () external payable {
-
+        this.commit();
     }
 
     function addSettings(
-        address _TokenController,
+        address _TokenTrackerAddress,
         uint256 _StartBlock,
         uint256 _EndBlock,
         uint256 _SaleStageBlockCount,
@@ -61,6 +61,7 @@ contract ReversableICO {
         onlyDeployer
         requireNotInitialized
     {
+        TokenTrackerAddress = _TokenTrackerAddress;
         StartBlock = _StartBlock;
         EndBlock = _EndBlock;
         SaleStageBlockCount = _SaleStageBlockCount;
@@ -100,9 +101,9 @@ contract ReversableICO {
     function commit()
         public
         payable
-        // requireAcceptContributions
-        // requireNotEnded
-        // requireNotFrozen
+        requireRunning
+        requireNotEnded
+        requireNotFrozen
     {
         /*
         // require(isStarted() && notFrozen(), "");
@@ -118,8 +119,6 @@ contract ReversableICO {
         based on amount of blocks that passed, take the cut for the project
         */
     }
-
-
 
     /*
     *   Whitelisting
@@ -147,7 +146,6 @@ contract ReversableICO {
         return false;
     }
 
-
     /*
     * Refund ( ERC777TokensRecipient method )
     */
@@ -164,6 +162,24 @@ contract ReversableICO {
         return block.number;
     }
 
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    )
+        external
+        requireInitialized
+        requireRunning
+        requireNotFrozen
+        requireNotEnded
+    {
+        // call internal refund method()
+        this.refund();
+    }
+
     /*
     *   Modifiers
     */
@@ -173,23 +189,43 @@ contract ReversableICO {
         _;
     }
 
-    modifier requireNotInitialized() {
-        require(initialized == false, "Contract must not be initialized");
-        _;
-    }
-
     modifier requireInitialized() {
         require(initialized == true, "Contract must be initialized");
         _;
     }
 
-    modifier requireNotFrozen() {
-        require(frozen == false, "Contract must not be frozen");
+    modifier requireNotInitialized() {
+        require(initialized == false, "Contract must not be initialized");
+        _;
+    }
+
+    modifier requireRunning() {
+        require(ended == true, "RICO must be running");
+        _;
+    }
+
+    modifier requireNotRunning() {
+        require(ended == false, "RICO must not be running");
+        _;
+    }
+
+    modifier requireEnded() {
+        require(ended == true, "RICO period must have ended");
+        _;
+    }
+
+    modifier requireNotEnded() {
+        require(ended == false, "RICO period must not have ended");
         _;
     }
 
     modifier requireFrozen() {
-        require(frozen == true, "Contract must not frozen");
+        require(frozen == true, "Contract must be frozen");
+        _;
+    }
+
+    modifier requireNotFrozen() {
+        require(frozen == false, "Contract must not be frozen");
         _;
     }
 

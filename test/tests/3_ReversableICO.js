@@ -28,21 +28,30 @@ describe("ReversableICO", function () {
         });
 
         it("Property deployerAddress should be accounts[0]", async function () {
-            await expect( await this.ReversableICO.methods.deployerAddress().call() ).to.be.equal(accounts[0]);
+            expect( await this.ReversableICO.methods.deployerAddress().call() ).to.be.equal(accounts[0]);
         });
 
         it("Property initialized should be false", async function () {
-            await expect( await this.ReversableICO.methods.initialized().call() ).to.be.equal(false);
+            expect( await this.ReversableICO.methods.initialized().call() ).to.be.equal(false);
         });
 
-        it("Property started should be false", async function () {
-            await expect( await this.ReversableICO.methods.started().call() ).to.be.equal(false);
+        it("Property running should be false", async function () {
+            expect( await this.ReversableICO.methods.running().call() ).to.be.equal(false);
         });
 
         it("Property frozen should be false", async function () {
-            await expect( await this.ReversableICO.methods.frozen().call() ).to.be.equal(false);
+            expect( await this.ReversableICO.methods.frozen().call() ).to.be.equal(false);
+        });
+
+        it("Property ended should be false", async function () {
+            expect( await this.ReversableICO.methods.ended().call() ).to.be.equal(false);
+        });       
+        
+        it("Property TokenTrackerAddress should be address(0)", async function () {
+            expect( await this.ReversableICO.methods.TokenTrackerAddress().call() ).to.be.equal("0x0000000000000000000000000000000000000000");
         });
         
+
     });
 
     /*

@@ -23,7 +23,7 @@ describe("ERC777 - RICO Token", function () {
         }
     });
 
-    describe("Stage 1 - Deployment", function () {
+    describe("Deployment", function () {
 
         before(async function () {
 
