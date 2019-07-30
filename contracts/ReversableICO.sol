@@ -17,7 +17,9 @@ contract ReversableICO {
     uint256 public EndBlock;
     uint256 public SaleStageBlockCount;
     uint256 public RicoStageBlockCount;
+
     address public TokenTrackerAddress;
+    address public whitelistControllerAddress;
 
     /*
     *   Addresses
@@ -52,8 +54,8 @@ contract ReversableICO {
 
     function addSettings(
         address _TokenTrackerAddress,
+        address _whitelistControllerAddress,
         uint256 _StartBlock,
-        uint256 _EndBlock,
         uint256 _SaleStageBlockCount,
         uint256 _RicoStageBlockCount
     )
@@ -62,10 +64,14 @@ contract ReversableICO {
         requireNotInitialized
     {
         TokenTrackerAddress = _TokenTrackerAddress;
+        whitelistControllerAddress = _whitelistControllerAddress;
         StartBlock = _StartBlock;
-        EndBlock = _EndBlock;
         SaleStageBlockCount = _SaleStageBlockCount;
         RicoStageBlockCount = _RicoStageBlockCount;
+
+        // calculate end block
+        EndBlock = _StartBlock + _SaleStageBlockCount + _RicoStageBlockCount;
+
         initialized = true;
     }
 
@@ -123,7 +129,6 @@ contract ReversableICO {
     /*
     *   Whitelisting
     */
-    address whitelistControllerAddress;
 
     function whitelist(address _address) public {
         Participant storage newRecord = ParticipantsByAddress[_address];
@@ -133,9 +138,7 @@ contract ReversableICO {
 
     function whitelistMultiple(address[] memory _address) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
-            Participant storage newRecord = ParticipantsByAddress[_address[i]];
-            newRecord.whitelisted = true;
-            ParticipantCount++;
+            this.whitelist(_address[i]);
         }
     }
 
@@ -154,14 +157,6 @@ contract ReversableICO {
         // 2. get current balance, and
     }
 
-    /*
-    *   Utils
-    */
-    // required so we can override when running tests
-    function getCurrentBlockNumber() public view returns (uint256) {
-        return block.number;
-    }
-
     function tokensReceived(
         address operator,
         address from,
@@ -178,6 +173,14 @@ contract ReversableICO {
     {
         // call internal refund method()
         this.refund();
+    }
+
+    /*
+    *   Utils
+    */
+    // required so we can override when running tests
+    function getCurrentBlockNumber() public view returns (uint256) {
+        return block.number;
     }
 
     /*

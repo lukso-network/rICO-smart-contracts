@@ -112,38 +112,6 @@ describe("ERC777 - RICO Token", function () {
             });
         });
 
-        /*
-        it("Property deployerAddress should be accounts[0]", async function () {
-            await expect( await this.RicoToken.methods.deployerAddress().call() ).to.be.equal(accounts[0]);
-        });
-
-        it("Property initialized should be false", async function () {
-            await expect( await this.RicoToken.methods.initialized().call() ).to.be.equal(false);
-        });
-
-        it("Property started should be false", async function () {
-            await expect( await this.RicoToken.methods.started().call() ).to.be.equal(false);
-        });
-
-        it("Property frozen should be false", async function () {
-            await expect( await this.RicoToken.methods.frozen().call() ).to.be.equal(false);
-        });
-        */
-
     });
-
-    /*
-    describe("Stage 2 - Initialisation", function () {
-        
-        before(async function () {
-            this.ReversableICO = await helpers.utils.deployNewContractInstance(helpers, "ReversableICO");
-        });
-
-        it("Gas usage should be lower than 6.7m", function () {
-            expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
-        });
-
-    });
-    */
 
 });

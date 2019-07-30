@@ -124,7 +124,7 @@ async function runTests() {
         const mocha = new Mocha();
 
         mocha.useColors(true);
-        mocha.slow(10);
+        mocha.slow(15);
         mocha.timeout(600000);
 
         for( let i = 0; i < tests.length; i++) {
