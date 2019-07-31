@@ -10,16 +10,33 @@ pragma solidity ^0.5.0;
 
 contract ReversableICO {
 
+    address public TokenTrackerAddress;
+    address public whitelistControllerAddress;
+
     /*
     *   Contract Settings
     */
     uint256 public StartBlock;
     uint256 public EndBlock;
-    uint256 public SaleStageBlockCount;
-    uint256 public RicoStageBlockCount;
 
-    address public TokenTrackerAddress;
-    address public whitelistControllerAddress;
+    /*
+    * Allocation period
+    */
+    uint256 public AllocationPrice;
+    uint256 public AllocationBlockCount;
+    uint256 public AllocationEndBlock;
+
+    /*
+    *   Distribution Stages
+    */
+    struct DistributionStage {
+        uint256 start_block;
+        uint256 end_block;
+        uint256 token_price;
+    }
+
+    mapping ( uint8 => DistributionStage ) public DistributionStageByNumber;
+    uint8 public DistributionStageCount = 0;
 
     /*
     *   Addresses
@@ -56,21 +73,41 @@ contract ReversableICO {
         address _TokenTrackerAddress,
         address _whitelistControllerAddress,
         uint256 _StartBlock,
-        uint256 _SaleStageBlockCount,
-        uint256 _RicoStageBlockCount
+        uint256 _AllocationBlockCount,
+        uint256 _AllocationPrice,
+        uint8   _StageCount,
+        uint256 _StageBlockCount,
+        uint256 _StagePriceIncrease
     )
         public
         onlyDeployer
         requireNotInitialized
     {
+        // addresses
         TokenTrackerAddress = _TokenTrackerAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
-        StartBlock = _StartBlock;
-        SaleStageBlockCount = _SaleStageBlockCount;
-        RicoStageBlockCount = _RicoStageBlockCount;
 
-        // calculate end block
-        EndBlock = _StartBlock + _SaleStageBlockCount + _RicoStageBlockCount;
+        // Allocation settings
+        StartBlock = _StartBlock;
+        AllocationBlockCount = _AllocationBlockCount;
+        AllocationEndBlock = StartBlock + AllocationBlockCount;
+        AllocationPrice = _AllocationPrice;
+
+        uint256 lastStageBlockEnd = AllocationEndBlock;
+        // calculate block ranges and set price for each period
+
+        for(uint8 i = 0; i < _StageCount; i++) {
+
+            DistributionStage storage StageRecord = DistributionStageByNumber[DistributionStageCount];
+            StageRecord.start_block = lastStageBlockEnd + 1;
+            StageRecord.end_block = lastStageBlockEnd + _StageBlockCount + 1;
+            StageRecord.token_price = _AllocationPrice + ( _StagePriceIncrease * (i + 1) );
+            DistributionStageCount++;
+
+            lastStageBlockEnd = StageRecord.end_block;
+        }
+
+        EndBlock = lastStageBlockEnd;
 
         initialized = true;
     }
