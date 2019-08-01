@@ -23,4 +23,8 @@ contract ReversableICOMock is ReversableICO {
         currentBlockNumber += _num;
     }
 
+    function jumpToBlockNumber(uint256 _num) public {
+        currentBlockNumber = _num;
+    }
+
 }

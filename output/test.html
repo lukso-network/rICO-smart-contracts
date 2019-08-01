@@ -33,27 +33,27 @@ Compiling your contracts...
 
   SafeMath
     add
-    <span style="color:lime;">  ✓</span> adds correctly<span style="color:red;"> (31ms)</span>
+    <span style="color:lime;">  ✓</span> adds correctly<span style="color:red;"> (33ms)</span>
     <span style="color:lime;">  ✓</span> reverts on addition overflow<span style="color:red;"> (37ms)</span>
     sub
-    <span style="color:lime;">  ✓</span> subtracts correctly<span style="color:yellow;"> (15ms)</span>
+    <span style="color:lime;">  ✓</span> subtracts correctly<span style="color:red;"> (16ms)</span>
     <span style="color:lime;">  ✓</span> reverts if subtraction result would be negative<span style="color:red;"> (18ms)</span>
     mul
-    <span style="color:lime;">  ✓</span> multiplies correctly<span style="color:red;"> (25ms)</span>
+    <span style="color:lime;">  ✓</span> multiplies correctly<span style="color:red;"> (28ms)</span>
     <span style="color:lime;">  ✓</span> multiplies by zero correctly<span style="color:red;"> (24ms)</span>
-    <span style="color:lime;">  ✓</span> reverts on multiplication overflow<span style="color:yellow;"> (15ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on multiplication overflow<span style="color:yellow;"> (14ms)</span>
     div
-    <span style="color:lime;">  ✓</span> divides correctly<span style="color:yellow;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span> divides correctly<span style="color:yellow;"> (12ms)</span>
     <span style="color:lime;">  ✓</span> divides zero correctly<span style="color:yellow;"> (14ms)</span>
     <span style="color:lime;">  ✓</span> returns complete number result on non-even division<span style="color:red;"> (16ms)</span>
-    <span style="color:lime;">  ✓</span> reverts on division by zero<span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on division by zero<span style="color:yellow;"> (13ms)</span>
     mod
-    <span style="color:lime;">  ✓</span> reverts with a 0 divisor<span style="color:red;"> (18ms)</span>
+    <span style="color:lime;">  ✓</span> reverts with a 0 divisor<span style="color:red;"> (22ms)</span>
       modulos correctly
-      <span style="color:lime;">  ✓</span> when the dividend is smaller than the divisor<span style="color:yellow;"> (10ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is equal to the divisor<span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is larger than the divisor<span style="color:yellow;"> (11ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is a multiple of the divisor<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is smaller than the divisor<span style="color:yellow;"> (12ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is equal to the divisor<span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is larger than the divisor<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is a multiple of the divisor<span style="color:yellow;"> (11ms)</span>
 
   ERC1820 - Token Registry
     Step 1 - Before deployment state
@@ -87,51 +87,73 @@ Compiling your contracts...
       basic information
       <span style="color:lime;">  ✓</span> returns the name<span style="color:red;"> (17ms)</span>
       <span style="color:lime;">  ✓</span> returns the symbol<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> returns a granularity of 1<span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span> returns the default operators<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns a granularity of 1<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns the default operators<span style="color:yellow;"> (12ms)</span>
       <span style="color:lime;">  ✓</span> default operators are operators for all accounts
-      <span style="color:lime;">  ✓</span> returns the total supply<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns the total supply<span style="color:yellow;"> (15ms)</span>
       <span style="color:lime;">  ✓</span> returns 18 when decimals is called<span style="color:yellow;"> (11ms)</span>
       <span style="color:lime;">  ✓</span> the ERC777Token interface is registered in the registry<span style="color:red;"> (17ms)</span>
-      <span style="color:lime;">  ✓</span> the ERC20Token interface is registered in the registry<span style="color:red;"> (16ms)</span>
+      <span style="color:lime;">  ✓</span> the ERC20Token interface is registered in the registry<span style="color:yellow;"> (14ms)</span>
       balanceOf
         for an account with no tokens
         <span style="color:lime;">  ✓</span> returns zero<span style="color:yellow;"> (11ms)</span>
         for an account with tokens
-        <span style="color:lime;">  ✓</span> returns their balance<span style="color:yellow;"> (12ms)</span>
+        <span style="color:lime;">  ✓</span> returns their balance<span style="color:yellow;"> (14ms)</span>
 
   ReversableICO
-      Gas used for deployment: 1357360
+      Gas used for deployment: 1674974
       Contract Address: 0x2A8b1b6AC8A5D4d17F19433907D0E9e779f9B5b8
 
     Stage 1 - Deployment
     <span style="color:lime;">  ✓</span> Gas usage should be lower than 6.7m.
-    <span style="color:lime;">  ✓</span> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222<span style="color:yellow;"> (13ms)</span>
-    <span style="color:lime;">  ✓</span> Property initialized should be false<span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222<span style="color:red;"> (17ms)</span>
+    <span style="color:lime;">  ✓</span> Property initialized should be false<span style="color:yellow;"> (11ms)</span>
     <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (10ms)</span>
     <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be address(0)<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be address(0)<span style="color:yellow;"> (10ms)</span>
-    Stage 2 - Initialisation
-    <span style="color:lime;">  ✓</span> Property initialized should be true<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (8ms)</span>
-    <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (9ms)</span>
     <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (13ms)</span>
-    <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be deployed ERC777 Token Contract address<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> StartBlock matches settings<span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span> SaleStageBlockCount matches settings<span style="color:yellow;"> (13ms)</span>
-    <span style="color:lime;">  ✓</span> RicoStageBlockCount matches settings<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> EndBlock matches settings<span style="color:yellow;"> (10ms)</span>
+    <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be address(0)<span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be address(0)<span style="color:yellow;"> (12ms)</span>
+    Stage 2 - Initialisation
+      Contract settings
+      <span style="color:lime;">  ✓</span> Property initialized should be true<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (12ms)</span>
+      <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (9ms)</span>
+      <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be deployed ERC777 Token Contract address<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> EndBlock matches settings<span style="color:yellow;"> (10ms)</span>
+      Contract Stages
+      <span style="color:lime;">  ✓</span> Stage Count is correct<span style="color:yellow;"> (9ms)</span>
+      <span style="color:lime;">  ✓</span> Allocation StartBlock matches settings
+      <span style="color:lime;">  ✓</span> Allocation duration is AllocationBlockCount
+      <span style="color:lime;">  ✓</span> Allocation EndBlock matches settings
+      <span style="color:lime;">  ✓</span> AllocationPrice matches settings
+      <span style="color:lime;">  ✓</span> First Distribution Stage settings are correct<span style="color:yellow;"> (15ms)</span>
+      <span style="color:lime;">  ✓</span> Last Distribution Stage settings are correct<span style="color:yellow;"> (13ms)</span>
+      <span style="color:lime;">  ✓</span> Last Distribution Stage end_block matches contract EndBlock<span style="color:yellow;"> (10ms)</span>
+    Contract Methods
+      getCurrentStage()
+      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation start_block<span style="color:red;"> (55ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation end_block<span style="color:red;"> (54ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 start_block<span style="color:red;"> (53ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 end_block<span style="color:red;"> (52ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 start_block<span style="color:red;"> (59ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 end_block<span style="color:red;"> (56ms)</span>
+      <span style="color:lime;">  ✓</span> Returns last stage if at last stage start_block<span style="color:red;"> (52ms)</span>
+      <span style="color:lime;">  ✓</span> Returns last stage if at last stage end_block<span style="color:red;"> (56ms)</span>
+      getCurrentPrice()
+      <span style="color:lime;">  ✓</span> Returns correct value for Allocation phase<span style="color:red;"> (50ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 1<span style="color:red;"> (57ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 5<span style="color:red;"> (48ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for last stage<span style="color:red;"> (50ms)</span>
 
 
- <span style="color:lime;"> 57 passing</span> (1s)
+ <span style="color:lime;"> 74 passing</span> (2s)
 
 Done
 --------------------------------------------------------------------
 
-Killing existing ganache-cli instance at pid 35241.
+Killing existing ganache-cli instance at pid 91991.
 
 </pre>
 </body>

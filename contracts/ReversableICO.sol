@@ -25,18 +25,19 @@ contract ReversableICO {
     uint256 public AllocationPrice;
     uint256 public AllocationBlockCount;
     uint256 public AllocationEndBlock;
+    uint256 public StageBlockCount;
 
     /*
-    *   Distribution Stages
+    *   Contract Stages
     */
-    struct DistributionStage {
+    struct ContractStage {
         uint256 start_block;
         uint256 end_block;
         uint256 token_price;
     }
 
-    mapping ( uint8 => DistributionStage ) public DistributionStageByNumber;
-    uint8 public DistributionStageCount = 0;
+    mapping ( uint8 => ContractStage ) public StageByNumber;
+    uint8 public ContractStageCount = 0;
 
     /*
     *   Addresses
@@ -93,16 +94,25 @@ contract ReversableICO {
         AllocationEndBlock = StartBlock + AllocationBlockCount;
         AllocationPrice = _AllocationPrice;
 
-        uint256 lastStageBlockEnd = AllocationEndBlock;
+        StageBlockCount = _StageBlockCount;
+
+        // first stage is allocation. Set it up.
+        ContractStage storage StageRecord = StageByNumber[ContractStageCount];
+        StageRecord.start_block = _StartBlock;
+        StageRecord.end_block = _StartBlock + _AllocationBlockCount;
+        StageRecord.token_price = _AllocationPrice;
+        ContractStageCount++;
+
+        uint256 lastStageBlockEnd = StageRecord.end_block;
+
         // calculate block ranges and set price for each period
+        for(uint8 i = 1; i <= _StageCount; i++) {
 
-        for(uint8 i = 0; i < _StageCount; i++) {
-
-            DistributionStage storage StageRecord = DistributionStageByNumber[DistributionStageCount];
+            StageRecord = StageByNumber[ContractStageCount];
             StageRecord.start_block = lastStageBlockEnd + 1;
             StageRecord.end_block = lastStageBlockEnd + _StageBlockCount + 1;
-            StageRecord.token_price = _AllocationPrice + ( _StagePriceIncrease * (i + 1) );
-            DistributionStageCount++;
+            StageRecord.token_price = _AllocationPrice + ( _StagePriceIncrease * (i) );
+            ContractStageCount++;
 
             lastStageBlockEnd = StageRecord.end_block;
         }
@@ -112,13 +122,46 @@ contract ReversableICO {
         initialized = true;
     }
 
-    function getCurrentStage() public view returns ( uint256 ) {
-        // Stages
-        uint256 test = block.timestamp;
-
-        return test;
+    function getCurrentPrice() public view returns ( uint256 ) {
+        return StageByNumber[getCurrentStage()].token_price;
     }
 
+    /*
+        Do we want to normalise for gas usage ?!
+        ( ie. add useless computation just to have the same gas used at all times ? )
+
+        22023 - Case 1: lower than allocation end
+        22797 - Case 2: lower than stage[X].end_block
+        22813 - Case 3: exactly at stage[X].end_block
+
+        Doing an interation and validating on each item range can go upto 37391 gas for 13 stages.
+    */
+    function getCurrentStage() public view returns ( uint8 ) {
+
+        uint256 currentBlock = getCurrentBlockNumber();
+
+        // if current is end block.. the user will get the correct
+        // stage now but their new transaction will end up in the
+        // next block which changes the stage vs what they've seen.
+        // resulting in a different price..
+        //
+        // @TODO: decide how we want to handle this on the frontend,
+        //        contract should always display proper data.
+        //
+        if ( currentBlock <= AllocationEndBlock ) {
+            return 0;
+        }
+
+        uint256 num = (currentBlock - AllocationEndBlock) / (StageBlockCount + 1) + 1;
+
+        // last block of each stage always computes as stage + 1
+        if(StageByNumber[uint8(num)-1].end_block == currentBlock) {
+            // save some gas and just return instead of decrementing.
+            return uint8(num - 1);
+        }
+
+        return uint8(num);
+    }
 
     /*
     *   Participants
