@@ -122,10 +122,6 @@ contract ReversableICO {
         initialized = true;
     }
 
-    function getCurrentPrice() public view returns ( uint256 ) {
-        return StageByNumber[getCurrentStage()].token_price;
-    }
-
     /*
         Do we want to normalise for gas usage ?!
         ( ie. add useless computation just to have the same gas used at all times ? )
@@ -137,30 +133,56 @@ contract ReversableICO {
         Doing an interation and validating on each item range can go upto 37391 gas for 13 stages.
     */
     function getCurrentStage() public view returns ( uint8 ) {
+        return getStageAtBlock(getCurrentBlockNumber());
+    }
 
-        uint256 currentBlock = getCurrentBlockNumber();
+    function getStageAtBlock(uint256 selectedBlock) public view returns ( uint8 ) {
 
-        // if current is end block.. the user will get the correct
-        // stage now but their new transaction will end up in the
-        // next block which changes the stage vs what they've seen.
-        // resulting in a different price..
+        // *NOTE: if selectedBlock is end block.. the user will get the correct
+        //        stage now but their new transaction will end up in the
+        //        next block which changes the stage vs what they've seen..
+        //        resulting in a different purchase price.
         //
         // @TODO: decide how we want to handle this on the frontend,
         //        contract should always display proper data.
         //
-        if ( currentBlock <= AllocationEndBlock ) {
+        if ( selectedBlock <= AllocationEndBlock ) {
             return 0;
         }
 
-        uint256 num = (currentBlock - AllocationEndBlock) / (StageBlockCount + 1) + 1;
+        // solidity floors division results, thus we get what we're looking for.
+        uint256 num = (selectedBlock - AllocationEndBlock) / (StageBlockCount + 1) + 1;
 
         // last block of each stage always computes as stage + 1
-        if(StageByNumber[uint8(num)-1].end_block == currentBlock) {
+        if(StageByNumber[uint8(num)-1].end_block == selectedBlock) {
             // save some gas and just return instead of decrementing.
             return uint8(num - 1);
         }
 
+        // return max_uint8 if outside range
+        // @TODO: maybe revert ?!
+        if(num >= ContractStageCount ) {
+            return 255;
+        }
+
         return uint8(num);
+    }
+
+    function getCurrentPrice() public view returns ( uint256 ) {
+        return getPriceAtBlock(getCurrentBlockNumber());
+    }
+
+    function getPriceAtBlock(uint256 blockNumber) public view returns ( uint256 ) {
+        uint8 stage = getStageAtBlock(blockNumber);
+        if(stage < ContractStageCount ) {
+            return StageByNumber[stage].token_price;
+        }
+        // revert with stage not found?
+        return 0;
+    }
+
+    function getCurrentPrice2() public view returns ( uint256 ) {
+        return StageByNumber[getCurrentStage()].token_price;
     }
 
     /*

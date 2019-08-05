@@ -227,40 +227,6 @@ describe("ReversableICO", function () {
                 const stage_end_block = stageData.end_block;
                 expect(stage_end_block).to.be.equal(EndBlock.toString());
             });
-
-            /*
-            it("Property initialized should be true", async function () {
-
-                console.log("StageCount:           ", StageCount);
-                console.log("StageBlockCount:      ", StageBlockCount);
-                console.log("StagePriceIncrease:   ", StagePriceIncrease);
-    
-                const StageStartBlock = AllocationEndBlock;
-                let lastStageBlockEnd = StageStartBlock;
-    
-                for(let i = 0; i < StageCount; i++) {
-    
-                    const start_block = lastStageBlockEnd + 1;
-                    const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                    const token_price = AllocationPrice + ( StagePriceIncrease * ( i +  1) );
-    
-                    console.log("Stage["+i+"]");
-                    console.log("start_block:          ", start_block);
-                    console.log("end_block:            ", end_block);
-                    console.log("token_price:          ", token_price);
-    
-                    lastStageBlockEnd = end_block;
-                }
-                console.log("lastBlock:            ", lastStageBlockEnd);
-
-                expect(await this.ReversableICO.methods.initialized().call()).to.be.equal(true);
-            });
-    
-            it("Property running should be false", async function () {
-                expect(await this.ReversableICO.methods.running().call()).to.be.equal(false);
-            });
-            */
-    
     
         });
 
@@ -337,6 +303,16 @@ describe("ReversableICO", function () {
                 await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
                 expect( await this.ReversableICO.methods.getCurrentStage().call() ).to.be.equal( stageId.toString() );
             });
+
+            it("Returns 255 after last stage end_block", async function () {
+                const stageData = await this.ReversableICO.methods.StageByNumber(StageCount).call();
+                await this.ReversableICO.methods.jumpToBlockNumber(
+                    stageData.end_block + 1
+                ).send({
+                    from: deployerAddress, gas: 100000
+                });
+                expect( await this.ReversableICO.methods.getCurrentStage().call() ).to.be.equal( "255" );
+            });
         });
 
         describe("getCurrentPrice()", async function () { 
@@ -350,41 +326,50 @@ describe("ReversableICO", function () {
             it("Returns correct value for stage 1", async function () {
                 const stageId = 1;
                 await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-                expect( 
+                expect(
                     await this.ReversableICO.methods.getCurrentPrice().call()
-                ).to.be.equal( 
-                    stageValidation[stageId - 1].token_price.toString() 
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
                 );
             });
 
             it("Returns correct value for stage 5", async function () {
                 const stageId = 5;
                 await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-                expect( 
+                expect(
                     await this.ReversableICO.methods.getCurrentPrice().call()
-                ).to.be.equal( 
-                    stageValidation[stageId - 1].token_price.toString() 
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
                 );
             });
 
             it("Returns correct value for last stage", async function () {
                 const stageId = StageCount;
                 await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-                expect( 
+                expect(
                     await this.ReversableICO.methods.getCurrentPrice().call()
-                ).to.be.equal( 
-                    stageValidation[stageId - 1].token_price.toString() 
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
                 );
             });
 
-        });
+            it("Returns 0 after last stage ended", async function () {
+                const stageData = await this.ReversableICO.methods.StageByNumber(StageCount).call();
+                await this.ReversableICO.methods.jumpToBlockNumber(
+                    stageData.end_block + 1
+                ).send({
+                    from: deployerAddress, gas: 100000
+                });
 
+                expect( await this.ReversableICO.methods.getCurrentPrice().call() ).to.be.equal("0");
+            });
+        });
     });
 
 
     /*
     describe("Dev", function () {
-            
+
         let data;
         before(async function () {
 
