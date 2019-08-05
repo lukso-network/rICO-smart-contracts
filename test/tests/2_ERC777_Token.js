@@ -11,7 +11,7 @@ const symbol = 'RICO';
 const data = web3.utils.sha3('OZ777TestData');
 const operatorData = web3.utils.sha3('OZ777TestOperatorData');
 const anyone = '0x0000000000000000000000000000000000000001';
-const holder = accounts[0];
+const holder = accounts[10];
 
 describe("ERC777 - RICO Token", function () {
 
@@ -29,7 +29,7 @@ describe("ERC777 - RICO Token", function () {
 
             this.RicoToken = await helpers.utils.deployNewContractInstance(
                 helpers, "RicoToken", {
-                    from: accounts[0],
+                    from: holder,
                     arguments: [initialSupply, defaultOperators],
                     gas: 3500000,
                     gasPrice: helpers.solidity.gwei * 10

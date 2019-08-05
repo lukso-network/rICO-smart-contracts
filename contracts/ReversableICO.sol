@@ -8,9 +8,18 @@
 
 pragma solidity ^0.5.0;
 
-contract ReversableICO {
+import "./zeppelin/token/ERC777/IERC777.sol";
+import "./zeppelin/token/ERC777/IERC777Recipient.sol";
+import "./zeppelin/introspection/IERC1820Registry.sol";
+
+contract ReversableICO is IERC777Recipient {
+
+    IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
+    bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
     address public TokenTrackerAddress;
+    IERC777 public TokenTracker;
+
     address public whitelistControllerAddress;
 
     /*
@@ -18,6 +27,8 @@ contract ReversableICO {
     */
     uint256 public StartBlock;
     uint256 public EndBlock;
+
+    uint256 public InitialTokenSupply;
 
     /*
     * Allocation period
@@ -63,6 +74,7 @@ contract ReversableICO {
 
     constructor() public {
         deployerAddress = msg.sender;
+        _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
     // fallback function
@@ -87,6 +99,12 @@ contract ReversableICO {
         // addresses
         TokenTrackerAddress = _TokenTrackerAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
+
+        // initialize ERC777 TokenTracker
+        TokenTracker = IERC777(TokenTrackerAddress);
+
+        // Save the token amount allocated to this address
+        InitialTokenSupply = TokenTracker.balanceOf(address(this));
 
         // Allocation settings
         StartBlock = _StartBlock;
@@ -181,16 +199,20 @@ contract ReversableICO {
         return 0;
     }
 
-    function getCurrentPrice2() public view returns ( uint256 ) {
-        return StageByNumber[getCurrentStage()].token_price;
-    }
-
     /*
     *   Participants
     */
     struct Contribution {
         uint256 value;
         uint256 block;
+        uint8   state;
+        uint256 tokens;
+    }
+
+    enum ContributionStates {
+        NOT_PROCESSED,
+        ACCEPTED,
+        REJECTED
     }
 
     struct Participant {
@@ -203,14 +225,33 @@ contract ReversableICO {
     mapping ( uint256 => address ) public ParticipantsById;
     uint256 ParticipantCount = 0;
 
+    function ParticipantContributionDetails(
+        address _address,
+        uint16 contribution_id
+    ) public view returns ( uint256, uint256, uint8, uint256 ) {
+        //
+        // direct call: ParticipantsByAddress[_address].contributions[contribution_id].value
+        //
+        // mapping to records vs calling directly yields lower gas usage ( 24115 vs 24526 )
+
+        Participant storage Record = ParticipantsByAddress[_address];
+        Contribution storage ContributionRecord = Record.contributions[contribution_id];
+        return (
+            ContributionRecord.value,
+            ContributionRecord.block,
+            ContributionRecord.state,
+            ContributionRecord.tokens
+        );
+    }
+
     /*
-    *   Investor commits funds
+    *   Participant commits funds
     */
     function commit()
         public
         payable
-        requireRunning
-        requireNotEnded
+        // requireRunning
+        // requireNotEnded
         requireNotFrozen
     {
         /*
@@ -226,7 +267,90 @@ contract ReversableICO {
 
         based on amount of blocks that passed, take the cut for the project
         */
+
+        // Check if participant already exists
+        Participant storage ParticipantRecord = ParticipantsByAddress[msg.sender];
+
+        uint16 newContributionId = 0;
+
+        if(ParticipantRecord.contributionsCount == 0) {
+            // increase participant count
+            ParticipantCount++;
+        } else {
+            newContributionId = ParticipantRecord.contributionsCount + 1;
+        }
+
+        // Save new contribution
+        Contribution storage ContributionRecord = ParticipantRecord.contributions[newContributionId];
+        ContributionRecord.value = msg.value;
+        ContributionRecord.block = getCurrentBlockNumber();
+        ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
+
+        // calculate how many tokens this contribution will receive
+        ContributionRecord.tokens = 0;
+
+        ParticipantRecord.contributionsCount++;
+
+        // if whitelisted, process the contribution automatically
+        if(ParticipantRecord.whitelisted == true) {
+            processContribution(msg.sender, newContributionId, uint8(ContributionStates.ACCEPTED));
+        }
     }
+
+    /*
+    *   Process contribution for address
+    */
+    function processContribution(
+        address _sender, uint16 _contributionId, uint8 _to_state
+    )
+        public
+        // onlyWhitelistController
+        returns ( bool )
+    {
+        // code
+
+        Participant storage Record = ParticipantsByAddress[_sender];
+        Contribution storage ContributionRecord = Record.contributions[_contributionId];
+
+        if(_to_state == uint8(ContributionStates.ACCEPTED)) {
+            // accept contribution
+
+            // allocate eth to project
+
+            // allocate tokens to participant
+
+            // mark contribution as being processed by setting it's state
+
+        } else if(_to_state == uint8(ContributionStates.REJECTED)) {
+            // reject
+
+            // mark contribution as being processed by setting it's state
+
+            // send funds back to participant
+
+        } else {
+            revert("Invalid to state received.");
+        }
+
+        /*
+        ContributionRecord.value = msg.value;
+        ContributionRecord.block = getCurrentBlockNumber();
+        ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
+        */
+
+        return false;
+    }
+
+    /*
+    *   Participant cancels commitment duiring Allocation Stage
+    */
+    function cancel()
+        public
+        payable
+    {
+        // code
+    }
+
 
     /*
     *   Whitelisting
@@ -268,13 +392,18 @@ contract ReversableICO {
         bytes calldata operatorData
     )
         external
-        requireInitialized
-        requireRunning
-        requireNotFrozen
-        requireNotEnded
+        // requireInitialized
+        // requireRunning
+        // requireNotFrozen
+        // requireNotEnded
     {
-        // call internal refund method()
-        this.refund();
+        if( initialized == true ) {
+            require(msg.sender == address(TokenTracker), "ERC777TokensRecipient: Invalid token");
+            // call internal refund method()
+            // this.refund();
+
+        }
+        // else accept any token when not initialized, so we can set things up.
     }
 
     /*
@@ -291,6 +420,11 @@ contract ReversableICO {
 
     modifier onlyDeployer() {
         require(msg.sender == deployerAddress, "Only deployer can call this method");
+        _;
+    }
+
+    modifier onlyWhitelistController() {
+        require(msg.sender == whitelistControllerAddress, "Only Whitelist Controller can call this method");
         _;
     }
 

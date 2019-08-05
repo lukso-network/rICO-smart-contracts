@@ -3,6 +3,8 @@ const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
+const holder = accounts[10];
+const RicoSaleSupply = 15000000; // 15 mil
 const blocksPerDay = 6450;
 
 describe("ReversableICO", function () {
@@ -12,6 +14,7 @@ describe("ReversableICO", function () {
     let TokenTrackerAddress, stageValidation = [], currentBlock, StartBlock,
         AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
         StageBlockCount, StagePriceIncrease, EndBlock;
+    let TokenTrackerInstance;
 
     before(async function () {
         // test requires ERC1820.instance
@@ -28,6 +31,8 @@ describe("ReversableICO", function () {
         console.log("      Gas used for deployment:", this.ReversableICO.receipt.gasUsed);
         console.log("      Contract Address:", this.ReversableICO.receipt.contractAddress);
         console.log("");
+
+        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;
 
     });
 
@@ -71,7 +76,31 @@ describe("ReversableICO", function () {
 
     });
 
-    describe("Stage 2 - Initialisation", function () {
+    describe("Stage 2 - Transfer tokens to RICO contract address", function () {
+        
+        const ERC777data = web3.utils.sha3('777TestData');
+
+        before(async function () {
+            TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
+            await TokenTrackerInstance.methods.send(
+                helpers.addresses.Rico,
+                RicoSaleSupply,
+                ERC777data
+            ).send({
+                from: holder,  // initial token supply holder
+                gas: 100000
+            });
+        });
+
+        it("RICO Contract should have the correct token balance ("+RicoSaleSupply+")", async function () {
+            expect(
+                await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call()
+            ).to.be.equal(RicoSaleSupply.toString());
+        });
+
+    });
+
+    describe("Stage 3 - Initialisation", function () {
 
         before(async function () {
 
@@ -230,6 +259,25 @@ describe("ReversableICO", function () {
     
         });
 
+        describe("Contract Assets", function () {
+        
+            before(async function () {
+            });
+
+            it("RICO Contract should have 0 eth", async function () {
+                const ContractBalance = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
+                expect( ContractBalance ).to.be.bignumber.equal( new helpers.BN(0) );
+            });
+
+            it("RICO Contract should have the correct token balance ("+RicoSaleSupply+")", async function () {
+                expect(
+                    await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call()
+                ).to.be.equal(RicoSaleSupply.toString());
+            });
+
+        });
+       
+
         /*
         it("DistributionStageCount matches settings", async function () {
             expect(await this.ReversableICO.methods.DistributionStageCount().call()).to.be.equal(StageCount.toString());
@@ -315,6 +363,82 @@ describe("ReversableICO", function () {
             });
         });
 
+        describe("getStageAtBlock(uint256)", async function () { 
+
+            it("Returns stage 0 if getStageAtBlock( Allocation.start_block )", async function () {
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.start_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage 0 if getStageAtBlock( Allocation.end_block )", async function () {
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.end_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage 1 if getStageAtBlock( stage_1.start_block )", async function () {
+                const stageId = 1;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.start_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage 1 if getStageAtBlock( stage_1.end_block )", async function () {
+                const stageId = 1;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.end_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage 5 if getStageAtBlock( stage_5.start_block )", async function () {
+                const stageId = 5;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.start_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage 5 if getStageAtBlock( stage_5.end_block )", async function () {
+                const stageId = 5;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.end_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage last stage if getStageAtBlock( last_stage.start_block )", async function () {
+                const stageId = StageCount;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.start_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns stage last stage if getStageAtBlock( last_stage.end_block )", async function () {
+                const stageId = StageCount;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.end_block).call()
+                ).to.be.equal( stageId.toString() );
+            });
+
+            it("Returns 255 if getStageAtBlock( last_stage.end_block + 1 )", async function () {
+                const stageId = StageCount;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getStageAtBlock(stageData.end_block + 1).call()
+                ).to.be.equal( "255" );
+            });
+        });
+
+
         describe("getCurrentPrice()", async function () { 
 
             it("Returns correct value for Allocation phase", async function () {
@@ -364,6 +488,55 @@ describe("ReversableICO", function () {
                 expect( await this.ReversableICO.methods.getCurrentPrice().call() ).to.be.equal("0");
             });
         });
+
+        describe("getPriceAtBlock(uint256)", async function () { 
+
+            it("Returns correct value for Allocation phase", async function () {
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getPriceAtBlock(stageData.start_block).call()
+                ).to.be.equal( AllocationPrice.toString() );
+            });
+
+            it("Returns correct value for stage 1", async function () {
+                const stageId = 1;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getPriceAtBlock(stageData.start_block).call()
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
+                );
+            });
+
+            it("Returns correct value for stage 5", async function () {
+                const stageId = 5;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getPriceAtBlock(stageData.start_block).call()
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
+                );
+            });
+
+            it("Returns correct value for last stage", async function () {
+                const stageId = StageCount;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getPriceAtBlock(stageData.start_block).call()
+                ).to.be.equal(
+                    stageValidation[stageId - 1].token_price.toString()
+                );
+            });
+
+            it("Returns 0 after last stage ended", async function () {
+                const stageId = StageCount;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                expect(
+                    await this.ReversableICO.methods.getPriceAtBlock(stageData.end_block + 1).call()
+                ).to.be.equal( "0" );
+            });
+        });
     });
 
 
@@ -407,4 +580,3 @@ async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, en
         from: deployerAddress, gas: 100000
     });
 }
-
