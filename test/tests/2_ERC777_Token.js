@@ -3,11 +3,7 @@ const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
-const initialSupply = 100000000; // 100 mil
 const defaultOperators = []; // accounts[0] maybe
-
-const name = 'RicoToken';
-const symbol = 'RICO';
 const data = web3.utils.sha3('OZ777TestData');
 const operatorData = web3.utils.sha3('OZ777TestOperatorData');
 const anyone = '0x0000000000000000000000000000000000000001';
@@ -30,7 +26,10 @@ describe("ERC777 - RICO Token", function () {
             this.RicoToken = await helpers.utils.deployNewContractInstance(
                 helpers, "RicoToken", {
                     from: holder,
-                    arguments: [initialSupply, defaultOperators],
+                    arguments: [
+                        setup.settings.token.supply.toString(),
+                        defaultOperators
+                    ],
                     gas: 3500000,
                     gasPrice: helpers.solidity.gwei * 10
                 }
@@ -48,15 +47,15 @@ describe("ERC777 - RICO Token", function () {
 
         describe('basic information', function () {
             it('returns the name', async function () {
-                expect(await this.RicoToken.methods.name().call() ).to.equal(name);
+                expect(await this.RicoToken.methods.name().call() ).to.equal(setup.settings.token.name);
             });
 
             it('returns the symbol', async function () {
-                expect(await this.RicoToken.methods.symbol().call()).to.equal(symbol);
+                expect(await this.RicoToken.methods.symbol().call()).to.equal(setup.settings.token.symbol);
             });
 
             it('returns a granularity of 1', async function () {
-                expect(await this.RicoToken.methods.granularity().call()).to.be.equal('1');
+                expect(await this.RicoToken.methods.granularity().call()).to.be.equal("1");
             });
 
             it('returns the default operators', async function () {
@@ -70,7 +69,9 @@ describe("ERC777 - RICO Token", function () {
             });
 
             it('returns the total supply', async function () {
-                expect(await this.RicoToken.methods.totalSupply().call()).to.be.equal(initialSupply.toString());
+                expect(await this.RicoToken.methods.totalSupply().call()).to.be.equal(
+                    setup.settings.token.supply.toString()
+                );
             });
 
             it('returns 18 when decimals is called', async function () {
@@ -107,7 +108,9 @@ describe("ERC777 - RICO Token", function () {
                 it('returns their balance', async function () {
                     expect(
                         await this.RicoToken.methods.balanceOf(holder).call()
-                    ).to.be.equal(initialSupply.toString());
+                    ).to.be.equal(
+                        setup.settings.token.supply.toString()
+                    );
                 });
             });
         });

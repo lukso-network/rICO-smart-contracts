@@ -199,6 +199,37 @@ contract ReversableICO is IERC777Recipient {
         return 0;
     }
 
+    // Since our tokens cost less than 1 eth, and decimals are 18
+    // 1 wei will always buy something.
+    function getTokenAmountForEthAtStageAndMore(
+        uint256 _ethValue,
+        uint8 _stageId
+    )
+    public view returns (uint256)
+    {
+        // add token decimals to value
+        return (_ethValue * (10 ** 18)) / StageByNumber[_stageId].token_price;
+    }
+
+    /*
+    function getFraction(
+        uint256 numerator, uint256 denominator, uint256 precision
+    )
+    public pure
+    returns(uint256)
+    {
+        // caution, check safe-to-multiply here
+        uint _numerator = numerator * 10 ** (precision + 1);
+        // with rounding of last digit
+        uint _quotient = ((_numerator / denominator) + 5) / 10;
+        return _quotient;
+    }
+    */
+
+
+    // uint256 myFraction = getFraction(myIcoTokens, ICOtokensInStage, precision);
+    // return (preIcoUnsoldSupply * myFraction) / ( 10 ** precision );
+
     /*
     *   Participants
     */
@@ -254,46 +285,38 @@ contract ReversableICO is IERC777Recipient {
         // requireNotEnded
         requireNotFrozen
     {
-        /*
-        // require(isStarted() && notFrozen(), "");
-        require(isWhitelisted(msg.sender), "Address is not whitelisted to participate");
-        require(msg.value > 0, "Value must be higher than zero");
+        // if we received eth
+        if( msg.value > 0 ) {
 
-        // contribute first, then get whitelisted.
+            // Check if participant already exists
+            Participant storage ParticipantRecord = ParticipantsByAddress[msg.sender];
 
-        ParticipantType storage newRecord = ParticipantsByAddress[_address];
-        newRecord.whitelisted = true;
-        ParticipantCount++;
+            uint16 newContributionId = 0;
 
-        based on amount of blocks that passed, take the cut for the project
-        */
+            if(ParticipantRecord.contributionsCount == 0) {
+                // increase participant count
+                ParticipantCount++;
+            } else {
+                newContributionId = ParticipantRecord.contributionsCount + 1;
+            }
 
-        // Check if participant already exists
-        Participant storage ParticipantRecord = ParticipantsByAddress[msg.sender];
+            // Save new contribution
+            Contribution storage ContributionRecord = ParticipantRecord.contributions[newContributionId];
+            ContributionRecord.value = msg.value;
+            ContributionRecord.block = getCurrentBlockNumber();
+            ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
 
-        uint16 newContributionId = 0;
+            // calculate how many tokens this contribution will receive
+            ContributionRecord.tokens = 0;
 
-        if(ParticipantRecord.contributionsCount == 0) {
-            // increase participant count
-            ParticipantCount++;
+            ParticipantRecord.contributionsCount++;
+
+            // if whitelisted, process the contribution automatically
+            if(ParticipantRecord.whitelisted == true) {
+                processContribution(msg.sender, newContributionId, uint8(ContributionStates.ACCEPTED));
+            }
         } else {
-            newContributionId = ParticipantRecord.contributionsCount + 1;
-        }
-
-        // Save new contribution
-        Contribution storage ContributionRecord = ParticipantRecord.contributions[newContributionId];
-        ContributionRecord.value = msg.value;
-        ContributionRecord.block = getCurrentBlockNumber();
-        ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
-
-        // calculate how many tokens this contribution will receive
-        ContributionRecord.tokens = 0;
-
-        ParticipantRecord.contributionsCount++;
-
-        // if whitelisted, process the contribution automatically
-        if(ParticipantRecord.whitelisted == true) {
-            processContribution(msg.sender, newContributionId, uint8(ContributionStates.ACCEPTED));
+            // not sure we can receive 0 value on a payable.. test
         }
     }
 
@@ -304,10 +327,9 @@ contract ReversableICO is IERC777Recipient {
         address _sender, uint16 _contributionId, uint8 _to_state
     )
         public
-        // onlyWhitelistController
         returns ( bool )
     {
-        // code
+        require(isWhitelisted(_sender), "Address is not whitelisted to participate");
 
         Participant storage Record = ParticipantsByAddress[_sender];
         Contribution storage ContributionRecord = Record.contributions[_contributionId];

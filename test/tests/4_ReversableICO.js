@@ -100,7 +100,7 @@ describe("ReversableICO", function () {
 
     });
 
-    describe("Stage 3 - Initialisation", function () {
+    describe("Stage 3 - Initialisation - addSettings()", function () {
 
         before(async function () {
 
@@ -275,30 +275,17 @@ describe("ReversableICO", function () {
                 ).to.be.equal(RicoSaleSupply.toString());
             });
 
-        });
-       
+            it("InitialTokenSupply property should match Contract token balance ("+RicoSaleSupply+")", async function () {
+                expect(
+                    await this.ReversableICO.methods.InitialTokenSupply().call()
+                ).to.be.equal(
+                    await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call()
+                );
+            });
 
-        /*
-        it("DistributionStageCount matches settings", async function () {
-            expect(await this.ReversableICO.methods.DistributionStageCount().call()).to.be.equal(StageCount.toString());
-        });
-        */
-
-    });
-
-    /*
-    describe("Stage 3 - Funding Start", function () {
-        
-        before(async function () {
-            
-        });
-
-        it("Gas usage should be lower than 6.7m", function () {
-            // expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
         });
 
     });
-    */
 
     describe("Contract Methods", function () {
 
@@ -539,25 +526,46 @@ describe("ReversableICO", function () {
         });
     });
 
+    /*
+    describe("Stage 4 - Funding Start", function () {
+        
+        before(async function () {
+            
+        });
 
+        it("Gas usage should be lower than 6.7m", function () {
+            // expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
+        });
+
+    });
+    */
     /*
     describe("Dev", function () {
 
-        let data;
         before(async function () {
 
-            let stageId = 0;
-            await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-            console.log("price at stage:", stageId, await this.ReversableICO.methods.getCurrentPrice().call());
+            let val = helpers.solidity.ether;
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", test);
 
-            stageId = 1;
-            await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-            console.log("price at stage:", stageId, await this.ReversableICO.methods.getCurrentPrice().call());
+            val = helpers.solidity.ether * 0.002
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", val, test);
 
-            stageId = 12;
-            await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-            console.log("price at stage:", stageId, await this.ReversableICO.methods.getCurrentPrice().call());
+            val = helpers.solidity.ether * 0.00002
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", val, test );
 
+            console.log(helpers.utils.toFullToken(helpers, test[0]))
         });
 
         it("works", function () {
@@ -565,7 +573,7 @@ describe("ReversableICO", function () {
         });
 
     });
-   */
+    */
 });
 
 async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, end = false ) {

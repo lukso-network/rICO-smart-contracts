@@ -17,7 +17,6 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
-
 const HDWalletProvider = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
@@ -79,13 +78,14 @@ module.exports = {
 
     development: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "http://127.0.0.1:8545/", 0, 11);
+        return new HDWalletProvider(mnemonic, "http://127.0.0.1:8545/", 0, 11, false);
       },
       // host: "127.0.0.1",     // Localhost (default: none)
       // port: 8545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none),
       // skipDryRun: true       // Skip dry run before migrations? (default: false for public nets )
     },
+
   },
 
   // Set default mocha options here, use special reporters etc.

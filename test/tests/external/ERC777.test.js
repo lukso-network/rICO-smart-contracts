@@ -24,6 +24,7 @@ module.exports = function(setup) {
     const name = 'ERC777Test';
     const symbol = '777T';
     const data = web3.utils.sha3('OZ777TestData');
+    const granularity = 10 ** 18;
     const operatorData = web3.utils.sha3('OZ777TestOperatorData');
 
     const defaultOperators = [defaultOperatorA, defaultOperatorB];
@@ -34,7 +35,7 @@ module.exports = function(setup) {
 
     context('with default operators', function () {
       beforeEach(async function () {
-        this.token = await ERC777.new(holder, initialSupply, name, symbol, defaultOperators);
+        this.token = await ERC777.new(holder, initialSupply, name, symbol, granularity, defaultOperators);
       });
 
       // shouldBehaveLikeERC20('ERC777', initialSupply, holder, anyone, defaultOperatorA);

@@ -9,7 +9,11 @@ function assertError(block, error, s, message) {
         console.log("error.search: ", error.message.search(s));
     }
     
-    assert.isAbove(error.message.search(message), -1, message)
+    assert.isAbove(error.message.search(message), -1, message);
+
+    // for some reason account nonceCache does not properly refresh
+    // after a revert happens.. so we clear it.
+    helpers.utils.resetAccountNonceCache(helpers);
 }
 
 async function assertThrows(block, message, errorCode) {

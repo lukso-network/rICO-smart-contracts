@@ -14,6 +14,7 @@ async function runTests() {
     const truffleConfig             = require("../truffle-config.js");
 
     let accounts;
+
     if(truffleConfig.networks[network]) {
         web3Instance = await new Web3(
             truffleConfig.networks[network].provider()
@@ -23,7 +24,7 @@ async function runTests() {
         console.log("Specified Network ["+network+"] not found in truffle-config.");
         process.exit( 1 );
     }
-    
+
     // global required by openzeppelin-test-helpers
     global.web3 = web3Instance; 
 
@@ -68,7 +69,7 @@ async function runTests() {
         instance: false,
     }
 
-
+    
     const setup = {
         network: network = process.argv[2],
         globals: {},
@@ -94,6 +95,27 @@ async function runTests() {
                 Token: null, 
                 Rico: null, 
             },
+        },
+        settings: {
+            token: {
+                name: "RicoToken",
+                symbol: "RICO",
+                decimals: 18,
+                supply: new BN(100).mul(
+                    // 100 milions
+                    new BN( "10" ).pow( new BN("6") )
+                ).mul(
+                    // 10^18 to account for decimals
+                    new BN ( "10" ).pow(  new BN("18") )
+                ),
+                sale: new BN(15).mul(
+                    // 15 milions
+                    new BN( "10" ).pow( new BN("6") )
+                ).mul(
+                    // 10^18 to account for decimals
+                    new BN ( "10" ).pow(  new BN("18") )
+                )
+            }
         }
     };
 
@@ -104,10 +126,10 @@ async function runTests() {
 
     const tests = [
         'external/SafeMath',
-        // 'external/ERC777.test',
         '1_ERC1820',
         '2_ERC777_Token',
-        '3_ReversableICO',
+        '3_ERC20Token',
+        '4_ReversableICO',
     ];
 
     utils.toLog(
@@ -128,9 +150,14 @@ async function runTests() {
         mocha.timeout(600000);
 
         for( let i = 0; i < tests.length; i++) {
-            mocha.addFile(
-                "test/tests/" + tests[i] + ".js"
-            );
+            try {
+                mocha.addFile(
+                    "test/tests/" + tests[i] + ".js"
+                );
+            }
+            catch(e) {
+                console.log("error:", e);
+            }
         }
 
         // Run the tests.
@@ -162,4 +189,9 @@ async function runTests() {
 
 };
 
-runTests();
+try {
+    runTests();
+}
+catch(e) {
+    console.log("error:", e);
+}

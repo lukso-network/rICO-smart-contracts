@@ -39,6 +39,8 @@ let logPre = "      ";
 
 module.exports = {
     hasEvent(tx, eventNamePlusReturn) {
+        console.log(tx);
+        
         let eventSig = web3util.sha3(eventNamePlusReturn);
         return tx.receipt.logs.filter(x => x.topics[0] === eventSig);
     },
@@ -260,5 +262,13 @@ module.exports = {
         const actualTime = endTime[0] + endTime[1] / 1000000000;
 
         return { item, actualTime }
+    },
+    resetAccountNonceCache(helpers) {
+        helpers.web3Instance.currentProvider.engine._providers[1].nonceCache = {};
+    },
+    toFullToken(helpers, balance) {
+        return helpers.web3util.fromWei(balance, "ether");
+        const decimals = new helpers.BN("10").pow("18");
+        return new helpers.BN(balance.toString()).div(decimals);
     }
 };
