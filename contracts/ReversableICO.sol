@@ -30,6 +30,10 @@ contract ReversableICO is IERC777Recipient {
 
     uint256 public InitialTokenSupply;
 
+    uint256 public maxEth = 30000 ether;
+    uint256 public receivedEth = 0;
+    uint256 public acceptedEth = 0;
+
     /*
     * Allocation period
     */
@@ -79,7 +83,7 @@ contract ReversableICO is IERC777Recipient {
 
     // fallback function
     function () external payable {
-        this.commit();
+        commit();
     }
 
     function addSettings(
@@ -201,13 +205,13 @@ contract ReversableICO is IERC777Recipient {
 
     // Since our tokens cost less than 1 eth, and decimals are 18
     // 1 wei will always buy something.
-    function getTokenAmountForEthAtStageAndMore(
+    function getTokenAmountForEthAtStage(
         uint256 _ethValue,
         uint8 _stageId
     )
     public view returns (uint256)
     {
-        // add token decimals to value
+        // add token decimals to value before division, that way we increase precision.
         return (_ethValue * (10 ** 18)) / StageByNumber[_stageId].token_price;
     }
 
@@ -236,11 +240,13 @@ contract ReversableICO is IERC777Recipient {
     struct Contribution {
         uint256 value;
         uint256 block;
+        uint8   stageId;
         uint8   state;
         uint256 tokens;
     }
 
     enum ContributionStates {
+        NOT_SET,        // will match default value of a mapping result
         NOT_PROCESSED,
         ACCEPTED,
         REJECTED
@@ -254,12 +260,14 @@ contract ReversableICO is IERC777Recipient {
 
     mapping ( address => Participant ) public ParticipantsByAddress;
     mapping ( uint256 => address ) public ParticipantsById;
-    uint256 ParticipantCount = 0;
+    uint256 public ParticipantCount = 0;
+    uint256 public WhitelistedCount = 0;
+    uint256 public RejectedCount = 0;
 
     function ParticipantContributionDetails(
         address _address,
         uint16 contribution_id
-    ) public view returns ( uint256, uint256, uint8, uint256 ) {
+    ) public view returns ( uint256, uint256, uint8, uint8, uint256 ) {
         //
         // direct call: ParticipantsByAddress[_address].contributions[contribution_id].value
         //
@@ -270,6 +278,7 @@ contract ReversableICO is IERC777Recipient {
         return (
             ContributionRecord.value,
             ContributionRecord.block,
+            ContributionRecord.stageId,
             ContributionRecord.state,
             ContributionRecord.tokens
         );
@@ -288,6 +297,18 @@ contract ReversableICO is IERC777Recipient {
         // if we received eth
         if( msg.value > 0 ) {
 
+            uint256 AcceptedValue = maxEth - acceptedEth;
+            uint256 returnValue = 0;
+
+            // make sure incomming value is lower than maxEth - acceptedEth
+            if(msg.value > AcceptedValue) {
+                // send the rest back
+                returnValue = msg.value - AcceptedValue;
+            }
+
+            // add to received value to receivedETH
+            receivedEth += AcceptedValue;
+
             // Check if participant already exists
             Participant storage ParticipantRecord = ParticipantsByAddress[msg.sender];
 
@@ -302,12 +323,15 @@ contract ReversableICO is IERC777Recipient {
 
             // Save new contribution
             Contribution storage ContributionRecord = ParticipantRecord.contributions[newContributionId];
-            ContributionRecord.value = msg.value;
+            ContributionRecord.value = AcceptedValue;
             ContributionRecord.block = getCurrentBlockNumber();
+            ContributionRecord.stageId = getStageAtBlock(ContributionRecord.block);
             ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
 
             // calculate how many tokens this contribution will receive
-            ContributionRecord.tokens = 0;
+            ContributionRecord.tokens = getTokenAmountForEthAtStage(
+                AcceptedValue, ContributionRecord.stageId
+            );
 
             ParticipantRecord.contributionsCount++;
 
@@ -315,8 +339,14 @@ contract ReversableICO is IERC777Recipient {
             if(ParticipantRecord.whitelisted == true) {
                 processContribution(msg.sender, newContributionId, uint8(ContributionStates.ACCEPTED));
             }
+
+            // if received value is too high to accept we then have a return value we must send back to our participant.
+            if(returnValue > 0) {
+                msg.sender.transfer(returnValue);
+            }
+
         } else {
-            // not sure we can receive 0 value on a payable.. test
+            // @TODO: we most likely cannot receive 0 value on a payable.. test it
         }
     }
 
@@ -324,42 +354,38 @@ contract ReversableICO is IERC777Recipient {
     *   Process contribution for address
     */
     function processContribution(
-        address _sender, uint16 _contributionId, uint8 _to_state
+        address _receiver, uint16 _contributionId, uint8 _to_state
     )
-        public
+        internal
         returns ( bool )
     {
-        require(isWhitelisted(_sender), "Address is not whitelisted to participate");
+        Participant storage ParticipantRecord = ParticipantsByAddress[_receiver];
+        Contribution storage ContributionRecord = ParticipantRecord.contributions[_contributionId];
 
-        Participant storage Record = ParticipantsByAddress[_sender];
-        Contribution storage ContributionRecord = Record.contributions[_contributionId];
-
-        if(_to_state == uint8(ContributionStates.ACCEPTED)) {
-            // accept contribution
-
-            // allocate eth to project
-
-            // allocate tokens to participant
+        if(ContributionRecord.state == uint8(ContributionStates.NOT_PROCESSED)) {
 
             // mark contribution as being processed by setting it's state
+            ContributionRecord.state = _to_state;
 
-        } else if(_to_state == uint8(ContributionStates.REJECTED)) {
-            // reject
+            if(_to_state == uint8(ContributionStates.ACCEPTED)) {
+                // accept contribution
+                acceptedEth += ContributionRecord.value;
 
-            // mark contribution as being processed by setting it's state
+                // allocate tokens to participant
+                bytes memory data;
+                TokenTracker.send(_receiver, ContributionRecord.tokens, data);
 
-            // send funds back to participant
+                // emit contributionAccepted event.
 
-        } else {
-            revert("Invalid to state received.");
+            } else if(_to_state == uint8(ContributionStates.REJECTED)) {
+                // convert to address payable and send funds back to participant
+                address(uint160(_receiver)).transfer(ContributionRecord.value);
+
+                // emit contributionRejected event.
+            }
+
+            return true;
         }
-
-        /*
-        ContributionRecord.value = msg.value;
-        ContributionRecord.block = getCurrentBlockNumber();
-        ContributionRecord.state = uint8(ContributionStates.NOT_PROCESSED);
-        */
-
         return false;
     }
 
@@ -375,18 +401,42 @@ contract ReversableICO is IERC777Recipient {
 
 
     /*
-    *   Whitelisting
+    *   Whitelisting or Rejecting
+    *   start / count allow us to recover from bad actors that contribute too many times..
+    *   that is if we want to unlock their eth
     */
+    function whitelistOrReject(address _address, uint8 _mode, uint16 start_at, uint8 count ) public {
+        Participant storage ParticipantRecord = ParticipantsByAddress[_address];
+        if(_mode == uint8(ContributionStates.ACCEPTED)) {
+            ParticipantRecord.whitelisted = true;
+            WhitelistedCount++;
+        } else if(_mode == uint8(ContributionStates.REJECTED)) {
+            // redundant since default is false ?
+            ParticipantRecord.whitelisted = false;
+            RejectedCount++;
+        } else {
+            revert("whitelistOrReject: invalid mode selected");
+        }
 
-    function whitelist(address _address) public {
-        Participant storage newRecord = ParticipantsByAddress[_address];
-        newRecord.whitelisted = true;
-        ParticipantCount++;
+        // process all available contributions
+        for( uint16 i = start_at; i < count; i++ ) {
+            if(ParticipantRecord.contributions[i].state == uint8(ContributionStates.NOT_PROCESSED)) {
+                processContribution(_address, i, _mode);
+            } else {
+                // break out
+                 i = count;
+            }
+        }
     }
 
-    function whitelistMultiple(address[] memory _address) public {
+    /*
+    *   Whitelisting or Rejecting multiple addresses
+    *   start is 0 / count is 10, should be fine for most
+    *   for special cases we just use the "1 address call"
+    */
+    function whitelistOrRejectMultiple(address[] memory _address, uint8 _mode) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
-            this.whitelist(_address[i]);
+            whitelistOrReject(_address[i], _mode, 0, 10);
         }
     }
 
@@ -421,8 +471,9 @@ contract ReversableICO is IERC777Recipient {
     {
         if( initialized == true ) {
             require(msg.sender == address(TokenTracker), "ERC777TokensRecipient: Invalid token");
+
             // call internal refund method()
-            // this.refund();
+            // refund();
 
         }
         // else accept any token when not initialized, so we can set things up.

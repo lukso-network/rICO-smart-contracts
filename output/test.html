@@ -33,27 +33,27 @@ Compiling your contracts...
 
   SafeMath
     add
-    <span style="color:lime;">  ✓</span> adds correctly<span style="color:red;"> (33ms)</span>
+    <span style="color:lime;">  ✓</span> adds correctly<span style="color:red;"> (31ms)</span>
     <span style="color:lime;">  ✓</span> reverts on addition overflow<span style="color:red;"> (37ms)</span>
     sub
-    <span style="color:lime;">  ✓</span> subtracts correctly<span style="color:red;"> (16ms)</span>
+    <span style="color:lime;">  ✓</span> subtracts correctly<span style="color:yellow;"> (13ms)</span>
     <span style="color:lime;">  ✓</span> reverts if subtraction result would be negative<span style="color:red;"> (17ms)</span>
     mul
-    <span style="color:lime;">  ✓</span> multiplies correctly<span style="color:red;"> (27ms)</span>
+    <span style="color:lime;">  ✓</span> multiplies correctly<span style="color:red;"> (25ms)</span>
     <span style="color:lime;">  ✓</span> multiplies by zero correctly<span style="color:red;"> (24ms)</span>
-    <span style="color:lime;">  ✓</span> reverts on multiplication overflow<span style="color:yellow;"> (14ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on multiplication overflow<span style="color:yellow;"> (15ms)</span>
     div
-    <span style="color:lime;">  ✓</span> divides correctly<span style="color:red;"> (17ms)</span>
-    <span style="color:lime;">  ✓</span> divides zero correctly<span style="color:yellow;"> (15ms)</span>
-    <span style="color:lime;">  ✓</span> returns complete number result on non-even division<span style="color:yellow;"> (15ms)</span>
-    <span style="color:lime;">  ✓</span> reverts on division by zero<span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span> divides correctly<span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span> divides zero correctly<span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span> returns complete number result on non-even division<span style="color:red;"> (16ms)</span>
+    <span style="color:lime;">  ✓</span> reverts on division by zero<span style="color:yellow;"> (13ms)</span>
     mod
     <span style="color:lime;">  ✓</span> reverts with a 0 divisor<span style="color:red;"> (17ms)</span>
       modulos correctly
-      <span style="color:lime;">  ✓</span> when the dividend is smaller than the divisor<span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is equal to the divisor<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is larger than the divisor<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> when the dividend is a multiple of the divisor<span style="color:yellow;"> (12ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is smaller than the divisor<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is equal to the divisor<span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is larger than the divisor<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> when the dividend is a multiple of the divisor<span style="color:yellow;"> (10ms)</span>
 
   ERC1820 - Token Registry
     Step 1 - Before deployment state
@@ -76,114 +76,167 @@ Compiling your contracts...
         <span style="color:lime;">  ✓</span> Contract address is 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24
         Contract
         <span style="color:lime;">  ✓</span> code at address exists
-        <span style="color:lime;">  ✓</span> contract has the getManager method which can be called<span style="color:yellow;"> (14ms)</span>
+        <span style="color:lime;">  ✓</span> contract has the getManager method which can be called<span style="color:yellow;"> (13ms)</span>
 
   ERC777 - RICO Token
     Deployment
-      Gas used for deployment: 3369411
+      Gas used for deployment: 3369731
       Contract Address: 0x88eC20080706B787C7BF684880f3d1899433f760
 
     <span style="color:lime;">  ✓</span> Gas usage should be lower than 3.5m.
       basic information
-      <span style="color:lime;">  ✓</span> returns the name<span style="color:red;"> (16ms)</span>
+      <span style="color:lime;">  ✓</span> returns the name<span style="color:yellow;"> (15ms)</span>
       <span style="color:lime;">  ✓</span> returns the symbol<span style="color:yellow;"> (13ms)</span>
       <span style="color:lime;">  ✓</span> returns a granularity of 1<span style="color:yellow;"> (11ms)</span>
       <span style="color:lime;">  ✓</span> returns the default operators<span style="color:yellow;"> (13ms)</span>
       <span style="color:lime;">  ✓</span> default operators are operators for all accounts
-      <span style="color:lime;">  ✓</span> returns the total supply<span style="color:yellow;"> (15ms)</span>
-      <span style="color:lime;">  ✓</span> returns 18 when decimals is called<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> the ERC777Token interface is registered in the registry<span style="color:yellow;"> (11ms)</span>
-      <span style="color:lime;">  ✓</span> the ERC20Token interface is registered in the registry<span style="color:red;"> (17ms)</span>
+      <span style="color:lime;">  ✓</span> returns the total supply<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> returns 18 when decimals is called<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> the ERC777Token interface is registered in the registry<span style="color:yellow;"> (13ms)</span>
+      <span style="color:lime;">  ✓</span> the ERC20Token interface is registered in the registry<span style="color:yellow;"> (13ms)</span>
       balanceOf
         for an account with no tokens
-        <span style="color:lime;">  ✓</span> returns zero<span style="color:red;"> (21ms)</span>
+        <span style="color:lime;">  ✓</span> returns zero<span style="color:yellow;"> (12ms)</span>
         for an account with tokens
-        <span style="color:lime;">  ✓</span> returns their balance<span style="color:yellow;"> (11ms)</span>
+        <span style="color:lime;">  ✓</span> returns their balance<span style="color:yellow;"> (13ms)</span>
+
+  ERC777 - ERC20 Token compatibility
+  <span style="color:lime;">  ✓</span> creation: in contract settings should match settings<span style="color:red;"> (48ms)</span>
+  <span style="color:lime;">  ✓</span> creation: should create a correct initial balance for the creator<span style="color:yellow;"> (10ms)</span>
+  <span style="color:lime;">  ✓</span> transfers: ether transfer should be reversed.<span style="color:red;"> (53ms)</span>
+  <span style="color:lime;">  ✓</span> transfers: should transfer 10000 to accounts[1] with creator having at least 10000<span style="color:red;"> (76ms)</span>
+  <span style="color:lime;">  ✓</span> transfers: should fail when trying to transfer total amount + 1 to accounts[1] with creator having total amount<span style="color:red;"> (53ms)</span>
+  <span style="color:lime;">  ✓</span> transfers: should handle zero-transfers normally<span style="color:red;"> (58ms)</span>
+  <span style="color:lime;">  ✓</span> transfers: should throw if receiver address is 0x0<span style="color:red;"> (40ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: msg.sender should approve 100 to accounts[1]<span style="color:red;"> (58ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 once.<span style="color:red;"> (191ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 twice.<span style="color:red;"> (258ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 50 &amp; 60 (2nd tx should fail)<span style="color:red;"> (149ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: attempt withdrawal from account with no allowance (should fail)<span style="color:red;"> (64ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: allow accounts[1] 100 to withdraw from creator. Withdraw 60 and then approve 0 &amp; attempt transfer.<span style="color:red;"> (200ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: approve max (2^256 - 1)<span style="color:red;"> (59ms)</span>
+  <span style="color:lime;">  ✓</span> allowance: should start with zero<span style="color:yellow;"> (9ms)</span>
+  <span style="color:lime;">  ✓</span> approvals: approve max (2^256 - 1)<span style="color:red;"> (51ms)</span>
+  <span style="color:lime;">  ✓</span> events: should fire Transfer event properly<span style="color:red;"> (62ms)</span>
+  <span style="color:lime;">  ✓</span> events: should fire Transfer event normally on a zero transfer<span style="color:red;"> (56ms)</span>
+  <span style="color:lime;">  ✓</span> events: should fire Approval event properly<span style="color:red;"> (42ms)</span>
 
   ReversableICO
-      Gas used for deployment: 2173518
+      Gas used for deployment: 2441705
       Contract Address: 0x35C310d59E2b7f1F96A5e133Efb20538266e4053
 
     Stage 1 - Deployment
     <span style="color:lime;">  ✓</span> Gas usage should be lower than 6.7m.
-    <span style="color:lime;">  ✓</span> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222<span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span> Property initialized should be false<span style="color:yellow;"> (12ms)</span>
-    <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (10ms)</span>
-    <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (12ms)</span>
-    <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be address(0)<span style="color:yellow;"> (15ms)</span>
+    <span style="color:lime;">  ✓</span> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222<span style="color:yellow;"> (10ms)</span>
+    <span style="color:lime;">  ✓</span> Property initialized should be false<span style="color:yellow;"> (10ms)</span>
+    <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (9ms)</span>
+    <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be address(0)<span style="color:yellow;"> (10ms)</span>
     <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be address(0)<span style="color:yellow;"> (10ms)</span>
     Stage 2 - Transfer tokens to RICO contract address
-    <span style="color:lime;">  ✓</span> RICO Contract should have the correct token balance (15000000)<span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span> RICO Contract should have the correct token balance (15000000000000000000000000)<span style="color:yellow;"> (12ms)</span>
     Stage 3 - Initialisation - addSettings()
       Contract settings
-      <span style="color:lime;">  ✓</span> Property initialized should be true<span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:yellow;"> (10ms)</span>
-      <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (14ms)</span>
-      <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be deployed ERC777 Token Contract address<span style="color:yellow;"> (15ms)</span>
-      <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE<span style="color:yellow;"> (11ms)</span>
-      <span style="color:lime;">  ✓</span> EndBlock matches settings<span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span> Property initialized should be true<span style="color:yellow;"> (9ms)</span>
+      <span style="color:lime;">  ✓</span> Property running should be false<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Property frozen should be false<span style="color:red;"> (73ms)</span>
+      <span style="color:lime;">  ✓</span> Property ended should be false<span style="color:yellow;"> (12ms)</span>
+      <span style="color:lime;">  ✓</span> Property TokenTrackerAddress should be deployed ERC777 Token Contract address<span style="color:red;"> (16ms)</span>
+      <span style="color:lime;">  ✓</span> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE<span style="color:yellow;"> (9ms)</span>
+      <span style="color:lime;">  ✓</span> EndBlock matches settings<span style="color:yellow;"> (8ms)</span>
       Contract Stages
-      <span style="color:lime;">  ✓</span> Stage Count is correct<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Stage Count is correct<span style="color:yellow;"> (15ms)</span>
       <span style="color:lime;">  ✓</span> Allocation StartBlock matches settings
       <span style="color:lime;">  ✓</span> Allocation duration is AllocationBlockCount
       <span style="color:lime;">  ✓</span> Allocation EndBlock matches settings
       <span style="color:lime;">  ✓</span> AllocationPrice matches settings
-      <span style="color:lime;">  ✓</span> First Distribution Stage settings are correct<span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span> Last Distribution Stage settings are correct<span style="color:yellow;"> (14ms)</span>
-      <span style="color:lime;">  ✓</span> Last Distribution Stage end_block matches contract EndBlock<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> First Distribution Stage settings are correct<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Last Distribution Stage settings are correct<span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span> Last Distribution Stage end_block matches contract EndBlock<span style="color:yellow;"> (13ms)</span>
       Contract Assets
       <span style="color:lime;">  ✓</span> RICO Contract should have 0 eth
-      <span style="color:lime;">  ✓</span> RICO Contract should have the correct token balance (15000000)<span style="color:yellow;"> (15ms)</span>
-      <span style="color:lime;">  ✓</span> InitialTokenSupply property should match Contract token balance (15000000)<span style="color:red;"> (25ms)</span>
+      <span style="color:lime;">  ✓</span> RICO Contract should have the correct token balance (15000000000000000000000000)<span style="color:red;"> (19ms)</span>
+      <span style="color:lime;">  ✓</span> InitialTokenSupply property should match Contract token balance (15000000000000000000000000)<span style="color:red;"> (22ms)</span>
     Contract Methods
       getCurrentStage()
-      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation start_block<span style="color:red;"> (52ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation end_block<span style="color:red;"> (54ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 start_block<span style="color:red;"> (61ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 end_block<span style="color:red;"> (55ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 start_block<span style="color:red;"> (51ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 end_block<span style="color:red;"> (53ms)</span>
-      <span style="color:lime;">  ✓</span> Returns last stage if at last stage start_block<span style="color:red;"> (60ms)</span>
-      <span style="color:lime;">  ✓</span> Returns last stage if at last stage end_block<span style="color:red;"> (59ms)</span>
-      <span style="color:lime;">  ✓</span> Returns 255 after last stage end_block<span style="color:red;"> (52ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation start_block<span style="color:red;"> (57ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 0 if at Allocation end_block<span style="color:red;"> (55ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 start_block<span style="color:red;"> (60ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if at stage 1 end_block<span style="color:red;"> (64ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 start_block<span style="color:red;"> (60ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if at stage 5 end_block<span style="color:red;"> (56ms)</span>
+      <span style="color:lime;">  ✓</span> Returns last stage if at last stage start_block<span style="color:red;"> (58ms)</span>
+      <span style="color:lime;">  ✓</span> Returns last stage if at last stage end_block<span style="color:red;"> (62ms)</span>
+      <span style="color:lime;">  ✓</span> Returns 255 after last stage end_block<span style="color:red;"> (50ms)</span>
       getStageAtBlock(uint256)
-      <span style="color:lime;">  ✓</span> Returns stage 0 if getStageAtBlock( Allocation.start_block )<span style="color:red;"> (25ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 0 if getStageAtBlock( Allocation.end_block )<span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 1 if getStageAtBlock( stage_1.start_block )<span style="color:red;"> (23ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 1 if getStageAtBlock( stage_1.end_block )<span style="color:red;"> (24ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 5 if getStageAtBlock( stage_5.start_block )<span style="color:red;"> (28ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage 5 if getStageAtBlock( stage_5.end_block )<span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage last stage if getStageAtBlock( last_stage.start_block )<span style="color:red;"> (25ms)</span>
-      <span style="color:lime;">  ✓</span> Returns stage last stage if getStageAtBlock( last_stage.end_block )<span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span> Returns 255 if getStageAtBlock( last_stage.end_block + 1 )<span style="color:red;"> (22ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 0 if getStageAtBlock( Allocation.start_block )<span style="color:red;"> (26ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 0 if getStageAtBlock( Allocation.end_block )<span style="color:red;"> (19ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if getStageAtBlock( stage_1.start_block )<span style="color:red;"> (20ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 1 if getStageAtBlock( stage_1.end_block )<span style="color:red;"> (29ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if getStageAtBlock( stage_5.start_block )<span style="color:red;"> (19ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage 5 if getStageAtBlock( stage_5.end_block )<span style="color:red;"> (19ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage last stage if getStageAtBlock( last_stage.start_block )<span style="color:red;"> (24ms)</span>
+      <span style="color:lime;">  ✓</span> Returns stage last stage if getStageAtBlock( last_stage.end_block )<span style="color:red;"> (19ms)</span>
+      <span style="color:lime;">  ✓</span> Returns 255 if getStageAtBlock( last_stage.end_block + 1 )<span style="color:red;"> (19ms)</span>
       getCurrentPrice()
-      <span style="color:lime;">  ✓</span> Returns correct value for Allocation phase<span style="color:red;"> (54ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for stage 1<span style="color:red;"> (52ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for stage 5<span style="color:red;"> (51ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for last stage<span style="color:red;"> (53ms)</span>
-      <span style="color:lime;">  ✓</span> Returns 0 after last stage ended<span style="color:red;"> (51ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for Allocation phase<span style="color:red;"> (56ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 1<span style="color:red;"> (62ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 5<span style="color:red;"> (54ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for last stage<span style="color:red;"> (47ms)</span>
+      <span style="color:lime;">  ✓</span> Returns 0 after last stage ended<span style="color:red;"> (58ms)</span>
       getPriceAtBlock(uint256)
-      <span style="color:lime;">  ✓</span> Returns correct value for Allocation phase<span style="color:red;"> (23ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for stage 1<span style="color:red;"> (26ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for stage 5<span style="color:red;"> (22ms)</span>
-      <span style="color:lime;">  ✓</span> Returns correct value for last stage<span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span> Returns 0 after last stage ended<span style="color:red;"> (25ms)</span>
-    Dev
-granularity: 1
-amount Result { '0': '500', '1': '1000000000000000000', '2': '0' }
-amount 2000000000000000 Result { '0': '1', '1': '2000000000000000', '2': '0' }
-amount 20000000000000 Result { '0': '0', '1': '0', '2': '20000000000000' }
-    <span style="color:lime;">  ✓</span> works
+      <span style="color:lime;">  ✓</span> Returns correct value for Allocation phase<span style="color:red;"> (22ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 1<span style="color:red;"> (31ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for stage 5<span style="color:red;"> (23ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for last stage<span style="color:red;"> (23ms)</span>
+      <span style="color:lime;">  ✓</span> Returns 0 after last stage ended<span style="color:red;"> (29ms)</span>
+      getTokenAmountForEthAtStage(uint256, uint8)
+      <span style="color:lime;">  ✓</span> Returns correct value for 1 eth &amp; Allocation stage<span style="color:red;"> (21ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for 1 eth &amp; stage 1<span style="color:red;"> (20ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for 0.002 eth &amp; Allocation stage ( results in 1 full token )<span style="color:red;"> (26ms)</span>
+      <span style="color:lime;">  ✓</span> Returns correct value for 1 wei &amp; Allocation stage ( results in 500 token grains )<span style="color:red;"> (22ms)</span>
+    Stage 4 - Funding Start
+participant 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222
+funds 50000 eth
+receivedEth 30000 eth
+max_accepted_funds 30000 eth
+ParticipantCount 1
+ParticipantByAddress Result {
+  '0': false,
+  '1': '1',
+  whitelisted: false,
+  contributionsCount: '1' }
+ParticipantContributionDetails Result {
+  '0': '30000000000000000000000',
+  '1': '148351',
+  '2': '1',
+  '3': '1',
+  '4': '14285714285714285714285714' }
+contractTokenBalance 15000000000000000000000000
+whitelistOrReject gas: 118144
+ParticipantByAddress Result {
+  '0': true,
+  '1': '1',
+  whitelisted: true,
+  contributionsCount: '1' }
+ParticipantContributionDetails Result {
+  '0': '30000000000000000000000',
+  '1': '148351',
+  '2': '1',
+  '3': '2',
+  '4': '14285714285714285714285714' }
+contractTokenBalance 714285714285714285714286
+ParticipantTokenBalance 14285714285714285714285714
+    <span style="color:lime;">  ✓</span> account[0] can commit funds ( 30.000 eth )<span style="color:red;"> (302ms)</span>
 
 
- <span style="color:lime;"> 95 passing</span> (3s)
+ <span style="color:lime;"> 118 passing</span> (6s)
 
 Done
 --------------------------------------------------------------------
 
-Killing existing ganache-cli instance at pid 43466.
+Killing existing ganache-cli instance at pid 70014.
 
 </pre>
 </body>

@@ -268,7 +268,5 @@ module.exports = {
     },
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
-        const decimals = new helpers.BN("10").pow("18");
-        return new helpers.BN(balance.toString()).div(decimals);
     }
 };

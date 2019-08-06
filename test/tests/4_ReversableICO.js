@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const RicoSaleSupply = 15000000; // 15 mil
+const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
 describe("ReversableICO", function () {
@@ -524,21 +524,158 @@ describe("ReversableICO", function () {
                 ).to.be.equal( "0" );
             });
         });
+
+
+        describe("getTokenAmountForEthAtStage(uint256, uint8)", async function () { 
+
+            it("Returns correct value for 1 eth & Allocation stage", async function () {
+                const ethValue = helpers.solidity.ether * 1;
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                
+                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
+                    new helpers.BN("10").pow( new BN("18") )
+                ).div(
+                    new helpers.BN(stageData.token_price)
+                );
+                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
+                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
+            });
+
+
+            it("Returns correct value for 1 eth & stage 1", async function () {
+                const ethValue = helpers.solidity.ether * 1;
+                const stageId = 1;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+
+                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
+                    new helpers.BN("10").pow( new BN("18") )
+                ).div(
+                    new helpers.BN(stageData.token_price)
+                );
+
+                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
+                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
+            });
+
+            it("Returns correct value for 0.002 eth & Allocation stage ( results in 1 full token )", async function () {
+                const ethValue = helpers.solidity.ether * 0.002;
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+
+                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
+                    new helpers.BN("10").pow( new BN("18") )
+                ).div(
+                    new helpers.BN(stageData.token_price)
+                );
+
+                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
+                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
+                expect( helpers.utils.toFullToken(helpers, tokenAmount) ).to.be.equal("1");
+                // console.log("tokenAmount", helpers.utils.toFullToken(helpers, tokenAmount) );
+
+            });
+
+            it("Returns correct value for 1 wei & Allocation stage ( results in 500 token grains )", async function () {
+                const ethValue = 1;
+                const stageId = 0;
+                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+
+                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
+                    new helpers.BN("10").pow( new BN("18") )
+                ).div(
+                    new helpers.BN(stageData.token_price)
+                );
+
+                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
+                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
+                expect( tokenAmount.toString() ).to.be.equal("500");
+                // console.log("tokenAmount", helpers.utils.toFullToken(helpers, tokenAmount) );
+            });
+        });
+
     });
 
-    /*
     describe("Stage 4 - Funding Start", function () {
         
         before(async function () {
-            
+            // jump to allocation start
+            // await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
+            await jumpToContractStage ( this.ReversableICO, deployerAddress, 1 );
         });
 
-        it("Gas usage should be lower than 6.7m", function () {
-            // expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
+        it("account[0] can commit funds ( 30.000 eth )", async function () {
+            
+            const participant = accounts[0];
+            const funds = new helpers.BN("50000").mul( helpers.solidity.etherBN );
+            const max_accepted_funds = new helpers.BN(
+                (await this.ReversableICO.methods.maxEth().call()).toString()
+            );
+
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant,
+                to: helpers.addresses.Rico,
+                value: funds.toString(),
+            });
+
+            // contract balance matches funds sent
+            const ContractBalance = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
+            expect( ContractBalance ).to.be.bignumber.equal( max_accepted_funds );
+
+            
+            console.log("participant", participant);
+            console.log("funds", helpers.utils.toFullToken(helpers, funds) + " eth");
+            
+            console.log("receivedEth", helpers.utils.toFullToken(
+                helpers,
+                await this.ReversableICO.methods.receivedEth().call()
+            ) + " eth");
+            console.log("max_accepted_funds", helpers.utils.toFullToken(
+                helpers,
+                max_accepted_funds
+            ) + " eth");
+
+            const ParticipantCount = await this.ReversableICO.methods.ParticipantCount().call(); 
+            console.log("ParticipantCount", ParticipantCount);
+
+            // let's check contributions
+            let ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant).call();
+            console.log("ParticipantByAddress", ParticipantByAddress);
+
+            let ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(participant, "0").call();
+            console.log("ParticipantContributionDetails", ParticipantContributionDetails);
+
+            // 15000000000000000000000000;
+            
+            let contractBalance = await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call();
+            console.log("contractTokenBalance", contractBalance);
+
+            let tx = await this.ReversableICO.methods.whitelistOrReject(
+                participant,
+                2,
+                0,
+                10
+            ).send({from: deployerAddress});
+
+            console.log("whitelistOrReject gas:", tx.gasUsed.toString());
+
+            ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant).call();
+            console.log("ParticipantByAddress", ParticipantByAddress);
+
+            ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(participant, "0").call();
+            console.log("ParticipantContributionDetails", ParticipantContributionDetails);
+
+            contractBalance = await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call();
+            console.log("contractTokenBalance", contractBalance);
+
+            let ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(participant).call();
+            console.log("ParticipantTokenBalance", ParticipantTokenBalance);
+
         });
 
     });
-    */
+
+
     /*
     describe("Dev", function () {
 
