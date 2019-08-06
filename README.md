@@ -1,1 +1,1 @@
-# rico-poc
+# Reversible ICO smart contracts
