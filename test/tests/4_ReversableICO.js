@@ -42,8 +42,8 @@ describe("ReversableICO", function () {
 
         });
 
-        it("Gas usage should be lower than 6.7m.", function () {
-            expect(this.ReversableICO.receipt.gasUsed).to.be.below(6700000);
+        it("Gas usage should be lower than network configuration gas.", function () {
+            expect(this.ReversableICO.receipt.gasUsed).to.be.below(helpers.networkConfig.gas);
         });
 
         it("Property deployerAddress should be " + deployerAddress, async function () {

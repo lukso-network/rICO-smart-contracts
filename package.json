@@ -8,8 +8,7 @@
   },
   "scripts": {
     "compile": "./node_modules/.bin/truffle compile --all",
-    "coverage": "scripts/run_coverage.sh all",
-    "coverage-reuse": "scripts/run_coverage.sh all use-existing",
+    "coverage": "scripts/run_coverage.sh",
     "test": "scripts/run_tests.sh all",
     "test-reuse": "scripts/run_tests.sh all use-existing",
     "test-single": "scripts/run_tests.sh single",
@@ -47,7 +46,7 @@
     "ganache-cli": "^6.4.4",
     "openzeppelin-test-helpers": "^0.4.0",
     "solc": "^0.5.10",
-    "solidity-coverage": "^0.5.11",
+    "solidity-coverage": "^0.6.4",
     "truffle": "^5.0.26",
     "truffle-hdwallet-provider": "^1.0.14",
     "ts-mocha": "^6.0.0",

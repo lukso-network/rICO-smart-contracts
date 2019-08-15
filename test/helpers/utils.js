@@ -149,8 +149,8 @@ module.exports = {
         const ContractData = await helpers.utils.getAbiFile(name);
 
         let from = accounts[0];
-        let gas = 6700000;
-        let gasPrice = helpers.defaultGasPrice;
+        let gas = helpers.networkConfig.gas;
+        let gasPrice = helpers.networkConfig.gasPrice;
 
         if(options && options.from) {
             from = options.from;
@@ -175,6 +175,11 @@ module.exports = {
             deployArguments.arguments = options.arguments;
         }
         
+        if(helpers.networkName == "coverage") {
+            // override gas and gas price for coverage runs no matter what.
+            gas = helpers.networkConfig.gas;
+            gasPrice = helpers.networkConfig.gasPrice;
+        }
 
         let ContractReceipt;
         const ContractInstance = await new helpers.web3Instance.eth.Contract(

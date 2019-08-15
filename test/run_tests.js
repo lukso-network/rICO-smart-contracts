@@ -1,19 +1,18 @@
 async function runTests() {
 
-    const defaultGasPrice = 10000000000; // 10 gwei
-
     const Web3                      = require('web3');
     let web3Instance;
 
     // Network name we're using to run the tests
     let network                     = process.argv[3];
-    
+
     if(!network) { network = "development"; };
 
     // load truffle config
     const truffleConfig             = require("../truffle-config.js");
 
     let accounts;
+    let networkConfig = truffleConfig.networks[network];
 
     if(truffleConfig.networks[network]) {
         web3Instance = await new Web3(
@@ -69,11 +68,12 @@ async function runTests() {
         instance: false,
     }
 
-    
     const setup = {
-        network: network = process.argv[2],
+        network: network,
         globals: {},
         helpers: {
+            networkName:network,
+            networkConfig:networkConfig,
             assertInvalidOpcode:assertInvalidOpcode,
             utils:utils,
             web3util:web3util,
@@ -89,7 +89,6 @@ async function runTests() {
             assert:assert,
             solidity:solidity,
             ERC1820:ERC1820,
-            defaultGasPrice:defaultGasPrice,
             addresses:{
                 ERC1820:'0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24',
                 Token: null, 
