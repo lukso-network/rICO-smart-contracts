@@ -2,14 +2,21 @@ function assertError(block, error, s, message) {
     
     let code = error.message.search(message);
     if(code == -1) {
-        console.log("block:        ", block.toString());
-        console.log("message:      ", message);
-        console.log("error:        ", error);
-        console.log("error.message:", error.message);
-        console.log("error.search: ", error.message.search(s));
+        console.log("----------------------------------------------------------------");
+        console.log("BLOCK: ---------------------------------------------------------");
+        console.log(block.toString());
+        console.log("ERROR: ---------------------------------------------------------");
+        console.log(error);
+        console.log("Expected: ------------------------------------------------------");
+        console.log(message);
+        console.log("Received: ------------------------------------------------------");
+        console.log(error.message);
+        console.log("----------------------------------------------------------------");
     }
     
-    assert.isAbove(error.message.search(message), -1, message);
+    // assert.isAbove(error.message.search(message), -1, message);
+
+    assert.include(error.message, message, 'Error');
 
     // for some reason account nonceCache does not properly refresh
     // after a revert happens.. so we clear it.
@@ -18,9 +25,9 @@ function assertError(block, error, s, message) {
 
 async function assertThrows(block, message, errorCode) {
     try {
-        await block()
+        await block();
     } catch (e) {
-        return assertError(block, e, errorCode, message)
+        return assertError(block, e, errorCode, message);
     }
 
     console.log();

@@ -252,6 +252,14 @@ contract ReversableICO is IERC777Recipient {
         REJECTED
     }
 
+    event ContributionEvent (
+        uint8 indexed _type,
+        uint16 indexed _id,
+        address indexed _from,
+        uint256 _value
+    );
+
+
     struct Participant {
         bool   whitelisted;
         uint16  contributionsCount;
@@ -267,7 +275,13 @@ contract ReversableICO is IERC777Recipient {
     function ParticipantContributionDetails(
         address _address,
         uint16 contribution_id
-    ) public view returns ( uint256, uint256, uint8, uint8, uint256 ) {
+    ) public view returns (
+        uint256 _value,
+        uint256 _block,
+        uint8 _stageId,
+        uint8 _state,
+        uint256 _tokens
+    ) {
         //
         // direct call: ParticipantsByAddress[_address].contributions[contribution_id].value
         //
@@ -297,15 +311,18 @@ contract ReversableICO is IERC777Recipient {
         // if we received eth
         if( msg.value > 0 ) {
 
-            uint256 AcceptedValue = maxEth - acceptedEth;
+            uint256 MaxAcceptedValue = maxEth - acceptedEth;
+            uint256 AcceptedValue = msg.value;
             uint256 returnValue = 0;
 
-            // make sure incomming value is lower than maxEth - acceptedEth
-            if(msg.value > AcceptedValue) {
+            // if incomming value is higher than what we can accept,
+            // just accept the difference and return the rest
+            if(AcceptedValue > MaxAcceptedValue) {
+                // accept max possible
+                AcceptedValue = MaxAcceptedValue;
                 // send the rest back
                 returnValue = msg.value - AcceptedValue;
             }
-
             // add to received value to receivedETH
             receivedEth += AcceptedValue;
 
@@ -318,7 +335,7 @@ contract ReversableICO is IERC777Recipient {
                 // increase participant count
                 ParticipantCount++;
             } else {
-                newContributionId = ParticipantRecord.contributionsCount + 1;
+                newContributionId = ParticipantRecord.contributionsCount;
             }
 
             // Save new contribution
@@ -376,13 +393,14 @@ contract ReversableICO is IERC777Recipient {
                 TokenTracker.send(_receiver, ContributionRecord.tokens, data);
 
                 // emit contributionAccepted event.
-
             } else if(_to_state == uint8(ContributionStates.REJECTED)) {
                 // convert to address payable and send funds back to participant
                 address(uint160(_receiver)).transfer(ContributionRecord.value);
 
                 // emit contributionRejected event.
             }
+
+            emit ContributionEvent(ContributionRecord.state, _contributionId, _receiver, ContributionRecord.value);
 
             return true;
         }
@@ -402,37 +420,50 @@ contract ReversableICO is IERC777Recipient {
 
     /*
     *   Whitelisting or Rejecting
-    *   start / count allow us to recover from bad actors that contribute too many times..
-    *   that is if we want to unlock their eth
+    *   start / count allow us to recover from bad actors that contribute waaaay too many times..
+    *   that is.. if we want to unlock their eth
     */
-    function whitelistOrReject(address _address, uint8 _mode, uint16 start_at, uint8 count ) public {
+    function whitelistOrReject(
+        address _address,
+        uint8 _mode,
+        uint16 start_at,
+        uint8 count
+    )
+        public
+        requireInitialized
+        requireNotFrozen
+        onlyWhitelistController
+    {
         Participant storage ParticipantRecord = ParticipantsByAddress[_address];
-        if(_mode == uint8(ContributionStates.ACCEPTED)) {
-            ParticipantRecord.whitelisted = true;
-            WhitelistedCount++;
-        } else if(_mode == uint8(ContributionStates.REJECTED)) {
-            // redundant since default is false ?
-            ParticipantRecord.whitelisted = false;
-            RejectedCount++;
-        } else {
-            revert("whitelistOrReject: invalid mode selected");
-        }
 
-        // process all available contributions
-        for( uint16 i = start_at; i < count; i++ ) {
-            if(ParticipantRecord.contributions[i].state == uint8(ContributionStates.NOT_PROCESSED)) {
-                processContribution(_address, i, _mode);
+        // Check if we actually have a ParticipantRecord
+        if(ParticipantRecord.contributionsCount > 0) {
+            if(_mode == uint8(ContributionStates.ACCEPTED)) {
+                ParticipantRecord.whitelisted = true;
+                WhitelistedCount++;
+            } else if(_mode == uint8(ContributionStates.REJECTED)) {
+                // redundant since default is false ?
+                ParticipantRecord.whitelisted = false;
+                RejectedCount++;
             } else {
-                // break out
-                 i = count;
+                revert("whitelistOrReject: invalid mode selected.");
             }
+
+            // process available contributions between start_at + count
+            for( uint16 i = start_at; i <= count; i++ ) {
+                if(ParticipantRecord.contributions[i].state == uint8(ContributionStates.NOT_PROCESSED)) {
+                    processContribution(_address, i, _mode);
+                }
+            }
+        } else {
+            revert("whitelistOrReject: Participant record not found.");
         }
     }
 
     /*
     *   Whitelisting or Rejecting multiple addresses
     *   start is 0 / count is 10, should be fine for most
-    *   for special cases we just use the "1 address call"
+    *   for special cases we just use the whitelistOrReject method
     */
     function whitelistOrRejectMultiple(address[] memory _address, uint8 _mode) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
@@ -492,52 +523,52 @@ contract ReversableICO is IERC777Recipient {
     */
 
     modifier onlyDeployer() {
-        require(msg.sender == deployerAddress, "Only deployer can call this method");
+        require(msg.sender == deployerAddress, "onlyDeployer: Only deployer can call this method");
         _;
     }
 
     modifier onlyWhitelistController() {
-        require(msg.sender == whitelistControllerAddress, "Only Whitelist Controller can call this method");
+        require(msg.sender == whitelistControllerAddress, "onlyWhitelistController: Only Whitelist Controller can call this method");
         _;
     }
 
     modifier requireInitialized() {
-        require(initialized == true, "Contract must be initialized");
+        require(initialized == true, "requireInitialized: Contract must be initialized");
         _;
     }
 
     modifier requireNotInitialized() {
-        require(initialized == false, "Contract must not be initialized");
+        require(initialized == false, "requireInitialized: Contract must not be initialized");
         _;
     }
 
     modifier requireRunning() {
-        require(ended == true, "RICO must be running");
+        require(ended == true, "requireRunning: RICO must be running");
         _;
     }
 
     modifier requireNotRunning() {
-        require(ended == false, "RICO must not be running");
+        require(ended == false, "requireRunning: RICO must not be running");
         _;
     }
 
     modifier requireEnded() {
-        require(ended == true, "RICO period must have ended");
+        require(ended == true, "requireEnded: RICO period must have ended");
         _;
     }
 
     modifier requireNotEnded() {
-        require(ended == false, "RICO period must not have ended");
+        require(ended == false, "requireEnded: RICO period must not have ended");
         _;
     }
 
     modifier requireFrozen() {
-        require(frozen == true, "Contract must be frozen");
+        require(frozen == true, "requireFrozen: Contract must be frozen");
         _;
     }
 
     modifier requireNotFrozen() {
-        require(frozen == false, "Contract must not be frozen");
+        require(frozen == false, "requireFrozen: Contract must not be frozen");
         _;
     }
 
