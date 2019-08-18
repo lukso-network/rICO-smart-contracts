@@ -1081,28 +1081,24 @@ describe("ReversableICO", function () {
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
             });
     
-            it("Returns 10 ** precision at EndBlock", async function () {
+            it("Returns 0 at EndBlock", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
                 const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-                expect( calculatedRatio ).to.be.bignumber.equal( 
-                    new helpers.BN("10").pow(new helpers.BN(precision))
-                );
+                expect( calculatedRatio.toString() ).to.be.equal("0");
             });
     
-            it("Returns 10 ** precision at EndBlock + 1", async function () {
+            it("Returns 0 at EndBlock + 1", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true, 1 );
                 const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-                expect( calculatedRatio ).to.be.bignumber.equal( 
-                    new helpers.BN("10").pow(new helpers.BN(precision))
-                );
+                expect( calculatedRatio.toString() ).to.be.equal("0");
             });
     
     
@@ -1243,6 +1239,39 @@ describe("ReversableICO", function () {
     
                 let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
                 let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+            });
+
+            it("Returns 0 locked tokens after EndBlock", async function () {
+    
+                // jump to stage allocation start block
+                let stageId = 12;
+                let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true, 1);
+    
+                let ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                let ContractContributionTokens = ParticipantsByAddress.token_amount;
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+
+                currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true, 1000);
+    
+                ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                ContractContributionTokens = ParticipantsByAddress.token_amount;
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
                 );
     

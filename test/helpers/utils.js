@@ -291,7 +291,7 @@ module.exports = {
                 new helpers.BN("10").pow( new helpers.BN(precision) )
             ).div(new helpers.BN(DistributionBlockLength));
         } else if (currentBlock.toNumber() >= EndBlock.toNumber()) {
-            return new helpers.BN("10").pow( new helpers.BN(precision) );
+            return 0; // new helpers.BN("10").pow( new helpers.BN(precision) );
         } else {
             return 0;
         }

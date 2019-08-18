@@ -542,7 +542,7 @@ contract ReversableICO is IERC777Recipient {
                 10 ** uint256(precision)
             ).div(DistributionBlockLength);
         } else if (currentBlock >= EndBlock) {
-            return 10 ** uint256(precision);
+            return 0; // 10 ** uint256(precision);
         } else {
             return 0; // 10 ** uint256(precision);
         }
