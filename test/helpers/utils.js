@@ -273,5 +273,89 @@ module.exports = {
     },
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
+    },
+    getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision) {
+
+        currentBlock = new helpers.BN(currentBlock);
+        DistributionStartBlock = new helpers.BN(DistributionStartBlock);
+        EndBlock = new helpers.BN(EndBlock);
+        precision = new helpers.BN(precision);
+
+        if(
+            currentBlock.toNumber() > DistributionStartBlock.toNumber()  
+            && currentBlock.toNumber() < EndBlock.toNumber()) 
+        {
+            const passedBlocks = currentBlock.sub(DistributionStartBlock);
+            const DistributionBlockLength = new helpers.BN(EndBlock).sub(DistributionStartBlock);
+            return passedBlocks.mul(
+                new helpers.BN("10").pow( new helpers.BN(precision) )
+            ).div(new helpers.BN(DistributionBlockLength));
+        } else if (currentBlock.toNumber() >= EndBlock.toNumber()) {
+            return new helpers.BN("10").pow( new helpers.BN(precision) );
+        } else {
+            return 0;
+        }
+
+        /*
+        const DistributionBlockLength = new helpers.BN(totalBlocks);
+        const passedBlocks = new helpers.BN(currentBlock);
+        if(passedBlocks > 0 && passedBlocks <= totalBlocks ) {
+            return passedBlocks.mul(
+                new helpers.BN("10").pow( new helpers.BN(precision) )
+            ).div(DistributionBlockLength)
+        } else if (passedBlocks > totalBlocks) {
+            return new helpers.BN("10").pow( new helpers.BN(precision) );
+        } else {
+            return new helpers.BN("0");
+        }
+        */
+    },
+    calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, DistributionStartBlock, EndBlock, tokenAmount) {
+
+        /*
+        console.log("calculateLockedTokensAtBlockForBoughtAmount");
+        console.log("currentBlock           ", currentBlock.toString());
+        console.log("DistributionStartBlock ", DistributionStartBlock.toString());
+        console.log("EndBlock               ", EndBlock.toString());
+        console.log("tokenAmount            ", tokenAmount.toString());
+        */
+
+        tokenAmount = new helpers.BN(tokenAmount);
+        if(currentBlock < DistributionStartBlock) {
+            // allocation phase
+            return tokenAmount;
+        } else if(currentBlock < EndBlock) {
+            // distribution phase
+            const precision = 20;
+            return tokenAmount.mul(
+                new helpers.BN(
+                    helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, new helpers.BN(precision) )
+                )
+            ).div(
+                new helpers.BN("10").pow( new helpers.BN(precision) )
+            );
+        } else {
+            // after contract end
+            return 0;
+        }
+
+        /*
+        if(currentBlock < 0 ) {
+            console.log("case 1");
+            return totalTokenAmount;
+        } else if(currentBlock >=0 ) {
+            console.log("case 2");
+            const precision = new helpers.BN("20");
+            const bought = new helpers.BN(totalTokenAmount);
+            return bought.mul(
+                helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, totalBlocks, precision)
+            ).div(
+                new helpers.BN("10").pow(precision)
+            );
+        } else {
+            console.log("case 3");
+            return new helpers.BN("0");
+        }
+        */
     }
 };

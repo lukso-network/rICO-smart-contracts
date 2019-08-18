@@ -129,6 +129,7 @@ async function runTests() {
         '2_ERC777_Token',
         '3_ERC20Token',
         '4_ReversableICO',
+        // '5_Flows',
     ];
 
     utils.toLog(

@@ -8,11 +8,14 @@
 
 pragma solidity ^0.5.0;
 
+import "./zeppelin/math/SafeMath.sol";
 import "./zeppelin/token/ERC777/IERC777.sol";
 import "./zeppelin/token/ERC777/IERC777Recipient.sol";
 import "./zeppelin/introspection/IERC1820Registry.sol";
 
 contract ReversableICO is IERC777Recipient {
+
+    using SafeMath for uint256;
 
     IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
@@ -26,6 +29,8 @@ contract ReversableICO is IERC777Recipient {
     *   Contract Settings
     */
     uint256 public StartBlock;
+    uint256 public DistributionStartBlock;
+    uint256 public DistributionBlockLength;
     uint256 public EndBlock;
 
     uint256 public InitialTokenSupply;
@@ -33,6 +38,10 @@ contract ReversableICO is IERC777Recipient {
     uint256 public maxEth = 30000 ether;
     uint256 public receivedEth = 0;
     uint256 public acceptedEth = 0;
+
+    // minimum amount of eth we accept for a contribution
+    // everything lower will trigger a refund
+    uint256 public minContribution = 0.001 ether;
 
     /*
     * Allocation period
@@ -83,7 +92,13 @@ contract ReversableICO is IERC777Recipient {
 
     // fallback function
     function () external payable {
-        commit();
+        if(msg.value >= minContribution) {
+            // accept contribution for processing
+            commit();
+        } else {
+            // refund all contributions by msg.sender
+            // refundByEth();
+        }
     }
 
     function addSettings(
@@ -140,6 +155,9 @@ contract ReversableICO is IERC777Recipient {
         }
 
         EndBlock = lastStageBlockEnd;
+
+        DistributionStartBlock = AllocationEndBlock + 1;
+        DistributionBlockLength = lastStageBlockEnd - DistributionStartBlock;
 
         initialized = true;
     }
@@ -216,25 +234,6 @@ contract ReversableICO is IERC777Recipient {
     }
 
     /*
-    function getFraction(
-        uint256 numerator, uint256 denominator, uint256 precision
-    )
-    public pure
-    returns(uint256)
-    {
-        // caution, check safe-to-multiply here
-        uint _numerator = numerator * 10 ** (precision + 1);
-        // with rounding of last digit
-        uint _quotient = ((_numerator / denominator) + 5) / 10;
-        return _quotient;
-    }
-    */
-
-
-    // uint256 myFraction = getFraction(myIcoTokens, ICOtokensInStage, precision);
-    // return (preIcoUnsoldSupply * myFraction) / ( 10 ** precision );
-
-    /*
     *   Participants
     */
     struct Contribution {
@@ -263,6 +262,7 @@ contract ReversableICO is IERC777Recipient {
     struct Participant {
         bool   whitelisted;
         uint16  contributionsCount;
+        uint256 token_amount;
         mapping ( uint16 => Contribution ) contributions;
     }
 
@@ -285,7 +285,7 @@ contract ReversableICO is IERC777Recipient {
         //
         // direct call: ParticipantsByAddress[_address].contributions[contribution_id].value
         //
-        // mapping to records vs calling directly yields lower gas usage ( 24115 vs 24526 )
+        // mapping to records vs calling directly yields lower gas usage
 
         Participant storage Record = ParticipantsByAddress[_address];
         Contribution storage ContributionRecord = Record.contributions[contribution_id];
@@ -363,7 +363,8 @@ contract ReversableICO is IERC777Recipient {
             }
 
         } else {
-            // @TODO: we most likely cannot receive 0 value on a payable.. test it
+            // looks like we can receive a 0 value transaction to our fallback.
+            // Thus we'll use it for the refund method.
         }
     }
 
@@ -387,6 +388,9 @@ contract ReversableICO is IERC777Recipient {
             if(_to_state == uint8(ContributionStates.ACCEPTED)) {
                 // accept contribution
                 acceptedEth += ContributionRecord.value;
+
+                // add the tokens we're allocating to the participant to their index
+                ParticipantRecord.token_amount += ContributionRecord.tokens;
 
                 // allocate tokens to participant
                 bytes memory data;
@@ -516,6 +520,73 @@ contract ReversableICO is IERC777Recipient {
     // required so we can override when running tests
     function getCurrentBlockNumber() public view returns (uint256) {
         return block.number;
+    }
+
+    /*
+    *   RICO Ratio methods:
+    */
+
+    /*
+        Returns unlock ratio multiplied by 10 to the power of precision
+        ( should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals )
+    */
+    function getCurrentUnlockRatio(uint8 precision)
+        public view
+        returns(uint256)
+    {
+        uint256 currentBlock = getCurrentBlockNumber();
+
+        if(currentBlock > DistributionStartBlock && currentBlock < EndBlock) {
+            uint256 passedBlocks = currentBlock.sub(DistributionStartBlock);
+            return passedBlocks.mul(
+                10 ** uint256(precision)
+            ).div(DistributionBlockLength);
+        } else if (currentBlock >= EndBlock) {
+            return 10 ** uint256(precision);
+        } else {
+            return 0; // 10 ** uint256(precision);
+        }
+    }
+
+    /*
+    * ERC777 - get the amount of locked tokens at current block number
+    */
+    function getLockedTokenAmount(address _address) public view returns (uint256) {
+
+        // to lower gas costs, let's check if _address actually has any contributions.
+        if(ParticipantsByAddress[_address].token_amount > 0) {
+
+            uint256 currentBlock = getCurrentBlockNumber();
+
+            // if before "development / distribution phase" ( stage 0 )
+            //   - return all tokens bought through contributing.
+            // if in development phase ( stage 1 to 12 )
+            //   - calculate and return
+            // else if after endBlock
+            //   - return 0
+            if(currentBlock < DistributionStartBlock) {
+
+                // allocation phase
+                return ParticipantsByAddress[_address].token_amount;
+
+            } else if(currentBlock < EndBlock) {
+
+                // distribution phase
+                uint8 precision = 20;
+                uint256 bought = ParticipantsByAddress[_address].token_amount;
+
+                return bought.mul(
+                    getCurrentUnlockRatio(precision)
+                ).div(10 ** uint256(precision));
+
+            } else {
+
+                // after contract end
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 
     /*

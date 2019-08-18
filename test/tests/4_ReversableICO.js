@@ -707,30 +707,52 @@ describe("ReversableICO", function () {
 
                     describe("supplied address has 15 contributions", async function () { 
 
-                        const TestParticipant = participant_1;
-                        const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
-                        let TotalContributionsAmount = new helpers.BN();
-                        let TotalGasCostAmount = new helpers.BN();
+                        const TestAcceptParticipant = participant_1;
+                        const TestRejectParticipant = participant_2;
+
+                        const AcceptContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+                        const RejectContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+                        let TotalAcceptContributionsAmount = new helpers.BN();
+                        let TotalRejectContributionsAmount = new helpers.BN();
+                        let TotalAcceptGasCostAmount = new helpers.BN();
+                        let TotalRejectGasCostAmount = new helpers.BN();
 
                         before(async function () {
 
                             // save contract and sender balances so we can check later
-                            const InitialParticipantBalance = await helpers.utils.getBalance(helpers, TestParticipant);
+                            const InitialAcceptParticipantBalance = await helpers.utils.getBalance(helpers, TestAcceptParticipant);
+                            const InitialRejectParticipantBalance = await helpers.utils.getBalance(helpers, TestRejectParticipant);
+
                             const InitialContractBalance = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
 
                             // Send 15 x 1 eth contributions from the same account.
                             for(i = 0; i < 15; i++) {
 
-                                // send a 1 eth contribution from TestParticipant
+                                // send a 1 eth contribution from TestAcceptParticipant
                                 fundingTx = await helpers.web3Instance.eth.sendTransaction({
-                                    from: TestParticipant,
+                                    from: TestAcceptParticipant,
                                     to: helpers.addresses.Rico,
-                                    value: ContributionAmount.toString(),
+                                    value: AcceptContributionAmount.toString(),
                                     gasPrice: helpers.networkConfig.gasPrice
                                 });
 
-                                TotalContributionsAmount = TotalContributionsAmount.add( ContributionAmount );
-                                TotalGasCostAmount = TotalGasCostAmount.add(
+                                TotalAcceptContributionsAmount = TotalAcceptContributionsAmount.add( AcceptContributionAmount );
+                                TotalAcceptGasCostAmount = TotalAcceptGasCostAmount.add(
+                                    new helpers.BN(fundingTx.gasUsed).mul(
+                                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                                    )
+                                );
+
+                                // send a 1 eth contribution from TestRejectParticipant
+                                fundingTx = await helpers.web3Instance.eth.sendTransaction({
+                                    from: TestRejectParticipant,
+                                    to: helpers.addresses.Rico,
+                                    value: RejectContributionAmount.toString(),
+                                    gasPrice: helpers.networkConfig.gasPrice
+                                });
+
+                                TotalRejectContributionsAmount = TotalRejectContributionsAmount.add( RejectContributionAmount );
+                                TotalRejectGasCostAmount = TotalRejectGasCostAmount.add(
                                     new helpers.BN(fundingTx.gasUsed).mul(
                                         new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                                     )
@@ -738,25 +760,37 @@ describe("ReversableICO", function () {
                             }
 
                             // make sure our ending participant's balance is correct
-                            const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-                            const newParticipantCalculatedBalance = InitialParticipantBalance
-                                .sub(TotalContributionsAmount)
-                                .sub(TotalGasCostAmount);
+                            const AcceptParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestAcceptParticipant);
+                            const RejectParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestRejectParticipant);
+                            
+                            const newAcceptParticipantCalculatedBalance = InitialAcceptParticipantBalance
+                                .sub(TotalAcceptContributionsAmount)
+                                .sub(TotalAcceptGasCostAmount);
 
-                            expect( ParticipantBalanceAfter ).to.be.bignumber.equal( newParticipantCalculatedBalance );
+                            const newRejectParticipantCalculatedBalance = InitialRejectParticipantBalance
+                                .sub(TotalRejectContributionsAmount)
+                                .sub(TotalRejectGasCostAmount);
+
+                            expect( AcceptParticipantBalanceAfter ).to.be.bignumber.equal( newAcceptParticipantCalculatedBalance );
+
+                            expect( RejectParticipantBalanceAfter ).to.be.bignumber.equal( newRejectParticipantCalculatedBalance );
 
                             // make sure our ending contract balance is correct
                             const ContractBalanceAfter = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
-                            const newCalculatedBalance = InitialContractBalance.add(TotalContributionsAmount);
+                            const newCalculatedBalance = InitialContractBalance
+                                .add(TotalAcceptContributionsAmount)
+                                .add(TotalRejectContributionsAmount);
+
                             expect( ContractBalanceAfter ).to.be.bignumber.equal( newCalculatedBalance );
+
                         });
 
                         describe("supplied mode is wrong.. (not ACCEPTED / REJECTED) ", async function () { 
-                    
+
                             it("transaction reverts \"whitelistOrReject: invalid mode selected.\"", async function () {
                                 await helpers.assertInvalidOpcode( async () => {
                                     await this.ReversableICO.methods.whitelistOrReject(
-                                        TestParticipant,
+                                        TestAcceptParticipant,
                                         ContributionStates.NOT_SET,
                                         0,          // start id
                                         10          // contribution count to process
@@ -765,18 +799,17 @@ describe("ReversableICO", function () {
                                     });
                                 }, "whitelistOrReject: invalid mode selected.");
                             });
-            
+
                         });
 
-                        
                         describe("supplied mode is ContributionStates.ACCEPTED", async function () { 
-                    
+
                             const ContributionCountToProcess = 15;
                             let whitelistOrRejectTx;
 
                             before(async function () {
                                 whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
-                                    TestParticipant,
+                                    TestAcceptParticipant,
                                     ContributionStates.ACCEPTED,
                                     0,          // start id
                                     ContributionCountToProcess
@@ -794,37 +827,35 @@ describe("ReversableICO", function () {
                             it("ContributionEvent emitted event count matches", async function () {
                                 expect(
                                     whitelistOrRejectTx.events.ContributionEvent.length
-                                ).to.be.equal( 
+                                ).to.be.equal(
                                     ContributionCountToProcess
                                 );
                             });
 
-                            
                             it("Participant Contribution count is correct", async function () { 
-                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestParticipant).call();
+                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestAcceptParticipant).call();
                                 expect(
                                     ParticipantByAddress.contributionsCount.toString()
-                                ).to.be.equal( 
+                                ).to.be.equal(
                                     ContributionCountToProcess.toString()
                                 );
                             });
 
                             it("Participant Contributions are stored correctly starting from 0", async function () { 
-                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestParticipant).call();
-                                for( let i = 0; i < ParticipantByAddress.contributionsCount; i++) {
-                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(TestParticipant, i).call();
+                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestAcceptParticipant).call();
+                                for( let i = 0; i < ParticipantByAddress.contributionsCount; i++ ) {
+                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(TestAcceptParticipant, i).call();
                                     expect(parseInt(ParticipantContributionDetails._value, 10)).to.be.above(0);
                                 }
                             });
-                            
+
                             it("Participant Token Balance is correct", async function () { 
-                                
-                                const ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestParticipant).call();
-                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestParticipant).call();
+                                const ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestAcceptParticipant).call();
+                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestAcceptParticipant).call();
                                 let TokenAmount = new helpers.BN();
                                 
-                                for( let i = 0; i <= ParticipantByAddress.contributionsCount; i++) {
-                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(TestParticipant, i).call();
+                                for( let i = 0; i <= ParticipantByAddress.contributionsCount; i++ ) {
+                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(TestAcceptParticipant, i).call();
                                     TokenAmount = TokenAmount.add(new helpers.BN(
                                         ParticipantContributionDetails._tokens
                                     ));
@@ -835,10 +866,169 @@ describe("ReversableICO", function () {
                                 ).to.be.equal( 
                                     TokenAmount.toString()
                                 );
+                            });
+
+                            describe("new contribution from the TestAcceptParticipant that is now whitelisted, is acceepted automatically.", async function () { 
+
+                                let newContributionTx, initialContributionsCount, afterContributionsCount;
+
+                                before(async function () {
+                                    let ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestAcceptParticipant).call();
+                                    initialContributionsCount = ParticipantByAddress.contributionsCount;
+
+                                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                                        from: TestAcceptParticipant,
+                                        to: helpers.addresses.Rico,
+                                        value: AcceptContributionAmount.toString(),
+                                        gasPrice: helpers.networkConfig.gasPrice
+                                    });
+                                });
+
+                                it("transaction is accepted", async function () {
+                                    expect( newContributionTx.status ).to.be.equal( true );
+                                });
+
+                                it("Participant Contribution Count increases by 1", async function () {
+                                    let ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestAcceptParticipant).call();
+                                    afterContributionsCount = ParticipantByAddress.contributionsCount;
+                                    expect(
+                                        afterContributionsCount
+                                    ).to.be.equal(
+                                        ( ( parseInt(initialContributionsCount, 10) + 1 ) ).toString()
+                                    );
+                                });
+
+                                it("Last Contribution is processed and has valid parameters", async function () {
+                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(
+                                        TestAcceptParticipant,
+                                        // indexed from 0, thus inital count will match last id
+                                        initialContributionsCount.toString()
+                                    ).call();
+
+                                    expect( (parseInt(ParticipantContributionDetails._value, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._block, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._tokens, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._stageId, 10) ) ).to.be.equal(0);
+                                    expect( (parseInt(ParticipantContributionDetails._state, 10) ) ).to.be.equal( ContributionStates.ACCEPTED );
+                                });
 
                             });
-                           
+
                         });
+
+
+                        describe("supplied mode is ContributionStates.REJECTED", async function () { 
+
+                            const ContributionCountToProcess = 15;
+                            let whitelistOrRejectTx;
+                            let initialParticipantTokenBalance;
+
+                            before(async function () {
+
+                                initialParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestRejectParticipant).call();
+
+                                whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
+                                    TestRejectParticipant,
+                                    ContributionStates.REJECTED,
+                                    0,          // start id
+                                    ContributionCountToProcess
+                                ).send({
+                                    from: whitelistControllerAddress
+                                });
+
+                                // console.log("gasUsed: ", whitelistOrRejectTx.gasUsed);
+                            });
+
+                            it("transaction is accepted", async function () {
+                                expect( whitelistOrRejectTx.status ).to.be.equal( true );
+                            });
+
+                            it("ContributionEvent emitted event count matches", async function () {
+                                expect(
+                                    whitelistOrRejectTx.events.ContributionEvent.length
+                                ).to.be.equal(
+                                    ContributionCountToProcess
+                                );
+                            });
+
+                            it("Participant Contribution count is correct", async function () { 
+                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
+                                expect(
+                                    ParticipantByAddress.contributionsCount.toString()
+                                ).to.be.equal(
+                                    ContributionCountToProcess.toString()
+                                );
+                            });
+
+                            it("Participant Contributions are stored correctly starting from 0", async function () { 
+                                const ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
+                                for( let i = 0; i < ParticipantByAddress.contributionsCount; i++ ) {
+                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(TestRejectParticipant, i).call();
+                                    expect(parseInt(ParticipantContributionDetails._value, 10)).to.be.above(0);
+                                }
+                            });
+
+                            it("Participant Token Balance is the same as initial", async function () { 
+
+                                // since we're rejecting their contribution.. new balance should be the same as initial.
+                                const ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestRejectParticipant).call();
+                                expect(
+                                    ParticipantTokenBalance.toString()
+                                ).to.be.equal( 
+                                    initialParticipantTokenBalance.toString()
+                                );
+                               
+                            });
+
+                            describe("new contribution from the RejectParticipant is now in NOT_PROCESSED state.", async function () { 
+
+                                let newContributionTx, initialContributionsCount, afterContributionsCount;
+
+                                before(async function () {
+                                    let ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
+                                    initialContributionsCount = ParticipantByAddress.contributionsCount;
+
+                                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                                        from: TestRejectParticipant,
+                                        to: helpers.addresses.Rico,
+                                        value: RejectContributionAmount.toString(),
+                                        gasPrice: helpers.networkConfig.gasPrice
+                                    });
+                                });
+
+                                it("transaction is accepted", async function () {
+                                    expect( newContributionTx.status ).to.be.equal( true );
+                                });
+
+                                it("Participant Contribution Count increases by 1", async function () {
+                                    let ParticipantByAddress = await this.ReversableICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
+                                    afterContributionsCount = ParticipantByAddress.contributionsCount;
+                                    expect(
+                                        afterContributionsCount
+                                    ).to.be.equal(
+                                        ( ( parseInt(initialContributionsCount, 10) + 1 ) ).toString()
+                                    );
+                                });
+
+                                it("Last Contribution is in NOT_PROCESSED state and has valid parameters", async function () {
+                                    const ParticipantContributionDetails = await this.ReversableICO.methods.ParticipantContributionDetails(
+                                        TestRejectParticipant,
+                                        // indexed from 0, thus inital count will match last id
+                                        initialContributionsCount.toString()
+                                    ).call();
+
+                                    expect( (parseInt(ParticipantContributionDetails._value, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._block, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._tokens, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantContributionDetails._stageId, 10) ) ).to.be.equal(0);
+                                    expect( (parseInt(ParticipantContributionDetails._state, 10) ) ).to.be.equal( ContributionStates.NOT_PROCESSED );
+                                });
+
+                            });
+
+                            
+                        });
+
 
                     });
 
@@ -846,67 +1036,306 @@ describe("ReversableICO", function () {
 
             });
 
+        });
 
+        describe("view getCurrentUnlockRatio(uint8 precision)", async function () { 
 
+            const precision = 20;
+            let DistributionStartBlock, DistributionBlockLength;
+    
+            before(async function () {
+                DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
+                DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
+            });
+    
+            it("Returns 0 before stage 1 start_block + 1", async function () {
+    
+                let stageId = 0;
+                // jump to stage allocation start block - 1
+                let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
+                let contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+    
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( contractRatio.toString() ).to.be.equal( "0" );
+    
+                stageId = 1;
+                // jump to stage start_block - 1
+                currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
+                contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+    
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( contractRatio.toString() ).to.be.equal( "0" );
+    
+            });
+    
+    
+            it("Returns higher than 0 if at stage 1 start_block + 1", async function () {
+                const stageId = 1;
+                // jump to stage 1 start_block exactly
+                const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, false, 1 );
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( calculatedRatio.toNumber() ).to.be.above( 0 );
+            });
+    
+            it("Returns 10 ** precision at EndBlock", async function () {
+                const stageId = 12;
+                // jump to stage 1 start_block exactly
+                const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( calculatedRatio ).to.be.bignumber.equal( 
+                    new helpers.BN("10").pow(new helpers.BN(precision))
+                );
+            });
+    
+            it("Returns 10 ** precision at EndBlock + 1", async function () {
+                const stageId = 12;
+                // jump to stage 1 start_block exactly
+                const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true, 1 );
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( calculatedRatio ).to.be.bignumber.equal( 
+                    new helpers.BN("10").pow(new helpers.BN(precision))
+                );
+            });
+    
+    
+        });
+    
+        describe("view getLockedTokenAmount(address)", async function () { 
+    
+            const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+            let DistributionStartBlock, DistributionBlockLength;
+    
+            before(async function () {
+                DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
+                DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
+    
+                // move to start of the allocation phase
+                await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
+                await this.ReversableICO.methods.EndBlock().call();
+                
+                // send 1 eth contribution
+                newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: helpers.addresses.Rico,
+                    value: ContributionAmount.toString(),
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+    
+                let whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
+                    participant_1,
+                    ContributionStates.ACCEPTED,
+                    0,          // start id
+                    15
+                ).send({
+                    from: whitelistControllerAddress
+                });
+    
+            });
+    
+            it("Returns 0 at any stage if participant has no contributions", async function () {
+    
+                // jump to stage allocation start block - 1
+                const stageId = 0;
+                let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, false, -1);
+                const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_6).call();
+                const ContractContributionTokens = ParticipantsByAddress.token_amount;
+    
+                let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
+                // make sure we return full purchased amount.
+                expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
+    
+                // now let's validate the js calculations
+                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+    
+    
+                currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 1);
+                getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+    
+                currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 12);
+                getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+    
+                currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 12, false, 1);
+                getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+            });
+    
+            it("Returns participant's purchased token amount before stage 1 start_block", async function () {
+    
+                // jump to stage allocation start block - 1
+                const stageId = 1;
+                const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, false, -1);
+    
+                const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                const ContractContributionTokens = ParticipantsByAddress.token_amount;
+    
+                const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
+    
+                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+            });
+    
+    
+            it("Returns proper amount at stage 1 start_block", async function () {
+    
+                // jump to stage allocation start block
+                const stageId = 1;
+                const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
+    
+                const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                const ContractContributionTokens = ParticipantsByAddress.token_amount;
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+            });
+    
+            it("Returns proper amount at stage 12 end_block - 1", async function () {
+    
+                // jump to stage allocation start block
+                const stageId = 12;
+                const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true, 0);
+    
+                const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                const ContractContributionTokens = ParticipantsByAddress.token_amount;
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+            });
+    
+            it("Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )", async function () {
+    
+                // jump to stage allocation start block
+                let stageId = 12;
+                let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true);
+    
+                let ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
+                let ContractContributionTokens = ParticipantsByAddress.token_amount;
+                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+    
+                let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
+                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                );
+    
+                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+            });
+    
+        });
+    
+
+        describe("transaction payable commit()", async function () { 
+
+            let newContributionTx;
+            const TestParticipant = participant_1;
+            const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+            let TotalContributionsAmount = new helpers.BN();
+            let TotalGasCostAmount = new helpers.BN();
+
+            before(async function () {
+
+                /*
+                newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: TestParticipant,
+                    to: helpers.addresses.Rico,
+                    value: RejectContributionAmount.toString(),
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                */
+
+                // jump to allocation start
+                // await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
+                // helpers.utils.resetAccountNonceCache(helpers);
+            });
 
             /*
+            it("reverts if sending 0 ( msg.value = 0 ) to a payable function", async function () {
 
-            it("Returns correct value for 1 eth & stage 1", async function () {
-                const ethValue = helpers.solidity.ether * 1;
-                const stageId = 1;
-                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
+                await helpers.assertInvalidOpcode( async () => {
 
-                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
-                    new helpers.BN("10").pow( new BN("18") )
-                ).div(
-                    new helpers.BN(stageData.token_price)
-                );
+                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: TestParticipant,
+                        to: helpers.addresses.Rico,
+                        value: "0",
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
 
-                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
-                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
-            });
+                }, "whitelistOrReject: invalid mode selected.");
 
-            it("Returns correct value for 0.002 eth & Allocation stage ( results in 1 full token )", async function () {
-                const ethValue = helpers.solidity.ether * 0.002;
-                const stageId = 0;
-                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
-
-                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
-                    new helpers.BN("10").pow( new BN("18") )
-                ).div(
-                    new helpers.BN(stageData.token_price)
-                );
-
-                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
-                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
-                expect( helpers.utils.toFullToken(helpers, tokenAmount) ).to.be.equal("1");
-                // console.log("tokenAmount", helpers.utils.toFullToken(helpers, tokenAmount) );
-
-            });
-
-            it("Returns correct value for 1 wei & Allocation stage ( results in 500 token grains )", async function () {
-                const ethValue = 1;
-                const stageId = 0;
-                const stageData = await this.ReversableICO.methods.StageByNumber(stageId).call();
-
-                const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
-                    new helpers.BN("10").pow( new BN("18") )
-                ).div(
-                    new helpers.BN(stageData.token_price)
-                );
-
-                const tokenAmount = await this.ReversableICO.methods.getTokenAmountForEthAtStage( ethValue.toString() , stageId).call();
-                expect( tokenAmount.toString() ).to.be.equal( calculatedTokenAmount.toString() );
-                expect( tokenAmount.toString() ).to.be.equal("500");
-                // console.log("tokenAmount", helpers.utils.toFullToken(helpers, tokenAmount) );
             });
             */
 
         });
-
-        
-
+       
     });
+
+    /*
+    describe("Dev", function () {
+
+        before(async function () {
+
+            // this.ReversableICO.methods.getLockedTokenAmount();
+            
+
+            let val = helpers.solidity.ether;
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", test);
+
+            val = helpers.solidity.ether * 0.002
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", val, test);
+
+            val = helpers.solidity.ether * 0.00002
+            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
+                val.toString(),
+                0
+            ).call();
+            console.log("amount", val, test );
+
+            console.log(helpers.utils.toFullToken(helpers, test[0]))
+        });
+
+        it("works", function () {
+            // expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
+        });
+        
+    });
+    */
 
     describe("Stage 4 - Funding Start", function () {
         
@@ -1006,52 +1435,26 @@ describe("ReversableICO", function () {
     });
     */
 
-    /*
-    describe("Dev", function () {
 
-        before(async function () {
-
-            let val = helpers.solidity.ether;
-            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
-                val.toString(),
-                0
-            ).call();
-            console.log("amount", test);
-
-            val = helpers.solidity.ether * 0.002
-            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
-                val.toString(),
-                0
-            ).call();
-            console.log("amount", val, test);
-
-            val = helpers.solidity.ether * 0.00002
-            test = await this.ReversableICO.methods.getTokenAmountForEthAtStageAndMore(
-                val.toString(),
-                0
-            ).call();
-            console.log("amount", val, test );
-
-            console.log(helpers.utils.toFullToken(helpers, test[0]))
-        });
-
-        it("works", function () {
-            // expect( this.ReversableICO.receipt.gasUsed ).to.be.lower( 6700000 );
-        });
-
-    });
-    */
 });
 
-async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, end = false ) {
+async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
     const stageData = await ReversableICO.methods.StageByNumber(stageId).call();
     let block = stageData.start_block;
     if(end) {
         block = stageData.end_block;
     }
+
+    if(addToBlockNumber !== false) {
+        block = parseInt(block) + parseInt(addToBlockNumber);
+    }
+
     await ReversableICO.methods.jumpToBlockNumber(
         block
     ).send({
         from: deployerAddress, gas: 100000
     });
+
+    return block;
 }
+

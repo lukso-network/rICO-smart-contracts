@@ -12,4 +12,9 @@ contract RicoToken is ERC777 {
     {
         _mint(msg.sender, msg.sender, initialSupply, "", "");
     }
+
+    // we need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
+
+
+
 }
