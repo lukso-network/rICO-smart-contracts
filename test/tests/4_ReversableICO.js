@@ -4,6 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
+const TeamWalletAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -167,6 +168,7 @@ describe("ReversableICO", function () {
             await this.ReversableICO.methods.addSettings(
                 TokenTrackerAddress,        // address _TokenTrackerAddress
                 whitelistControllerAddress, // address _whitelistControllerAddress
+                TeamWalletAddress,          // address _TeamWalletAddress
                 StartBlock,                 // uint256 _StartBlock
                 AllocationBlockCount,       // uint256 _AllocationBlockCount,
                 AllocationPrice,            // uint256 _AllocationPrice in wei
@@ -204,6 +206,10 @@ describe("ReversableICO", function () {
     
             it("Property whitelistControllerAddress should be " + whitelistControllerAddress, async function () {
                 expect(await this.ReversableICO.methods.whitelistControllerAddress().call()).to.be.equal(whitelistControllerAddress);
+            });
+
+            it("Property TeamWalletAddress should be " + TeamWalletAddress, async function () {
+                expect(await this.ReversableICO.methods.TeamWalletAddress().call()).to.be.equal(TeamWalletAddress);
             });
     
             it("EndBlock matches settings", async function () {
@@ -1100,8 +1106,6 @@ describe("ReversableICO", function () {
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
             });
-    
-    
         });
     
         describe("view getLockedTokenAmount(address)", async function () { 
@@ -1115,7 +1119,6 @@ describe("ReversableICO", function () {
     
                 // move to start of the allocation phase
                 await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
-                await this.ReversableICO.methods.EndBlock().call();
                 
                 // send 1 eth contribution
                 newContributionTx = await helpers.web3Instance.eth.sendTransaction({

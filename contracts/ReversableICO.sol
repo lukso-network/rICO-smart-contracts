@@ -24,6 +24,7 @@ contract ReversableICO is IERC777Recipient {
     IERC777 public TokenTracker;
 
     address public whitelistControllerAddress;
+    address public TeamWalletAddress;
 
     /*
     *   Contract Settings
@@ -44,7 +45,7 @@ contract ReversableICO is IERC777Recipient {
     uint256 public minContribution = 0.001 ether;
 
     /*
-    * Allocation period
+    *   Allocation period
     */
     uint256 public AllocationPrice;
     uint256 public AllocationBlockCount;
@@ -104,6 +105,7 @@ contract ReversableICO is IERC777Recipient {
     function addSettings(
         address _TokenTrackerAddress,
         address _whitelistControllerAddress,
+        address _TeamWalletAddress,
         uint256 _StartBlock,
         uint256 _AllocationBlockCount,
         uint256 _AllocationPrice,
@@ -118,6 +120,7 @@ contract ReversableICO is IERC777Recipient {
         // addresses
         TokenTrackerAddress = _TokenTrackerAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
+        TeamWalletAddress = _TeamWalletAddress;
 
         // initialize ERC777 TokenTracker
         TokenTracker = IERC777(TokenTrackerAddress);
@@ -483,7 +486,7 @@ contract ReversableICO is IERC777Recipient {
     }
 
     /*
-    * Refund ( ERC777TokensRecipient method )
+    *   Refund ( ERC777TokensRecipient method )
     */
     function refund() public view returns (bool) {
         // 1. make sure we're receiving the correct tokens, else revert
@@ -549,7 +552,7 @@ contract ReversableICO is IERC777Recipient {
     }
 
     /*
-    * ERC777 - get the amount of locked tokens at current block number
+    *   ERC777 - get the amount of locked tokens at current block number
     */
     function getLockedTokenAmount(address _address) public view returns (uint256) {
 
@@ -587,6 +590,26 @@ contract ReversableICO is IERC777Recipient {
         } else {
             return 0;
         }
+    }
+
+    /*
+    *   Project Withdraw
+    */
+    function projectWithdraw()
+        public
+        requireInitialized
+        returns (bool)
+    {
+        require(msg.sender == TeamWalletAddress, "only TeamWalletAddress");
+
+
+        /*
+        // based on how many
+        return bought.mul(
+            getCurrentUnlockRatio(precision)
+        ).div(10 ** uint256(precision));
+        //
+        */
     }
 
     /*
