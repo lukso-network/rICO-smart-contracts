@@ -165,6 +165,12 @@ describe("Flow Testing", function () {
         let DistributionStartBlock, DistributionBlockLength, currentBlock;
 
         before(async function () {
+
+            let maxEth = await this.ReversableICO.methods.availableEth().call();
+            let ricoTokenBalance = await TokenTrackerInstance.methods.balanceOf(this.ReversableICO.receipt.contractAddress).call();
+            let currentStage = await this.ReversableICO.methods.getCurrentStage().call();
+            let StageData = await this.ReversableICO.methods.StageByNumber(currentStage).call(); 
+    
             DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
             DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
 
@@ -190,17 +196,19 @@ describe("Flow Testing", function () {
             });
 
             // console.log("contribution 3 / account 2");
-            const ContributionAmount3 = new helpers.BN("35000").mul( helpers.solidity.etherBN );
+            const ContributionAmount3 = new helpers.BN("15000").mul( helpers.solidity.etherBN );
             newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                 from: participant_2,
                 to: helpers.addresses.Rico,
                 value: ContributionAmount3.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
+            
 
-
+            // await displayContractStats(this.ReversableICO, TokenTrackerInstance);
             // await displayContributions(this.ReversableICO, participant_1);
             // await displayContributions(this.ReversableICO, participant_2);
+
             // console.log("whitelist!");
             // whitelist and accept contribution
             let whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
@@ -282,7 +290,7 @@ describe("Flow Testing", function () {
 
             it("test", async function () {
 
-                await displayContractEthStats(this.ReversableICO);
+                await displayContractStats(this.ReversableICO, TokenTrackerInstance);
 
                 const ContributionAmountStage5 = new helpers.BN("1000").mul( helpers.solidity.etherBN );
                 newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -292,7 +300,7 @@ describe("Flow Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                await displayContractEthStats(this.ReversableICO);
+                await displayContractStats(this.ReversableICO, TokenTrackerInstance);
 
             });
             
@@ -360,9 +368,9 @@ async function displayContributions(contract, participant_address) {
     const contributionsCount = ParticipantByAddress.contributionsCount;
     console.log("Contributions for address:", participant_address, "Count:", contributionsCount.toString());
 
-    console.log("Total Contributed amount:", contributed_amount.toString());
-    console.log("Total Withdrawn amount:  ", withdrawn_amount.toString());
-    console.log("Total Available amount:  ", available_amount.toString());
+    console.log("Total Contributed amount:", ParticipantByAddress.contributed_amount.toString());
+    console.log("Total Withdrawn amount:  ", ParticipantByAddress.withdrawn_amount.toString());
+    console.log("Total Available amount:  ", ParticipantByAddress.available_amount.toString());
     
     for(let i = 0; i < contributionsCount; i++) {
         const ParticipantContributionDetails = await contract.methods.ParticipantContributionDetails(participant_address, i).call();
@@ -380,16 +388,18 @@ async function displayContributions(contract, participant_address) {
     console.log("\n");
 }
 
-async function displayContractEthStats(contract) {
+async function displayContractStats(contract, TokenTrackerInstance) {
 
-    let maxEth = await contract.methods.maxEth().call();
+    let maxEth = await contract.methods.maxAvailableEth().call();
     let receivedETH = await contract.methods.receivedETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let acceptedETH = await contract.methods.acceptedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
     let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
-    
+    let ricoTokenBalance = await TokenTrackerInstance.methods.balanceOf(contract.receipt.contractAddress).call();
+
+    console.log("ricoTokenBalance:   ", ricoTokenBalance);
     console.log("maxEth:             ", maxEth);
     console.log("receivedETH:        ", receivedETH);
     console.log("returnedETH:        ", returnedETH);
