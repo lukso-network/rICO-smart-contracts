@@ -158,9 +158,10 @@ describe("Flow Testing", function () {
     });
 
     
-    describe("transaction projectWithdraw()", async function () { 
+    describe("transaction projectWithdraw(uint256 ethAmount)", async function () { 
 
         const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+
         let DistributionStartBlock, DistributionBlockLength, currentBlock;
 
         before(async function () {
@@ -179,8 +180,28 @@ describe("Flow Testing", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            let amount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
+            // console.log("contribution 2 / account 1");
+            const ContributionAmount2 = new helpers.BN("15000").mul( helpers.solidity.etherBN );
+            newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: helpers.addresses.Rico,
+                value: ContributionAmount2.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
 
+            // console.log("contribution 3 / account 2");
+            const ContributionAmount3 = new helpers.BN("35000").mul( helpers.solidity.etherBN );
+            newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                from: participant_2,
+                to: helpers.addresses.Rico,
+                value: ContributionAmount3.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+
+            // await displayContributions(this.ReversableICO, participant_1);
+            // await displayContributions(this.ReversableICO, participant_2);
+            // console.log("whitelist!");
             // whitelist and accept contribution
             let whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
                 participant_1,
@@ -191,6 +212,19 @@ describe("Flow Testing", function () {
                 from: whitelistControllerAddress
             });
 
+            whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
+                participant_2,
+                ContributionStates.ACCEPTED,
+                0,          // start id
+                15
+            ).send({
+                from: whitelistControllerAddress
+            });
+
+            // await displayContributions(this.ReversableICO, participant_1);
+            // await displayContributions(this.ReversableICO, participant_2);
+
+            // console.log("Jump to stage 5");
             // jump to stage 5
             currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 5);
         });
@@ -211,8 +245,10 @@ describe("Flow Testing", function () {
                 const initialized = await TestReversableICO.methods.initialized().call();
                 expect( initialized ).to.be.equal( false );
 
+                let ethAmount = await TestReversableICO.methods.projectETH().call();
+
                 await helpers.assertInvalidOpcode( async () => {
-                    let tx = await TestReversableICO.methods.projectWithdraw().send({
+                    let tx = await TestReversableICO.methods.projectWithdraw(ethAmount).send({
                         from: TeamWalletAddress
                     });
                 }, "requireInitialized: Contract must be initialized");
@@ -223,21 +259,45 @@ describe("Flow Testing", function () {
         describe("contract in Distribution phase", async function () { 
 
             it("transaction reverts \"only TeamWalletAddress\" if called by other address", async function () {
+
+                let ethAmount = await this.ReversableICO.methods.projectETH().call();
+
                 await helpers.assertInvalidOpcode( async () => {
-                    let tx = await this.ReversableICO.methods.projectWithdraw().send({
+                    let tx = await this.ReversableICO.methods.projectWithdraw(ethAmount).send({
                         from: participant_1
                     });
                 }, "only TeamWalletAddress");
             });
 
             it("succeeds if called by TeamWalletAddress", async function () {
-                let tx = await this.ReversableICO.methods.projectWithdraw().send({
+
+                let ethAmount = await this.ReversableICO.methods.projectETH().call();
+
+                let tx = await this.ReversableICO.methods.projectWithdraw(ethAmount).send({
                     from: TeamWalletAddress
                 });
-                console.log(tx.status);
-            });
-        });
 
+            });
+
+
+            it("test", async function () {
+
+                await displayContractEthStats(this.ReversableICO);
+
+                const ContributionAmountStage5 = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_2,
+                    to: helpers.addresses.Rico,
+                    value: ContributionAmountStage5.toString(),
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+
+                await displayContractEthStats(this.ReversableICO);
+
+            });
+            
+
+        });
 
     });
 
@@ -289,4 +349,53 @@ async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, en
     });
 
     return block;
+}
+
+
+
+async function displayContributions(contract, participant_address) {
+
+    let ParticipantByAddress = await contract.methods.ParticipantsByAddress(participant_address).call();
+
+    const contributionsCount = ParticipantByAddress.contributionsCount;
+    console.log("Contributions for address:", participant_address, "Count:", contributionsCount.toString());
+
+    console.log("Total Contributed amount:", contributed_amount.toString());
+    console.log("Total Withdrawn amount:  ", withdrawn_amount.toString());
+    console.log("Total Available amount:  ", available_amount.toString());
+    
+    for(let i = 0; i < contributionsCount; i++) {
+        const ParticipantContributionDetails = await contract.methods.ParticipantContributionDetails(participant_address, i).call();
+        console.log("contribution:", i);
+
+        console.log("_value:    ", ParticipantContributionDetails._value.toString());
+        console.log("_received: ", ParticipantContributionDetails._received.toString());
+        console.log("_returned: ", ParticipantContributionDetails._returned.toString());
+        console.log("_block:    ", ParticipantContributionDetails._block.toString());
+        console.log("_stageId:  ", ParticipantContributionDetails._stageId.toString());
+        console.log("_state:    ", ParticipantContributionDetails._state.toString());
+        console.log("_tokens:   ", ParticipantContributionDetails._tokens.toString());
+
+    }
+    console.log("\n");
+}
+
+async function displayContractEthStats(contract) {
+
+    let maxEth = await contract.methods.maxEth().call();
+    let receivedETH = await contract.methods.receivedETH().call();
+    let returnedETH = await contract.methods.returnedETH().call();
+    let acceptedETH = await contract.methods.acceptedETH().call();
+    let contributorsETH = await contract.methods.contributorsETH().call();
+    let projectETH = await contract.methods.projectETH().call();
+    let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
+    
+    console.log("maxEth:             ", maxEth);
+    console.log("receivedETH:        ", receivedETH);
+    console.log("returnedETH:        ", returnedETH);
+    console.log("acceptedETH:        ", acceptedETH);
+    console.log("contributorsETH:    ", contributorsETH);
+    console.log("projectETH:         ", projectETH);
+    console.log("projectETHWithdrawn:", projectETHWithdrawn);
+    console.log("\n");
 }

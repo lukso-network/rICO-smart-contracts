@@ -127,8 +127,8 @@ async function runTests() {
         'external/SafeMath',
         '1_ERC1820',
         '2_ERC777_Token',
-        '3_ERC20Token',
-        '4_ReversableICO',
+        // '3_ERC20Token',
+        // '4_ReversableICO',
         '5_Flows',
     ];
 

@@ -83,11 +83,11 @@ describe("ReversableICO", function () {
             expect(await this.ReversableICO.methods.ended().call()).to.be.equal(false);
         });
 
-        it("Property TokenTrackerAddress should be address(0)", async function () {
+        it("Property TokenTrackerAddress should be address(0x0)", async function () {
             expect(await this.ReversableICO.methods.TokenTrackerAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
-        it("Property whitelistControllerAddress should be address(0)", async function () {
+        it("Property whitelistControllerAddress should be address(0x0)", async function () {
             expect(await this.ReversableICO.methods.whitelistControllerAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
@@ -1044,7 +1044,7 @@ describe("ReversableICO", function () {
 
         });
 
-        describe("view getCurrentUnlockRatio(uint8 precision)", async function () { 
+        describe("view getCurrentUnlockRatio()", async function () { 
 
             const precision = 20;
             let DistributionStartBlock, DistributionBlockLength;
@@ -1059,7 +1059,7 @@ describe("ReversableICO", function () {
                 let stageId = 0;
                 // jump to stage allocation start block - 1
                 let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
-                let contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                let contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio().call();
                 let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
     
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
@@ -1068,7 +1068,7 @@ describe("ReversableICO", function () {
                 stageId = 1;
                 // jump to stage start_block - 1
                 currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-                contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio().call();
                 calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
     
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
@@ -1081,7 +1081,7 @@ describe("ReversableICO", function () {
                 const stageId = 1;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, false, 1 );
-                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
@@ -1091,7 +1091,7 @@ describe("ReversableICO", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
@@ -1101,7 +1101,7 @@ describe("ReversableICO", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true, 1 );
-                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
+                const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
