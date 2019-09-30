@@ -4,7 +4,7 @@ async function runTests() {
     let web3Instance;
 
     // Network name we're using to run the tests
-    let network                     = process.argv[3];
+    let network                     = process.argv[4];
 
     if(!network) { network = "development"; };
 
