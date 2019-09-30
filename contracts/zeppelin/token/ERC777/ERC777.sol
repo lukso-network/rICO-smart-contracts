@@ -398,7 +398,7 @@ contract ERC777 is IERC777, IERC20 {
         bytes memory userData,
         bytes memory operatorData
     )
-        private
+        internal
     {
         _balances[from] = _balances[from].sub(amount);
         _balances[to] = _balances[to].add(amount);
