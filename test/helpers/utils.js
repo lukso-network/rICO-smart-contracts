@@ -39,10 +39,8 @@ let logPre = "      ";
 
 module.exports = {
     hasEvent(tx, eventNamePlusReturn) {
-        console.log(tx);
-        
         let eventSig = web3util.sha3(eventNamePlusReturn);
-        return tx.receipt.logs.filter(x => x.topics[0] === eventSig);
+        return tx.logs.filter(x => x.topics[0] === eventSig);
     },
     getEventArgs(tx) {
         // tx.receipt.logs[0].topics[2];

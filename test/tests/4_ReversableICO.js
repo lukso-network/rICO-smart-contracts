@@ -19,7 +19,8 @@ const ContributionStates = {
     NOT_SET:0,        // will match default value of a mapping result
     NOT_PROCESSED:1,
     ACCEPTED:2,
-    REJECTED:3
+    REJECTED:3,
+    CANCELLED:4,
 }
 
 let errorMessage;
