@@ -1,10 +1,14 @@
 async function runTests() {
 
     const Web3                      = require('web3');
-    let web3Instance;
+    let web3Instance, network;
 
-    // Network name we're using to run the tests
-    let network                     = process.argv[4];
+    if(process.argv[3] == "coverage") {
+        network = process.argv[3];
+    } else {
+        // Network name we're using to run the tests
+        network = process.argv[4];
+    }
 
     if(!network) { network = "development"; };
 
@@ -151,8 +155,8 @@ async function runTests() {
         'external/SafeMath',
         '1_ERC1820',
         '2_ERC777_Token',
-        // '3_ERC20Token',
-        // '4_ReversableICO',
+        '3_ERC20Token',
+        '4_ReversableICO',
         '5_Flows',
     ];
 
