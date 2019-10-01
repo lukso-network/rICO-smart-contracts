@@ -1,2 +1,2 @@
 #!/bin/bash
-sh scripts/rpcs/ethereum/stoprpc.sh $1
+scripts/rpcs/ethereum/stoprpc.sh $1
