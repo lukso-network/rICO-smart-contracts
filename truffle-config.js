@@ -17,11 +17,14 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
-const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require("truffle-hdwallet-provider");
 // const infuraKey = "fj4jll3k.....";
 //
-const fs = require('fs');
-const mnemonic = fs.readFileSync("scripts/rpcs/_seed_words").toString().trim();
+const fs = require("fs");
+const mnemonic = fs
+  .readFileSync("scripts/rpcs/_seed_words")
+  .toString()
+  .trim();
 
 module.exports = {
   /**
@@ -49,52 +52,62 @@ module.exports = {
 
     // Another network with more advanced options...
     // advanced: {
-      // port: 8777,             // Custom port
-      // network_id: 1342,       // Custom network
-      // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
-      // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
-      // from: <address>,        // Account to send txs from (default: accounts[0])
-      // websockets: true        // Enable EventEmitter interface for web3 (default: false)
+    // port: 8777,             // Custom port
+    // network_id: 1342,       // Custom network
+    // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
+    // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
+    // from: <address>,        // Account to send txs from (default: accounts[0])
+    // websockets: true        // Enable EventEmitter interface for web3 (default: false)
     // },
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     // ropsten: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/YOUR-PROJECT-ID`),
-      // network_id: 3,       // Ropsten's id
-      // gas: 5500000,        // Ropsten has a lower block limit than mainnet
-      // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/YOUR-PROJECT-ID`),
+    // network_id: 3,       // Ropsten's id
+    // gas: 5500000,        // Ropsten has a lower block limit than mainnet
+    // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+    // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+    // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     // },
 
     // Useful for private networks
     // private: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-      // network_id: 2111,   // This network is yours, in the cloud.
-      // production: true    // Treats this network as if it was a public net. (default: false)
+    // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
+    // network_id: 2111,   // This network is yours, in the cloud.
+    // production: true    // Treats this network as if it was a public net. (default: false)
     // }
-
 
     development: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "http://127.0.0.1:8545/", 0, 11, false);
+        return new HDWalletProvider(
+          mnemonic,
+          "http://127.0.0.1:8545/",
+          0,
+          11,
+          false
+        );
       },
       // host: "127.0.0.1",     // Localhost (default: none)
       // port: 8545,            // Standard Ethereum port (default: none)
-      network_id: "*",          // Any network (default: none),
+      network_id: "*", // Any network (default: none),
       // skipDryRun: true       // Skip dry run before migrations? (default: false for public nets )
-      gas: 6700000,             // 6.7m .. should be around 8m these days
-      gasPrice: 10000000000     // 10 gwei (in wei) (default: 100 gwei)
-
+      gas: 6700000, // 6.7m .. should be around 8m these days
+      gasPrice: 10000000000 // 10 gwei (in wei) (default: 100 gwei)
     },
     coverage: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "http://127.0.0.1:6545/", 0, 11, false);
+        return new HDWalletProvider(
+          mnemonic,
+          "http://127.0.0.1:6545/",
+          0,
+          11,
+          false
+        );
       },
       gas: 0xfffffffffff, // <-- Use this high gas value
-      gasPrice: 0x01      // <-- Use this low gas price
-    },
+      gasPrice: 0x01 // <-- Use this low gas price
+    }
   },
 
   // Set default mocha options here, use special reporters etc.
@@ -105,7 +118,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "native",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.5.10" // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
@@ -116,4 +129,4 @@ module.exports = {
       // }
     }
   }
-}
+};
