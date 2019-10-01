@@ -53,6 +53,7 @@ async function revertToFreshDeployment() {
     let SnapShotKey = "FlowTestInit";
 
     if (typeof snapshots[SnapShotKey] !== "undefined" && snapshotsEnabled) {
+        
         // restore snapshot
         await helpers.web3.evm.revert(snapshots[SnapShotKey]);
         // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
@@ -61,7 +62,7 @@ async function revertToFreshDeployment() {
         // reset account nonces.. 
         helpers.utils.resetAccountNonceCache(helpers);
     } else {
-
+        
         /*
         *   Deploy Token Contract
         */
@@ -73,7 +74,7 @@ async function revertToFreshDeployment() {
                     setup.settings.token.supply.toString(),
                     defaultOperators
                 ],
-                gas: 3500000,
+                gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }
         );
@@ -94,6 +95,11 @@ async function revertToFreshDeployment() {
         console.log("      Contract Address:", ReversableICOAddress);
         console.log("");
 
+        await TokenTrackerInstance.methods.setupRico(
+            ReversableICOAddress,
+        ).send({
+            from: holder,  // initial token supply holder
+        });
 
         // transfer tokens to rico
         await TokenTrackerInstance.methods.send(
@@ -104,6 +110,7 @@ async function revertToFreshDeployment() {
             from: holder,  // initial token supply holder
             gas: 100000
         });
+
 
         expect(
             await TokenTrackerInstance.methods.balanceOf(ReversableICOAddress).call()
