@@ -1,10 +1,14 @@
 async function runTests() {
 
     const Web3                      = require('web3');
-    let web3Instance;
+    let web3Instance, network;
 
-    // Network name we're using to run the tests
-    let network                     = process.argv[3];
+    if(process.argv[3] == "coverage") {
+        network = process.argv[3];
+    } else {
+        // Network name we're using to run the tests
+        network = process.argv[4];
+    }
 
     if(!network) { network = "development"; };
 
@@ -67,7 +71,31 @@ async function runTests() {
         abi: [{"constant":false,"inputs":[{"name":"_addr","type":"address"},{"name":"_interfaceHash","type":"bytes32"},{"name":"_implementer","type":"address"}],"name":"setInterfaceImplementer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_addr","type":"address"}],"name":"getManager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_addr","type":"address"},{"name":"_newManager","type":"address"}],"name":"setManager","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_interfaceName","type":"string"}],"name":"interfaceHash","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":false,"inputs":[{"name":"_contract","type":"address"},{"name":"_interfaceId","type":"bytes4"}],"name":"updateERC165Cache","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_addr","type":"address"},{"name":"_interfaceHash","type":"bytes32"}],"name":"getInterfaceImplementer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_contract","type":"address"},{"name":"_interfaceId","type":"bytes4"}],"name":"implementsERC165InterfaceNoCache","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_contract","type":"address"},{"name":"_interfaceId","type":"bytes4"}],"name":"implementsERC165Interface","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"name":"addr","type":"address"},{"indexed":true,"name":"interfaceHash","type":"bytes32"},{"indexed":true,"name":"implementer","type":"address"}],"name":"InterfaceImplementerSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"addr","type":"address"},{"indexed":true,"name":"newManager","type":"address"}],"name":"ManagerChanged","type":"event"}],
         instance: false,
     }
+    
+    function toIntVal(val) {
+        return parseInt(val);
+    }
 
+    // https://web3js.readthedocs.io/en/v1.2.1/web3.html#extend
+    web3.extend({
+        property: 'evm',
+        methods: 
+        [
+            {
+                name: 'snapshot',
+                call: 'evm_snapshot',
+                params: 0,
+                outputFormatter: toIntVal
+            },
+            {
+                name: 'revert',
+                call: 'evm_revert',
+                params: 1,
+                inputFormatter: [toIntVal]
+            }
+        ]
+    });
+    
     const setup = {
         network: network,
         globals: {},
@@ -127,8 +155,8 @@ async function runTests() {
         'external/SafeMath',
         '1_ERC1820',
         '2_ERC777_Token',
-        // '3_ERC20Token',
-        // '4_ReversableICO',
+        '3_ERC20Token',
+        '4_ReversableICO',
         '5_Flows',
     ];
 

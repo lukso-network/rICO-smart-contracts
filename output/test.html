@@ -10,7 +10,7 @@
 <pre>
 
 &gt; ricopoc@0.0.1 test /Volumes/Dev/RICO/poc
-&gt; scripts/run_tests.sh all
+&gt; scripts/run_tests.sh all refresh
 
 Starting new ganache-cli instance at port 8545
 exchange neither monster ethics bless cancel ghost excite business record warfare invite
@@ -33,27 +33,27 @@ Compiling your contracts...
 
   SafeMath
     add
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> adds correctly</span><span style="color:red;"> (32ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts on addition overflow</span><span style="color:red;"> (40ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> adds correctly</span><span style="color:red;"> (33ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts on addition overflow</span><span style="color:red;"> (41ms)</span>
     sub
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> subtracts correctly</span><span style="color:yellow;"> (14ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts if subtraction result would be negative</span><span style="color:red;"> (17ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> subtracts correctly</span><span style="color:yellow;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts if subtraction result would be negative</span><span style="color:red;"> (18ms)</span>
     mul
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> multiplies correctly</span><span style="color:red;"> (28ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> multiplies by zero correctly</span><span style="color:red;"> (24ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> multiplies by zero correctly</span><span style="color:red;"> (25ms)</span>
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts on multiplication overflow</span><span style="color:yellow;"> (15ms)</span>
     div
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> divides correctly</span><span style="color:yellow;"> (13ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> divides zero correctly</span><span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns complete number result on non-even division</span><span style="color:yellow;"> (11ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts on division by zero</span><span style="color:yellow;"> (14ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> divides correctly</span><span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> divides zero correctly</span><span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns complete number result on non-even division</span><span style="color:yellow;"> (12ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts on division by zero</span><span style="color:yellow;"> (13ms)</span>
     mod
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts with a 0 divisor</span><span style="color:red;"> (18ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> reverts with a 0 divisor</span><span style="color:red;"> (17ms)</span>
       modulos correctly
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is smaller than the divisor</span><span style="color:yellow;"> (13ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is smaller than the divisor</span><span style="color:yellow;"> (12ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is equal to the divisor</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is larger than the divisor</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is a multiple of the divisor</span><span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is larger than the divisor</span><span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> when the dividend is a multiple of the divisor</span><span style="color:yellow;"> (10ms)</span>
 
   ERC1820 - Token Registry
     Step 1 - Before deployment state
@@ -76,7 +76,7 @@ Compiling your contracts...
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract address is 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24</span>
         Contract
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> code at address exists</span>
-        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> contract has the getManager method which can be called</span><span style="color:yellow;"> (12ms)</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> contract has the getManager method which can be called</span><span style="color:red;"> (20ms)</span>
 
   ERC777 - RICO Token
     Deployment
@@ -86,169 +86,207 @@ Compiling your contracts...
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Gas usage should be lower than 3.5m.</span>
       basic information
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the name</span><span style="color:yellow;"> (14ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the symbol</span><span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the symbol</span><span style="color:red;"> (29ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns a granularity of 1</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the default operators</span><span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the default operators</span><span style="color:yellow;"> (13ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> default operators are operators for all accounts</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns the total supply</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns 18 when decimals is called</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> the ERC777Token interface is registered in the registry</span><span style="color:yellow;"> (15ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> the ERC20Token interface is registered in the registry</span><span style="color:yellow;"> (15ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns 18 when decimals is called</span><span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> the ERC777Token interface is registered in the registry</span><span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> the ERC20Token interface is registered in the registry</span><span style="color:red;"> (16ms)</span>
       balanceOf
         for an account with no tokens
-        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns zero</span><span style="color:yellow;"> (12ms)</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns zero</span><span style="color:yellow;"> (13ms)</span>
         for an account with tokens
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns their balance</span><span style="color:yellow;"> (12ms)</span>
 
   ERC777 - ERC20 Token compatibility
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> creation: in contract settings should match settings</span><span style="color:red;"> (50ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> creation: should create a correct initial balance for the creator</span><span style="color:yellow;"> (13ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: ether transfer should be reversed.</span><span style="color:red;"> (78ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should transfer 10000 to accounts[1] with creator having at least 10000</span><span style="color:red;"> (77ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should fail when trying to transfer total amount + 1 to accounts[1] with creator having total amount</span><span style="color:red;"> (56ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should handle zero-transfers normally</span><span style="color:red;"> (69ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should throw if receiver address is 0x0</span><span style="color:red;"> (37ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> creation: in contract settings should match settings</span><span style="color:red;"> (49ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> creation: should create a correct initial balance for the creator</span><span style="color:yellow;"> (10ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: ether transfer should be reversed.</span><span style="color:red;"> (54ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should transfer 10000 to accounts[1] with creator having at least 10000</span><span style="color:red;"> (79ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should fail when trying to transfer total amount + 1 to accounts[1] with creator having total amount</span><span style="color:red;"> (54ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should handle zero-transfers normally</span><span style="color:red;"> (67ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transfers: should throw if receiver address is 0x0</span><span style="color:red;"> (36ms)</span>
   <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender should approve 100 to accounts[1]</span><span style="color:red;"> (59ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 once.</span><span style="color:red;"> (210ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 twice.</span><span style="color:red;"> (269ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 50 &amp; 60 (2nd tx should fail)</span><span style="color:red;"> (158ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 once.</span><span style="color:red;"> (208ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 20 twice.</span><span style="color:red;"> (262ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: msg.sender approves accounts[1] of 100 &amp; withdraws 50 &amp; 60 (2nd tx should fail)</span><span style="color:red;"> (159ms)</span>
   <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: attempt withdrawal from account with no allowance (should fail)</span><span style="color:red;"> (74ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: allow accounts[1] 100 to withdraw from creator. Withdraw 60 and then approve 0 &amp; attempt transfer.</span><span style="color:red;"> (208ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: approve max (2^256 - 1)</span><span style="color:red;"> (61ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> allowance: should start with zero</span><span style="color:yellow;"> (15ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: approve max (2^256 - 1)</span><span style="color:red;"> (54ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Transfer event properly</span><span style="color:red;"> (68ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Transfer event normally on a zero transfer</span><span style="color:red;"> (68ms)</span>
-  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Approval event properly</span><span style="color:red;"> (48ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: allow accounts[1] 100 to withdraw from creator. Withdraw 60 and then approve 0 &amp; attempt transfer.</span><span style="color:red;"> (212ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: approve max (2^256 - 1)</span><span style="color:red;"> (56ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> allowance: should start with zero</span><span style="color:yellow;"> (11ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> approvals: approve max (2^256 - 1)</span><span style="color:red;"> (53ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Transfer event properly</span><span style="color:red;"> (67ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Transfer event normally on a zero transfer</span><span style="color:red;"> (65ms)</span>
+  <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> events: should fire Approval event properly</span><span style="color:red;"> (46ms)</span>
 
   ReversableICO
-      Gas used for deployment: 3039744
+      Gas used for deployment: 4314512
       Contract Address: 0x35C310d59E2b7f1F96A5e133Efb20538266e4053
 
     Stage 1 - Deployment
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Gas usage should be lower than network configuration gas.</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222</span><span style="color:red;"> (16ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222</span><span style="color:yellow;"> (14ms)</span>
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property initialized should be false</span><span style="color:yellow;"> (12ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property running should be false</span><span style="color:yellow;"> (13ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property frozen should be false</span><span style="color:yellow;"> (13ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property running should be false</span><span style="color:red;"> (16ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property frozen should be false</span><span style="color:yellow;"> (11ms)</span>
     <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property ended should be false</span><span style="color:yellow;"> (12ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property TokenTrackerAddress should be address(0)</span><span style="color:red;"> (18ms)</span>
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property whitelistControllerAddress should be address(0)</span><span style="color:yellow;"> (9ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property TokenTrackerAddress should be address(0x0)</span><span style="color:yellow;"> (14ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property whitelistControllerAddress should be address(0x0)</span><span style="color:red;"> (17ms)</span>
     Stage 2 - Transfer tokens to RICO contract address
-    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> RICO Contract should have the correct token balance (15000000000000000000000000)</span><span style="color:yellow;"> (11ms)</span>
+    <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> RICO Contract should have the correct token balance (15000000000000000000000000)</span><span style="color:yellow;"> (12ms)</span>
     Stage 3 - Initialisation - addSettings()
       Contract settings
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property initialized should be true</span><span style="color:yellow;"> (11ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property running should be false</span><span style="color:red;"> (16ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property frozen should be false</span><span style="color:yellow;"> (14ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property initialized should be true</span><span style="color:yellow;"> (10ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property running should be false</span><span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property frozen should be false</span><span style="color:yellow;"> (15ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property ended should be false</span><span style="color:yellow;"> (12ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property TokenTrackerAddress should be deployed ERC777 Token Contract address</span><span style="color:yellow;"> (11ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE</span><span style="color:yellow;"> (15ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> EndBlock matches settings</span><span style="color:red;"> (17ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE</span><span style="color:yellow;"> (9ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Property TeamWalletAddress should be 0xFE6B56FdCF920382Af1493828E79C017EE090F2a</span><span style="color:red;"> (20ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> EndBlock matches settings</span><span style="color:yellow;"> (11ms)</span>
       Contract Stages
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Stage Count is correct</span><span style="color:yellow;"> (11ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Stage Count is correct</span><span style="color:yellow;"> (14ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Allocation StartBlock matches settings</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Allocation duration is AllocationBlockCount</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Allocation EndBlock matches settings</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> AllocationPrice matches settings</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> First Distribution Stage settings are correct</span><span style="color:yellow;"> (12ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Distribution Stage settings are correct</span><span style="color:red;"> (16ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> First Distribution Stage settings are correct</span><span style="color:yellow;"> (15ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Distribution Stage settings are correct</span><span style="color:yellow;"> (12ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Distribution Stage end_block matches contract EndBlock</span><span style="color:yellow;"> (13ms)</span>
       Contract Assets
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> RICO Contract should have 0 eth</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> RICO Contract should have the correct token balance (15000000000000000000000000)</span><span style="color:yellow;"> (13ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> InitialTokenSupply property should match Contract token balance (15000000000000000000000000)</span><span style="color:red;"> (27ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> InitialTokenSupply property should match Contract token balance (15000000000000000000000000)</span><span style="color:red;"> (26ms)</span>
     Contract Methods
       view getCurrentStage()
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if at Allocation start_block</span><span style="color:red;"> (66ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if at Allocation end_block</span><span style="color:red;"> (56ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if at stage 1 start_block</span><span style="color:red;"> (53ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if at stage 1 end_block</span><span style="color:red;"> (52ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if at stage 5 start_block</span><span style="color:red;"> (48ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if at stage 5 end_block</span><span style="color:red;"> (56ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns last stage if at last stage start_block</span><span style="color:red;"> (55ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns last stage if at last stage end_block</span><span style="color:red;"> (48ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 255 after last stage end_block</span><span style="color:red;"> (57ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if at Allocation start_block</span><span style="color:red;"> (64ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if at Allocation end_block</span><span style="color:red;"> (62ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if at stage 1 start_block</span><span style="color:red;"> (67ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if at stage 1 end_block</span><span style="color:red;"> (64ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if at stage 5 start_block</span><span style="color:red;"> (59ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if at stage 5 end_block</span><span style="color:red;"> (55ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns last stage if at last stage start_block</span><span style="color:red;"> (51ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns last stage if at last stage end_block</span><span style="color:red;"> (59ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 255 after last stage end_block</span><span style="color:red;"> (52ms)</span>
       view getStageAtBlock(uint256)
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if getStageAtBlock( Allocation.start_block )</span><span style="color:red;"> (23ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if getStageAtBlock( Allocation.end_block )</span><span style="color:red;"> (26ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if getStageAtBlock( Allocation.start_block )</span><span style="color:red;"> (20ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 0 if getStageAtBlock( Allocation.end_block )</span><span style="color:red;"> (25ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if getStageAtBlock( stage_1.start_block )</span><span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if getStageAtBlock( stage_1.end_block )</span><span style="color:red;"> (21ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if getStageAtBlock( stage_5.start_block )</span><span style="color:red;"> (28ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if getStageAtBlock( stage_5.end_block )</span><span style="color:red;"> (23ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage last stage if getStageAtBlock( last_stage.start_block )</span><span style="color:red;"> (27ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage last stage if getStageAtBlock( last_stage.end_block )</span><span style="color:red;"> (24ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 255 if getStageAtBlock( last_stage.end_block + 1 )</span><span style="color:red;"> (21ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 1 if getStageAtBlock( stage_1.end_block )</span><span style="color:red;"> (26ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if getStageAtBlock( stage_5.start_block )</span><span style="color:red;"> (29ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage 5 if getStageAtBlock( stage_5.end_block )</span><span style="color:red;"> (22ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage last stage if getStageAtBlock( last_stage.start_block )</span><span style="color:red;"> (64ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns stage last stage if getStageAtBlock( last_stage.end_block )</span><span style="color:red;"> (29ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 255 if getStageAtBlock( last_stage.end_block + 1 )</span><span style="color:red;"> (24ms)</span>
       view getCurrentPrice()
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for Allocation phase</span><span style="color:red;"> (56ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 1</span><span style="color:red;"> (54ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 5</span><span style="color:red;"> (49ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for last stage</span><span style="color:red;"> (54ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 after last stage ended</span><span style="color:red;"> (54ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 1</span><span style="color:red;"> (52ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 5</span><span style="color:red;"> (51ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for last stage</span><span style="color:red;"> (53ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 after last stage ended</span><span style="color:red;"> (57ms)</span>
       view getPriceAtBlock(uint256)
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for Allocation phase</span><span style="color:red;"> (22ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 1</span><span style="color:red;"> (30ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for Allocation phase</span><span style="color:red;"> (23ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 1</span><span style="color:red;"> (24ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for stage 5</span><span style="color:red;"> (22ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for last stage</span><span style="color:red;"> (23ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 after last stage ended</span><span style="color:red;"> (27ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for last stage</span><span style="color:red;"> (27ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 after last stage ended</span><span style="color:red;"> (23ms)</span>
       view getTokenAmountForEthAtStage(uint256, uint8)
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 eth &amp; Allocation stage</span><span style="color:red;"> (22ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 eth &amp; stage 1</span><span style="color:red;"> (20ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 0.002 eth &amp; Allocation stage ( results in 1 full token )</span><span style="color:red;"> (26ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 wei &amp; Allocation stage ( results in 500 token grains )</span><span style="color:red;"> (22ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 eth &amp; Allocation stage</span><span style="color:red;"> (24ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 eth &amp; stage 1</span><span style="color:red;"> (21ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 0.002 eth &amp; Allocation stage ( results in 1 full token )</span><span style="color:red;"> (22ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns correct value for 1 wei &amp; Allocation stage ( results in 500 token grains )</span><span style="color:red;"> (23ms)</span>
       transaction whitelistOrReject(address,mode,start_at,count)
         if msg.sender is not whitelistControllerAddress
-        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;onlyWhitelistController: Only Whitelist Controller can call this method&quot;</span><span style="color:red;"> (44ms)</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;onlyWhitelistController: Only Whitelist Controller can call this method&quot;</span><span style="color:red;"> (45ms)</span>
         msg.sender is whitelistControllerAddress
           contract in stage 1 or 2 ( not initialized with settings )
-          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> initialized is false</span><span style="color:yellow;"> (13ms)</span>
-          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (51ms)</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> initialized is false</span><span style="color:yellow;"> (10ms)</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (47ms)</span>
           contract in stage 4 - Ready for contributions
             supplied address has no contributions
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;whitelistOrReject: Participant record not found.&quot;</span><span style="color:red;"> (39ms)</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;whitelistOrReject: Participant record not found.&quot;</span><span style="color:red;"> (36ms)</span>
             supplied address has 15 contributions
               supplied mode is wrong.. (not ACCEPTED / REJECTED) 
               <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction reverts &quot;whitelistOrReject: invalid mode selected.&quot;</span><span style="color:red;"> (38ms)</span>
               supplied mode is ContributionStates.ACCEPTED
               <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction is accepted</span>
               <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ContributionEvent emitted event count matches</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution count is correct</span><span style="color:yellow;"> (13ms)</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contributions are stored correctly starting from 0</span><span style="color:red;"> (201ms)</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Token Balance is correct</span><span style="color:red;"> (232ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution count is correct</span><span style="color:yellow;"> (14ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contributions are stored correctly starting from 0</span><span style="color:red;"> (219ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Token Balance is correct</span><span style="color:red;"> (246ms)</span>
                 new contribution from the TestAcceptParticipant that is now whitelisted, is acceepted automatically.
                 <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction is accepted</span>
-                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution Count increases by 1</span><span style="color:yellow;"> (13ms)</span>
-                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Contribution is processed and has valid parameters</span><span style="color:red;"> (17ms)</span>
+                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution Count increases by 1</span><span style="color:red;"> (17ms)</span>
+                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Contribution is processed and has valid parameters</span><span style="color:yellow;"> (13ms)</span>
               supplied mode is ContributionStates.REJECTED
               <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction is accepted</span>
               <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ContributionEvent emitted event count matches</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution count is correct</span><span style="color:red;"> (17ms)</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contributions are stored correctly starting from 0</span><span style="color:red;"> (212ms)</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Token Balance is the same as initial</span><span style="color:yellow;"> (13ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution count is correct</span><span style="color:yellow;"> (12ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contributions are stored correctly starting from 0</span><span style="color:red;"> (203ms)</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Token Balance is the same as initial</span><span style="color:yellow;"> (9ms)</span>
                 new contribution from the RejectParticipant is now in NOT_PROCESSED state.
                 <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> transaction is accepted</span>
-                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution Count increases by 1</span><span style="color:yellow;"> (14ms)</span>
+                <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Participant Contribution Count increases by 1</span><span style="color:yellow;"> (11ms)</span>
                 <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Last Contribution is in NOT_PROCESSED state and has valid parameters</span><span style="color:yellow;"> (11ms)</span>
-      view getCurrentUnlockRatio(uint8 precision)
+      view getCurrentUnlockRatio()
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 before stage 1 start_block + 1</span><span style="color:red;"> (109ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns higher than 0 if at stage 1 start_block + 1</span><span style="color:red;"> (51ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at EndBlock</span><span style="color:red;"> (51ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at EndBlock + 1</span><span style="color:red;"> (51ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns higher than 0 if at stage 1 start_block + 1</span><span style="color:red;"> (53ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at EndBlock</span><span style="color:red;"> (50ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at EndBlock + 1</span><span style="color:red;"> (52ms)</span>
       view getLockedTokenAmount(address)
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at any stage if participant has no contributions</span><span style="color:red;"> (220ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns participant's purchased token amount before stage 1 start_block</span><span style="color:red;"> (57ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns proper amount at stage 1 start_block</span><span style="color:red;"> (63ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 at any stage if participant has no contributions</span><span style="color:red;"> (258ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns participant's purchased token amount before stage 1 start_block</span><span style="color:red;"> (63ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns proper amount at stage 1 start_block</span><span style="color:red;"> (65ms)</span>
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns proper amount at stage 12 end_block - 1</span><span style="color:red;"> (63ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )</span><span style="color:red;"> (62ms)</span>
-      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 locked tokens after EndBlock</span><span style="color:red;"> (127ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )</span><span style="color:red;"> (61ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Returns 0 locked tokens after EndBlock</span><span style="color:red;"> (128ms)</span>
+
+  Flow Testing
+    view getCancelModeStates(address participantAddress)
+      TOKEN Gas used for deployment: 3369731
+      Contract Address: 0x24De5E526646a41c794656b2C692710655991A20
+      RICO Gas used for deployment:  4314512
+      Contract Address: 0xf2574a2460A5B751edebE8929de8369E545750b1
+
+      contract in stage 1 or 2 ( not initialized with settings )
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (false, false) as no participant actually exists</span><span style="color:yellow;"> (12ms)</span>
+      contract in Allocation phase
+        participant has no contributions
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (false, false)</span><span style="color:yellow;"> (10ms)</span>
+        participant is not whitelisted and has 1 contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (true, false) =&gt; cancel by sending eth value smaller than 0.001 eth to contract</span><span style="color:yellow;"> (12ms)</span>
+        participant is whitelisted and has 1 contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (false, true) =&gt; cancel by sending tokens back to contract</span><span style="color:red;"> (16ms)</span>
+      contract in Distribution phase
+        participant has no contributions
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (false, false)</span><span style="color:yellow;"> (11ms)</span>
+        participant is not whitelisted and has 1 contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (true, false) =&gt; cancel by sending eth value smaller than 0.001 eth to contract</span><span style="color:yellow;"> (12ms)</span>
+        participant is whitelisted and has 1 contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return (false, true) =&gt; cancel by sending tokens back to contract</span><span style="color:yellow;"> (14ms)</span>
+    transaction () =&gt; fallback method
+      contract in stage 1 or 2 ( not initialized with settings )
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> 0 value transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (39ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> value &gt; 0 transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (40ms)</span>
+      contract in Allocation phase
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> value &gt;= rico.minContribution results in a new contribution</span><span style="color:red;"> (137ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> value &lt; rico.minContribution results in cancel(), account has 2 contributions</span><span style="color:red;"> (222ms)</span>
+    transaction cancel()
+      contract in stage 1 or 2 ( not initialized with settings )
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> 0 value transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (28ms)</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> value &gt; 0 transaction reverts &quot;requireInitialized: Contract must be initialized&quot;</span><span style="color:red;"> (28ms)</span>
+      contract in Allocation phase
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> value &lt; rico.minContribution results in cancel(), account has 1 contribution</span><span style="color:red;"> (196ms)</span>
 
 
-<span style="filter: contrast(70%) brightness(190%);color:lime;"> </span><span style="color:lime;"> 148 passing</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> (11s)</span>
+<span style="filter: contrast(70%) brightness(190%);color:lime;"> </span><span style="color:lime;"> 163 passing</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> (15s)</span>
 
 Done
 --------------------------------------------------------------------
 
-Killing existing ganache-cli instance at pid 57645.
+Killing existing ganache-cli instance at pid 90630.
 
 </pre>
 </body>

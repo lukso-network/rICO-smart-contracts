@@ -1,6 +1,6 @@
 
 > ricopoc@0.0.1 test /Volumes/Dev/RICO/poc
-> scripts/run_tests.sh all
+> scripts/run_tests.sh all refresh
 
 Starting new ganache-cli instance at port 8545
 exchange neither monster ethics bless cancel ghost excite business record warfare invite
@@ -23,27 +23,27 @@ Compiling your contracts...
 [0m[0m
 [0m  SafeMath[0m
 [0m    add[0m
-    [32m  ✓[0m[90m adds correctly[0m[31m (32ms)[0m
-    [32m  ✓[0m[90m reverts on addition overflow[0m[31m (40ms)[0m
+    [32m  ✓[0m[90m adds correctly[0m[31m (33ms)[0m
+    [32m  ✓[0m[90m reverts on addition overflow[0m[31m (41ms)[0m
 [0m    sub[0m
-    [32m  ✓[0m[90m subtracts correctly[0m[33m (14ms)[0m
-    [32m  ✓[0m[90m reverts if subtraction result would be negative[0m[31m (17ms)[0m
+    [32m  ✓[0m[90m subtracts correctly[0m[33m (13ms)[0m
+    [32m  ✓[0m[90m reverts if subtraction result would be negative[0m[31m (18ms)[0m
 [0m    mul[0m
     [32m  ✓[0m[90m multiplies correctly[0m[31m (28ms)[0m
-    [32m  ✓[0m[90m multiplies by zero correctly[0m[31m (24ms)[0m
+    [32m  ✓[0m[90m multiplies by zero correctly[0m[31m (25ms)[0m
     [32m  ✓[0m[90m reverts on multiplication overflow[0m[33m (15ms)[0m
 [0m    div[0m
-    [32m  ✓[0m[90m divides correctly[0m[33m (13ms)[0m
-    [32m  ✓[0m[90m divides zero correctly[0m[33m (11ms)[0m
-    [32m  ✓[0m[90m returns complete number result on non-even division[0m[33m (11ms)[0m
-    [32m  ✓[0m[90m reverts on division by zero[0m[33m (14ms)[0m
+    [32m  ✓[0m[90m divides correctly[0m[33m (12ms)[0m
+    [32m  ✓[0m[90m divides zero correctly[0m[33m (12ms)[0m
+    [32m  ✓[0m[90m returns complete number result on non-even division[0m[33m (12ms)[0m
+    [32m  ✓[0m[90m reverts on division by zero[0m[33m (13ms)[0m
 [0m    mod[0m
-    [32m  ✓[0m[90m reverts with a 0 divisor[0m[31m (18ms)[0m
+    [32m  ✓[0m[90m reverts with a 0 divisor[0m[31m (17ms)[0m
 [0m      modulos correctly[0m
-      [32m  ✓[0m[90m when the dividend is smaller than the divisor[0m[33m (13ms)[0m
+      [32m  ✓[0m[90m when the dividend is smaller than the divisor[0m[33m (12ms)[0m
       [32m  ✓[0m[90m when the dividend is equal to the divisor[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m when the dividend is larger than the divisor[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m when the dividend is a multiple of the divisor[0m[33m (11ms)[0m
+      [32m  ✓[0m[90m when the dividend is larger than the divisor[0m[33m (11ms)[0m
+      [32m  ✓[0m[90m when the dividend is a multiple of the divisor[0m[33m (10ms)[0m
 
 [0m  ERC1820 - Token Registry[0m
 [0m    Step 1 - Before deployment state[0m
@@ -66,7 +66,7 @@ Compiling your contracts...
         [32m  ✓[0m[90m Contract address is 0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24[0m
 [0m        Contract[0m
         [32m  ✓[0m[90m code at address exists[0m
-        [32m  ✓[0m[90m contract has the getManager method which can be called[0m[33m (12ms)[0m
+        [32m  ✓[0m[90m contract has the getManager method which can be called[0m[31m (20ms)[0m
 
 [0m  ERC777 - RICO Token[0m
 [0m    Deployment[0m
@@ -76,167 +76,205 @@ Compiling your contracts...
     [32m  ✓[0m[90m Gas usage should be lower than 3.5m.[0m
 [0m      basic information[0m
       [32m  ✓[0m[90m returns the name[0m[33m (14ms)[0m
-      [32m  ✓[0m[90m returns the symbol[0m[33m (14ms)[0m
+      [32m  ✓[0m[90m returns the symbol[0m[31m (29ms)[0m
       [32m  ✓[0m[90m returns a granularity of 1[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m returns the default operators[0m[33m (11ms)[0m
+      [32m  ✓[0m[90m returns the default operators[0m[33m (13ms)[0m
       [32m  ✓[0m[90m default operators are operators for all accounts[0m
       [32m  ✓[0m[90m returns the total supply[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m returns 18 when decimals is called[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m the ERC777Token interface is registered in the registry[0m[33m (15ms)[0m
-      [32m  ✓[0m[90m the ERC20Token interface is registered in the registry[0m[33m (15ms)[0m
+      [32m  ✓[0m[90m returns 18 when decimals is called[0m[33m (10ms)[0m
+      [32m  ✓[0m[90m the ERC777Token interface is registered in the registry[0m[33m (14ms)[0m
+      [32m  ✓[0m[90m the ERC20Token interface is registered in the registry[0m[31m (16ms)[0m
 [0m      balanceOf[0m
 [0m        for an account with no tokens[0m
-        [32m  ✓[0m[90m returns zero[0m[33m (12ms)[0m
+        [32m  ✓[0m[90m returns zero[0m[33m (13ms)[0m
 [0m        for an account with tokens[0m
         [32m  ✓[0m[90m returns their balance[0m[33m (12ms)[0m
 
 [0m  ERC777 - ERC20 Token compatibility[0m
-  [32m  ✓[0m[90m creation: in contract settings should match settings[0m[31m (50ms)[0m
-  [32m  ✓[0m[90m creation: should create a correct initial balance for the creator[0m[33m (13ms)[0m
-  [32m  ✓[0m[90m transfers: ether transfer should be reversed.[0m[31m (78ms)[0m
-  [32m  ✓[0m[90m transfers: should transfer 10000 to accounts[1] with creator having at least 10000[0m[31m (77ms)[0m
-  [32m  ✓[0m[90m transfers: should fail when trying to transfer total amount + 1 to accounts[1] with creator having total amount[0m[31m (56ms)[0m
-  [32m  ✓[0m[90m transfers: should handle zero-transfers normally[0m[31m (69ms)[0m
-  [32m  ✓[0m[90m transfers: should throw if receiver address is 0x0[0m[31m (37ms)[0m
+  [32m  ✓[0m[90m creation: in contract settings should match settings[0m[31m (49ms)[0m
+  [32m  ✓[0m[90m creation: should create a correct initial balance for the creator[0m[33m (10ms)[0m
+  [32m  ✓[0m[90m transfers: ether transfer should be reversed.[0m[31m (54ms)[0m
+  [32m  ✓[0m[90m transfers: should transfer 10000 to accounts[1] with creator having at least 10000[0m[31m (79ms)[0m
+  [32m  ✓[0m[90m transfers: should fail when trying to transfer total amount + 1 to accounts[1] with creator having total amount[0m[31m (54ms)[0m
+  [32m  ✓[0m[90m transfers: should handle zero-transfers normally[0m[31m (67ms)[0m
+  [32m  ✓[0m[90m transfers: should throw if receiver address is 0x0[0m[31m (36ms)[0m
   [32m  ✓[0m[90m approvals: msg.sender should approve 100 to accounts[1][0m[31m (59ms)[0m
-  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 20 once.[0m[31m (210ms)[0m
-  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 20 twice.[0m[31m (269ms)[0m
-  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 50 & 60 (2nd tx should fail)[0m[31m (158ms)[0m
+  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 20 once.[0m[31m (208ms)[0m
+  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 20 twice.[0m[31m (262ms)[0m
+  [32m  ✓[0m[90m approvals: msg.sender approves accounts[1] of 100 & withdraws 50 & 60 (2nd tx should fail)[0m[31m (159ms)[0m
   [32m  ✓[0m[90m approvals: attempt withdrawal from account with no allowance (should fail)[0m[31m (74ms)[0m
-  [32m  ✓[0m[90m approvals: allow accounts[1] 100 to withdraw from creator. Withdraw 60 and then approve 0 & attempt transfer.[0m[31m (208ms)[0m
-  [32m  ✓[0m[90m approvals: approve max (2^256 - 1)[0m[31m (61ms)[0m
-  [32m  ✓[0m[90m allowance: should start with zero[0m[33m (15ms)[0m
-  [32m  ✓[0m[90m approvals: approve max (2^256 - 1)[0m[31m (54ms)[0m
-  [32m  ✓[0m[90m events: should fire Transfer event properly[0m[31m (68ms)[0m
-  [32m  ✓[0m[90m events: should fire Transfer event normally on a zero transfer[0m[31m (68ms)[0m
-  [32m  ✓[0m[90m events: should fire Approval event properly[0m[31m (48ms)[0m
+  [32m  ✓[0m[90m approvals: allow accounts[1] 100 to withdraw from creator. Withdraw 60 and then approve 0 & attempt transfer.[0m[31m (212ms)[0m
+  [32m  ✓[0m[90m approvals: approve max (2^256 - 1)[0m[31m (56ms)[0m
+  [32m  ✓[0m[90m allowance: should start with zero[0m[33m (11ms)[0m
+  [32m  ✓[0m[90m approvals: approve max (2^256 - 1)[0m[31m (53ms)[0m
+  [32m  ✓[0m[90m events: should fire Transfer event properly[0m[31m (67ms)[0m
+  [32m  ✓[0m[90m events: should fire Transfer event normally on a zero transfer[0m[31m (65ms)[0m
+  [32m  ✓[0m[90m events: should fire Approval event properly[0m[31m (46ms)[0m
 
 [0m  ReversableICO[0m
-      Gas used for deployment: 3039744
+      Gas used for deployment: 4314512
       Contract Address: 0x35C310d59E2b7f1F96A5e133Efb20538266e4053
 
 [0m    Stage 1 - Deployment[0m
     [32m  ✓[0m[90m Gas usage should be lower than network configuration gas.[0m
-    [32m  ✓[0m[90m Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222[0m[31m (16ms)[0m
+    [32m  ✓[0m[90m Property deployerAddress should be 0x9d9216e0a29468bE1eCaCc351ce3887be8a26222[0m[33m (14ms)[0m
     [32m  ✓[0m[90m Property initialized should be false[0m[33m (12ms)[0m
-    [32m  ✓[0m[90m Property running should be false[0m[33m (13ms)[0m
-    [32m  ✓[0m[90m Property frozen should be false[0m[33m (13ms)[0m
+    [32m  ✓[0m[90m Property running should be false[0m[31m (16ms)[0m
+    [32m  ✓[0m[90m Property frozen should be false[0m[33m (11ms)[0m
     [32m  ✓[0m[90m Property ended should be false[0m[33m (12ms)[0m
-    [32m  ✓[0m[90m Property TokenTrackerAddress should be address(0)[0m[31m (18ms)[0m
-    [32m  ✓[0m[90m Property whitelistControllerAddress should be address(0)[0m[33m (9ms)[0m
+    [32m  ✓[0m[90m Property TokenTrackerAddress should be address(0x0)[0m[33m (14ms)[0m
+    [32m  ✓[0m[90m Property whitelistControllerAddress should be address(0x0)[0m[31m (17ms)[0m
 [0m    Stage 2 - Transfer tokens to RICO contract address[0m
-    [32m  ✓[0m[90m RICO Contract should have the correct token balance (15000000000000000000000000)[0m[33m (11ms)[0m
+    [32m  ✓[0m[90m RICO Contract should have the correct token balance (15000000000000000000000000)[0m[33m (12ms)[0m
 [0m    Stage 3 - Initialisation - addSettings()[0m
 [0m      Contract settings[0m
-      [32m  ✓[0m[90m Property initialized should be true[0m[33m (11ms)[0m
-      [32m  ✓[0m[90m Property running should be false[0m[31m (16ms)[0m
-      [32m  ✓[0m[90m Property frozen should be false[0m[33m (14ms)[0m
+      [32m  ✓[0m[90m Property initialized should be true[0m[33m (10ms)[0m
+      [32m  ✓[0m[90m Property running should be false[0m[33m (11ms)[0m
+      [32m  ✓[0m[90m Property frozen should be false[0m[33m (15ms)[0m
       [32m  ✓[0m[90m Property ended should be false[0m[33m (12ms)[0m
       [32m  ✓[0m[90m Property TokenTrackerAddress should be deployed ERC777 Token Contract address[0m[33m (11ms)[0m
-      [32m  ✓[0m[90m Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE[0m[33m (15ms)[0m
-      [32m  ✓[0m[90m EndBlock matches settings[0m[31m (17ms)[0m
+      [32m  ✓[0m[90m Property whitelistControllerAddress should be 0x42D0290527b2F2334c2E30C10562C1731DBA9dFE[0m[33m (9ms)[0m
+      [32m  ✓[0m[90m Property TeamWalletAddress should be 0xFE6B56FdCF920382Af1493828E79C017EE090F2a[0m[31m (20ms)[0m
+      [32m  ✓[0m[90m EndBlock matches settings[0m[33m (11ms)[0m
 [0m      Contract Stages[0m
-      [32m  ✓[0m[90m Stage Count is correct[0m[33m (11ms)[0m
+      [32m  ✓[0m[90m Stage Count is correct[0m[33m (14ms)[0m
       [32m  ✓[0m[90m Allocation StartBlock matches settings[0m
       [32m  ✓[0m[90m Allocation duration is AllocationBlockCount[0m
       [32m  ✓[0m[90m Allocation EndBlock matches settings[0m
       [32m  ✓[0m[90m AllocationPrice matches settings[0m
-      [32m  ✓[0m[90m First Distribution Stage settings are correct[0m[33m (12ms)[0m
-      [32m  ✓[0m[90m Last Distribution Stage settings are correct[0m[31m (16ms)[0m
+      [32m  ✓[0m[90m First Distribution Stage settings are correct[0m[33m (15ms)[0m
+      [32m  ✓[0m[90m Last Distribution Stage settings are correct[0m[33m (12ms)[0m
       [32m  ✓[0m[90m Last Distribution Stage end_block matches contract EndBlock[0m[33m (13ms)[0m
 [0m      Contract Assets[0m
       [32m  ✓[0m[90m RICO Contract should have 0 eth[0m
       [32m  ✓[0m[90m RICO Contract should have the correct token balance (15000000000000000000000000)[0m[33m (13ms)[0m
-      [32m  ✓[0m[90m InitialTokenSupply property should match Contract token balance (15000000000000000000000000)[0m[31m (27ms)[0m
+      [32m  ✓[0m[90m InitialTokenSupply property should match Contract token balance (15000000000000000000000000)[0m[31m (26ms)[0m
 [0m    Contract Methods[0m
 [0m      view getCurrentStage()[0m
-      [32m  ✓[0m[90m Returns stage 0 if at Allocation start_block[0m[31m (66ms)[0m
-      [32m  ✓[0m[90m Returns stage 0 if at Allocation end_block[0m[31m (56ms)[0m
-      [32m  ✓[0m[90m Returns stage 1 if at stage 1 start_block[0m[31m (53ms)[0m
-      [32m  ✓[0m[90m Returns stage 1 if at stage 1 end_block[0m[31m (52ms)[0m
-      [32m  ✓[0m[90m Returns stage 5 if at stage 5 start_block[0m[31m (48ms)[0m
-      [32m  ✓[0m[90m Returns stage 5 if at stage 5 end_block[0m[31m (56ms)[0m
-      [32m  ✓[0m[90m Returns last stage if at last stage start_block[0m[31m (55ms)[0m
-      [32m  ✓[0m[90m Returns last stage if at last stage end_block[0m[31m (48ms)[0m
-      [32m  ✓[0m[90m Returns 255 after last stage end_block[0m[31m (57ms)[0m
+      [32m  ✓[0m[90m Returns stage 0 if at Allocation start_block[0m[31m (64ms)[0m
+      [32m  ✓[0m[90m Returns stage 0 if at Allocation end_block[0m[31m (62ms)[0m
+      [32m  ✓[0m[90m Returns stage 1 if at stage 1 start_block[0m[31m (67ms)[0m
+      [32m  ✓[0m[90m Returns stage 1 if at stage 1 end_block[0m[31m (64ms)[0m
+      [32m  ✓[0m[90m Returns stage 5 if at stage 5 start_block[0m[31m (59ms)[0m
+      [32m  ✓[0m[90m Returns stage 5 if at stage 5 end_block[0m[31m (55ms)[0m
+      [32m  ✓[0m[90m Returns last stage if at last stage start_block[0m[31m (51ms)[0m
+      [32m  ✓[0m[90m Returns last stage if at last stage end_block[0m[31m (59ms)[0m
+      [32m  ✓[0m[90m Returns 255 after last stage end_block[0m[31m (52ms)[0m
 [0m      view getStageAtBlock(uint256)[0m
-      [32m  ✓[0m[90m Returns stage 0 if getStageAtBlock( Allocation.start_block )[0m[31m (23ms)[0m
-      [32m  ✓[0m[90m Returns stage 0 if getStageAtBlock( Allocation.end_block )[0m[31m (26ms)[0m
+      [32m  ✓[0m[90m Returns stage 0 if getStageAtBlock( Allocation.start_block )[0m[31m (20ms)[0m
+      [32m  ✓[0m[90m Returns stage 0 if getStageAtBlock( Allocation.end_block )[0m[31m (25ms)[0m
       [32m  ✓[0m[90m Returns stage 1 if getStageAtBlock( stage_1.start_block )[0m[31m (21ms)[0m
-      [32m  ✓[0m[90m Returns stage 1 if getStageAtBlock( stage_1.end_block )[0m[31m (21ms)[0m
-      [32m  ✓[0m[90m Returns stage 5 if getStageAtBlock( stage_5.start_block )[0m[31m (28ms)[0m
-      [32m  ✓[0m[90m Returns stage 5 if getStageAtBlock( stage_5.end_block )[0m[31m (23ms)[0m
-      [32m  ✓[0m[90m Returns stage last stage if getStageAtBlock( last_stage.start_block )[0m[31m (27ms)[0m
-      [32m  ✓[0m[90m Returns stage last stage if getStageAtBlock( last_stage.end_block )[0m[31m (24ms)[0m
-      [32m  ✓[0m[90m Returns 255 if getStageAtBlock( last_stage.end_block + 1 )[0m[31m (21ms)[0m
+      [32m  ✓[0m[90m Returns stage 1 if getStageAtBlock( stage_1.end_block )[0m[31m (26ms)[0m
+      [32m  ✓[0m[90m Returns stage 5 if getStageAtBlock( stage_5.start_block )[0m[31m (29ms)[0m
+      [32m  ✓[0m[90m Returns stage 5 if getStageAtBlock( stage_5.end_block )[0m[31m (22ms)[0m
+      [32m  ✓[0m[90m Returns stage last stage if getStageAtBlock( last_stage.start_block )[0m[31m (64ms)[0m
+      [32m  ✓[0m[90m Returns stage last stage if getStageAtBlock( last_stage.end_block )[0m[31m (29ms)[0m
+      [32m  ✓[0m[90m Returns 255 if getStageAtBlock( last_stage.end_block + 1 )[0m[31m (24ms)[0m
 [0m      view getCurrentPrice()[0m
       [32m  ✓[0m[90m Returns correct value for Allocation phase[0m[31m (56ms)[0m
-      [32m  ✓[0m[90m Returns correct value for stage 1[0m[31m (54ms)[0m
-      [32m  ✓[0m[90m Returns correct value for stage 5[0m[31m (49ms)[0m
-      [32m  ✓[0m[90m Returns correct value for last stage[0m[31m (54ms)[0m
-      [32m  ✓[0m[90m Returns 0 after last stage ended[0m[31m (54ms)[0m
+      [32m  ✓[0m[90m Returns correct value for stage 1[0m[31m (52ms)[0m
+      [32m  ✓[0m[90m Returns correct value for stage 5[0m[31m (51ms)[0m
+      [32m  ✓[0m[90m Returns correct value for last stage[0m[31m (53ms)[0m
+      [32m  ✓[0m[90m Returns 0 after last stage ended[0m[31m (57ms)[0m
 [0m      view getPriceAtBlock(uint256)[0m
-      [32m  ✓[0m[90m Returns correct value for Allocation phase[0m[31m (22ms)[0m
-      [32m  ✓[0m[90m Returns correct value for stage 1[0m[31m (30ms)[0m
+      [32m  ✓[0m[90m Returns correct value for Allocation phase[0m[31m (23ms)[0m
+      [32m  ✓[0m[90m Returns correct value for stage 1[0m[31m (24ms)[0m
       [32m  ✓[0m[90m Returns correct value for stage 5[0m[31m (22ms)[0m
-      [32m  ✓[0m[90m Returns correct value for last stage[0m[31m (23ms)[0m
-      [32m  ✓[0m[90m Returns 0 after last stage ended[0m[31m (27ms)[0m
+      [32m  ✓[0m[90m Returns correct value for last stage[0m[31m (27ms)[0m
+      [32m  ✓[0m[90m Returns 0 after last stage ended[0m[31m (23ms)[0m
 [0m      view getTokenAmountForEthAtStage(uint256, uint8)[0m
-      [32m  ✓[0m[90m Returns correct value for 1 eth & Allocation stage[0m[31m (22ms)[0m
-      [32m  ✓[0m[90m Returns correct value for 1 eth & stage 1[0m[31m (20ms)[0m
-      [32m  ✓[0m[90m Returns correct value for 0.002 eth & Allocation stage ( results in 1 full token )[0m[31m (26ms)[0m
-      [32m  ✓[0m[90m Returns correct value for 1 wei & Allocation stage ( results in 500 token grains )[0m[31m (22ms)[0m
+      [32m  ✓[0m[90m Returns correct value for 1 eth & Allocation stage[0m[31m (24ms)[0m
+      [32m  ✓[0m[90m Returns correct value for 1 eth & stage 1[0m[31m (21ms)[0m
+      [32m  ✓[0m[90m Returns correct value for 0.002 eth & Allocation stage ( results in 1 full token )[0m[31m (22ms)[0m
+      [32m  ✓[0m[90m Returns correct value for 1 wei & Allocation stage ( results in 500 token grains )[0m[31m (23ms)[0m
 [0m      transaction whitelistOrReject(address,mode,start_at,count)[0m
 [0m        if msg.sender is not whitelistControllerAddress[0m
-        [32m  ✓[0m[90m transaction reverts "onlyWhitelistController: Only Whitelist Controller can call this method"[0m[31m (44ms)[0m
+        [32m  ✓[0m[90m transaction reverts "onlyWhitelistController: Only Whitelist Controller can call this method"[0m[31m (45ms)[0m
 [0m        msg.sender is whitelistControllerAddress[0m
 [0m          contract in stage 1 or 2 ( not initialized with settings )[0m
-          [32m  ✓[0m[90m initialized is false[0m[33m (13ms)[0m
-          [32m  ✓[0m[90m transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (51ms)[0m
+          [32m  ✓[0m[90m initialized is false[0m[33m (10ms)[0m
+          [32m  ✓[0m[90m transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (47ms)[0m
 [0m          contract in stage 4 - Ready for contributions[0m
 [0m            supplied address has no contributions[0m
-            [32m  ✓[0m[90m transaction reverts "whitelistOrReject: Participant record not found."[0m[31m (39ms)[0m
+            [32m  ✓[0m[90m transaction reverts "whitelistOrReject: Participant record not found."[0m[31m (36ms)[0m
 [0m            supplied address has 15 contributions[0m
 [0m              supplied mode is wrong.. (not ACCEPTED / REJECTED) [0m
               [32m  ✓[0m[90m transaction reverts "whitelistOrReject: invalid mode selected."[0m[31m (38ms)[0m
 [0m              supplied mode is ContributionStates.ACCEPTED[0m
               [32m  ✓[0m[90m transaction is accepted[0m
               [32m  ✓[0m[90m ContributionEvent emitted event count matches[0m
-              [32m  ✓[0m[90m Participant Contribution count is correct[0m[33m (13ms)[0m
-              [32m  ✓[0m[90m Participant Contributions are stored correctly starting from 0[0m[31m (201ms)[0m
-              [32m  ✓[0m[90m Participant Token Balance is correct[0m[31m (232ms)[0m
+              [32m  ✓[0m[90m Participant Contribution count is correct[0m[33m (14ms)[0m
+              [32m  ✓[0m[90m Participant Contributions are stored correctly starting from 0[0m[31m (219ms)[0m
+              [32m  ✓[0m[90m Participant Token Balance is correct[0m[31m (246ms)[0m
 [0m                new contribution from the TestAcceptParticipant that is now whitelisted, is acceepted automatically.[0m
                 [32m  ✓[0m[90m transaction is accepted[0m
-                [32m  ✓[0m[90m Participant Contribution Count increases by 1[0m[33m (13ms)[0m
-                [32m  ✓[0m[90m Last Contribution is processed and has valid parameters[0m[31m (17ms)[0m
+                [32m  ✓[0m[90m Participant Contribution Count increases by 1[0m[31m (17ms)[0m
+                [32m  ✓[0m[90m Last Contribution is processed and has valid parameters[0m[33m (13ms)[0m
 [0m              supplied mode is ContributionStates.REJECTED[0m
               [32m  ✓[0m[90m transaction is accepted[0m
               [32m  ✓[0m[90m ContributionEvent emitted event count matches[0m
-              [32m  ✓[0m[90m Participant Contribution count is correct[0m[31m (17ms)[0m
-              [32m  ✓[0m[90m Participant Contributions are stored correctly starting from 0[0m[31m (212ms)[0m
-              [32m  ✓[0m[90m Participant Token Balance is the same as initial[0m[33m (13ms)[0m
+              [32m  ✓[0m[90m Participant Contribution count is correct[0m[33m (12ms)[0m
+              [32m  ✓[0m[90m Participant Contributions are stored correctly starting from 0[0m[31m (203ms)[0m
+              [32m  ✓[0m[90m Participant Token Balance is the same as initial[0m[33m (9ms)[0m
 [0m                new contribution from the RejectParticipant is now in NOT_PROCESSED state.[0m
                 [32m  ✓[0m[90m transaction is accepted[0m
-                [32m  ✓[0m[90m Participant Contribution Count increases by 1[0m[33m (14ms)[0m
+                [32m  ✓[0m[90m Participant Contribution Count increases by 1[0m[33m (11ms)[0m
                 [32m  ✓[0m[90m Last Contribution is in NOT_PROCESSED state and has valid parameters[0m[33m (11ms)[0m
-[0m      view getCurrentUnlockRatio(uint8 precision)[0m
+[0m      view getCurrentUnlockRatio()[0m
       [32m  ✓[0m[90m Returns 0 before stage 1 start_block + 1[0m[31m (109ms)[0m
-      [32m  ✓[0m[90m Returns higher than 0 if at stage 1 start_block + 1[0m[31m (51ms)[0m
-      [32m  ✓[0m[90m Returns 0 at EndBlock[0m[31m (51ms)[0m
-      [32m  ✓[0m[90m Returns 0 at EndBlock + 1[0m[31m (51ms)[0m
+      [32m  ✓[0m[90m Returns higher than 0 if at stage 1 start_block + 1[0m[31m (53ms)[0m
+      [32m  ✓[0m[90m Returns 0 at EndBlock[0m[31m (50ms)[0m
+      [32m  ✓[0m[90m Returns 0 at EndBlock + 1[0m[31m (52ms)[0m
 [0m      view getLockedTokenAmount(address)[0m
-      [32m  ✓[0m[90m Returns 0 at any stage if participant has no contributions[0m[31m (220ms)[0m
-      [32m  ✓[0m[90m Returns participant's purchased token amount before stage 1 start_block[0m[31m (57ms)[0m
-      [32m  ✓[0m[90m Returns proper amount at stage 1 start_block[0m[31m (63ms)[0m
+      [32m  ✓[0m[90m Returns 0 at any stage if participant has no contributions[0m[31m (258ms)[0m
+      [32m  ✓[0m[90m Returns participant's purchased token amount before stage 1 start_block[0m[31m (63ms)[0m
+      [32m  ✓[0m[90m Returns proper amount at stage 1 start_block[0m[31m (65ms)[0m
       [32m  ✓[0m[90m Returns proper amount at stage 12 end_block - 1[0m[31m (63ms)[0m
-      [32m  ✓[0m[90m Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )[0m[31m (62ms)[0m
-      [32m  ✓[0m[90m Returns 0 locked tokens after EndBlock[0m[31m (127ms)[0m
+      [32m  ✓[0m[90m Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )[0m[31m (61ms)[0m
+      [32m  ✓[0m[90m Returns 0 locked tokens after EndBlock[0m[31m (128ms)[0m
+
+[0m  Flow Testing[0m
+[0m    view getCancelModeStates(address participantAddress)[0m
+      TOKEN Gas used for deployment: 3369731
+      Contract Address: 0x24De5E526646a41c794656b2C692710655991A20
+      RICO Gas used for deployment:  4314512
+      Contract Address: 0xf2574a2460A5B751edebE8929de8369E545750b1
+
+[0m      contract in stage 1 or 2 ( not initialized with settings )[0m
+      [32m  ✓[0m[90m should return (false, false) as no participant actually exists[0m[33m (12ms)[0m
+[0m      contract in Allocation phase[0m
+[0m        participant has no contributions[0m
+        [32m  ✓[0m[90m should return (false, false)[0m[33m (10ms)[0m
+[0m        participant is not whitelisted and has 1 contribution[0m
+        [32m  ✓[0m[90m should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract[0m[33m (12ms)[0m
+[0m        participant is whitelisted and has 1 contribution[0m
+        [32m  ✓[0m[90m should return (false, true) => cancel by sending tokens back to contract[0m[31m (16ms)[0m
+[0m      contract in Distribution phase[0m
+[0m        participant has no contributions[0m
+        [32m  ✓[0m[90m should return (false, false)[0m[33m (11ms)[0m
+[0m        participant is not whitelisted and has 1 contribution[0m
+        [32m  ✓[0m[90m should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract[0m[33m (12ms)[0m
+[0m        participant is whitelisted and has 1 contribution[0m
+        [32m  ✓[0m[90m should return (false, true) => cancel by sending tokens back to contract[0m[33m (14ms)[0m
+[0m    transaction () => fallback method[0m
+[0m      contract in stage 1 or 2 ( not initialized with settings )[0m
+      [32m  ✓[0m[90m 0 value transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (39ms)[0m
+      [32m  ✓[0m[90m value > 0 transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (40ms)[0m
+[0m      contract in Allocation phase[0m
+      [32m  ✓[0m[90m value >= rico.minContribution results in a new contribution[0m[31m (137ms)[0m
+      [32m  ✓[0m[90m value < rico.minContribution results in cancel(), account has 2 contributions[0m[31m (222ms)[0m
+[0m    transaction cancel()[0m
+[0m      contract in stage 1 or 2 ( not initialized with settings )[0m
+      [32m  ✓[0m[90m 0 value transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (28ms)[0m
+      [32m  ✓[0m[90m value > 0 transaction reverts "requireInitialized: Contract must be initialized"[0m[31m (28ms)[0m
+[0m      contract in Allocation phase[0m
+      [32m  ✓[0m[90m value < rico.minContribution results in cancel(), account has 1 contribution[0m[31m (196ms)[0m
 
 
-[92m [0m[32m 148 passing[0m[90m (11s)[0m
+[92m [0m[32m 163 passing[0m[90m (15s)[0m
 
 Done
 --------------------------------------------------------------------
 
-Killing existing ganache-cli instance at pid 57645.
+Killing existing ganache-cli instance at pid 90630.
 
