@@ -376,7 +376,7 @@ contract ERC777 is IERC777, IERC20 {
         bytes memory data,
         bytes memory operatorData
     )
-        private
+        internal
     {
         require(from != address(0), "ERC777: burn from the zero address");
 

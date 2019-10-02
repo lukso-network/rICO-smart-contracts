@@ -8,6 +8,7 @@ const data = web3.utils.sha3("OZ777TestData");
 const operatorData = web3.utils.sha3("OZ777TestOperatorData");
 const anyone = "0x0000000000000000000000000000000000000001";
 const holder = accounts[10];
+const newManager = accounts[9];
 
 describe("ERC777 - RICO Token", function() {
   before(async function() {
@@ -46,7 +47,7 @@ describe("ERC777 - RICO Token", function() {
       );
 
       await this.RicoToken.methods
-        .setupRico(_ricoAddress)
+        .setup(_ricoAddress, holder)
         .send({ from: holder });
 
       console.log(
@@ -62,7 +63,7 @@ describe("ERC777 - RICO Token", function() {
       helpers.addresses.Token = this.RicoToken.receipt.contractAddress;
     });
 
-    it("Gas usage should be lower than 3.5m.", function() {
+    it("Gas usage should be lower than 6.7m.", function() {
       expect(this.RicoToken.receipt.gasUsed).to.be.below(6500000);
     });
 
@@ -111,6 +112,18 @@ describe("ERC777 - RICO Token", function() {
         );
       });
 
+      it("returns the manager", async function() {
+        expect(await this.RicoToken.methods.manager().call()).to.be.equal(
+          holder
+        );
+      });
+
+      it("returns corrctly the freezed status", async function() {
+        expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+          false
+        );
+      });
+
       it("the ERC777Token interface is registered in the registry", async function() {
         expect(
           await helpers.ERC1820.instance.methods
@@ -131,6 +144,26 @@ describe("ERC777 - RICO Token", function() {
             )
             .call()
         ).to.equal(helpers.addresses.Token);
+      });
+    });
+
+    describe("Manager restricted functions", function() {
+      context("Trasnfering to another manager", function() {
+        it("fails if non-manager tries to transfer it", async function() {
+          await helpers.assertInvalidOpcode(async () => {
+            await this.RicoToken.methods
+              .changeManager(accounts[1])
+              .send({ from: accounts[1] });
+          }, "revert");
+        });
+        it("Allows manager to transfer", async function() {
+          await this.RicoToken.methods
+            .changeManager(newManager)
+            .send({ from: holder });
+          expect(await this.RicoToken.methods.manager().call()).to.be.equal(
+            newManager
+          );
+        });
       });
     });
 
@@ -181,41 +214,110 @@ describe("ERC777 - RICO Token", function() {
       });
     }); //describe
 
-    describe("Trasnfers with locked amount", () => {
-      context("It executes correctly for an account with locked tokens", () => {
-        const lockedAmount = "100000000";
-        it("should transfer if amount is unlocked", async function() {
-          await this.ReversableICOMock777.methods
-            .setLockedTokenAmount(holder, lockedAmount)
-            .send({ from: accounts[0] });
-
+    describe("freezing funcionality", function() {
+      context("Should correctly set the freezed status", function() {
+        it("to true", async function() {
           await this.RicoToken.methods
-            .transfer(accounts[1], 10000)
-            .send({ from: holder });
-
-          const balance = await this.RicoToken.methods
-            .balanceOf(accounts[1])
-            .call();
-          assert.strictEqual(balance, "10000");
+            .setFreezed(true)
+            .send({ from: newManager });
+          expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+            true
+          );
         });
 
-        it("transfers: should fail when trying to transfer more than unlocked amount", async function() {
-          const balance = new helpers.BN(
-            await this.RicoToken.methods.balanceOf(holder).call()
+        it("to false", async function() {
+          await this.RicoToken.methods
+            .setFreezed(false)
+            .send({ from: newManager });
+          expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+            false
           );
-          const amt = balance.add(new helpers.BN("1"));
+        });
 
-          await this.ReversableICOMock777.methods
-            .setLockedTokenAmount(holder, amt.toString())
-            .send({ from: accounts[0] });
-
+        it("Fails if non-manager calls freeze", async function() {
           await helpers.assertInvalidOpcode(async () => {
             await this.RicoToken.methods
-              .transfer(accounts[1], amt.toString())
-              .send({ from: holder });
+              .setFreezed(false)
+              .send({ from: accounts[3] });
           }, "revert");
         });
       });
+
+      context("should block actions when freezed", function() {
+        it("Blocks trasnfers", async function() {
+          await this.RicoToken.methods
+            .setFreezed(true)
+            .send({ from: newManager });
+          await helpers.assertInvalidOpcode(async () => {
+            await this.RicoToken.methods
+              .transfer(accounts[1], "1")
+              .send({ from: newManager });
+          }, "revert");
+        });
+
+        it("Blocks burns", async function() {
+          await this.RicoToken.methods
+            .setFreezed(true)
+            .send({ from: newManager });
+          await helpers.assertInvalidOpcode(async () => {
+            await this.RicoToken.methods.burn("1", "0x").send({ from: holder });
+          }, "revert");
+        });
+
+        it("Re-allows trasnfer when unfreezed", async function() {
+          await this.RicoToken.methods
+            .setFreezed(false)
+            .send({ from: newManager });
+          await this.RicoToken.methods
+            .transfer(accounts[5], 10000)
+            .send({ from: holder });
+
+          const balance = await this.RicoToken.methods
+            .balanceOf(accounts[5])
+            .call();
+          assert.strictEqual(balance, "10000");
+        });
+      });
+    }); //describe
+
+    describe("Trasnfers with locked amount", () => {
+      context(
+        "It executes correctly for an account with locked tokens",
+        async function() {
+          const lockedAmount = "100000000";
+          it("should transfer if amount is unlocked", async function() {
+            await this.ReversableICOMock777.methods
+              .setLockedTokenAmount(holder, lockedAmount)
+              .send({ from: accounts[0] });
+
+            await this.RicoToken.methods
+              .transfer(accounts[1], 10000)
+              .send({ from: holder });
+
+            const balance = await this.RicoToken.methods
+              .balanceOf(accounts[1])
+              .call();
+            assert.strictEqual(balance, "10000");
+          });
+
+          it("transfers: should fail when trying to transfer more than unlocked amount", async function() {
+            const balance = new helpers.BN(
+              await this.RicoToken.methods.balanceOf(holder).call()
+            );
+            const amt = balance.add(new helpers.BN("1"));
+
+            await this.ReversableICOMock777.methods
+              .setLockedTokenAmount(holder, amt.toString())
+              .send({ from: accounts[0] });
+
+            await helpers.assertInvalidOpcode(async () => {
+              await this.RicoToken.methods
+                .transfer(accounts[1], amt.toString())
+                .send({ from: holder });
+            }, "revert");
+          });
+        }
+      );
     });
   });
 });

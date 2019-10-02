@@ -32,7 +32,7 @@ describe("ERC777 - ERC20 Token compatibility", function() {
       gasPrice: helpers.solidity.gwei * 10
     });
 
-    await HST.methods.setupRico(_ricoAddress).send({ from: accounts[2] });
+    await HST.methods.setup(_ricoAddress, creator).send({ from: creator });
   });
 
   it("creation: in contract settings should match settings", async () => {

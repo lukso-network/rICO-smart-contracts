@@ -242,8 +242,8 @@ async function runTests() {
     },
     settings: {
       token: {
-        name: "RicoToken",
-        symbol: "RICO",
+        name: "LYXeToken",
+        symbol: "LYXe",
         decimals: 18,
         supply: new BN(100)
           .mul(
@@ -277,8 +277,8 @@ async function runTests() {
     "1_ERC1820",
     "2_ERC777_Token",
     "3_ERC20Token",
-    "4_ReversableICO",
-    "5_Flows"
+    "4_ReversableICO"
+    // "5_Flows"
   ];
 
   utils.toLog(

@@ -95,8 +95,9 @@ async function revertToFreshDeployment() {
         console.log("      Contract Address:", ReversableICOAddress);
         console.log("");
 
-        await TokenTrackerInstance.methods.setupRico(
+        await TokenTrackerInstance.methods.setup(
             ReversableICOAddress,
+            holder
         ).send({
             from: holder,  // initial token supply holder
         });

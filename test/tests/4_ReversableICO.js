@@ -53,12 +53,12 @@ describe("ReversableICO", function () {
         console.log("      Contract Address:", this.ReversableICO.receipt.contractAddress);
         console.log("");
 
-        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;
+        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;        
 
-        await TokenTrackerInstance.methods.setupRico(
-            helpers.addresses.Rico,
+        await TokenTrackerInstance.methods.setup(
+            helpers.addresses.Rico, holder
         ).send({
-            from: holder,  // initial token supply holder
+            from: accounts[9],  // initial token supply holder
         });
 
     });
