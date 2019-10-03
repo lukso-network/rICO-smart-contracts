@@ -42,6 +42,9 @@ describe("ReversableICO", function () {
         }
 
         TokenTrackerAddress = helpers.addresses.Token;
+        TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
+
+        
 
         // deploy mock contract so we can set block times. ( ReversableICOMock )
         this.ReversableICO = await helpers.utils.deployNewContractInstance(helpers, "ReversableICOMock");
@@ -50,7 +53,13 @@ describe("ReversableICO", function () {
         console.log("      Contract Address:", this.ReversableICO.receipt.contractAddress);
         console.log("");
 
-        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;
+        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;        
+
+        await TokenTrackerInstance.methods.setup(
+            helpers.addresses.Rico, holder
+        ).send({
+            from: accounts[9],  // initial token supply holder
+        });
 
     });
 
