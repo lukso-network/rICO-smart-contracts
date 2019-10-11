@@ -42,6 +42,7 @@ async function runTests() {
   const web3util = require("web3-utils");
   const Table = require("cli-table");
   const utils = require("./helpers/utils");
+  const safeUtils = require("./helpers/safeUtils");
   const { assert, expect } = require("chai");
   const { assertInvalidOpcode } = require("./helpers/assertThrow");
 
@@ -221,6 +222,7 @@ async function runTests() {
       networkConfig: networkConfig,
       assertInvalidOpcode: assertInvalidOpcode,
       utils: utils,
+      safeUtils: safeUtils,
       web3util: web3util,
       web3: web3,
       web3Instance: web3Instance,
@@ -273,12 +275,13 @@ async function runTests() {
   global.assert = assert;
 
   const tests = [
-    "external/SafeMath",
-    "1_ERC1820",
-    "2_ERC777_Token",
-    "3_ERC20Token",
-    "4_ReversableICO"
-    // "5_Flows"
+    //"external/SafeMath",
+    // "1_ERC1820",
+    // "2_ERC777_Token",
+    // "3_ERC20Token",
+    // "4_ReversableICO",
+    // "5_Flows",
+    "6_Gnosis-Safe"
   ];
 
   utils.toLog(
