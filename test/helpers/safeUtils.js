@@ -3,6 +3,7 @@ const BigNumber = require("bignumber.js");
 //const web3 = require("web3");
 const web3 = require("web3-utils");
 const web3JS = require("./web3.js");
+const lightwallet = require("eth-lightwallet");
 
 const GAS_PRICE = web3.toWei("100", "gwei");
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -41,7 +42,6 @@ let estimateBaseGas = function(
   // numbers < 256 are 192 -> 31 * 4 + 68
   // numbers < 65k are 256 -> 30 * 4 + 2 * 68
   // For signature array length and baseGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
-  console.log(to);
 
   let signatureCost = signatureCount * (68 + 2176 + 2176 + 6000); // (array count (3 -> r, s, v) + ecrecover costs) * signature count
   let payload = safe.methods
@@ -58,7 +58,6 @@ let estimateBaseGas = function(
       "0x"
     )
     .encodeABI();
-  console.log(4243434343434);
 
   let baseGasEstimate =
     estimatebaseGasCosts(payload) +
@@ -86,24 +85,32 @@ let executeTransactionWithSigner = async function(
   let refundReceiver = options.refundReceiver || ZERO_ADDRESS;
 
   // Estimate safe transaction (need to be called with from set to the safe address)
-  let txGasEstimate = 0;
-  try {
-    let estimateData = safe.methods
-      .requiredTxGas(to, value, data, operation)
-      .encodeABI();
-    let estimateResponse = await web3JS.sendTransaction({
-      to: safe.address,
-      from: safe.address,
-      data: estimateData,
-      gasPrice: 0
-    });
-    txGasEstimate = new BigNumber(estimateResponse.substring(138), 16);
-    // Add 10k else we will fail in case of nested calls
-    txGasEstimate = txGasEstimate.toNumber() + 10000;
-    console.log("    Tx Gas estimate: " + txGasEstimate);
-  } catch (e) {
-    console.log("    Could not estimate " + subject + "; cause: " + e);
-  }
+  let txGasEstimate = 1000000;
+
+  //BYpassign gas estimations for now
+  //   try {
+  //     let estimateData = safe.methods
+  //       .requiredTxGas(to, value, data, operation)
+  //       .encodeABI();
+  //     let estimateResponse = await safe.methods
+  //       .requiredTxGas(to, value, data, operation)
+  //       .call({
+  //         from: safe._address,
+  //         //from: safe.address
+  //         //to: safe.address,
+  //         data: estimateData
+  //         //  gasPrice: 0
+  //       });
+  //     console.log(estimateResponse);
+
+  //     txGasEstimate = new BigNumber(estimateResponse.substring(138), 16);
+  //     // Add 10k else we will fail in case of nested calls
+  //     txGasEstimate = txGasEstimate.toNumber() + 10000;
+  //     console.log("    Tx Gas estimate: " + txGasEstimate);
+  //   } catch (e) {
+  //     console.log("    Could not estimate " + subject + "; cause: " + e);
+  //   }
+
   let nonce = await safe.methods.nonce().call();
 
   //   let baseGasEstimate = estimateBaseGas(
@@ -119,7 +126,7 @@ let executeTransactionWithSigner = async function(
   //     nonce
   //   );
   let baseGasEstimate = 4000000;
-  console.log("    Base Gas estimate: " + baseGasEstimate);
+  //console.log("    Base Gas estimate: " + baseGasEstimate);
 
   let gasPrice = GAS_PRICE;
   if (txGasToken != 0) {
@@ -154,7 +161,7 @@ let executeTransactionWithSigner = async function(
       sigs
     )
     .encodeABI();
-  console.log("    Data costs: " + estimatebaseGasCosts(payload));
+  //console.log("    Data costs: " + estimatebaseGasCosts(payload));
 
   // Estimate gas of paying transaction
   let estimate = null;
@@ -192,32 +199,8 @@ let executeTransactionWithSigner = async function(
 
   // Execute paying transaction
   // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-  let tx = await safe.execTransaction(
-    to,
-    value,
-    data,
-    operation,
-    txGasEstimate,
-    baseGasEstimate,
-    gasPrice,
-    txGasToken,
-    refundReceiver,
-    sigs,
-    {
-      from: executor,
-      gas: estimate + txGasEstimate + 10000,
-      gasPrice: options.txGasPrice || gasPrice
-    }
-  );
-  let events = utils.checkTxEvent(
-    tx,
-    "ExecutionFailed",
-    safe.address,
-    txFailed,
-    subject
-  );
-  if (txFailed) {
-    let transactionHash = await safe.getTransactionHash(
+  let tx = await safe.methods
+    .execTransaction(
       to,
       value,
       data,
@@ -227,10 +210,35 @@ let executeTransactionWithSigner = async function(
       gasPrice,
       txGasToken,
       refundReceiver,
-      nonce
-    );
-    assert.equal(transactionHash, events.args.txHash);
-  }
+      sigs
+    )
+    .send({
+      from: executor,
+      gas: estimate + txGasEstimate + 10000,
+      gasPrice: options.txGasPrice || gasPrice
+    });
+  // let events = utils.checkTxEvent(
+  //   tx,
+  //   "ExecutionFailed",
+  //   safe.address,
+  //   txFailed,
+  //   subject
+  // );
+  // if (txFailed) {
+  //   let transactionHash = await safe.getTransactionHash(
+  //     to,
+  //     value,
+  //     data,
+  //     operation,
+  //     txGasEstimate,
+  //     baseGasEstimate,
+  //     gasPrice,
+  //     txGasToken,
+  //     refundReceiver,
+  //     nonce
+  //   );
+  //   assert.equal(transactionHash, events.args.txHash);
+  // }
   return tx;
 };
 
@@ -274,7 +282,7 @@ let executeTransaction = async function(
       .call();
 
     // Confirm transaction with signed messages
-    return signTransaction(accounts, transactionHash);
+    return signTransaction(lw, lw.accounts, transactionHash);
   };
   return executeTransactionWithSigner(
     signer,
@@ -290,16 +298,18 @@ let executeTransaction = async function(
   );
 };
 
-async function signTransaction(signers, transactionHash) {
+async function signTransaction(lw, signers, transactionHash) {
   let signatureBytes = "0x";
   signers.sort();
   for (var i = 0; i < signers.length; i++) {
-    let sig = await web3JS.sign(signers[i], transactionHash);
-
+    let sig = lightwallet.signing.signMsgHash(
+      lw.keystore,
+      lw.passwords,
+      transactionHash,
+      signers[i]
+    );
     signatureBytes +=
-      sig.r.slice(2).toString("hex") +
-      sig.s.slice(2).toString("hex") +
-      sig.v.toString(16);
+      sig.r.toString("hex") + sig.s.toString("hex") + sig.v.toString(16);
   }
   return signatureBytes;
 }

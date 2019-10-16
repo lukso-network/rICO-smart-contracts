@@ -638,6 +638,7 @@ contract GnosisSafe
         );
         // Increase nonce and execute transaction.
         nonce++;
+        emit DebugH(keccak256(txHashData));
         checkSignatures(keccak256(txHashData), txHashData, signatures, true);
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         uint256 gasUsed = gasleft();
@@ -673,7 +674,9 @@ contract GnosisSafe
             require(transferToken(gasToken, receiver, gasUsed.add(baseGas).mul(gasPrice)), "Could not pay gas costs with token");
         }
     }
-
+    event Debug(address own);
+    event DebugH(bytes32 hash);
+    event DebugB(bytes sug);
     /**
     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
@@ -699,7 +702,6 @@ contract GnosisSafe
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint256(r));
-
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
@@ -728,6 +730,7 @@ contract GnosisSafe
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint256(r));
+
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "Hash has not been approved");
                 // Hash has been marked for consumption. If this hash was pre-approved free storage
@@ -737,9 +740,12 @@ contract GnosisSafe
             } else if (v > 30) {
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
                 currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
+ 
+
             } else {
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
+                emit Debug(currentOwner);
             }
             require (
                 currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,

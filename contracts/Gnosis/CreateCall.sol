@@ -16,11 +16,11 @@ contract CreateCall {
     }
 
     function performCreate(uint256 value, bytes memory deploymentData) public returns(address newContract) {
-        // solium-disable-next-line security/no-inline-assembly
+        //  solium-disable-next-line security/no-inline-assembly
         assembly {
-            newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))
+            newContract := create(value, add(deploymentData, 0x00), mload(deploymentData))
         }
-        require(newContract != address(0), "Could not deploy contract");
+         require(newContract != address(0), "Could not deploy contract");
         emit ContractCreation(newContract);
     }
 }

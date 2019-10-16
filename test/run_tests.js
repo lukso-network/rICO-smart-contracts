@@ -275,8 +275,8 @@ async function runTests() {
   global.assert = assert;
 
   const tests = [
-    //"external/SafeMath",
-    // "1_ERC1820",
+    "external/SafeMath",
+    "1_ERC1820",
     // "2_ERC777_Token",
     // "3_ERC20Token",
     // "4_ReversableICO",

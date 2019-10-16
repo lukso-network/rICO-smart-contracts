@@ -2,28 +2,60 @@ const helpers = setup.helpers;
 const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect;
+const lightwallet = require("eth-lightwallet");
+const util = require("util");
 
-const signers = [
-  accounts[0],
-  accounts[1],
-  accounts[2],
-  accounts[3],
-  accounts[4]
-]; // accounts[0] maybe
-const data = web3.utils.sha3("OZ777TestData");
-const operatorData = web3.utils.sha3("OZ777TestOperatorData");
+let signers;
+let safeAccounts;
 const anyone = "0x0000000000000000000000000000000000000001";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const holder = accounts[10];
 const manager = accounts[9];
 
-const generateDeploymentCode = async function(name) {
+const generateDeploymentCode = async function(name, arguments) {
   const ContractData = await helpers.utils.getAbiFile(name);
-  return ContractData.bytecode;
+  const deployArguments = {
+    data: ContractData.bytecode,
+    arguments: arguments
+  };
+  const ContractInstance = await new helpers.web3Instance.eth.Contract(
+    ContractData.abi,
+    "0x0000000000000000000000000000000000000000"
+  )
+    .deploy(deployArguments)
+    .encodeABI();
+
+  return ContractInstance;
 };
 
+async function createLightwallet() {
+  // Create lightwallet accounts
+  const createVault = util
+    .promisify(lightwallet.keystore.createVault)
+    .bind(lightwallet.keystore);
+  const keystore = await createVault({
+    hdPathString: "m/44'/60'/0'/0",
+    seedPhrase:
+      "pull rent tower word science patrol economy legal yellow kit frequent fat",
+    password: "test",
+    salt: "testsalt"
+  });
+  const keyFromPassword = await util
+    .promisify(keystore.keyFromPassword)
+    .bind(keystore)("test");
+  keystore.generateNewAddress(keyFromPassword, 5);
+  return {
+    keystore: keystore,
+    accounts: keystore.getAddresses(),
+    passwords: keyFromPassword
+  };
+}
+
 describe("Gnosis Safe Integration", function() {
-  before(async function() {});
+  before(async function() {
+    safeAccounts = await createLightwallet();
+    signers = safeAccounts.accounts;
+  });
 
   describe("Deployment", function() {
     before(async function() {
@@ -37,6 +69,7 @@ describe("Gnosis Safe Integration", function() {
         }
       );
 
+      helpers.addresses.GnosisSafe = this.GnosisSafe.receipt.contractAddress;
       this.CreateCall = await helpers.utils.deployNewContractInstance(
         helpers,
         "CreateCall",
@@ -49,8 +82,11 @@ describe("Gnosis Safe Integration", function() {
 
       helpers.addresses.CreateCall = this.CreateCall.receipt.contractAddress;
 
-      const deploymentDataToken = await generateDeploymentCode("RicoToken");
-      const deploymentDataRico = await generateDeploymentCode("ReversableICO");
+      const deploymentDataToken = await generateDeploymentCode("RicoToken", [
+        setup.settings.token.supply.toString(),
+        []
+      ]);
+      const deploymentDataRico = await generateDeploymentCode("MathMock");
 
       let creationDataToken = this.CreateCall.methods
         .performCreate(0, deploymentDataToken)
@@ -60,19 +96,12 @@ describe("Gnosis Safe Integration", function() {
         .performCreate(0, deploymentDataRico)
         .encodeABI();
 
-      console.log(
-        await helpers.safeUtils.executeTransaction(
-          this.GnosisSafe,
-          this.GnosisSafe,
-          "deploy Token",
-          signers,
-          helpers.addresses.CreateCall,
-          "0",
-          creationDataToken,
-          1, //DELEGATECALL
-          manager
-        )
-      );
+      await helpers.web3.eth.sendTransaction({
+        from: manager,
+        to: helpers.addresses.GnosisSafe,
+        value: "10000000000000000000"
+      });
+
       await this.GnosisSafe.methods
         .setup(
           signers,
@@ -86,6 +115,30 @@ describe("Gnosis Safe Integration", function() {
         )
         .send({ from: manager });
 
+      await helpers.safeUtils.executeTransaction(
+        safeAccounts,
+        this.GnosisSafe,
+        "deploy Token",
+        signers,
+        helpers.addresses.CreateCall,
+        "0",
+        creationDataToken,
+        1, //DELEGATECALL
+        manager
+      );
+
+      await helpers.safeUtils.executeTransaction(
+        safeAccounts,
+        this.GnosisSafe,
+        "deploy Token",
+        signers,
+        helpers.addresses.CreateCall,
+        "0",
+        creationDataRico,
+        1, //DELEGATECALL
+        manager
+      );
+
       console.log(
         "      Gas used for deployment:",
         this.GnosisSafe.receipt.gasUsed
@@ -95,7 +148,6 @@ describe("Gnosis Safe Integration", function() {
         this.GnosisSafe.receipt.contractAddress
       );
       console.log("");
-      helpers.addresses.GnosisSafe = this.GnosisSafe.receipt.contractAddress;
     });
 
     it("Gas usage should be lower than 6.7m.", function() {
