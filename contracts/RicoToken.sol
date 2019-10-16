@@ -21,13 +21,11 @@ contract RicoToken is ERC777 {
         manager = msg.sender;
         freezed = true;
     }
-    event Setup(address hah);
     function setup(address _rICO, address _newManager) public {
-        // require(msg.sender == manager);
-        // rICO = ReversableICO(_rICO);
-        // manager = _newManager;
-        // freezed = false;
-        emit Setup(msg.sender);
+        require(msg.sender == manager);
+        rICO = ReversableICO(_rICO);
+        manager = _newManager;
+        freezed = false;
     }
 
     function changeManager(address _newManager) public {

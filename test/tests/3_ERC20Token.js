@@ -15,7 +15,7 @@ describe("ERC777 - ERC20 Token compatibility", function() {
       "ReversableICOMock777",
       {
         from: accounts[2],
-        gas: 3500000,
+        gas: 6000000,
         gasPrice: helpers.solidity.gwei * 10
       }
     );
