@@ -196,7 +196,6 @@ let executeTransactionWithSigner = async function(
     );
     return null;
   }
-
   // Execute paying transaction
   // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
   let tx = await safe.methods
@@ -239,6 +238,8 @@ let executeTransactionWithSigner = async function(
   //   );
   //   assert.equal(transactionHash, events.args.txHash);
   // }
+  //console.log(tx);
+
   return tx;
 };
 

@@ -638,7 +638,6 @@ contract GnosisSafe
         );
         // Increase nonce and execute transaction.
         nonce++;
-        emit DebugH(keccak256(txHashData));
         checkSignatures(keccak256(txHashData), txHashData, signatures, true);
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         uint256 gasUsed = gasleft();
@@ -674,9 +673,6 @@ contract GnosisSafe
             require(transferToken(gasToken, receiver, gasUsed.add(baseGas).mul(gasPrice)), "Could not pay gas costs with token");
         }
     }
-    event Debug(address own);
-    event DebugH(bytes32 hash);
-    event DebugB(bytes sug);
     /**
     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
@@ -745,7 +741,6 @@ contract GnosisSafe
             } else {
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
-                emit Debug(currentOwner);
             }
             require (
                 currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,
