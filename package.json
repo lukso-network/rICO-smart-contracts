@@ -17,6 +17,7 @@
     "start-all-rpcs": "scripts/rpcs/start_all.sh",
     "stop-all-rpcs": "scripts/rpcs/stop_all.sh"
   },
+  "preinstall": "rm -rf node_modules/*/.git/",
   "bin": {
     "rpcs": "./scripts/rpc.sh"
   },
@@ -38,6 +39,7 @@
   "author": "Micky Socaci <micky@nowlive.ro>",
   "license": "ISC",
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "chai": "^4.2.0",
     "cli-table": "^0.3.1",
     "dateformat": "^3.0.3",

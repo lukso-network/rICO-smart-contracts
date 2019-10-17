@@ -281,7 +281,8 @@ async function runTests() {
     "3_ERC20Token",
     "4_ReversableICO",
     "5_Flows",
-    "6_Gnosis-Safe"
+    "6_Gnosis-Safe",
+    "7_Website"
   ];
 
   utils.toLog(
