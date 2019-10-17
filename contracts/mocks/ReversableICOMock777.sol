@@ -8,7 +8,9 @@
 
 pragma solidity ^0.5.0;
 
-contract ReversableICOMock777 {
+import './ReversableICOMock.sol';
+
+contract ReversableICOMock777 is ReversableICOMock {
 
     mapping( address => uint256 ) public balances;
 
@@ -16,7 +18,7 @@ contract ReversableICOMock777 {
         balances[wallet] = _balance;
     }
 
-    function getLockedTokenAmount(address wallet) external returns (uint256) {
+    function getLockedTokenAmount(address wallet) public view returns (uint256) {
         return balances[wallet];
     }
 
