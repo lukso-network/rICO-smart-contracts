@@ -28,7 +28,7 @@ describe("ERC777 - RICO Token", function() {
         "ReversableICOMock777",
         {
           from: holder,
-          gas: 3500000,
+          gas: 6500000,
           gasPrice: helpers.solidity.gwei * 10
         }
       );
