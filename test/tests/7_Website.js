@@ -16,12 +16,26 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-const ContributionStates = {
+const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    NOT_PROCESSED:1,
-    ACCEPTED:2,
-    REJECTED:3,
-    CANCELLED:4,
+    CONTRIBUTION_NEW:1,
+    CONTRIBUTION_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    WHITELIST_CANCEL:4,
+    WHITELIST_ACCEPT:5,
+    COMMIT_ACCEPT:6,
+    ACCEPT:7,
+    REJECT:8,
+    CANCEL:9
+}
+
+const TransferTypes = {
+    NOT_SET:0,
+    AUTOMATIC_REFUND:1,
+    WHITELIST_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    PARTICIPANT_WITHDRAW:4,
+    PROJECT_WITHDRAW:5
 }
 
 const ERC777data = web3.utils.sha3('777TestData');
@@ -284,9 +298,7 @@ describe("Website States", function () {
 
             await Instances.ReversibleICOInstance.methods.whitelistOrReject(
                 participant_1,
-                ContributionStates.ACCEPTED,
-                0,          // start id
-                10          // contribution count to process
+                ApplicationEventTypes.WHITELIST_ACCEPT
             ).send({
                 from: whitelistControllerAddress
             });

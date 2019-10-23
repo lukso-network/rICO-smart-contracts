@@ -15,13 +15,29 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-const ContributionStates = {
+
+const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    NOT_PROCESSED:1,
-    ACCEPTED:2,
-    REJECTED:3,
-    CANCELLED:4,
+    CONTRIBUTION_NEW:1,
+    CONTRIBUTION_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    WHITELIST_CANCEL:4,
+    WHITELIST_ACCEPT:5,
+    COMMIT_ACCEPT:6,
+    ACCEPT:7,
+    REJECT:8,
+    CANCEL:9
 }
+
+const TransferTypes = {
+    NOT_SET:0,
+    AUTOMATIC_REFUND:1,
+    WHITELIST_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    PARTICIPANT_WITHDRAW:4,
+    PROJECT_WITHDRAW:5
+}
+
 
 const ERC777data = web3.utils.sha3('777TestData');
 const defaultOperators = []; // accounts[0] maybe
@@ -648,9 +664,7 @@ describe("Flow Testing", function () {
                     // whitelist and accept contribution
                     let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
                         participant_1,
-                        ContributionStates.ACCEPTED,
-                        0,          // start id
-                        15
+                        ApplicationEventTypes.WHITELIST_ACCEPT,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -675,6 +689,7 @@ describe("Flow Testing", function () {
 
                 it("participant can withdraw by sending tokens back to contract", async function () {
 
+                    // @TODO!
                     // - Our participant must have a token balance
                     // - the unlocked balance can be 0 or higher
                     // - must be able to transfer partial / whole balance back to rico
@@ -690,11 +705,13 @@ describe("Flow Testing", function () {
                         await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
                     );
 
+                    /*
                     console.log(
                         "RicoUnlockedTokenBalanceBefore:   ",
                         helpers.utils.toEth(helpers, RicoUnlockedTokenBalanceBefore.toString()),
                         "tokens" 
                     );
+                    */
 
                     expect(
                         ParticipantTokenBalance
@@ -740,7 +757,8 @@ describe("Flow Testing", function () {
 
                     let tokenAmt = await ReversibleICOInstance.methods.getTokenAmountForEthAtStage( initialEth.toString(), 0 ).call();
                     let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( tokenAmt.toString(), 0 ).call();
-                    
+
+                    /*
                     console.log(
                         "initialEth: ",
                         helpers.utils.toEth(helpers, initialEth.toString()),
@@ -758,6 +776,7 @@ describe("Flow Testing", function () {
                         helpers.utils.toEth(helpers, ethAmt.toString()),
                         "eth" 
                     );
+                    */
                 });
             });
         });
@@ -793,38 +812,6 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }
 
-
-
-async function displayContributions(contract, participant_address) {
-
-    let ParticipantByAddress = await contract.methods.ParticipantsByAddress(participant_address).call();
-
-    const contributionsCount = ParticipantByAddress.contributionsCount;
-    console.log("Contributions for address:", participant_address, "Count:", contributionsCount.toString());
-
-    console.log("Total Contributed amount:", helpers.utils.toEth(helpers, ParticipantByAddress.contributed_amount.toString()) +" eth" );
-    console.log("Total Accepted amount:   ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted_amount.toString()) +" eth" );
-    console.log("Total Withdrawn amount:  ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn_amount.toString()) +" eth" );
-    console.log("Total Available amount:  ", helpers.utils.toEth(helpers, ParticipantByAddress.available_amount.toString()) +" eth" );
-    console.log("Total Token amount:      ", helpers.utils.toEth(helpers, ParticipantByAddress.token_amount.toString()) +" tokens" );
-
-    
-    
-    for(let i = 0; i < contributionsCount; i++) {
-        const ParticipantContributionDetails = await contract.methods.ParticipantContributionDetails(participant_address, i).call();
-        console.log("contribution:", i);
-
-        console.log("_value:    ", helpers.utils.toEth(helpers,ParticipantContributionDetails._value.toString() ) +" eth" );
-        console.log("_received: ", helpers.utils.toEth(helpers,ParticipantContributionDetails._received.toString() ) +" eth" );
-        console.log("_returned: ", helpers.utils.toEth(helpers,ParticipantContributionDetails._returned.toString() ) +" eth" );
-        console.log("_tokens:   ", helpers.utils.toEth(helpers,ParticipantContributionDetails._tokens.toString() ) +" tokens" );
-        console.log("_block:    ", ParticipantContributionDetails._block.toString());
-        console.log("_stageId:  ", ParticipantContributionDetails._stageId.toString());
-        console.log("_state:    ", ParticipantContributionDetails._state.toString());
-
-    }
-    console.log("\n");
-}
 
 async function displayContractStats(contract, TokenTrackerInstance) {
 

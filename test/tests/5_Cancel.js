@@ -15,13 +15,31 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-const ContributionStates = {
+const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    NOT_PROCESSED:1,
-    ACCEPTED:2,
-    REJECTED:3,
-    CANCELLED:4,
+    CONTRIBUTION_NEW:1,
+    CONTRIBUTION_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    WHITELIST_CANCEL:4,
+    WHITELIST_ACCEPT:5,
+    COMMIT_ACCEPT:6,
+    ACCEPT:7,
+    REJECT:8,
+    CANCEL:9
 }
+
+const TransferTypes = {
+    NOT_SET:0,
+    AUTOMATIC_REFUND:1,
+    WHITELIST_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    PARTICIPANT_WITHDRAW:4,
+    PROJECT_WITHDRAW:5
+}
+
+
+
+
 
 const ERC777data = web3.utils.sha3('777TestData');
 const defaultOperators = []; // accounts[0] maybe
@@ -257,12 +275,11 @@ describe("Cancel Testing", function () {
                     // whitelist and accept contribution
                     let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
                         participant_1,
-                        ContributionStates.ACCEPTED,
-                        0,          // start id
-                        15
+                        ApplicationEventTypes.WHITELIST_ACCEPT
                     ).send({
                         from: whitelistControllerAddress
                     });
+
                 });
 
                 it("should return (false, true) => cancel by sending tokens back to contract", async function () {
@@ -327,9 +344,7 @@ describe("Cancel Testing", function () {
                     // whitelist and accept contribution
                     let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
                         participant_1,
-                        ContributionStates.ACCEPTED,
-                        0,          // start id
-                        15
+                        ApplicationEventTypes.WHITELIST_ACCEPT
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -450,6 +465,9 @@ describe("Cancel Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
+                let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+
                 const ContributionTxCost = new helpers.BN( ContributionTx.gasUsed ).mul(
                     new helpers.BN(helpers.networkConfig.gasPrice)
                 );
@@ -466,25 +484,18 @@ describe("Cancel Testing", function () {
 
 
                 // validate contributions
-                let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
-
+                ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
                 let ContributionTotals = new helpers.BN("0");
-                for(let i = 0; i < ParticipantByAddress.contributionsCount; i++) {
-                    const ParticipantContributionDetails = await ReversibleICOInstance.methods.ParticipantContributionDetails(participant_1, i).call();
-                    ContributionTotals = ContributionTotals.add(
-                        new helpers.BN(ParticipantContributionDetails._value.toString())
-                    );
 
-                    expect( 
-                        ParticipantContributionDetails._state.toString()
-                    ).to.be.equal(
-                        ContributionStates.NOT_PROCESSED.toString()
-                    );
+                for(let i = 0; i < StageCount; i++) {
+                    const ParticipantStageDetails = await ReversibleICOInstance.methods.ParticipantTotalsDetails(participant_1, i).call();
+                    ContributionTotals = ContributionTotals.add(new helpers.BN(
+                        ParticipantStageDetails.received
+                    ));
                 }
 
                 expect( 
-                    ParticipantByAddress.contributed_amount.toString()
+                    ParticipantByAddress.received.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -510,8 +521,7 @@ describe("Cancel Testing", function () {
                 const ParticipantAccountBalanceAfterCancelValidation = new helpers.BN( 
                     ParticipantAccountBalanceAfterContributionValidation
                 ).sub(CancelTxCost)
-                // cancel amount is returned
-                // .sub(CancelAmount)
+                // cancel amount is returned already
                 // contribution amount is returned
                 .add(ContributionTotals);
 
@@ -523,15 +533,15 @@ describe("Cancel Testing", function () {
                 
                 // validate fired events
                 let eventFilter = helpers.utils.hasEvent(
-                    cancelTx, 'ExitEvent(address,uint256,uint256,uint8,bool)'
+                    cancelTx, 'TransferEvent(uint8,address,uint256)'
                 );
-                assert.equal(eventFilter.length, 1, 'ExitEvent event not received.');
+                assert.equal(eventFilter.length, 1, 'TransferEvent event not received.');
 
                 eventFilter = helpers.utils.hasEvent(
-                    cancelTx, 'ContributionEvent(uint8,uint16,address,uint256)'
+                    cancelTx, 'ApplicationEvent(uint8,uint16,address,uint256)'
                 );
-                assert.equal(eventFilter.length, parseInt(ParticipantByAddress.contributionsCount), 'ExitEvent event not received.');
- 
+                assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
+                
                 ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
                 const afterContributionsCount = ParticipantByAddress.contributionsCount;
 
@@ -539,19 +549,9 @@ describe("Cancel Testing", function () {
                 expect( 
                     afterContributionsCount.toString()
                 ).to.be.equal(
-                initialContributionsCount.toString()
+                    initialContributionsCount.toString()
                 );
 
-                // validate contributions
-                for(let i = 0; i < ParticipantByAddress.contributionsCount; i++) {
-                    const ParticipantContributionDetails = await ReversibleICOInstance.methods.ParticipantContributionDetails(participant_1, i).call();
-                    expect( 
-                        ParticipantContributionDetails._state.toString()
-                    ).to.be.equal(
-                        ContributionStates.CANCELLED.toString()
-                    );
-                }
-                
             });
         });
     });
