@@ -279,9 +279,11 @@ async function runTests() {
     "1_ERC1820",
     "2_ERC777_Token",
     "3_ERC20Token",
-    "4_ReversableICO",
+    "4_ReversibleICO",
+    "5_Cancel",
     "5_Flows",
-    "6_Gnosis-Safe",
+    "5_Contributions",
+    // "6_Gnosis-Safe",
     "7_Website"
   ];
 

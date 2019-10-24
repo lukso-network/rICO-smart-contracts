@@ -8,9 +8,9 @@
 
 pragma solidity ^0.5.0;
 
-import './ReversableICOMock.sol';
+import './ReversibleICOMock.sol';
 
-contract ReversableICOMock777 is ReversableICOMock {
+contract ReversibleICOMock777 is ReversibleICOMock {
 
     mapping( address => uint256 ) public balances;
 

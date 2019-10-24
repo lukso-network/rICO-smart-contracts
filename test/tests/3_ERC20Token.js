@@ -10,9 +10,9 @@ describe("ERC777 - ERC20 Token compatibility", function() {
   let mintedSupply = new helpers.BN(TokenSettings.supply);
 
   beforeEach(async function() {
-    this.ReversableICOMock777 = await helpers.utils.deployNewContractInstance(
+    this.ReversibleICOMock777 = await helpers.utils.deployNewContractInstance(
       helpers,
-      "ReversableICOMock777",
+      "ReversibleICOMock777",
       {
         from: accounts[2],
         gas: 6000000,
@@ -20,7 +20,7 @@ describe("ERC777 - ERC20 Token compatibility", function() {
       }
     );
 
-    _ricoAddress = this.ReversableICOMock777.receipt.contractAddress;
+    _ricoAddress = this.ReversibleICOMock777.receipt.contractAddress;
 
     HST = await helpers.utils.deployNewContractInstance(helpers, "RicoToken", {
       from: creator,

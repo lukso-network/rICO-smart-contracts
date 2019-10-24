@@ -8,9 +8,9 @@
 
 pragma solidity ^0.5.0;
 
-import '../ReversableICO.sol';
+import '../ReversibleICO.sol';
 
-contract ReversableICOMock is ReversableICO {
+contract ReversibleICOMock is ReversibleICO {
 
     uint256 currentBlockNumber = 0;
 

@@ -23,9 +23,9 @@ describe("ERC777 - RICO Token", function() {
 
   describe("Deployment", function() {
     before(async function() {
-      this.ReversableICOMock777 = await helpers.utils.deployNewContractInstance(
+      this.ReversibleICOMock777 = await helpers.utils.deployNewContractInstance(
         helpers,
-        "ReversableICOMock777",
+        "ReversibleICOMock777",
         {
           from: holder,
           gas: 6500000,
@@ -33,7 +33,7 @@ describe("ERC777 - RICO Token", function() {
         }
       );
 
-      _ricoAddress = this.ReversableICOMock777.receipt.contractAddress;
+      _ricoAddress = this.ReversibleICOMock777.receipt.contractAddress;
 
       this.RicoToken = await helpers.utils.deployNewContractInstance(
         helpers,
@@ -187,14 +187,14 @@ describe("ERC777 - RICO Token", function() {
       context("for an account with locked tokens", function() {
         const lockedAmount = "10000000";
 
-        it("returns their full balance when calling `balanceOf ", async function() {
+        it("returns their full balance when calling `balanceOf`", async function() {
           expect(
             await this.RicoToken.methods.balanceOf(holder).call()
           ).to.be.equal(setup.settings.token.supply.toString());
         });
 
         it("returns their locked balance when calling `getLockedBalance` ", async function() {
-          await this.ReversableICOMock777.methods
+          await this.ReversibleICOMock777.methods
             .setLockedTokenAmount(holder, lockedAmount)
             .send({ from: holder });
           expect(
@@ -202,7 +202,7 @@ describe("ERC777 - RICO Token", function() {
           ).to.be.equal(lockedAmount.toString());
         });
         it("returns their unlocked balance when calling `getUnlockedBalance` ", async function() {
-          await this.ReversableICOMock777.methods
+          await this.ReversibleICOMock777.methods
             .setLockedTokenAmount(holder, lockedAmount)
             .send({ from: accounts[0] });
           expect(
@@ -286,7 +286,7 @@ describe("ERC777 - RICO Token", function() {
         async function() {
           const lockedAmount = "100000000";
           it("should transfer if amount is unlocked", async function() {
-            await this.ReversableICOMock777.methods
+            await this.ReversibleICOMock777.methods
               .setLockedTokenAmount(holder, lockedAmount)
               .send({ from: accounts[0] });
 
@@ -306,7 +306,7 @@ describe("ERC777 - RICO Token", function() {
             );
             const amt = balance.add(new helpers.BN("1"));
 
-            await this.ReversableICOMock777.methods
+            await this.ReversibleICOMock777.methods
               .setLockedTokenAmount(holder, amt.toString())
               .send({ from: accounts[0] });
 

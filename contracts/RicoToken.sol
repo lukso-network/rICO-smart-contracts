@@ -2,18 +2,20 @@ pragma solidity ^0.5.0;
 
 import "./zeppelin/token/ERC777/ERC777.sol";
 
-interface ReversableICO {
+interface ReversibleICO {
     function getLockedTokenAmount(address) external returns (uint256);
 }
+
 contract RicoToken is ERC777 {
-    
-    ReversableICO public rICO;
+
+    ReversibleICO public rICO;
     address public manager;
     bool public freezed;
 
     constructor(
         uint256 initialSupply,
-        address[] memory _defaultOperators)
+        address[] memory _defaultOperators
+    )
         ERC777("LYXeToken", "LYXe", _defaultOperators)
         public
     {
@@ -22,20 +24,19 @@ contract RicoToken is ERC777 {
         freezed = true;
     }
     function setup(address _rICO, address _newManager) public {
-        require(msg.sender == manager);
-        rICO = ReversableICO(_rICO);
+        require(msg.sender == manager, "only manager");
+        rICO = ReversibleICO(_rICO);
         manager = _newManager;
         freezed = false;
     }
 
     function changeManager(address _newManager) public {
-        require(msg.sender == manager, "Not authorized");
+        require(msg.sender == manager, "only manager");
         manager = _newManager;
     }
 
-
     function setFreezed(bool _status) public {
-        require(msg.sender == manager);
+        require(msg.sender == manager, "only manager");
         freezed = _status;
     }
 
@@ -47,10 +48,8 @@ contract RicoToken is ERC777 {
         return balanceOf(owner).sub(rICO.getLockedTokenAmount(owner));
     }
 
-
-    
-    //We should override burn as well. So users can't burn locked amounts
-      function _burn(
+    // We should override burn as well. So users can't burn locked amounts
+    function _burn(
         address operator,
         address from,
         uint256 amount,
@@ -63,7 +62,9 @@ contract RicoToken is ERC777 {
         require(amount <= getUnlockedBalance(from), "Insufficient funds");
         ERC777._burn(operator, from, amount, data, operatorData);
     }
-    // we need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
+
+      // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
+      // ricoAddress can receive any amount for withdraw functionality
       function _move(
         address operator,
         address from,
@@ -75,10 +76,10 @@ contract RicoToken is ERC777 {
         internal
     {
         require(!freezed, "Contract is freezed");
-        require(amount <= getUnlockedBalance(from), "Insufficient funds");
+        if(to != address(rICO)) {
+            require(amount <= getUnlockedBalance(from), "Insufficient funds");
+        }
         ERC777._move(operator, from, to, amount, userData, operatorData);
     }
-
-
 
 }
