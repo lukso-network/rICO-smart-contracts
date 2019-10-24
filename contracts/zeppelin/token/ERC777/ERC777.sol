@@ -324,7 +324,8 @@ contract ERC777 is IERC777, IERC20 {
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
 
-        _callTokensReceived(operator, address(0), account, amount, userData, operatorData, true);
+
+        //_callTokensReceived(operator, address(0), account, amount, userData, operatorData, true); //Overriding this so Gnosis Safe can recieve tokens on deployment
 
         emit Minted(operator, account, amount, userData, operatorData);
         emit Transfer(address(0), account, amount);
@@ -376,7 +377,7 @@ contract ERC777 is IERC777, IERC20 {
         bytes memory data,
         bytes memory operatorData
     )
-        private
+        internal
     {
         require(from != address(0), "ERC777: burn from the zero address");
 
@@ -398,7 +399,7 @@ contract ERC777 is IERC777, IERC20 {
         bytes memory userData,
         bytes memory operatorData
     )
-        private
+        internal
     {
         _balances[from] = _balances[from].sub(amount);
         _balances[to] = _balances[to].add(amount);

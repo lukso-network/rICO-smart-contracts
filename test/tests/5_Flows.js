@@ -4,6 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
+const projectWalletAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -14,12 +15,29 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-const ContributionStates = {
+
+const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    NOT_PROCESSED:1,
-    ACCEPTED:2,
-    REJECTED:3
+    CONTRIBUTION_NEW:1,
+    CONTRIBUTION_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    WHITELIST_CANCEL:4,
+    WHITELIST_ACCEPT:5,
+    COMMIT_ACCEPT:6,
+    ACCEPT:7,
+    REJECT:8,
+    CANCEL:9
 }
+
+const TransferTypes = {
+    NOT_SET:0,
+    AUTOMATIC_REFUND:1,
+    WHITELIST_CANCEL:2,
+    PARTICIPANT_CANCEL:3,
+    PARTICIPANT_WITHDRAW:4,
+    PROJECT_WITHDRAW:5
+}
+
 
 const ERC777data = web3.utils.sha3('777TestData');
 const defaultOperators = []; // accounts[0] maybe
@@ -29,29 +47,41 @@ const anyone = '0x0000000000000000000000000000000000000001';
 
 let errorMessage;
 
-describe("Flow Testing", function () {
+let SnapShotKey = "FlowTestInit";
+let snapshotsEnabled = true;
+let snapshots = [];
 
-    const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
-    let TokenTrackerAddress, stageValidation = [], currentBlock, StartBlock,
-        AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-        StageBlockCount, StagePriceIncrease, EndBlock;
-    let TokenTrackerInstance;
+const deployerAddress = accounts[0];
+const whitelistControllerAddress = accounts[1];
 
-    before(async function () {
+let TokenTrackerAddress, ReversibleICOAddress, stageValidation = [], currentBlock, 
+    StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
+    StageBlockCount, StagePriceIncrease, EndBlock, TokenTrackerInstance, 
+    TokenTrackerReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
-        // this is where we should be using the store / restore blockchain 
-        // functionality to speed things up when when we move to the "beforeEach" method
+async function revertToFreshDeployment() {
 
-        // test requires ERC1820.instance
-        if (helpers.ERC1820.instance == false) {
-            console.log("  Error: ERC1820.instance not found, please make sure to run it first.");
-            process.exit();
-        }
+    // test requires ERC1820.instance
+    if (helpers.ERC1820.instance == false) {
+        console.log("  Error: ERC1820.instance not found, please make sure to run it first.");
+        process.exit();
+    }
+
+    if (typeof snapshots[SnapShotKey] !== "undefined" && snapshotsEnabled) {
+        // restore snapshot
+        await helpers.web3.evm.revert(snapshots[SnapShotKey]);
+
+        // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
+        snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
+
+        // reset account nonces.. 
+        helpers.utils.resetAccountNonceCache(helpers);
+    } else {
 
         /*
         *   Deploy Token Contract
         */
+       
         TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
@@ -59,36 +89,38 @@ describe("Flow Testing", function () {
                     setup.settings.token.supply.toString(),
                     defaultOperators
                 ],
-                gas: 3500000,
+                gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }
         );
+        TokenTrackerReceipt = TokenTrackerInstance.receipt;
         TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
+        console.log("      TOKEN Gas used for deployment:", TokenTrackerInstance.receipt.gasUsed);
+        console.log("      Contract Address:", TokenTrackerAddress);
 
         /*
         *   Deploy RICO Contract
         */
-        this.ReversableICO = await helpers.utils.deployNewContractInstance(helpers, "ReversableICOMock");
-        helpers.addresses.Rico = this.ReversableICO.receipt.contractAddress;
+        ReversibleICOInstance = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
+        ReversibleICOReceipt = ReversibleICOInstance.receipt;
+        ReversibleICOAddress = ReversibleICOInstance.receipt.contractAddress;
+        // helpers.addresses.Rico = ReversibleICOAddress;
 
-        // transfer tokens to rico
-        await TokenTrackerInstance.methods.send(
-            helpers.addresses.Rico,
-            RicoSaleSupply,
-            ERC777data
+        console.log("      RICO Gas used for deployment: ", ReversibleICOInstance.receipt.gasUsed);
+        console.log("      Contract Address:", ReversibleICOAddress);
+        console.log("");
+
+        await TokenTrackerInstance.methods.setup(
+            ReversibleICOAddress,
+            holder
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
         });
-
-        expect(
-            await TokenTrackerInstance.methods.balanceOf(this.ReversableICO.receipt.contractAddress).call()
-        ).to.be.equal(RicoSaleSupply.toString());
 
         /*
         *   Add RICO Settings
         */
-        currentBlock = await this.ReversableICO.methods.getCurrentBlockNumber().call();
+        currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
             
         // starts in one day
         StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
@@ -103,30 +135,13 @@ describe("Flow Testing", function () {
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
         AllocationEndBlock = StartBlock + AllocationBlockCount;
 
-        // for validation
         EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-        const StageStartBlock = AllocationEndBlock;
-        let lastStageBlockEnd = StageStartBlock;
 
-        for(let i = 0; i < StageCount; i++) {
-
-            const start_block = lastStageBlockEnd + 1;
-            const end_block = lastStageBlockEnd + StageBlockCount + 1;
-            const token_price = AllocationPrice + ( StagePriceIncrease * ( i +  1) );
-
-            stageValidation.push( {
-                start_block: start_block,
-                end_block: end_block,
-                token_price: token_price
-            });
-
-            lastStageBlockEnd = end_block;
-        }
-
-        await this.ReversableICO.methods.addSettings(
+        await ReversibleICOInstance.methods.addSettings(
             TokenTrackerAddress,        // address _TokenTrackerAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
+            projectWalletAddress,          // address _projectWalletAddress
             StartBlock,                 // uint256 _StartBlock
             AllocationBlockCount,       // uint256 _AllocationBlockCount,
             AllocationPrice,            // uint256 _AllocationPrice in wei
@@ -138,400 +153,640 @@ describe("Flow Testing", function () {
             gas: 3000000
         });
 
-        // do some validation
-        expect( 
-            await helpers.utils.getBalance(helpers, this.ReversableICO.receipt.contractAddress)
-        ).to.be.bignumber.equal( new helpers.BN(0) );
+        // transfer tokens to rico
+        await TokenTrackerInstance.methods.send(
+            ReversibleICOInstance.receipt.contractAddress,
+            RicoSaleSupply,
+            ERC777data
+        ).send({
+            from: holder,  // initial token supply holder
+            gas: 100000
+        });
 
         expect(
-            await TokenTrackerInstance.methods.balanceOf(this.ReversableICO.receipt.contractAddress).call()
+            await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
+        
 
-        expect(
-            await this.ReversableICO.methods.InitialTokenSupply().call()
-        ).to.be.equal(
-            await TokenTrackerInstance.methods.balanceOf(this.ReversableICO.receipt.contractAddress).call()
-        );
+        // create snapshot
+        if (snapshotsEnabled) {
+            snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
+        }
+    }
 
-        // save state, else get contract instances at address
+    // reinitialize instances so revert works properly.
+    TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
+    TokenTrackerInstance.receipt = TokenTrackerReceipt;
+    ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
+    ReversibleICOInstance.receipt = ReversibleICOReceipt;
 
+    // do some validation
+    expect( 
+        await helpers.utils.getBalance(helpers, ReversibleICOAddress)
+    ).to.be.bignumber.equal( new helpers.BN(0) );
+
+    expect(
+        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+    ).to.be.equal(RicoSaleSupply.toString());
+
+    expect(
+        await ReversibleICOInstance.methods.TokenSupply().call()
+    ).to.be.equal(
+        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+    );
+};
+
+describe("Flow Testing", function () {
+
+    before(async function () { 
+        await revertToFreshDeployment();
+    });
+    
+    describe("tokensReceived() - sending ERC777 tokens to rico contract", async function () { 
+
+        describe("0 - contract not initialized with settings", async function () { 
+
+            let TestReversibleICO;
+
+            before(async function () { 
+                helpers.utils.resetAccountNonceCache(helpers);
+    
+                // deploy mock contract so we can set block times. ( ReversibleICOMock )
+                TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
+    
+                // jump to contract start
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+            });
+            
+            describe("token sender is projectWalletAddress", async function () { 
+
+                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+
+                    const initialized = await TestReversibleICO.methods.initialized().call();
+                    expect( initialized ).to.be.equal( false );
+
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    await helpers.assertInvalidOpcode( async function () { 
+
+                        await TokenTrackerInstance.methods.send(
+                            TestReversibleICO.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: projectWalletAddress,
+                            gas: 100000
+                        });
+
+                    }, "requireInitialized: Contract must be initialized");
+
+                });
+            });
+            
+            describe("token sender is deployerAddress", async function () { 
+
+                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+
+                    helpers.utils.resetAccountNonceCache(helpers);
+
+                    const initialized = await TestReversibleICO.methods.initialized().call();
+                    expect( initialized ).to.be.equal( false );
+
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    // transfer 100 tokens to deployerAddress
+                    await TokenTrackerInstance.methods.send(
+                        deployerAddress,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
+
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // deployerAddress transfers 100 tokens to rico before it is initialised.
+                        await TokenTrackerInstance.methods.send(
+                            TestReversibleICO.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: deployerAddress,
+                            gas: 100000
+                        });
+
+                    }, "requireInitialized: Contract must be initialized");
+
+                });
+            });
+        });
+
+        describe("1 - contract initialized with settings", async function () { 
+
+            let TestReversibleICO, TestReversibleICOAddress, TestTokenTracker, TestTokenTrackerAddress;
+
+            before(async function () { 
+                helpers.utils.resetAccountNonceCache(helpers);
+    
+                // deploy everything except sending tokens to rico
+
+                TestTokenTracker = await helpers.utils.deployNewContractInstance(
+                    helpers, "RicoToken", {
+                        from: holder,
+                        arguments: [
+                            setup.settings.token.supply.toString(),
+                            defaultOperators
+                        ],
+                        gas: 6500000,
+                        gasPrice: helpers.solidity.gwei * 10
+                    }
+                );
+                TestTokenTrackerAddress = TestTokenTracker.receipt.contractAddress;
+
+                /*
+                *   Deploy RICO Contract
+                */
+                TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
+                TestReversibleICOReceipt = TestReversibleICO.receipt;
+                TestReversibleICOAddress = TestReversibleICO.receipt.contractAddress;
+
+                await TestTokenTracker.methods.setup(
+                    TestReversibleICOAddress,
+                    holder
+                ).send({
+                    from: holder,  // initial token supply holder
+                });
+
+                /*
+                *   Add RICO Settings
+                */
+                currentBlock = await TestReversibleICO.methods.getCurrentBlockNumber().call();
+                        
+                // starts in one day
+                StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
+                
+                // 22 days allocation
+                AllocationBlockCount = blocksPerDay * 22;                   
+                AllocationPrice = helpers.solidity.ether * 0.002;
+
+                // 12 x 30 day periods for distribution
+                StageCount = 12;
+                StageBlockCount = blocksPerDay * 30;      
+                StagePriceIncrease = helpers.solidity.ether * 0.0001;
+                AllocationEndBlock = StartBlock + AllocationBlockCount;
+
+                // for validation
+                EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+
+                await TestReversibleICO.methods.addSettings(
+                    TestTokenTrackerAddress,    // address _TokenTrackerAddress
+                    whitelistControllerAddress, // address _whitelistControllerAddress
+                    projectWalletAddress,       // address _projectWalletAddress
+                    StartBlock,                 // uint256 _StartBlock
+                    AllocationBlockCount,       // uint256 _AllocationBlockCount,
+                    AllocationPrice,            // uint256 _AllocationPrice in wei
+                    StageCount,                 // uint8   _StageCount
+                    StageBlockCount,            // uint256 _StageBlockCount
+                    StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+                ).send({
+                    from: deployerAddress,  // deployer
+                    gas: 3000000
+                });
+
+                // jump to contract start
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+            });
+            
+            describe("using configured token", async function () { 
+
+                describe("token sender is projectWalletAddress", async function () { 
+
+                    it("token amount is accepted and TokenSupply is correct", async function () {
+
+                        helpers.utils.resetAccountNonceCache(helpers);
+
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        await TestTokenTracker.methods.send(
+                            TestReversibleICOAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: projectWalletAddress,
+                            gas: 100000
+                        });
+
+                        expect(
+                            await TestReversibleICO.methods.TokenSupply().call()
+                        ).to.be.equal(
+                            testAmount
+                        );
+
+                    });
+                });
+
+                describe("token sender is deployerAddress ", async function () { 
+
+                    it("transaction reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        // transfer 100 tokens to deployerAddress
+                        await TestTokenTracker.methods.send(
+                            deployerAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: holder,
+                            gas: 100000
+                        });
+
+                        await helpers.assertInvalidOpcode( async () => {
+
+                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            await TestTokenTracker.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
+                                from: deployerAddress,
+                                gas: 100000
+                            });
+
+                        }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+
+                    });
+
+                });
+
+            });
+            
+            describe("using different token", async function () { 
+
+                describe("token sender is projectWalletAddress", async function () { 
+
+                    it("transaction reverts \"ERC777TokensRecipient: Invalid token\"", async function () {
+
+                        helpers.utils.resetAccountNonceCache(helpers);
+
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        await helpers.assertInvalidOpcode( async () => {
+
+                            await TokenTrackerInstance.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
+                                from: projectWalletAddress,
+                                gas: 100000
+                            });
+
+                        }, "ERC777TokensRecipient: Invalid token");
+
+                    });
+                });
+
+                describe("token sender is deployerAddress ", async function () { 
+
+                    it("transaction reverts \"ERC777TokensRecipient: Invalid token\"", async function () {
+
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        // transfer 100 tokens to deployerAddress
+                        await TokenTrackerInstance.methods.send(
+                            deployerAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: holder,
+                            gas: 100000
+                        });
+
+                        await helpers.assertInvalidOpcode( async () => {
+
+                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            await TokenTrackerInstance.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
+                                from: deployerAddress,
+                                gas: 100000
+                            });
+
+                        }, "ERC777TokensRecipient: Invalid token");
+
+                    });
+
+                });
+
+            });
+            
+        });
+
+        describe("2 - contract in Allocation phase", async function () { 
+
+            describe("participant is not whitelisted and has no contributions", async function () { 
+
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                });
+
+                it("getCancelModeStates() returns (false, false)", async function () {
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    expect(CancelStates[0]).to.be.equal(false);
+                    expect(CancelStates[1]).to.be.equal(false);
+                });
+
+                it("sending tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+
+                    // our participant somehow got some tokens that they then attempt to send for withdraw
+
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    // transfer 100 tokens to participant_1
+                    await TokenTrackerInstance.methods.send(
+                        participant_1,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
+                    
+                    const ParticipantTokenBalance = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                    );
+
+                    expect(
+                        ParticipantTokenBalance
+                    ).to.be.bignumber.equal(
+                        testAmount
+                    );
+
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // transfer tokens to Rico for withdraw
+                        await TokenTrackerInstance.methods.send(
+                            ReversibleICOInstance.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: participant_1,
+                            gas: 500000
+                        });
+
+                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+
+                });
+            });
+
+            describe("participant is not whitelisted and has 1 contribution", async function () { 
+
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+
+                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+
+                    let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: participant_1,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+                });
+
+                it("getCancelModeStates() returns (true, false)", async function () {
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    expect(CancelStates[0]).to.be.equal(true);
+                    expect(CancelStates[1]).to.be.equal(false);
+                });
+
+                it("sending tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+
+                    // our participant somehow got some tokens that they then attempt to send for withdraw
+
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    // transfer 100 tokens to participant_1
+                    await TokenTrackerInstance.methods.send(
+                        participant_1,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
+                    
+                    const ParticipantTokenBalance = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                    );
+
+                    expect(
+                        ParticipantTokenBalance
+                    ).to.be.bignumber.equal(
+                        testAmount
+                    );
+
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // transfer tokens to Rico for withdraw
+                        await TokenTrackerInstance.methods.send(
+                            ReversibleICOInstance.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: participant_1,
+                            gas: 500000
+                        });
+
+                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+
+                });
+            });
+
+
+            describe("participant is whitelisted and has 2 contributions", async function () { 
+
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+
+                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+
+                    let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: participant_1,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+
+                    // whitelist and accept contribution
+                    let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
+                        participant_1,
+                        ApplicationEventTypes.WHITELIST_ACCEPT,
+                    ).send({
+                        from: whitelistControllerAddress
+                    });
+
+
+                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: participant_1,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+
+                });
+
+                it("getCancelModeStates() returns (false, true)", async function () {
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    expect(CancelStates[0]).to.be.equal(false);
+                    expect(CancelStates[1]).to.be.equal(true);
+                });
+
+                it("participant can withdraw by sending tokens back to contract", async function () {
+
+                    // @TODO!
+                    // - Our participant must have a token balance
+                    // - the unlocked balance can be 0 or higher
+                    // - must be able to transfer partial / whole balance back to rico
+                    // in order to get eth back.
+
+
+
+                    const ParticipantTokenBalance = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                    );
+
+                    const RicoUnlockedTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                    );
+
+                    /*
+                    console.log(
+                        "RicoUnlockedTokenBalanceBefore:   ",
+                        helpers.utils.toEth(helpers, RicoUnlockedTokenBalanceBefore.toString()),
+                        "tokens" 
+                    );
+                    */
+
+                    expect(
+                        ParticipantTokenBalance
+                    ).to.be.bignumber.above(
+                        new BN("0")
+                    );
+
+                    // half the amount
+                    const testAmount = ParticipantTokenBalance.div( new BN("2") ).toString();
+
+                    // transfer 100 tokens to Rico for withdraw
+                    await TokenTrackerInstance.methods.send(
+                        ReversibleICOInstance.receipt.contractAddress,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: participant_1,
+                        gas: 500000
+                    });
+
+                    const ParticipantTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                    );
+
+                    const ParticipantUnlockedTokenBalance = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                    );
+
+
+                    expect(
+                        ParticipantTokenBalanceAfter
+                    ).to.be.bignumber.equal(
+                        ParticipantTokenBalance.div( new BN("2") )
+                    );
+
+                    expect(
+                        ParticipantUnlockedTokenBalance
+                    ).to.be.bignumber.equal(
+                        RicoUnlockedTokenBalanceBefore.div( new BN("2") )
+                    );
+
+                    let initialEth = helpers.solidity.etherBN;
+
+                    let tokenAmt = await ReversibleICOInstance.methods.getTokenAmountForEthAtStage( initialEth.toString(), 0 ).call();
+                    let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( tokenAmt.toString(), 0 ).call();
+
+                    /*
+                    console.log(
+                        "initialEth: ",
+                        helpers.utils.toEth(helpers, initialEth.toString()),
+                        "eth" 
+                    );
+
+                    console.log(
+                        "tokenAmt:   ",
+                        helpers.utils.toEth(helpers, tokenAmt.toString()),
+                        "tokens" 
+                    );
+
+                    console.log(
+                        "ethAmt:     ",
+                        helpers.utils.toEth(helpers, ethAmt.toString()),
+                        "eth" 
+                    );
+                    */
+                });
+            });
+        });
     });
 
     
-    describe("Dev", function () {
-
-        const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
-        let newContributionTx;
-
-        before(async function () {
-            
-            /*
-            // move to start of the allocation phase
-            let currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
-            let EndBlock = await this.ReversableICO.methods.EndBlock().call();
-            
-            // send 1 eth contribution
-            newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                from: participant_1,
-                to: helpers.addresses.Rico,
-                value: ContributionAmount.toString(),
-                gasPrice: helpers.networkConfig.gasPrice
-            });
-
-            let amount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            console.log("stage 0 start", amount);
-
-            let whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
-                participant_1,
-                ContributionStates.ACCEPTED,
-                0,          // start id
-                15
-            ).send({
-                from: whitelistControllerAddress
-            });
-
-
-            let totalTokens = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            amount = totalTokens;
-            console.log("stage 0 accepted ", 0,  amount);
-            console.log("in full tokens:  ", helpers.utils.toFullToken(helpers, amount))
-
-            // move to first distribution stage and whitelist participant
-
-            
-            currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, 1 );
-            const startBlock = currentBlock;
-            diffBlock = (currentBlock - startBlock);
-            const blockTotals = EndBlock - startBlock;
-
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 0 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 1 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 1, false, 1 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 1, false, 2 );
-
-            
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 3 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 4 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 5 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 6, true );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 7 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 12 );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, participant_1, 12, true );
-
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, accounts[0], 1, false );
-            await displayTokensForParticipantAtStage(startBlock, blockTotals, this.ReversableICO, deployerAddress, accounts[0], 12, true, 100 );
-
-
-            console.log("start block:      ", startBlock);
-            console.log("end block:        ", EndBlock);
-            console.log("length:           ", (EndBlock - startBlock) );
-
-            */
-        });
-
-    });
-
-    /*
-    describe("view getCurrentUnlockRatio(uint8 precision)", async function () { 
-
-        const precision = 20;
-        let DistributionStartBlock, DistributionBlockLength;
-
-        before(async function () {
-            DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
-            DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
-        });
-
-        it("Returns 0 before stage 1 start_block + 1", async function () {
-
-            let stageId = 0;
-            // jump to stage allocation start block - 1
-            let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
-
-            let diffBlock = (currentBlock - DistributionStartBlock);
-            let contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, DistributionBlockLength, precision);
-
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( contractRatio.toString() ).to.be.equal( "0" );
-
-            stageId = 1;
-            // jump to stage start_block - 1
-            currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-
-            diffBlock = (currentBlock - DistributionStartBlock);
-            contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, DistributionBlockLength, precision);
-
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( contractRatio.toString() ).to.be.equal( "0" );
-
-        });
-
-        it("Returns higher than 0 if at stage 1 start_block + 1", async function () {
-            const stageId = 1;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, false, 1 );
-            const diffBlock = (currentBlock - DistributionStartBlock);
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, DistributionBlockLength, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio.toNumber() ).to.be.above( 0 );
-        });
-
-        it("Returns 10 ** precision at EndBlock", async function () {
-            const stageId = 12;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-            const diffBlock = (currentBlock - DistributionStartBlock);
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, DistributionBlockLength, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio ).to.be.bignumber.equal( 
-                new helpers.BN("10").pow(new helpers.BN(precision))
-            );
-        });
-
-        it("Returns 10 ** precision at EndBlock + 1", async function () {
-            const stageId = 12;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true, 1 );
-            const diffBlock = (currentBlock - DistributionStartBlock);
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, DistributionBlockLength, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio ).to.be.bignumber.equal( 
-                new helpers.BN("10").pow(new helpers.BN(precision))
-            );
-        });
-
-    });
-    */
-
-    describe("view 2 getCurrentUnlockRatio(uint8 precision)", async function () { 
-
-        const precision = 20;
-        let DistributionStartBlock, DistributionBlockLength;
-
-        before(async function () {
-            DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
-            DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
-        });
-
-        it("Returns 0 before stage 1 start_block + 1", async function () {
-
-            let stageId = 0;
-            // jump to stage allocation start block - 1
-            let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
-            let contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
-
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( contractRatio.toString() ).to.be.equal( "0" );
-
-            stageId = 1;
-            // jump to stage start_block - 1
-            currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId );
-            contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
-
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( contractRatio.toString() ).to.be.equal( "0" );
-
-        });
-
-
-        it("Returns higher than 0 if at stage 1 start_block + 1", async function () {
-            const stageId = 1;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, false, 1 );
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio.toNumber() ).to.be.above( 0 );
-        });
-
-        it("Returns 10 ** precision at EndBlock", async function () {
-            const stageId = 12;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true );
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio ).to.be.bignumber.equal( 
-                new helpers.BN("10").pow(new helpers.BN(precision))
-            );
-        });
-
-        it("Returns 10 ** precision at EndBlock + 1", async function () {
-            const stageId = 12;
-            // jump to stage 1 start_block exactly
-            const currentBlock = await jumpToContractStage ( this.ReversableICO, deployerAddress, stageId, true, 1 );
-            const contractRatio = await this.ReversableICO.methods.getCurrentUnlockRatio(precision).call();
-            const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
-            expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-            expect( calculatedRatio ).to.be.bignumber.equal( 
-                new helpers.BN("10").pow(new helpers.BN(precision))
-            );
-        });
-
-
-    });
-
-    describe("view getLockedTokenAmount(address)", async function () { 
-
-        const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
-        let DistributionStartBlock, DistributionBlockLength;
-
-        before(async function () {
-            DistributionStartBlock = await this.ReversableICO.methods.DistributionStartBlock().call();
-            DistributionBlockLength = await this.ReversableICO.methods.DistributionBlockLength().call();
-
-            // move to start of the allocation phase
-            await jumpToContractStage ( this.ReversableICO, deployerAddress, 0 );
-            await this.ReversableICO.methods.EndBlock().call();
-            
-            // send 1 eth contribution
-            newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                from: participant_1,
-                to: helpers.addresses.Rico,
-                value: ContributionAmount.toString(),
-                gasPrice: helpers.networkConfig.gasPrice
-            });
-
-            let amount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            console.log("stage 0 start", amount);
-
-            let whitelistOrRejectTx = await this.ReversableICO.methods.whitelistOrReject(
-                participant_1,
-                ContributionStates.ACCEPTED,
-                0,          // start id
-                15
-            ).send({
-                from: whitelistControllerAddress
-            });
-
-        });
-
-        it("Returns 0 at any stage if participant has no contributions", async function () {
-
-            // jump to stage allocation start block - 1
-            const stageId = 0;
-            let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, false, -1);
-            const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_6).call();
-            const ContractContributionTokens = ParticipantsByAddress.token_amount;
-
-            let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
-            // make sure we return full purchased amount.
-            expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
-
-            // now let's validate the js calculations
-            let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
-            );
-
-            expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-            expect(getLockedTokenAmount.toString()).to.be.equal("0");
-
-
-            currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 1);
-            getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
-            expect(getLockedTokenAmount.toString()).to.be.equal("0");
-
-            currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 12);
-            getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
-            expect(getLockedTokenAmount.toString()).to.be.equal("0");
-
-            currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, 12, false, 1);
-            getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_6).call();
-            expect(getLockedTokenAmount.toString()).to.be.equal("0");
-        });
-
-        it("Returns participant's purchased token amount before stage 1 start_block", async function () {
-
-            // jump to stage allocation start block - 1
-            const stageId = 1;
-            const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, false, -1);
-
-            const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
-            const ContractContributionTokens = ParticipantsByAddress.token_amount;
-
-            const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-            expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
-
-            let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
-            );
-
-            expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-        });
-
-
-        it("Returns proper amount at stage 1 start_block", async function () {
-
-            // jump to stage allocation start block
-            const stageId = 1;
-            const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId);
-
-            const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
-            const ContractContributionTokens = ParticipantsByAddress.token_amount;
-            expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-            const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
-            );
-            expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-        });
-
-        it("Returns proper amount at stage 12 end_block - 1", async function () {
-
-            // jump to stage allocation start block
-            const stageId = 12;
-            const currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true, 0);
-
-            const ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
-            const ContractContributionTokens = ParticipantsByAddress.token_amount;
-            expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-            const getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
-            );
-
-            expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-        });
-
-        it("Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )", async function () {
-
-            // jump to stage allocation start block
-            let stageId = 12;
-            let currentBlock = await jumpToContractStage (this.ReversableICO, deployerAddress, stageId, true);
-
-            let ParticipantsByAddress = await this.ReversableICO.methods.ParticipantsByAddress(participant_1).call();
-            let ContractContributionTokens = ParticipantsByAddress.token_amount;
-            expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-            let getLockedTokenAmount = await this.ReversableICO.methods.getLockedTokenAmount(participant_1).call();
-            let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
-            );
-
-            expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-            expect(getLockedTokenAmount.toString()).to.be.equal("0");
-        });
-
-    });
-
-
-    
-
 });
 
 async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
-    let currentBlock = await jumpToContractStage ( contract, deployerAddress, stage, end, after );
+    let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployerAddress, stage, end, after );
 
     let ParticipantsByAddress = await contract.methods.ParticipantsByAddress(participant).call();
     let totalTokens = ParticipantsByAddress.token_amount;
@@ -555,26 +810,27 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     const ratioC = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
-
 }
 
 
-async function jumpToContractStage ( ReversableICO, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
-    const stageData = await ReversableICO.methods.StageByNumber(stageId).call();
-    let block = stageData.start_block;
-    if(end) {
-        block = stageData.end_block;
-    }
+async function displayContractStats(contract, TokenTrackerInstance) {
 
-    if(addToBlockNumber !== false) {
-        block = parseInt(block) + parseInt(addToBlockNumber);
-    }
+    let maxEth = await contract.methods.availableEth().call();
+    let receivedETH = await contract.methods.receivedETH().call();
+    let returnedETH = await contract.methods.returnedETH().call();
+    let acceptedETH = await contract.methods.acceptedETH().call();
+    let contributorsETH = await contract.methods.contributorsETH().call();
+    let projectETH = await contract.methods.projectETH().call();
+    let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
+    let ricoTokenBalance = await TokenTrackerInstance.methods.balanceOf(contract.receipt.contractAddress).call();
 
-    await ReversableICO.methods.jumpToBlockNumber(
-        block
-    ).send({
-        from: deployerAddress, gas: 100000
-    });
-
-    return block;
+    console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
+    console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
+    console.log("receivedETH:        ", helpers.utils.toEth(helpers,receivedETH) + " eth");
+    console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
+    console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
+    console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");
+    console.log("projectETH:         ", helpers.utils.toEth(helpers,projectETH) + " eth");
+    console.log("projectETHWithdrawn:", helpers.utils.toEth(helpers,projectETHWithdrawn) + " eth");
+    console.log("\n");
 }
