@@ -4,6 +4,7 @@ import "./zeppelin/token/ERC777/ERC777.sol";
 
 interface ReversibleICO {
     function getLockedTokenAmount(address) external returns (uint256);
+    function isWhitelisted(address) external returns (bool);
 }
 
 contract RicoToken is ERC777 {
@@ -76,10 +77,19 @@ contract RicoToken is ERC777 {
         internal
     {
         require(!freezed, "Contract is freezed");
-        if(to != address(rICO)) {
+        uint256 sendAmount = amount;
+        if(to == address(rICO)) {
+            // sending back all tokens for a withdraw will cap at max locked tokens
+            uint256 locked = getLockedBalance(from);
+
+            // make sure the user is whitelisted
+            if(rICO.isWhitelisted(from) && amount > locked) {
+                sendAmount = locked;
+            }
+        } else {
             require(amount <= getUnlockedBalance(from), "Insufficient funds");
         }
-        ERC777._move(operator, from, to, amount, userData, operatorData);
+        ERC777._move(operator, from, to, sendAmount, userData, operatorData);
     }
 
 }

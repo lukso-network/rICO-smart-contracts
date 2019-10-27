@@ -341,6 +341,57 @@ module.exports = {
         });
     
         return block;
+    },
+    async displayContributions(helpers, contract, participant_address, max = null) {
+
+        let receivedETH = await contract.methods.receivedETH().call();
+        let returnedETH = await contract.methods.returnedETH().call();
+        let acceptedETH = await contract.methods.acceptedETH().call();
+        let withdrawnETH = await contract.methods.withdrawnETH().call();
+        let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
+    
+        let ParticipantByAddress = await contract.methods.ParticipantsByAddress(participant_address).call();
+    
+        let ContractStageCount = await contract.methods.ContractStageCount().call();
+        const contributionsCount = ParticipantByAddress.contributionsCount;
+        const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
+    
+        console.log("Globals");
+        console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, receivedETH.toString()) +" eth" );
+        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, returnedETH.toString()) +" eth" );
+        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, acceptedETH.toString()) +" eth" );
+        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, withdrawnETH.toString()) +" eth" );
+        
+        console.log("Contributions for address:", participant_address);
+        console.log("Count:                    ", contributionsCount.toString());
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.received.toString()) +" eth" );
+        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned.toString()) +" eth" );
+        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted.toString()) +" eth" );
+        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn.toString()) +" eth" );
+        console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_reserved.toString()) +" tokens" );
+        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_awarded.toString()) +" tokens" );
+        console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_returned.toString()) +" tokens" );
+        console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
+
+        if(max > 0) {
+            ContractStageCount = max;
+        }
+    
+        for(let i = 0; i < ContractStageCount; i++) {
+            const ParticipantStageDetails = await contract.methods.ParticipantTotalsDetails(participant_address, i).call();
+            console.log("-------------------------------------------");
+            console.log("stageId:          ", i);
+            console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.received.toString() ) +" eth" );
+            console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned.toString() ) +" eth" );
+            console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted.toString() ) +" eth" );
+            console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn.toString() ) +" eth" );
+            console.log("tokens_reserved:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_reserved.toString() ) +" tokens" );
+            console.log("tokens_awarded:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_awarded.toString() ) +" tokens" );
+            console.log("tokens_returned:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_returned.toString() ) +" tokens" );
+        }
+    
+        console.log("\n");
     }
     
 };
