@@ -278,13 +278,14 @@ async function runTests() {
     "external/SafeMath",
     "1_ERC1820",
     "2_ERC777_Token",
-    "3_ERC20Token",
-    "4_ReversibleICO",
-    "5_Cancel",
-    "5_Flows",
-    "5_Contributions",
+    // "3_ERC20Token",
+    // "4_ReversibleICO",
+    // "5_Cancel",
+    // "5_Flows",
     // "6_Gnosis-Safe",
-    "7_Website"
+    // "7_Website",
+    
+    "5_Contributions",
   ];
 
   utils.toLog(

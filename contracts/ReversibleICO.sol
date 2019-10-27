@@ -316,7 +316,7 @@ contract ReversibleICO is IERC777Recipient {
 
     enum TransferTypes {
         NOT_SET,
-        AUTOMATIC_REFUND,
+        AUTOMATIC_RETURN,
         WHITELIST_CANCEL,
         PARTICIPANT_CANCEL,
         PARTICIPANT_WITHDRAW,
@@ -503,7 +503,7 @@ contract ReversibleICO is IERC777Recipient {
                 // a return value we must send back to our participant.
                 if(ReturnValue > 0) {
                     address(uint160(_receiver)).transfer(ReturnValue);
-                    emit TransferEvent(uint8(TransferTypes.AUTOMATIC_REFUND), _receiver, ReturnValue);
+                    emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _receiver, ReturnValue);
                 }
 
                 emit ApplicationEvent(_event_type, _stageId, _receiver, NewAcceptedValue);
