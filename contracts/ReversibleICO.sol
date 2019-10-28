@@ -610,9 +610,7 @@ contract ReversibleICO is IERC777Recipient {
         view
         returns ( bool )
     {
-        if( TokenTracker.balanceOf(address(participantAddress)) > 0 &&
-            ParticipantsByAddress[participantAddress].accepted > 0
-        ) {
+        if(getLockedTokenAmount(participantAddress) > 0) {
             return true;
         }
         return false;
@@ -640,6 +638,8 @@ contract ReversibleICO is IERC777Recipient {
         // - latest contributions get returned first.
 
         Participant storage ParticipantRecord = ParticipantsByAddress[_from];
+
+        // this is needed otherwise participants that can call cancel() can bypass
         if(ParticipantRecord.whitelisted == true) {
 
             uint256 currentBlockNumber = getCurrentBlockNumber();
@@ -717,8 +717,6 @@ contract ReversibleICO is IERC777Recipient {
                 emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, ReturnETHAmount);
                 return;
             }
-            revert("withdraw: Withdraw not possible. No locked tokens.");
-
         }
 
         // If address is not Whitelisted a call to this results in a revert

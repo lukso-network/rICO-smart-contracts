@@ -323,6 +323,14 @@ module.exports = {
             return new helpers.BN("0");
         }
     },
+    async getTokenAmountForEthAtStage(helpers, contract, ethValue, stageId) {
+        const stageData = await contract.methods.StageByNumber(stageId).call();
+        return new helpers.BN(ethValue.toString()).mul(
+            new helpers.BN("10").pow( new helpers.BN("18") )
+        ).div(
+            new helpers.BN(stageData.token_price)
+        );
+    },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
         const stageData = await contract.methods.StageByNumber(stageId).call();
         let block = stageData.start_block;

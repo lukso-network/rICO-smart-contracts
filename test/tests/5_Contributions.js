@@ -243,7 +243,6 @@ describe("Contribution Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;
-                // await displayContributions(helpers, ReversibleICOInstance, participant_1, 1);
 
                 let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
                     participant_1,
@@ -251,7 +250,6 @@ describe("Contribution Testing", function () {
                 ).send({
                     from: whitelistControllerAddress
                 });
-                // await displayContributions(helpers, ReversibleICOInstance, participant_1, 1);
 
                 await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
@@ -260,7 +258,6 @@ describe("Contribution Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;
-                await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 1);
 
                 ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
                 const afterContributionsCount = ParticipantByAddress.contributionsCount;
