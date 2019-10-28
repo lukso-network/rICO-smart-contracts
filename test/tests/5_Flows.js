@@ -15,7 +15,6 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-
 const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
     CONTRIBUTION_NEW:1,
@@ -80,8 +79,7 @@ async function revertToFreshDeployment() {
 
         /*
         *   Deploy Token Contract
-        */
-       
+        */       
         TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
@@ -137,7 +135,6 @@ async function revertToFreshDeployment() {
 
         EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-
         await ReversibleICOInstance.methods.addSettings(
             TokenTrackerAddress,        // address _TokenTrackerAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
@@ -167,7 +164,6 @@ async function revertToFreshDeployment() {
             await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
         
-
         // create snapshot
         if (snapshotsEnabled) {
             snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
@@ -585,7 +581,7 @@ describe("Flow Testing", function () {
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-                    let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    const newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
@@ -594,7 +590,7 @@ describe("Flow Testing", function () {
                 });
 
                 it("getCancelModeStates() returns (true, false)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(true);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -669,7 +665,6 @@ describe("Flow Testing", function () {
                         from: whitelistControllerAddress
                     });
 
-
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
                         to: ReversibleICOInstance.receipt.contractAddress,
@@ -688,11 +683,10 @@ describe("Flow Testing", function () {
 
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 2, false, 1);
 
-
                 });
 
                 it("getCancelModeStates() returns (false, true)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
@@ -700,136 +694,127 @@ describe("Flow Testing", function () {
 
                 it("participant can withdraw by sending tokens back to contract", async function () {
 
-                    // @TODO!
-                    // - Our participant must have a token balance
-                    // - the unlocked balance can be 0 or higher
-                    // - must be able to transfer partial / whole balance back to rico
-                    // in order to get eth back.
-
-                    const ParticipantTokenBalance = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                    const TestParticipantAddress = participant_1;
+                    const ReturnTokenAmount = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    const RicoUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    /*
-                    console.log(
-                        "RicoUnlockedTokenBalanceBefore:   ",
-                        helpers.utils.toEth(helpers, RicoUnlockedTokenBalanceBefore.toString()),
-                        "tokens" 
-                    );
-                    */
+                    // if in allocation stage (0) then unlocked need to be 0 else higher than 0
+                    // expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
-                    expect(
-                        ParticipantTokenBalance
-                    ).to.be.bignumber.above(
-                        new BN("0")
+                    // jump to end of stage 6
+                    // currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 1);
+
+                    const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
+
+                    const ContractTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
+
+                    const ParticipantTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+                    // Must have a token balance
+                    expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+
+                    const ParticipantLockedTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     
-                    // jump to end of stage 6
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 1);
+                    // locked + unlocked = balance
+                    expect(
+                        ParticipantLockedTokenBalanceBefore.add(
+                            ParticipantUnlockedTokenBalanceBefore
+                        )
+                    ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
 
-                    /*
-                    let DistributionStartBlock = parseInt( await ReversibleICOInstance.methods.DistributionStartBlock().call() );
-                    let middleBlock = Math.floor((EndBlock - DistributionStartBlock ) / 2) - ( 6 * 2 );
-                    currentBlock = await ReversibleICOInstance.methods.jumpToBlockNumber(
-                        middleBlock
-                    ).send({
-                        from: deployerAddress, gas: 100000
-                    });
-
-                    console.log( "EndBlock", EndBlock);
-                    console.log( "DistributionStartBlock", DistributionStartBlock);
-                    console.log( "middleBlock", middleBlock);
-                    */
-
-                    // const testAmount = ParticipantTokenBalance.div( new BN("2") );
-                    // const testAmount = ParticipantTokenBalance.div( new BN("4") )(); //
-                    // const testAmount = new helpers.BN("5000000").mul( helpers.solidity.etherBN );
-                    await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 3);
+                    // calculate how much eth we should be receiving for the tokens we're sending
+                    const withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
+                        helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
+                    );
 
                     // send full token balance back to rico
-                    await TokenTrackerInstance.methods.send(
+                    let withdrawTx = await TokenTrackerInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
-                        ParticipantTokenBalance.toString(),
+                        ReturnTokenAmount.toString(),
                         ERC777data
                     ).send({
-                        from: participant_1,
-                        gas: 1000000
+                        from: TestParticipantAddress,
+                        gas: 1000000,
+                        gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 3);
+                    const ContractBalanceAfter = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
-
-                    // console.log("ParticipantTokenBalance:      ", helpers.utils.toEth(helpers, ParticipantTokenBalance.toString()) +" tokens" );
-                    // console.log("ParticipanttestAmount:        ", helpers.utils.toEth(helpers, testAmount.toString()) +" tokens" );
-                    // let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( testAmount.toString(), 1 ).call();
-                    
-                    
-                    
+                    const ContractTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
                     const ParticipantTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(participant_1).call()
+                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantUnlockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    console.log("ParticipantTokenBalanceAfter:         ", helpers.utils.toEth(helpers, ParticipantTokenBalanceAfter.toString()) +" tokens" );
-                    console.log("ParticipantLockedTokenBalanceAfter:   ", helpers.utils.toEth(helpers, ParticipantLockedTokenBalanceAfter.toString()) +" tokens" );
-                    console.log("ParticipantUnlockedTokenBalanceAfter: ", helpers.utils.toEth(helpers, ParticipantUnlockedTokenBalanceAfter.toString()) +" tokens" );
-
-
-
-                    const ParticipantUnlockedTokenBalance = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
+                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
                     /*
-
-                    expect(
-                        ParticipantTokenBalanceAfter
-                    ).to.be.bignumber.equal(
-                        ParticipantTokenBalance.sub( testAmount )
-                    );
-
-                    expect(
-                        ParticipantUnlockedTokenBalance
-                    ).to.be.bignumber.equal(
-                        RicoUnlockedTokenBalanceBefore
-                    );
-                    
-
-                    let initialEth = helpers.solidity.etherBN;
-                    let tokenAmt = await ReversibleICOInstance.methods.getTokenAmountForEthAtStage( initialEth.toString(), 0 ).call();
-                    let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( tokenAmt.toString(), 0 ).call();
-
-
-                    
-                    console.log(
-                        "initialEth: ",
-                        helpers.utils.toEth(helpers, initialEth.toString()),
-                        "eth" 
-                    );
-
-                    console.log(
-                        "tokenAmt:   ",
-                        helpers.utils.toEth(helpers, tokenAmt.toString()),
-                        "tokens" 
-                    );
-
-                    console.log(
-                        "ethAmt:     ",
-                        helpers.utils.toEth(helpers, ethAmt.toString()),
-                        "eth" 
-                    );
+                    * Validation
                     */
+                    // ETH: validate participant eth balances
+                    let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
+                    // subtract transaction cost
+                    .sub(txGasCost)
+                    // add withdrawn eth amount
+                    .add(withdrawCalculatedBefore.eth);
+                    expect( ParticipantBalanceAfter ).to.be.bignumber.equal( ParticipantBalanceAfterValidation );
+
+                    // ETH: validate contract eth balances
+                    let ContractBalanceAfterValidation = ContractBalanceBefore
+                    // subtract withdrawn eth amount
+                    .sub(withdrawCalculatedBefore.eth);
+                    expect( ContractBalanceAfter ).to.be.bignumber.equal( ContractBalanceAfterValidation );
+
+                    // Tokens: validate participant token balances
+                    let ParticipantTokenBalanceAfterValidation = ParticipantTokenBalanceBefore
+                    // subtract tokens that were accepted for return
+                    .sub( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ParticipantTokenBalanceAfter ).to.be.bignumber.equal( ParticipantTokenBalanceAfterValidation );
+
+                    // Tokens: validate contract token balances
+                    let ContractTokenBalanceAfterValidation = ContractTokenBalanceBefore
+                    // add tokens that were accepted for return
+                    .add( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
+
+                    // Tokens: locked validation
+                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                    .sub(withdrawCalculatedBefore.withdrawn_tokens)
+                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+
+                    // Tokens: unlocked validation - the same
+                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+                    
+                    // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 3);
+
                 });
             });
+        });
+
+        describe("3 - contract in Distribution phase", async function () { 
+
+
         });
     });
 

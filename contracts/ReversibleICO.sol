@@ -329,7 +329,6 @@ contract ReversibleICO is IERC777Recipient {
         uint256 indexed _value
     );
 
-
     struct TotalsByStage {
         uint256 received;		    // msg.value
         uint256 returned;		    // received - accepted
@@ -337,27 +336,19 @@ contract ReversibleICO is IERC777Recipient {
         uint256 withdrawn;		    // withdrawn from current stage
         uint256 tokens_reserved;    // tokens bought in this stage
         uint256 tokens_awarded;	    // tokens already sent to the user in this stage
-        uint256 tokens_returned;	// tokens returned
+        uint256 tokens_returned;	// tokens returned by participant to contract
     }
 
     struct Participant {
-
-        uint256 contributed_amount;
-        uint256 accepted_amount;
-        uint256 withdrawn_amount;
-        uint256 available_amount;
-        uint256 token_amount;
-        mapping ( uint16 => Contribution ) contributions;
-
         bool   whitelisted;
         uint16  contributionsCount;
         uint256 received;	        // msg.value
         uint256 returned;	        // received - accepted
         uint256 accepted;	        // lower than msg.value if maxCap already reached
         uint256 withdrawn;	        // cancel() / withdraw()
-        uint256 tokens_reserved;    // tokens bought in all stages
-        uint256 tokens_awarded;	    // tokens already sent to the user in all stages
-        uint256 tokens_returned;    // tokens returned
+        uint256 tokens_reserved;    // total tokens bought in all stages
+        uint256 tokens_awarded;	    // total tokens already sent to the user in all stages
+        uint256 tokens_returned;    // total tokens returned by participant to contract in all stages
         mapping ( uint8 => TotalsByStage ) byStage;
     }
 
@@ -633,25 +624,9 @@ contract ReversibleICO is IERC777Recipient {
         returns ( bool )
     {
         Participant storage ParticipantRecord = ParticipantsByAddress[participantAddress];
-
         if( ParticipantRecord.received > 0 && ParticipantRecord.received > ParticipantRecord.returned ) {
             return true;
         }
-
-        /*
-        // ParticipantRecord.amount_accepted only available after whitelisting, so we need to check all contributions
-        uint256 ParticipantAvailableEth = 0;
-        for( uint16 i = 0; i < ParticipantRecord.contributionsCount; i++ ) {
-            Contribution storage ContributionRecord = ParticipantRecord.contributions[i];
-            if(ContributionRecord.state == uint8(ContributionStates.NOT_PROCESSED)) {
-                ParticipantAvailableEth += ContributionRecord.value;
-            }
-        }
-
-        if(ParticipantAvailableEth > 0 && ParticipantAvailableEth <= ParticipantRecord.contributed_amount) {
-            return true;
-        }
-        */
         return false;
     }
 
@@ -691,11 +666,8 @@ contract ReversibleICO is IERC777Recipient {
 
                 uint256 ReturnETHAmount = 0;
 
-                // WTF: shift by 1 as solidity seems to break if we use a for loop while i >= 0 / i--;
-                uint8 currentStageNumber = getCurrentStage() + 1;
-                for( uint8 i = currentStageNumber; i > 0; i-- ) {
-
-                    uint8 stage_id = i - 1;
+                uint8 currentStageNumber = getCurrentStage();
+                for( uint8 stage_id = currentStageNumber; stage_id >= 0; stage_id-- ) {
 
                     // calculate how many tokens are actually locked in this stage
                     // and only use those for return.
@@ -748,16 +720,6 @@ contract ReversibleICO is IERC777Recipient {
             revert("withdraw: Withdraw not possible. No locked tokens.");
 
         }
-
-        /*
-            revert(
-                append(
-                    "withdraw: stage_id:", bytes32ToString(uintToBytes(stage_id)),
-                    " tokens_in_stage:", bytes32ToString(uintToBytes(tokens_in_stage)),
-                    " CurrentETHAmount:", bytes32ToString(uintToBytes(CurrentETHAmount))
-                )
-            );
-        */
 
         // If address is not Whitelisted a call to this results in a revert
         revert("withdraw: Withdraw not possible. Participant has no locked tokens.");
@@ -889,7 +851,6 @@ contract ReversibleICO is IERC777Recipient {
             ParticipantsByAddress[_address].tokens_awarded,
             getCurrentBlockNumber()
         ) - ParticipantsByAddress[_address].tokens_returned;
-
     }
 
     /*
@@ -943,7 +904,6 @@ contract ReversibleICO is IERC777Recipient {
         returns (bool)
     {
         require(msg.sender == projectWalletAddress, "only projectWalletAddress");
-
         require(ethAmount <= projectETH, "Specified ETH value too large.");
 
 
@@ -959,36 +919,6 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Helpers
     */
-
-    function ParticipantContributionDetails(
-        address _address,
-        uint16 contribution_id
-    ) public view returns (
-        uint256 _value,
-        uint256 _received,
-        uint256 _returned,
-        uint256 _block,
-        uint8 _stageId,
-        uint8 _state,
-        uint256 _tokens
-    ) {
-        //
-        // direct call: ParticipantsByAddress[_address].contributions[contribution_id].value
-        //
-        // mapping to records vs calling directly yields lower gas usage
-
-        Participant storage Record = ParticipantsByAddress[_address];
-        Contribution storage ContributionRecord = Record.contributions[contribution_id];
-        return (
-            ContributionRecord.value,
-            ContributionRecord.received,
-            ContributionRecord.returned,
-            ContributionRecord.block,
-            ContributionRecord.stageId,
-            ContributionRecord.state,
-            ContributionRecord.tokens
-        );
-    }
 
     // direct call: ParticipantsByAddress[_address].byStage[_stageId]._accepted
     function ParticipantTotalsDetails(
