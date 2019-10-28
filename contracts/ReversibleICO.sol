@@ -663,13 +663,22 @@ contract ReversibleICO is IERC777Recipient {
         // Whitelisted contributor sends tokens back to the RICO contract
         // - unlinke cancel() method, this allows variable amounts.
         // - latest contributions get returned first.
-        // - TokenTracker makes sure we cannot receive more than locked.
-
 
         Participant storage ParticipantRecord = ParticipantsByAddress[_from];
         if(ParticipantRecord.whitelisted == true) {
 
+            uint256 currentBlockNumber = getCurrentBlockNumber();
+
+            // Contributors can send more tokens than they have locked,
+            // thus make sure we only try to return for said amount
             uint256 RemainingTokenAmount = _returned_token_amount;
+            uint256 maxLocked = getLockedTokenAmount(_from);
+            uint256 ReturnTokenAmount = 0;
+
+            if(RemainingTokenAmount > maxLocked) {
+                ReturnTokenAmount = RemainingTokenAmount - maxLocked;
+                RemainingTokenAmount = maxLocked;
+            }
 
             if(RemainingTokenAmount > 0) {
 
@@ -688,13 +697,14 @@ contract ReversibleICO is IERC777Recipient {
 
                     uint8 stage_id = i - 1;
 
-                    // calculate stack based on unlock ratio how many tokens are actually
-                    // locked in this stage and only use those for return... otherwise we
-                    // return at the highest price.. not fair to the user this way
-                    uint256 tokens_in_stage = getLockedFromAmount(
-                        ParticipantRecord.byStage[stage_id].tokens_awarded -
-                        ParticipantRecord.byStage[stage_id].tokens_returned
-                    );
+                    // calculate how many tokens are actually locked in this stage
+                    // and only use those for return.
+
+                    uint256 tokens_in_stage = getLockedFromAmountAtBlock(
+                        ParticipantRecord.byStage[stage_id].tokens_reserved +
+                        ParticipantRecord.byStage[stage_id].tokens_awarded,
+                        currentBlockNumber
+                    ) - ParticipantRecord.byStage[stage_id].tokens_returned;
 
                     // only try to process stages that actually have tokens in them.
                     if(tokens_in_stage > 0) {
@@ -719,6 +729,15 @@ contract ReversibleICO is IERC777Recipient {
                             break;
                         }
                     }
+                }
+
+                if(ReturnTokenAmount > 0) {
+                    // return overflow tokens received
+
+                    // allocate tokens to participant
+                    bytes memory data;
+                    // solium-disable-next-line security/no-send
+                    TokenTracker.send(_from, ReturnTokenAmount, data);
                 }
 
                 ParticipantRecord.withdrawn += ReturnETHAmount;
@@ -820,10 +839,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     function isWhitelisted(address _address) public view returns ( bool ) {
-        if(ParticipantsByAddress[_address].whitelisted == true) {
-            return true;
-        }
-        return false;
+        return ParticipantsByAddress[_address].whitelisted;
     }
 
     /*
@@ -867,20 +883,21 @@ contract ReversibleICO is IERC777Recipient {
     function getLockedTokenAmount(address _address) public view returns (uint256) {
         // since we want to display token amounts even when they're not already
         // transferred to their accounts, we use reserved + awarded
-        uint256 tokenAmount = ParticipantsByAddress[_address].tokens_awarded +
-                              ParticipantsByAddress[_address].tokens_reserved -
-                              ParticipantsByAddress[_address].tokens_returned;
-        return getLockedFromAmount(tokenAmount);
+
+        return getLockedFromAmountAtBlock(
+            ParticipantsByAddress[_address].tokens_reserved +
+            ParticipantsByAddress[_address].tokens_awarded,
+            getCurrentBlockNumber()
+        ) - ParticipantsByAddress[_address].tokens_returned;
+
     }
 
     /*
     *   ERC777 - get the amount of locked tokens at current block number
     */
-    function getLockedFromAmount(uint256 tokenAmount) public view returns (uint256) {
+    function getLockedFromAmountAtBlock(uint256 tokenAmount, uint256 blockNumber) public view returns (uint256) {
 
         if(tokenAmount > 0) {
-
-            uint256 currentBlock = getCurrentBlockNumber();
 
             // if before "development / distribution phase" ( stage 0 )
             //   - return all tokens bought through contributing.
@@ -888,12 +905,12 @@ contract ReversibleICO is IERC777Recipient {
             //   - calculate and return
             // else if after endBlock
             //   - return 0
-            if(currentBlock < DistributionStartBlock) {
+            if(blockNumber < DistributionStartBlock) {
 
                 // allocation phase
                 return tokenAmount;
 
-            } else if(currentBlock < EndBlock) {
+            } else if(blockNumber < EndBlock) {
 
                 // distribution phase
                 uint8 precision = 20;

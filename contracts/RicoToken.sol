@@ -11,7 +11,7 @@ contract RicoToken is ERC777 {
 
     ReversibleICO public rICO;
     address public manager;
-    bool public freezed;
+    bool public frozen;
 
     constructor(
         uint256 initialSupply,
@@ -22,13 +22,13 @@ contract RicoToken is ERC777 {
     {
         _mint(msg.sender, msg.sender, initialSupply, "", "");
         manager = msg.sender;
-        freezed = true;
+        frozen = true;
     }
     function setup(address _rICO, address _newManager) public {
         require(msg.sender == manager, "only manager");
         rICO = ReversibleICO(_rICO);
         manager = _newManager;
-        freezed = false;
+        frozen = false;
     }
 
     function changeManager(address _newManager) public {
@@ -36,9 +36,9 @@ contract RicoToken is ERC777 {
         manager = _newManager;
     }
 
-    function setFreezed(bool _status) public {
+    function setFrozen(bool _status) public {
         require(msg.sender == manager, "only manager");
-        freezed = _status;
+        frozen = _status;
     }
 
     function getLockedBalance(address owner) public returns(uint){
@@ -59,14 +59,14 @@ contract RicoToken is ERC777 {
     )
         internal
     {
-        require(!freezed, "Contract is freezed");
+        require(!frozen, "Contract is frozen");
         require(amount <= getUnlockedBalance(from), "Insufficient funds");
         ERC777._burn(operator, from, amount, data, operatorData);
     }
 
-      // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
-      // ricoAddress can receive any amount for withdraw functionality
-      function _move(
+    // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
+    // ricoAddress can receive any amount for withdraw functionality
+    function _move(
         address operator,
         address from,
         address to,
@@ -76,20 +76,17 @@ contract RicoToken is ERC777 {
     )
         internal
     {
-        require(!freezed, "Contract is freezed");
-        uint256 sendAmount = amount;
-        if(to == address(rICO)) {
-            // sending back all tokens for a withdraw will cap at max locked tokens
-            uint256 locked = getLockedBalance(from);
+        require(!frozen, "Contract is frozen");
 
-            // make sure the user is whitelisted
-            if(rICO.isWhitelisted(from) && amount > locked) {
-                sendAmount = locked;
-            }
+        if(to == address(rICO)) {
+            // full balance can be sent back to rico
+            require(amount <= balanceOf(from), "Insufficient funds");
         } else {
+            // for every other address limit to unlocked balance
             require(amount <= getUnlockedBalance(from), "Insufficient funds");
         }
-        ERC777._move(operator, from, to, sendAmount, userData, operatorData);
+
+        ERC777._move(operator, from, to, amount, userData, operatorData);
     }
 
 }

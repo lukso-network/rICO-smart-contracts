@@ -706,8 +706,6 @@ describe("Flow Testing", function () {
                     // - must be able to transfer partial / whole balance back to rico
                     // in order to get eth back.
 
-
-
                     const ParticipantTokenBalance = new BN(
                         await TokenTrackerInstance.methods.balanceOf(participant_1).call()
                     );
@@ -729,16 +727,33 @@ describe("Flow Testing", function () {
                     ).to.be.bignumber.above(
                         new BN("0")
                     );
+                    
+                    // jump to end of stage 6
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 1);
+
+                    /*
+                    let DistributionStartBlock = parseInt( await ReversibleICOInstance.methods.DistributionStartBlock().call() );
+                    let middleBlock = Math.floor((EndBlock - DistributionStartBlock ) / 2) - ( 6 * 2 );
+                    currentBlock = await ReversibleICOInstance.methods.jumpToBlockNumber(
+                        middleBlock
+                    ).send({
+                        from: deployerAddress, gas: 100000
+                    });
+
+                    console.log( "EndBlock", EndBlock);
+                    console.log( "DistributionStartBlock", DistributionStartBlock);
+                    console.log( "middleBlock", middleBlock);
+                    */
 
                     // const testAmount = ParticipantTokenBalance.div( new BN("2") );
                     // const testAmount = ParticipantTokenBalance.div( new BN("4") )(); //
-                    const testAmount = new helpers.BN("5000000").mul( helpers.solidity.etherBN );
-
+                    // const testAmount = new helpers.BN("5000000").mul( helpers.solidity.etherBN );
                     await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 3);
 
+                    // send full token balance back to rico
                     await TokenTrackerInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
-                        testAmount.toString(),
+                        ParticipantTokenBalance.toString(),
                         ERC777data
                     ).send({
                         from: participant_1,
@@ -747,15 +762,28 @@ describe("Flow Testing", function () {
 
                     await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 3);
 
-                    console.log("ParticipantTokenBalance: ", helpers.utils.toEth(helpers, ParticipantTokenBalance.toString()) +" tokens" );
-                    console.log("ParticipanttestAmount:   ", helpers.utils.toEth(helpers, testAmount.toString()) +" tokens" );
 
-                    let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( testAmount.toString(), 1 ).call();
-                    console.log("CalcEthAmount:           ", helpers.utils.toEth(helpers, ethAmt.toString()) +" tokens" );
-
+                    // console.log("ParticipantTokenBalance:      ", helpers.utils.toEth(helpers, ParticipantTokenBalance.toString()) +" tokens" );
+                    // console.log("ParticipanttestAmount:        ", helpers.utils.toEth(helpers, testAmount.toString()) +" tokens" );
+                    // let ethAmt = await ReversibleICOInstance.methods.getEthAmountForTokensAtStage( testAmount.toString(), 1 ).call();
+                    
+                    
+                    
                     const ParticipantTokenBalanceAfter = new BN(
                         await TokenTrackerInstance.methods.balanceOf(participant_1).call()
                     );
+                    const ParticipantLockedTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.getLockedBalance(participant_1).call()
+                    );
+                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()
+                    );
+
+                    console.log("ParticipantTokenBalanceAfter:         ", helpers.utils.toEth(helpers, ParticipantTokenBalanceAfter.toString()) +" tokens" );
+                    console.log("ParticipantLockedTokenBalanceAfter:   ", helpers.utils.toEth(helpers, ParticipantLockedTokenBalanceAfter.toString()) +" tokens" );
+                    console.log("ParticipantUnlockedTokenBalanceAfter: ", helpers.utils.toEth(helpers, ParticipantUnlockedTokenBalanceAfter.toString()) +" tokens" );
+
+
 
                     const ParticipantUnlockedTokenBalance = new BN(
                         await TokenTrackerInstance.methods.getUnlockedBalance(participant_1).call()

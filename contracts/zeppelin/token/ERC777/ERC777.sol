@@ -325,7 +325,8 @@ contract ERC777 is IERC777, IERC20 {
         _balances[account] = _balances[account].add(amount);
 
         // @RICO
-        //_callTokensReceived(operator, address(0), account, amount, userData, operatorData, true); //Overriding this so Gnosis Safe can recieve tokens on deployment
+        // modified to false so Gnosis Safe can recieve tokens on deployment
+        _callTokensReceived(operator, address(0), account, amount, userData, operatorData, false);
 
         emit Minted(operator, account, amount, userData, operatorData);
         emit Transfer(address(0), account, amount);
