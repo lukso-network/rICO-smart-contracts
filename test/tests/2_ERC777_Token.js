@@ -118,8 +118,8 @@ describe("ERC777 - RICO Token", function() {
         );
       });
 
-      it("returns corrctly the freezed status", async function() {
-        expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+      it("returns corrctly the frozen status", async function() {
+        expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
           false
         );
       });
@@ -215,21 +215,21 @@ describe("ERC777 - RICO Token", function() {
     }); //describe
 
     describe("freezing funcionality", function() {
-      context("Should correctly set the freezed status", function() {
+      context("Should correctly set the frozen status", function() {
         it("to true", async function() {
           await this.RicoToken.methods
-            .setFreezed(true)
+            .setFrozen(true)
             .send({ from: newManager });
-          expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+          expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
             true
           );
         });
 
         it("to false", async function() {
           await this.RicoToken.methods
-            .setFreezed(false)
+            .setFrozen(false)
             .send({ from: newManager });
-          expect(await this.RicoToken.methods.freezed().call()).to.be.equal(
+          expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
             false
           );
         });
@@ -237,16 +237,16 @@ describe("ERC777 - RICO Token", function() {
         it("Fails if non-manager calls freeze", async function() {
           await helpers.assertInvalidOpcode(async () => {
             await this.RicoToken.methods
-              .setFreezed(false)
+              .setFrozen(false)
               .send({ from: accounts[3] });
           }, "revert");
         });
       });
 
-      context("should block actions when freezed", function() {
+      context("should block actions when frozen", function() {
         it("Blocks trasnfers", async function() {
           await this.RicoToken.methods
-            .setFreezed(true)
+            .setFrozen(true)
             .send({ from: newManager });
           await helpers.assertInvalidOpcode(async () => {
             await this.RicoToken.methods
@@ -257,16 +257,16 @@ describe("ERC777 - RICO Token", function() {
 
         it("Blocks burns", async function() {
           await this.RicoToken.methods
-            .setFreezed(true)
+            .setFrozen(true)
             .send({ from: newManager });
           await helpers.assertInvalidOpcode(async () => {
             await this.RicoToken.methods.burn("1", "0x").send({ from: holder });
           }, "revert");
         });
 
-        it("Re-allows trasnfer when unfreezed", async function() {
+        it("Re-allows transfer when unfrozen", async function() {
           await this.RicoToken.methods
-            .setFreezed(false)
+            .setFrozen(false)
             .send({ from: newManager });
           await this.RicoToken.methods
             .transfer(accounts[5], 10000)
@@ -280,7 +280,7 @@ describe("ERC777 - RICO Token", function() {
       });
     }); //describe
 
-    describe("Trasnfers with locked amount", () => {
+    describe("Transfers with locked amount", () => {
       context(
         "It executes correctly for an account with locked tokens",
         async function() {

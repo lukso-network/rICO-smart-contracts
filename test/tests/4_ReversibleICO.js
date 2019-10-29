@@ -1073,7 +1073,7 @@ describe("ReversibleICO", function () {
     
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( contractRatio.toString() ).to.be.equal( "0" );
-    
+
             });
     
     

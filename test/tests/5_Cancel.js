@@ -30,7 +30,7 @@ const ApplicationEventTypes = {
 
 const TransferTypes = {
     NOT_SET:0,
-    AUTOMATIC_REFUND:1,
+    AUTOMATIC_RETURN:1,
     WHITELIST_CANCEL:2,
     PARTICIPANT_CANCEL:3,
     PARTICIPANT_WITHDRAW:4,
@@ -612,6 +612,8 @@ describe("Cancel Testing", function () {
         });
 
     });
+
+    
 
 });
 

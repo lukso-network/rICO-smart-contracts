@@ -4,13 +4,14 @@ import "./zeppelin/token/ERC777/ERC777.sol";
 
 interface ReversibleICO {
     function getLockedTokenAmount(address) external returns (uint256);
+    function isWhitelisted(address) external returns (bool);
 }
 
 contract RicoToken is ERC777 {
 
     ReversibleICO public rICO;
     address public manager;
-    bool public freezed;
+    bool public frozen;
 
     constructor(
         uint256 initialSupply,
@@ -21,13 +22,13 @@ contract RicoToken is ERC777 {
     {
         _mint(msg.sender, msg.sender, initialSupply, "", "");
         manager = msg.sender;
-        freezed = true;
+        frozen = true;
     }
     function setup(address _rICO, address _newManager) public {
         require(msg.sender == manager, "only manager");
         rICO = ReversibleICO(_rICO);
         manager = _newManager;
-        freezed = false;
+        frozen = false;
     }
 
     function changeManager(address _newManager) public {
@@ -35,9 +36,9 @@ contract RicoToken is ERC777 {
         manager = _newManager;
     }
 
-    function setFreezed(bool _status) public {
+    function setFrozen(bool _status) public {
         require(msg.sender == manager, "only manager");
-        freezed = _status;
+        frozen = _status;
     }
 
     function getLockedBalance(address owner) public returns(uint){
@@ -58,14 +59,14 @@ contract RicoToken is ERC777 {
     )
         internal
     {
-        require(!freezed, "Contract is freezed");
+        require(!frozen, "Contract is frozen");
         require(amount <= getUnlockedBalance(from), "Insufficient funds");
         ERC777._burn(operator, from, amount, data, operatorData);
     }
 
-      // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
-      // ricoAddress can receive any amount for withdraw functionality
-      function _move(
+    // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
+    // ricoAddress can receive any amount for withdraw functionality
+    function _move(
         address operator,
         address from,
         address to,
@@ -75,10 +76,16 @@ contract RicoToken is ERC777 {
     )
         internal
     {
-        require(!freezed, "Contract is freezed");
-        if(to != address(rICO)) {
+        require(!frozen, "Contract is frozen");
+
+        if(to == address(rICO)) {
+            // full balance can be sent back to rico
+            require(amount <= balanceOf(from), "Insufficient funds");
+        } else {
+            // for every other address limit to unlocked balance
             require(amount <= getUnlockedBalance(from), "Insufficient funds");
         }
+
         ERC777._move(operator, from, to, amount, userData, operatorData);
     }
 
