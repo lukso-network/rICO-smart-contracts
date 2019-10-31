@@ -113,8 +113,7 @@ async function revertToFreshDeployment() {
         console.log("");
 
         await TokenTrackerInstance.methods.setup(
-            ReversibleICOAddress,
-            holder
+            ReversibleICOAddress
         ).send({
             from: holder,  // initial token supply holder
         });

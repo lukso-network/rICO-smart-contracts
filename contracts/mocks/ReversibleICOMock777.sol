@@ -22,4 +22,19 @@ contract ReversibleICOMock777 is ReversibleICOMock {
         return balances[wallet];
     }
 
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    )
+        external
+        // solium-disable-next-line no-empty-blocks
+    {
+        // Rico should only receive tokens from the Rico Token Tracker.
+        // any other transaction should revert
+    }
+
 }

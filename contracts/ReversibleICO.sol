@@ -752,6 +752,7 @@ contract ReversibleICO is IERC777Recipient {
             // 2 - rico contributor sends tokens back
             withdraw(from, amount);
         }
+
     }
 
 
@@ -1000,36 +1001,5 @@ contract ReversibleICO is IERC777Recipient {
         require(frozen == false, "requireFrozen: Contract must not be frozen");
         _;
     }
-
-
-    function append(string memory a, string memory b, string memory c, string memory d, string memory e, string memory f) internal pure returns (string memory) {
-        return string(abi.encodePacked(a, b, c, d, e, f));
-    }
-
-    function bytes32ToString (bytes32 data) internal pure returns (string memory) {
-        bytes memory bytesString = new bytes(32);
-        for (uint j=0; j<32; j++) {
-            byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
-            if (char != 0) {
-                bytesString[j] = char;
-            }
-        }
-        return string(bytesString);
-    }
-
-    function uintToBytes(uint v) internal pure returns (bytes32 ret) {
-        if (v == 0) {
-            ret = '0';
-        }
-        else {
-            while (v > 0) {
-                ret = bytes32(uint(ret) / (2 ** 8));
-                ret |= bytes32(((v % 10) + 48) * 2 ** (8 * 31));
-                v /= 10;
-            }
-        }
-        return ret;
-    }
-
 
 }

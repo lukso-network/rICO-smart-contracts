@@ -109,8 +109,7 @@ async function revertToFreshDeployment() {
         console.log("");
 
         await TokenTrackerInstance.methods.setup(
-            ReversibleICOAddress,
-            holder
+            ReversibleICOAddress
         ).send({
             from: holder,  // initial token supply holder
         });
@@ -314,8 +313,7 @@ describe("Flow Testing", function () {
                 TestReversibleICOAddress = TestReversibleICO.receipt.contractAddress;
 
                 await TestTokenTracker.methods.setup(
-                    TestReversibleICOAddress,
-                    holder
+                    TestReversibleICOAddress
                 ).send({
                     from: holder,  // initial token supply holder
                 });
@@ -847,6 +845,135 @@ describe("Flow Testing", function () {
                     const CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
+                });
+
+
+                it("participant can withdraw a small amount of eth by sending tokens back to contract", async function () {
+
+                    const TestParticipantAddress = participant_1;
+                    
+                    // return 1 eth worth of tokens in current stage
+                    const ethAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+                    const ReturnTokenAmount = new BN(
+                        await helpers.utils.getTokenAmountForEthAtStage(
+                            helpers,
+                            ReversibleICOInstance, 
+                            ethAmount,
+                            6
+                        ) 
+                    );
+
+                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                    );
+
+                    // since we're in a later stage, unlocked need to be above 0 
+                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+
+
+                    const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
+
+                    const ContractTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
+
+                    const ParticipantTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+                    // Must have a token balance
+                    expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+
+                    const ParticipantLockedTokenBalanceBefore = new BN(
+                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                    );
+                    
+                    // locked + unlocked = balance
+                    expect(
+                        ParticipantLockedTokenBalanceBefore.add(
+                            ParticipantUnlockedTokenBalanceBefore
+                        )
+                    ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
+
+                    // calculate how much eth we should be receiving for the tokens we're sending
+                    const withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
+                        helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
+                    );
+
+                    // send full token balance back to rico
+                    let withdrawTx = await TokenTrackerInstance.methods.send(
+                        ReversibleICOInstance.receipt.contractAddress,
+                        ReturnTokenAmount.toString(),
+                        ERC777data
+                    ).send({
+                        from: TestParticipantAddress,
+                        gas: 1000000,
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+
+                    const ContractBalanceAfter = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
+
+                    const ContractTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
+                    const ParticipantTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+                    const ParticipantLockedTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                    );
+                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                    );
+
+                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
+                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    );
+
+                    /*
+                    * Validation
+                    */
+                    // ETH: validate participant eth balances
+                    let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
+                        // subtract transaction cost
+                        .sub(txGasCost)
+                        // add withdrawn eth amount
+                        .add(withdrawCalculatedBefore.eth);
+                    expect( ParticipantBalanceAfter ).to.be.bignumber.equal( ParticipantBalanceAfterValidation );
+
+                    // ETH: validate contract eth balances
+                    let ContractBalanceAfterValidation = ContractBalanceBefore
+                        // subtract withdrawn eth amount
+                        .sub(withdrawCalculatedBefore.eth);
+                    expect( ContractBalanceAfter ).to.be.bignumber.equal( ContractBalanceAfterValidation );
+
+                    // Tokens: validate participant token balances
+                    let ParticipantTokenBalanceAfterValidation = ParticipantTokenBalanceBefore
+                        // subtract tokens that were accepted for return
+                        .sub( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ParticipantTokenBalanceAfter ).to.be.bignumber.equal( ParticipantTokenBalanceAfterValidation );
+
+                    // Tokens: validate contract token balances
+                    let ContractTokenBalanceAfterValidation = ContractTokenBalanceBefore
+                        // add tokens that were accepted for return
+                        .add( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
+
+                    // Tokens: locked validation
+                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                        .sub(withdrawCalculatedBefore.withdrawn_tokens)
+                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+
+                    // Tokens: unlocked validation - the same
+                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+                    
+                    // accounting for price rounding errors
+                    if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new helpers.BN("1") ));
+                    } else {
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount).or(ethAmount);
+                    }
                 });
 
 
