@@ -275,7 +275,7 @@ describe("Gnosis Safe Integration", function () {
         describe("Correctly setup Token and Rico", async function () {
             it("Setups rICO and Manager", async function () {
                 let setupData = this.RicoToken.methods
-                    .setup(helpers.addresses.Rico, helpers.addresses.GnosisSafe)
+                    .setup(helpers.addresses.Rico)
                     .encodeABI();
                 await helpers.safeUtils.executeTransaction(
                     safeAccounts,

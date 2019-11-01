@@ -4,14 +4,14 @@ import "./zeppelin/token/ERC777/ERC777.sol";
 
 interface ReversibleICO {
     function getLockedTokenAmount(address) external returns (uint256);
-    function isWhitelisted(address) external returns (bool);
 }
 
 contract RicoToken is ERC777 {
 
     ReversibleICO public rICO;
     address public manager;
-    bool public frozen;
+    bool public frozen = false;
+    bool public initialized = false;
 
     constructor(
         uint256 initialSupply,
@@ -24,28 +24,32 @@ contract RicoToken is ERC777 {
         manager = msg.sender;
         frozen = true;
     }
-    function setup(address _rICO, address _newManager) public {
-        require(msg.sender == manager, "only manager");
+
+    // since rico affects balances, changing the rico address
+    // once setup should not be possible.
+    function setup(address _rICO)
+        public
+        requireNotInitialized
+        onlyManager
+    {
         rICO = ReversibleICO(_rICO);
-        manager = _newManager;
         frozen = false;
+        initialized = true;
     }
 
-    function changeManager(address _newManager) public {
-        require(msg.sender == manager, "only manager");
+    function changeManager(address _newManager) public onlyManager {
         manager = _newManager;
     }
 
-    function setFrozen(bool _status) public {
-        require(msg.sender == manager, "only manager");
+    function setFrozen(bool _status) public onlyManager {
         frozen = _status;
     }
 
-    function getLockedBalance(address owner) public returns(uint){
+    function getLockedBalance(address owner) public returns(uint) {
         return rICO.getLockedTokenAmount(owner);
     }
 
-    function getUnlockedBalance(address owner) public returns(uint){
+    function getUnlockedBalance(address owner) public returns(uint) {
         return balanceOf(owner).sub(rICO.getLockedTokenAmount(owner));
     }
 
@@ -58,9 +62,9 @@ contract RicoToken is ERC777 {
         bytes memory operatorData
     )
         internal
+        requireNotFrozen
     {
-        require(!frozen, "Contract is frozen");
-        require(amount <= getUnlockedBalance(from), "Insufficient funds");
+        require(amount <= getUnlockedBalance(from), "getUnlockedBalance: Insufficient funds");
         ERC777._burn(operator, from, amount, data, operatorData);
     }
 
@@ -75,18 +79,38 @@ contract RicoToken is ERC777 {
         bytes memory operatorData
     )
         internal
+        requireNotFrozen
+        requireInitialized
     {
-        require(!frozen, "Contract is frozen");
 
         if(to == address(rICO)) {
             // full balance can be sent back to rico
-            require(amount <= balanceOf(from), "Insufficient funds");
+            require(amount <= balanceOf(from), "getUnlockedBalance: Insufficient funds");
         } else {
             // for every other address limit to unlocked balance
-            require(amount <= getUnlockedBalance(from), "Insufficient funds");
+            require(amount <= getUnlockedBalance(from), "getUnlockedBalance: Insufficient funds");
         }
 
         ERC777._move(operator, from, to, amount, userData, operatorData);
+    }
+
+    modifier onlyManager() {
+        require(msg.sender == manager, "onlyManager: Only manager can call this method");
+        _;
+    }
+
+    modifier requireInitialized() {
+        require(initialized == true, "requireInitialized: Contract must be initialized");
+        _;
+    }
+    modifier requireNotInitialized() {
+        require(initialized == false, "requireNotInitialized: Contract must not be initialized");
+        _;
+    }
+
+    modifier requireNotFrozen() {
+        require(frozen == false, "requireNotFrozen: Contract must not be frozen");
+        _;
     }
 
 }

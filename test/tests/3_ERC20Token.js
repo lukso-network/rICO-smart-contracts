@@ -28,11 +28,11 @@ describe("ERC777 - ERC20 Token compatibility", function() {
         mintedSupply.toString(),
         [] // defaultOperators
       ],
-      gas: 5500000,
+      gas: 6000000,
       gasPrice: helpers.solidity.gwei * 10
     });
 
-    await HST.methods.setup(_ricoAddress, creator).send({ from: creator });
+    await HST.methods.setup(_ricoAddress).send({ from: creator });
   });
 
   it("creation: in contract settings should match settings", async () => {
@@ -94,7 +94,7 @@ describe("ERC777 - ERC20 Token compatibility", function() {
     await helpers.assertInvalidOpcode(async () => {
       await HST.methods
         .transfer(accounts[1], amt.toString())
-        .send({ from: creator });
+        .send({ from: creator, gas: 100000 });
     }, "revert");
   });
 

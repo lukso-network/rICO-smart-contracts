@@ -102,8 +102,7 @@ async function doFreshDeployment(name) {
     // helpers.addresses.Rico = ReversibleICOAddress;
 
     await TokenTrackerInstance.methods.setup(
-        ReversibleICOAddress,
-        holder
+        ReversibleICOAddress
     ).send({
         from: holder,  // initial token supply holder
     });

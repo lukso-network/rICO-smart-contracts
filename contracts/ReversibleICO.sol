@@ -45,8 +45,10 @@ contract ReversibleICO is IERC777Recipient {
     // commited eth
     uint256 public contributorsETH = 0;
 
-    uint256 public projectETH = 0;
-    uint256 public projectETHWithdrawn = 0;
+    // uint256 public projectETH = 0;
+    uint256 public ProjectWithdrawCount = 0;
+    uint256 public ProjectETHAllocated = 0;
+    uint256 public ProjectETHWithdrawn = 0;
 
     // minimum amount of eth we accept for a contribution
     // everything lower will trigger a withdraw
@@ -86,7 +88,7 @@ contract ReversibleICO is IERC777Recipient {
     bool public ended = false;
 
     /*
-    *   When a user cancels their contribution, delete the mapping or keep it and set it's state to CANCELLED
+    *   When a participant cancels their contribution, delete the mapping or keep it and set it's state to CANCELLED
     */
     bool public contributionCleanupAtWithdraw = false;
 
@@ -196,7 +198,7 @@ contract ReversibleICO is IERC777Recipient {
 
     function getStageAtBlock(uint256 selectedBlock) public view returns ( uint8 ) {
 
-        // *NOTE: if selectedBlock is end block.. the user will get the correct
+        // *NOTE: if selectedBlock is end block.. the participant will get the correct
         //        stage now but their new transaction will end up in the
         //        next block which changes the stage vs what they've seen..
         //        resulting in a different purchase price.
@@ -304,7 +306,8 @@ contract ReversibleICO is IERC777Recipient {
 		PARTICIPANT_CANCEL,
 		WHITELIST_CANCEL,
 		WHITELIST_ACCEPT,
-        COMMIT_ACCEPT
+        COMMIT_ACCEPT,
+        PROJECT_WITHDRAW
     }
 
     event ApplicationEvent (
@@ -335,7 +338,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 accepted;		    // lower than msg.value if maxCap already reached
         uint256 withdrawn;		    // withdrawn from current stage
         uint256 tokens_reserved;    // tokens bought in this stage
-        uint256 tokens_awarded;	    // tokens already sent to the user in this stage
+        uint256 tokens_awarded;	    // tokens already sent to the participant in this stage
         uint256 tokens_returned;	// tokens returned by participant to contract
     }
 
@@ -347,7 +350,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 accepted;	        // lower than msg.value if maxCap already reached
         uint256 withdrawn;	        // cancel() / withdraw()
         uint256 tokens_reserved;    // total tokens bought in all stages
-        uint256 tokens_awarded;	    // total tokens already sent to the user in all stages
+        uint256 tokens_awarded;	    // total tokens already sent to the participant in all stages
         uint256 tokens_returned;    // total tokens returned by participant to contract in all stages
         mapping ( uint8 => TotalsByStage ) byStage;
     }
@@ -525,13 +528,12 @@ contract ReversibleICO is IERC777Recipient {
             // Adjust globals
             returnedETH += ParticipantAvailableEth;
 
-            // @TODO: update globals for projectWithdraw
-
             // Set Participant audit values
             ParticipantRecord.tokens_reserved = 0;
             ParticipantRecord.withdrawn += ParticipantAvailableEth;
 
-            // @TODO: Reset stage records ?
+            // globals
+            withdrawnETH += ParticipantAvailableEth;
 
             // send eth back to participant including received value
             address(uint160(_receiver)).transfer(ParticipantAvailableEth + msg.value);
@@ -553,15 +555,6 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             revert("cancel: Participant has not contributed any eth.");
         }
-    }
-
-    /*
-    *   Recalculate Funds allocation
-    */
-    function recalculateFunds() internal
-    // solium-disable-next-line no-empty-blocks
-    {
-        //
     }
 
     /*
@@ -658,7 +651,7 @@ contract ReversibleICO is IERC777Recipient {
             if(RemainingTokenAmount > 0) {
 
                 // go through stages starting with current stage
-                // take stage token amount and remove from "amount user wants to return"
+                // take stage token amount and remove from "amount participant wants to return"
                 // get eth amount in said stage for that token amount
                 // set stage tokens to 0
                 // if stage tokens < remaining tokens to process, just sub remaining from stage
@@ -712,6 +705,12 @@ contract ReversibleICO is IERC777Recipient {
                     TokenTracker.send(_from, ReturnTokenAmount, data);
                 }
 
+                // Adjust globals
+                withdrawnETH += ReturnETHAmount;
+
+                // allocate remaining eth to project directly
+                // ProjectETHAllocated
+
                 ParticipantRecord.withdrawn += ReturnETHAmount;
                 address(uint160(_from)).transfer(ReturnETHAmount);
                 emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, ReturnETHAmount);
@@ -752,6 +751,7 @@ contract ReversibleICO is IERC777Recipient {
             // 2 - rico contributor sends tokens back
             withdraw(from, amount);
         }
+
     }
 
 
@@ -899,19 +899,33 @@ contract ReversibleICO is IERC777Recipient {
     function projectWithdraw(uint256 ethAmount)
         public
         requireInitialized
-        returns (bool)
     {
-        require(msg.sender == projectWalletAddress, "only projectWalletAddress");
-        require(ethAmount <= projectETH, "Specified ETH value too large.");
+        require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
+
+        uint256 unlocked = getProjectAvailableEth();
+        require(ethAmount <= unlocked, "projectWithdraw: Specified ETH value too large.");
+
+        ProjectWithdrawCount++;
+        ProjectETHWithdrawn += ethAmount;
 
 
-        /*
-        // based on how many
-        return bought.mul(
-            getCurrentUnlockRatio(precision)
-        ).div(10 ** uint256(precision));
-        //
-        */
+        emit ApplicationEvent(
+            uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
+            uint16(ProjectWithdrawCount),
+            projectWalletAddress,
+            ethAmount
+        );
+
+        emit TransferEvent(uint8(TransferTypes.PROJECT_WITHDRAW), projectWalletAddress, ethAmount);
+        address(uint160(projectWalletAddress)).transfer(ethAmount);
+    }
+
+    function getProjectAvailableEth() public view returns (uint256 _amount) {
+        uint256 available = acceptedETH.sub(withdrawnETH);
+        uint256 unlocked = available.mul(
+            getCurrentUnlockRatio()
+        ).div(10 ** 20);
+        return unlocked.sub(ProjectETHWithdrawn).add(ProjectETHAllocated);
     }
 
     /*
@@ -967,7 +981,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     modifier requireNotInitialized() {
-        require(initialized == false, "requireInitialized: Contract must not be initialized");
+        require(initialized == false, "requireNotInitialized: Contract must not be initialized");
         _;
     }
 
@@ -1000,36 +1014,5 @@ contract ReversibleICO is IERC777Recipient {
         require(frozen == false, "requireFrozen: Contract must not be frozen");
         _;
     }
-
-
-    function append(string memory a, string memory b, string memory c, string memory d, string memory e, string memory f) internal pure returns (string memory) {
-        return string(abi.encodePacked(a, b, c, d, e, f));
-    }
-
-    function bytes32ToString (bytes32 data) internal pure returns (string memory) {
-        bytes memory bytesString = new bytes(32);
-        for (uint j=0; j<32; j++) {
-            byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
-            if (char != 0) {
-                bytesString[j] = char;
-            }
-        }
-        return string(bytesString);
-    }
-
-    function uintToBytes(uint v) internal pure returns (bytes32 ret) {
-        if (v == 0) {
-            ret = '0';
-        }
-        else {
-            while (v > 0) {
-                ret = bytes32(uint(ret) / (2 ** 8));
-                ret |= bytes32(((v % 10) + 48) * 2 ** (8 * 31));
-                v /= 10;
-            }
-        }
-        return ret;
-    }
-
 
 }
