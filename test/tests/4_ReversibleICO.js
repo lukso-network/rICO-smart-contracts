@@ -44,9 +44,9 @@ describe("ReversibleICO", function () {
 
     const deployerAddress = accounts[0];
     const whitelistControllerAddress = accounts[1];
-    let TokenContractAddress, stageValidation = [], currentBlock, StartBlock,
-        AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-        StageBlockCount, StagePriceIncrease, EndBlock;
+    let TokenContractAddress, stageValidation = [], currentBlock, commitPhaseStartBlock,
+        commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+        StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock;
     let TokenContractInstance;
 
     before(async function () {
@@ -133,30 +133,30 @@ describe("ReversibleICO", function () {
             currentBlock = await this.ReversibleICO.methods.getCurrentBlockNumber().call();
             
             // starts in one day
-            StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
+            commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
             
             // 22 days allocation
-            AllocationBlockCount = blocksPerDay * 22;                   
-            AllocationPrice = helpers.solidity.ether * 0.002;
+            commitPhaseBlockCount = blocksPerDay * 22;
+            commitPhasePrice = helpers.solidity.ether * 0.002;
 
             // 12 x 30 day periods for distribution
             StageCount = 12;
             StageBlockCount = blocksPerDay * 30;      
             StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
-            AllocationEndBlock = StartBlock + AllocationBlockCount;
+            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
             // for validation
-            EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+            BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-            const StageStartBlock = AllocationEndBlock;
+            const StageStartBlock = commitPhaseEndBlock;
             let lastStageBlockEnd = StageStartBlock;
 
             for(let i = 0; i < StageCount; i++) {
 
                 const start_block = lastStageBlockEnd + 1;
                 const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                const token_price = AllocationPrice + ( StagePriceIncrease * ( i +  1) );
+                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i +  1) );
 
                 stageValidation.push( {
                     start_block: start_block,
@@ -171,9 +171,9 @@ describe("ReversibleICO", function () {
                 TokenContractAddress,        // address _TokenContractAddress
                 whitelistControllerAddress, // address _whitelistControllerAddress
                 projectWalletAddress,       // address _projectWalletAddress
-                StartBlock,                 // uint256 _StartBlock
-                AllocationBlockCount,       // uint256 _AllocationBlockCount,
-                AllocationPrice,            // uint256 _AllocationPrice in wei
+                commitPhaseStartBlock,                 // uint256 _commitPhaseStartBlock
+                commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+                commitPhasePrice,            // uint256 _commitPhasePrice in wei
                 StageCount,                 // uint8   _StageCount
                 StageBlockCount,            // uint256 _StageBlockCount
                 StagePriceIncrease          // uint256 _StagePriceIncrease in wei
@@ -214,8 +214,8 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.projectWalletAddress().call()).to.be.equal(projectWalletAddress);
             });
     
-            it("EndBlock matches settings", async function () {
-                expect(await this.ReversibleICO.methods.EndBlock().call()).to.be.equal(EndBlock.toString());
+            it("BuyPhaseEndBlock matches settings", async function () {
+                expect(await this.ReversibleICO.methods.BuyPhaseEndBlock().call()).to.be.equal(BuyPhaseEndBlock.toString());
             });
     
         });
@@ -233,21 +233,21 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.ContractStageCount().call()).to.be.equal(stages.toString());
             });
 
-            it("Allocation StartBlock matches settings", async function () {
-                expect(allocationStageData.start_block).to.be.equal(StartBlock.toString());
+            it("Allocation commitPhaseStartBlock matches settings", async function () {
+                expect(allocationStageData.start_block).to.be.equal(commitPhaseStartBlock.toString());
             });
 
-            it("Allocation duration is AllocationBlockCount", async function () {
+            it("Allocation duration is commitPhaseBlockCount", async function () {
                 const count = allocationStageData.end_block - allocationStageData.start_block;
-                expect(count.toString()).to.be.equal(AllocationBlockCount.toString());
+                expect(count.toString()).to.be.equal(commitPhaseBlockCount.toString());
             });
 
-            it("Allocation EndBlock matches settings", async function () {
-                expect(allocationStageData.end_block).to.be.equal(AllocationEndBlock.toString());
+            it("Allocation BuyPhaseEndBlock matches settings", async function () {
+                expect(allocationStageData.end_block).to.be.equal(commitPhaseEndBlock.toString());
             });            
     
-            it("AllocationPrice matches settings", async function () {
-                expect(allocationStageData.token_price).to.be.equal(AllocationPrice.toString());
+            it("commitPhasePrice matches settings", async function () {
+                expect(allocationStageData.token_price).to.be.equal(commitPhasePrice.toString());
             });
 
             it("First Distribution Stage settings are correct", async function () {
@@ -274,11 +274,11 @@ describe("ReversibleICO", function () {
                 expect(stage_token_price).to.be.equal(stageValidation[stageRefId].token_price.toString());
             });
 
-            it("Last Distribution Stage end_block matches contract EndBlock", async function () {
+            it("Last Distribution Stage end_block matches contract BuyPhaseEndBlock", async function () {
                 const stageRefId = StageCount;
                 const stageData = await this.ReversibleICO.methods.StageByNumber(stageRefId).call();
                 const stage_end_block = stageData.end_block;
-                expect(stage_end_block).to.be.equal(EndBlock.toString());
+                expect(stage_end_block).to.be.equal(BuyPhaseEndBlock.toString());
             });
     
         });
@@ -473,7 +473,7 @@ describe("ReversibleICO", function () {
             it("Returns correct value for Allocation phase", async function () {
                 const stageId = 0;
                 await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
-                expect( await this.ReversibleICO.methods.getCurrentPrice().call() ).to.be.equal( AllocationPrice.toString() );
+                expect( await this.ReversibleICO.methods.getCurrentPrice().call() ).to.be.equal( commitPhasePrice.toString() );
             });
 
             it("Returns correct value for stage 1", async function () {
@@ -525,7 +525,7 @@ describe("ReversibleICO", function () {
                 const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.start_block).call()
-                ).to.be.equal( AllocationPrice.toString() );
+                ).to.be.equal( commitPhasePrice.toString() );
             });
 
             it("Returns correct value for stage 1", async function () {
@@ -1055,11 +1055,11 @@ describe("ReversibleICO", function () {
         describe("view getCurrentUnlockRatio()", async function () { 
 
             const precision = 20;
-            let DistributionStartBlock, DistributionBlockLength;
+            let BuyPhaseStartBlock, BuyPhaseBlockCount;
     
             before(async function () {
-                DistributionStartBlock = await this.ReversibleICO.methods.DistributionStartBlock().call();
-                DistributionBlockLength = await this.ReversibleICO.methods.DistributionBlockLength().call();
+                BuyPhaseStartBlock = await this.ReversibleICO.methods.BuyPhaseStartBlock().call();
+                BuyPhaseBlockCount = await this.ReversibleICO.methods.BuyPhaseBlockCount().call();
             });
     
             it("Returns 0 before stage 1 start_block + 1", async function () {
@@ -1068,7 +1068,7 @@ describe("ReversibleICO", function () {
                 // jump to stage allocation start block - 1
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
                 let contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
     
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( contractRatio.toString() ).to.be.equal( "0" );
@@ -1077,7 +1077,7 @@ describe("ReversibleICO", function () {
                 // jump to stage start_block - 1
                 currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
                 contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
     
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( contractRatio.toString() ).to.be.equal( "0" );
@@ -1090,27 +1090,27 @@ describe("ReversibleICO", function () {
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, false, 1 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
             });
     
-            it("Returns 0 at EndBlock", async function () {
+            it("Returns 0 at BuyPhaseEndBlock", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
             });
     
-            it("Returns 0 at EndBlock + 1", async function () {
+            it("Returns 0 at BuyPhaseEndBlock + 1", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 1 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision);
+                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
             });
@@ -1119,11 +1119,11 @@ describe("ReversibleICO", function () {
         describe("view getLockedTokenAmount(address)", async function () { 
     
             const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
-            let DistributionStartBlock, DistributionBlockLength;
+            let BuyPhaseStartBlock, BuyPhaseBlockCount;
     
             before(async function () {
-                DistributionStartBlock = await this.ReversibleICO.methods.DistributionStartBlock().call();
-                DistributionBlockLength = await this.ReversibleICO.methods.DistributionBlockLength().call();
+                BuyPhaseStartBlock = await this.ReversibleICO.methods.BuyPhaseStartBlock().call();
+                BuyPhaseBlockCount = await this.ReversibleICO.methods.BuyPhaseBlockCount().call();
     
                 // move to start of the allocation phase
                 await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 0 );
@@ -1159,7 +1159,7 @@ describe("ReversibleICO", function () {
     
                 // now let's validate the js calculations
                 let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
@@ -1194,7 +1194,7 @@ describe("ReversibleICO", function () {
                 expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
     
                 let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
@@ -1213,7 +1213,7 @@ describe("ReversibleICO", function () {
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
@@ -1230,7 +1230,7 @@ describe("ReversibleICO", function () {
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
@@ -1248,13 +1248,13 @@ describe("ReversibleICO", function () {
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
     
-            it("Returns 0 locked tokens at stage 12 end_block ( also known as EndBlock )", async function () {
+            it("Returns 0 locked tokens at stage 12 end_block ( also known as BuyPhaseEndBlock )", async function () {
     
                 // jump to stage allocation start block
                 let stageId = 12;
@@ -1266,14 +1266,14 @@ describe("ReversibleICO", function () {
     
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
                 expect(getLockedTokenAmount.toString()).to.be.equal("0");
             });
 
-            it("Returns 0 locked tokens after EndBlock", async function () {
+            it("Returns 0 locked tokens after BuyPhaseEndBlock", async function () {
     
                 // jump to stage allocation start block
                 let stageId = 12;
@@ -1285,7 +1285,7 @@ describe("ReversibleICO", function () {
     
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
@@ -1299,7 +1299,7 @@ describe("ReversibleICO", function () {
     
                 getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, DistributionStartBlock, EndBlock, ContractContributionTokens
+                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
     
                 expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());

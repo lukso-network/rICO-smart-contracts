@@ -53,8 +53,8 @@ const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
-    StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenContractInstance,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
     TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 let deployments = {};
@@ -113,29 +113,29 @@ async function doFreshDeployment(name) {
     currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
         
     // starts in one day
-    StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
+    commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
     
     // 22 days allocation
-    AllocationBlockCount = blocksPerDay * 22;                   
-    AllocationPrice = helpers.solidity.ether * 0.002;
+    commitPhaseBlockCount = blocksPerDay * 22;
+    commitPhasePrice = helpers.solidity.ether * 0.002;
 
     // 12 x 30 day periods for distribution
     StageCount = 12;
     StageBlockCount = blocksPerDay * 30;      
     StagePriceIncrease = helpers.solidity.ether * 0.0001;
-    AllocationEndBlock = StartBlock + AllocationBlockCount;
+    commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
     // for validation
-    EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+    BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-    const StageStartBlock = AllocationEndBlock;
+    const StageStartBlock = commitPhaseEndBlock;
     let lastStageBlockEnd = StageStartBlock;
 
     for(let i = 0; i < StageCount; i++) {
 
         const start_block = lastStageBlockEnd + 1;
         const end_block = lastStageBlockEnd + StageBlockCount + 1;
-        const token_price = AllocationPrice + ( StagePriceIncrease * ( i +  1) );
+        const token_price = commitPhasePrice + ( StagePriceIncrease * ( i +  1) );
 
         stageValidation.push( {
             start_block: start_block,
@@ -150,9 +150,9 @@ async function doFreshDeployment(name) {
         TokenContractAddress,        // address _TokenContractAddress
         whitelistControllerAddress, // address _whitelistControllerAddress
         projectWalletAddress,          // address _projectWalletAddress
-        StartBlock,                 // uint256 _StartBlock
-        AllocationBlockCount,       // uint256 _AllocationBlockCount,
-        AllocationPrice,            // uint256 _AllocationPrice in wei
+        commitPhaseStartBlock,                 // uint256 _StartBlock
+        commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+        commitPhasePrice,            // uint256 _commitPhasePrice in wei
         StageCount,                 // uint8   _StageCount
         StageBlockCount,            // uint256 _StageBlockCount
         StagePriceIncrease          // uint256 _StagePriceIncrease in wei

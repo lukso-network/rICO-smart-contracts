@@ -34,152 +34,146 @@ contract ReversibleICO is IERC777Recipient {
     address public whitelistControllerAddress;
 
     /*
-    *   Contract Settings
+    *   Public Variables
     */
-    uint256 public StartBlock;
-    uint256 public DistributionStartBlock;
-    uint256 public DistributionBlockLength;
-    uint256 public EndBlock;
-
     uint256 public TokenSupply = 0;
 
-    // uint256 public maxEth = 30000 ether;
     uint256 public receivedETH = 0;
     uint256 public returnedETH = 0;
     uint256 public acceptedETH = 0;
     uint256 public withdrawnETH = 0;
 
-    // Committed ETH
-    uint256 public contributorsETH = 0;
-
-    // uint256 public projectETH = 0;
-    uint256 public ProjectWithdrawCount = 0;
-    uint256 public ProjectETHAllocated = 0;
-    uint256 public ProjectETHWithdrawn = 0;
+    uint256 public projectWithdrawCount = 0;
+    uint256 public projectETHAllocated = 0;
+    uint256 public projectETHWithdrawn = 0;
 
     // minimum amount of eth we accept for a contribution
-    // everything lower will trigger a withdraw
+    // everything lower will trigger a withdraw, as well as sending back pending ETH
     uint256 public minContribution = 0.001 ether;
 
     /*
-    *   Allocation period
+    *   Commit phase (Stage 0)
     */
-    uint256 public AllocationPrice;
-    uint256 public AllocationBlockCount;
-    uint256 public AllocationEndBlock;
+    uint256 public commitPhasePrice;
+    uint256 public commitPhaseStartBlock;
+    uint256 public commitPhaseEndBlock;
+    uint256 public commitPhaseBlockCount;
+
+    uint256 public BuyPhaseStartBlock;
+    uint256 public BuyPhaseEndBlock;
+    uint256 public BuyPhaseBlockCount;
     uint256 public StageBlockCount;
 
     /*
-    *   Contract Stages
+    *   Buy phase (Stage 1-n)
     */
-    struct ContractStage {
+    struct Stage {
         uint256 start_block;
         uint256 end_block;
         uint256 token_price;
     }
 
-    mapping ( uint8 => ContractStage ) public StageByNumber;
-    uint8 public ContractStageCount = 0;
+    mapping ( uint8 => Stage ) public Stages;
+    uint8 public StageCount = 0;
 
     /*
-    *   Internals
+    *   Contract States
     */
     bool public initialized = false;
-    bool public running = false;
     bool public frozen = false;
+    bool public started = false;
     bool public ended = false;
 
-    /*
-    *   When a participant cancels their contribution, delete the mapping or keep it and set it's state to CANCELLED
-    */
-    bool public contributionCleanupAtWithdraw = false;
 
-    enum Stages {
-        DEPLOYED,
-        INITIALIZED,
-        SALE,
-        RICO,
-        ENDED,
-        FROZEN
-    }
+    // ------------------------------------------------------------------------------------------------
 
+
+    // Constructor
     constructor() public {
         deployerAddress = msg.sender;
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
-    // fallback function
+
+    // FALLBACK function
     function ()
         external
         payable
-        requireInitialized
-        requireNotFrozen
+        initialized
+        notFrozen
     {
         if(msg.value >= minContribution) {
             // accept contribution for processing
             commit();
         } else {
-            // Participant cancels commitment duiring Allocation Stage if they've not been whitelisted yet.
+            // Participant cancels commitment during Allocation Stage if they've not been whitelisted yet.
             cancel();
         }
     }
+
 
     function addSettings(
         address _TokenContractAddress,
         address _whitelistControllerAddress,
         address _projectWalletAddress,
-        uint256 _StartBlock,
-        uint256 _AllocationBlockCount,
-        uint256 _AllocationPrice,
+        uint256 _commitPhaseStartBlock,
+        uint256 _commitPhaseBlockCount,
+        uint256 _commitPhasePrice,
         uint8   _StageCount,
         uint256 _StageBlockCount,
         uint256 _StagePriceIncrease
     )
         public
         onlyDeployer
-        requireNotInitialized
+        notInitialized
     {
-        // assign addresses
+
+        // Assign address variables
         TokenContractAddress = _TokenContractAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
         projectWalletAddress = _projectWalletAddress;
 
-        // initialize ERC777 TokenContract
-        TokenContract = IERC777(TokenContractAddress);
-
-        // Allocation settings
-        StartBlock = _StartBlock;
-        AllocationBlockCount = _AllocationBlockCount;
-        AllocationEndBlock = StartBlock + AllocationBlockCount;
-        AllocationPrice = _AllocationPrice;
+        // Assign other variables
+        commitPhaseStartBlock = _commitPhaseStartBlock;
+        commitPhaseBlockCount = _commitPhaseBlockCount;
+        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        commitPhasePrice = _commitPhasePrice;
 
         StageBlockCount = _StageBlockCount;
 
-        // first stage is allocation. Set it up.
-        ContractStage storage StageRecord = StageByNumber[ContractStageCount];
-        StageRecord.start_block = _StartBlock;
-        StageRecord.end_block = _StartBlock + _AllocationBlockCount;
-        StageRecord.token_price = _AllocationPrice;
-        ContractStageCount++;
 
-        uint256 lastStageBlockEnd = StageRecord.end_block;
+        // initialize ERC777 TokenContract
+        TokenContract = IERC777(TokenContractAddress);
 
-        // calculate block ranges and set price for each period
+
+        // Setup stage 0: The commit phase.
+        Stage storage Stage0 = Stages[StageCount]; // StageCount = 0
+        Stage0.start_block = _commitPhaseStartBlock;
+        Stage0.end_block = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        Stage0.token_price = _commitPhasePrice;
+
+        StageCount++; // StageCount = 1
+
+
+        // Setup stage 1 to n: The buy phase stages
+        uint256 lastStageBlockEnd = Stage0.end_block;
+
         for(uint8 i = 1; i <= _StageCount; i++) {
 
-            StageRecord = StageByNumber[ContractStageCount];
-            StageRecord.start_block = lastStageBlockEnd + 1;
-            StageRecord.end_block = lastStageBlockEnd + _StageBlockCount + 1;
-            StageRecord.token_price = _AllocationPrice + ( _StagePriceIncrease * (i) );
-            ContractStageCount++;
+            Stage storage StageN = Stages[StageCount]; // StageCount = n
+            StageN.start_block = lastStageBlockEnd + 1;
+            StageN.end_block = lastStageBlockEnd + _StageBlockCount + 1;
+            StageN.token_price = _commitPhasePrice + ( _StagePriceIncrease * (i) );
 
-            lastStageBlockEnd = StageRecord.end_block;
+            StageCount++; // StageCount = n + 1
+
+            lastStageBlockEnd = StageN.end_block;
         }
 
-        EndBlock = lastStageBlockEnd;
+        BuyPhaseEndBlock = lastStageBlockEnd;
 
-        DistributionStartBlock = AllocationEndBlock + 1;
-        DistributionBlockLength = lastStageBlockEnd - DistributionStartBlock;
+        BuyPhaseStartBlock = commitPhaseEndBlock + 1;
+        BuyPhaseBlockCount = lastStageBlockEnd - BuyPhaseStartBlock;
 
         initialized = true;
     }
@@ -208,22 +202,22 @@ contract ReversibleICO is IERC777Recipient {
         // @TODO: decide how we want to handle this on the frontend,
         //        contract should always display proper data.
         //
-        if ( selectedBlock <= AllocationEndBlock ) {
+        if ( selectedBlock <= commitPhaseEndBlock ) {
             return 0;
         }
 
         // solidity floors division results, thus we get what we're looking for.
-        uint256 num = (selectedBlock - AllocationEndBlock) / (StageBlockCount + 1) + 1;
+        uint256 num = (selectedBlock - commitPhaseEndBlock) / (StageBlockCount + 1) + 1;
 
         // last block of each stage always computes as stage + 1
-        if(StageByNumber[uint8(num)-1].end_block == selectedBlock) {
+        if(Stages[uint8(num)-1].end_block == selectedBlock) {
             // save some gas and just return instead of decrementing.
             return uint8(num - 1);
         }
 
         // return max_uint8 if outside range
         // @TODO: maybe revert ?!
-        if(num >= ContractStageCount ) {
+        if(num >= StageCount) {
             return 255;
         }
 
@@ -236,8 +230,8 @@ contract ReversibleICO is IERC777Recipient {
 
     function getPriceAtBlock(uint256 blockNumber) public view returns ( uint256 ) {
         uint8 stage = getStageAtBlock(blockNumber);
-        if(stage < ContractStageCount ) {
-            return StageByNumber[stage].token_price;
+        if(stage < StageCount) {
+            return Stages[stage].token_price;
         }
         // revert with stage not found?
         return 0;
@@ -255,7 +249,7 @@ contract ReversibleICO is IERC777Recipient {
         // return (_ethValue * (10 ** 18)) / StageByNumber[_stageId].token_price;
         return _ethValue.mul(
             (10 ** 18)
-        ).div( StageByNumber[_stageId].token_price );
+        ).div( Stages[_stageId].token_price );
     }
 
     function getEthAmountForTokensAtStage(
@@ -266,7 +260,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // return (_token_amount * StageByNumber[_stageId].token_price) / (10 ** 18);
         return _token_amount.mul(
-            StageByNumber[_stageId].token_price
+            Stages[_stageId].token_price
         ).div(
             (10 ** 18)
         );
@@ -366,7 +360,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     function availableEth() public view returns (uint256) {
         return TokenContract.balanceOf(address(this)).mul(
-            StageByNumber[getCurrentStage()].token_price
+            Stages[getCurrentStage()].token_price
         ).div( 10 ** 18 );
     }
 
@@ -375,8 +369,8 @@ contract ReversibleICO is IERC777Recipient {
     */
     function commit()
         internal
-        requireInitialized
-        requireNotFrozen
+        initialized
+        notFrozen
     {
         // add to received value to receivedETH
         receivedETH += msg.value;
@@ -565,8 +559,8 @@ contract ReversibleICO is IERC777Recipient {
     function cancel()
         public
         payable
-        requireInitialized
-        requireNotFrozen
+        initialized
+        notFrozen
     {
         if(ParticipantsByAddress[msg.sender].whitelisted == true) {
             revert("cancel: Please send tokens back to this contract in order to withdraw ETH.");
@@ -734,8 +728,8 @@ contract ReversibleICO is IERC777Recipient {
         bytes calldata operatorData
     )
         external
-        requireInitialized
-        // requireNotFrozen
+        initialized
+        // notFrozen TODO??
         // requireNotEnded
     {
         // Rico should only receive tokens from the Rico Token Tracker.
@@ -765,8 +759,8 @@ contract ReversibleICO is IERC777Recipient {
         uint8 _mode
     )
         public
-        requireInitialized
-        requireNotFrozen
+        initialized
+        notFrozen
         onlyWhitelistController
     {
         Participant storage ParticipantRecord = ParticipantsByAddress[_address];
@@ -827,12 +821,12 @@ contract ReversibleICO is IERC777Recipient {
         uint8 precision = 20;
         uint256 currentBlock = getCurrentBlockNumber();
 
-        if(currentBlock > DistributionStartBlock && currentBlock < EndBlock) {
-            uint256 passedBlocks = currentBlock.sub(DistributionStartBlock);
+        if(currentBlock > BuyPhaseStartBlock && currentBlock < BuyPhaseEndBlock) {
+            uint256 passedBlocks = currentBlock.sub(BuyPhaseStartBlock);
             return passedBlocks.mul(
                 10 ** uint256(precision)
-            ).div(DistributionBlockLength);
-        } else if (currentBlock >= EndBlock) {
+            ).div(BuyPhaseBlockCount);
+        } else if (currentBlock >= BuyPhaseEndBlock) {
             return 0; // 10 ** uint256(precision);
         } else {
             return 0; // 10 ** uint256(precision);
@@ -866,12 +860,12 @@ contract ReversibleICO is IERC777Recipient {
             //   - calculate and return
             // else if after endBlock
             //   - return 0
-            if(blockNumber < DistributionStartBlock) {
+            if(blockNumber < BuyPhaseStartBlock) {
 
                 // allocation phase
                 return tokenAmount;
 
-            } else if(blockNumber < EndBlock) {
+            } else if(blockNumber < BuyPhaseEndBlock) {
 
                 // distribution phase
                 uint8 precision = 20;
@@ -900,20 +894,20 @@ contract ReversibleICO is IERC777Recipient {
     */
     function projectWithdraw(uint256 ethAmount)
         public
-        requireInitialized
+        initialized
     {
         require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
 
         uint256 unlocked = getProjectAvailableEth();
         require(ethAmount <= unlocked, "projectWithdraw: Specified ETH value too large.");
 
-        ProjectWithdrawCount++;
-        ProjectETHWithdrawn += ethAmount;
+        projectWithdrawCount++;
+        projectETHWithdrawn += ethAmount;
 
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
-            uint16(ProjectWithdrawCount),
+            uint16(projectWithdrawCount),
             projectWalletAddress,
             ethAmount
         );
@@ -927,7 +921,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 unlocked = available.mul(
             getCurrentUnlockRatio()
         ).div(10 ** 20);
-        return unlocked.sub(ProjectETHWithdrawn).add(ProjectETHAllocated);
+        return unlocked.sub(projectETHWithdrawn).add(projectETHAllocated);
     }
 
     /*
@@ -968,52 +962,52 @@ contract ReversibleICO is IERC777Recipient {
     */
 
     modifier onlyDeployer() {
-        require(msg.sender == deployerAddress, "onlyDeployer: Only deployer can call this method");
+        require(msg.sender == deployerAddress, "Only the deployer can call this method.");
         _;
     }
 
     modifier onlyWhitelistController() {
-        require(msg.sender == whitelistControllerAddress, "onlyWhitelistController: Only Whitelist Controller can call this method");
+        require(msg.sender == whitelistControllerAddress, "Only the whitelist controller can call this method.");
         _;
     }
 
-    modifier requireInitialized() {
-        require(initialized == true, "requireInitialized: Contract must be initialized");
+    modifier initialized() {
+        require(initialized == true, "Contract must be initialized.");
         _;
     }
 
-    modifier requireNotInitialized() {
-        require(initialized == false, "requireNotInitialized: Contract must not be initialized");
+    modifier notInitialized() {
+        require(initialized == false, "Contract can not be initialized again.");
         _;
     }
 
-    modifier requireRunning() {
-        require(ended == true, "requireRunning: RICO must be running");
+//    modifier requireRunning() {
+//        require(ended == true, "requireRunning: RICO must be running");
+//        _;
+//    }
+//
+//    modifier requireNotRunning() {
+//        require(ended == false, "requireRunning: RICO must not be running");
+//        _;
+//    }
+
+//    modifier requireEnded() {
+//        require(ended == true, "requireEnded: RICO period must have ended");
+//        _;
+//    }
+//
+//    modifier requireNotEnded() {
+//        require(ended == false, "requireEnded: RICO period must not have ended");
+//        _;
+//    }
+
+    modifier frozen() {
+        require(frozen == true, "Contract is frozen.");
         _;
     }
 
-    modifier requireNotRunning() {
-        require(ended == false, "requireRunning: RICO must not be running");
-        _;
-    }
-
-    modifier requireEnded() {
-        require(ended == true, "requireEnded: RICO period must have ended");
-        _;
-    }
-
-    modifier requireNotEnded() {
-        require(ended == false, "requireEnded: RICO period must not have ended");
-        _;
-    }
-
-    modifier requireFrozen() {
-        require(frozen == true, "requireFrozen: Contract must be frozen");
-        _;
-    }
-
-    modifier requireNotFrozen() {
-        require(frozen == false, "requireFrozen: Contract must not be frozen");
+    modifier notFrozen() {
+        require(frozen == false, "Contract can not be frozen.");
         _;
     }
 

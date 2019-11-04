@@ -54,8 +54,8 @@ const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
-    StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenContractInstance,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
     TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 async function revertToFreshDeployment() {
@@ -120,27 +120,27 @@ async function revertToFreshDeployment() {
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
             
         // starts in one day
-        StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
+        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
         
         // 22 days allocation
-        AllocationBlockCount = blocksPerDay * 22;                   
-        AllocationPrice = helpers.solidity.ether * 0.002;
+        commitPhaseBlockCount = blocksPerDay * 22;
+        commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         StageCount = 12;
         StageBlockCount = blocksPerDay * 30;      
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        AllocationEndBlock = StartBlock + AllocationBlockCount;
+        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
-        EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.addSettings(
             TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress
-            StartBlock,                 // uint256 _StartBlock
-            AllocationBlockCount,       // uint256 _AllocationBlockCount,
-            AllocationPrice,            // uint256 _AllocationPrice in wei
+            commitPhaseStartBlock,                 // uint256 _StartBlock
+            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+            commitPhasePrice,            // uint256 _commitPhasePrice in wei
             StageCount,                 // uint8   _StageCount
             StageBlockCount,            // uint256 _StageBlockCount
             StagePriceIncrease          // uint256 _StagePriceIncrease in wei
@@ -324,28 +324,28 @@ describe("Flow Testing", function () {
                 currentBlock = await TestReversibleICO.methods.getCurrentBlockNumber().call();
                         
                 // starts in one day
-                StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
+                commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
                 
                 // 22 days allocation
-                AllocationBlockCount = blocksPerDay * 22;                   
-                AllocationPrice = helpers.solidity.ether * 0.002;
+                commitPhaseBlockCount = blocksPerDay * 22;
+                commitPhasePrice = helpers.solidity.ether * 0.002;
 
                 // 12 x 30 day periods for distribution
                 StageCount = 12;
                 StageBlockCount = blocksPerDay * 30;      
                 StagePriceIncrease = helpers.solidity.ether * 0.0001;
-                AllocationEndBlock = StartBlock + AllocationBlockCount;
+                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
                 // for validation
-                EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+                BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
                 await TestReversibleICO.methods.addSettings(
                     TestTokenContractAddress,    // address _TokenContractAddress
                     whitelistControllerAddress, // address _whitelistControllerAddress
                     projectWalletAddress,       // address _projectWalletAddress
-                    StartBlock,                 // uint256 _StartBlock
-                    AllocationBlockCount,       // uint256 _AllocationBlockCount,
-                    AllocationPrice,            // uint256 _AllocationPrice in wei
+                    commitPhaseStartBlock,                 // uint256 _StartBlock
+                    commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+                    commitPhasePrice,            // uint256 _commitPhasePrice in wei
                     StageCount,                 // uint8   _StageCount
                     StageBlockCount,            // uint256 _StageBlockCount
                     StagePriceIncrease          // uint256 _StagePriceIncrease in wei

@@ -272,36 +272,36 @@ module.exports = {
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
     },
-    getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision) {
+    getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
 
         currentBlock = new helpers.BN(currentBlock);
-        DistributionStartBlock = new helpers.BN(DistributionStartBlock);
-        EndBlock = new helpers.BN(EndBlock);
+        BuyPhaseStartBlock = new helpers.BN(BuyPhaseStartBlock);
+        BuyPhaseEndBlock = new helpers.BN(BuyPhaseEndBlock);
         precision = new helpers.BN(precision);
 
         if(
-            currentBlock.toNumber() > DistributionStartBlock.toNumber()  
-            && currentBlock.toNumber() < EndBlock.toNumber()) 
+            currentBlock.toNumber() > BuyPhaseStartBlock.toNumber()
+            && currentBlock.toNumber() < BuyPhaseEndBlock.toNumber())
         {
-            const passedBlocks = currentBlock.sub(DistributionStartBlock);
-            const DistributionBlockLength = new helpers.BN(EndBlock).sub(DistributionStartBlock);
+            const passedBlocks = currentBlock.sub(BuyPhaseStartBlock);
+            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock);
             return passedBlocks.mul(
                 new helpers.BN("10").pow( new helpers.BN(precision) )
-            ).div(new helpers.BN(DistributionBlockLength));
-        } else if (currentBlock.toNumber() >= EndBlock.toNumber()) {
+            ).div(new helpers.BN(BuyPhaseBlockCount));
+        } else if (currentBlock.toNumber() >= BuyPhaseEndBlock.toNumber()) {
             return 0; 
         } else {
             return 0;
         }
 
     },
-    calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, DistributionStartBlock, EndBlock, tokenAmount) {
+    calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount) {
 
         tokenAmount = new helpers.BN(tokenAmount);
-        if(currentBlock < DistributionStartBlock) {
+        if(currentBlock < BuyPhaseStartBlock) {
             // allocation phase
             return tokenAmount;
-        } else if(currentBlock < EndBlock) {
+        } else if(currentBlock < BuyPhaseEndBlock) {
             // distribution phase
             const precision = 20;
             const unlocked = tokenAmount.mul(
@@ -309,8 +309,8 @@ module.exports = {
                     helpers.utils.getCurrentUnlockRatio(
                         helpers,
                         currentBlock,
-                        DistributionStartBlock,
-                        EndBlock,
+                        BuyPhaseStartBlock,
+                        BuyPhaseEndBlock,
                         new helpers.BN(precision)
                     )
                 )
@@ -424,8 +424,8 @@ module.exports = {
         };
 
         const currentBlockNumber = parseInt(await contract.methods.getCurrentBlockNumber().call());
-        const EndBlock = parseInt(await contract.methods.EndBlock().call());
-        const DistributionStartBlock = parseInt(await contract.methods.DistributionStartBlock().call());
+        const BuyPhaseEndBlock = parseInt(await contract.methods.BuyPhaseEndBlock().call());
+        const BuyPhaseStartBlock = parseInt(await contract.methods.BuyPhaseStartBlock().call());
         const maxLocked = new helpers.BN( await contract.methods.getLockedTokenAmount(_from).call() );
         const ParticipantRecord = await contract.methods.ParticipantsByAddress(_from).call();
 
@@ -456,7 +456,7 @@ module.exports = {
                         )
 
                     let tokens_in_stage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                        helpers, currentBlockNumber, DistributionStartBlock, EndBlock, tokenAmount
+                        helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount
                     ).sub( 
                         new helpers.BN(ParticipantRecordbyStage.tokens_returned.toString()) 
                     );
