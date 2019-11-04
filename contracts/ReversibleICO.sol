@@ -271,22 +271,22 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Participants
     */
-
-    event ExitEvent (
-        address indexed _participant,
-        uint256 indexed _token_amount,
-        uint256 indexed _eth_amount,
-        uint8 _type,
-        bool is_partial
-    );
-
-    event DebugEvent (
-        uint256 indexed _id,
-        uint256 indexed a,
-        uint256 indexed b,
-        bool _type
-    );
-
+//
+//    event ExitEvent (
+//        address indexed _participant,
+//        uint256 indexed _token_amount,
+//        uint256 indexed _eth_amount,
+//        uint8 _type,
+//        bool is_partial
+//    );
+//
+//    event DebugEvent (
+//        uint256 indexed _id,
+//        uint256 indexed a,
+//        uint256 indexed b,
+//        bool _type
+//    );
+//
     struct Contribution {
         uint256 value;
         uint256 received;
