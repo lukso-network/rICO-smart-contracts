@@ -324,7 +324,7 @@ module.exports = {
         }
     },
     async getTokenAmountForEthAtStage(helpers, contract, ethValue, stageId) {
-        const stageData = await contract.methods.StageByNumber(stageId).call();
+        const stageData = await contract.methods.Stages(stageId).call();
         return new helpers.BN(ethValue.toString()).mul(
             new helpers.BN("10").pow( new helpers.BN("18") )
         ).div(
@@ -332,7 +332,7 @@ module.exports = {
         );
     },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
-        const stageData = await contract.methods.StageByNumber(stageId).call();
+        const stageData = await contract.methods.Stages(stageId).call();
         let block = stageData.start_block;
         if(end) {
             block = stageData.end_block;
@@ -360,7 +360,7 @@ module.exports = {
     
         let ParticipantByAddress = await contract.methods.ParticipantsByAddress(participant_address).call();
     
-        let ContractStageCount = await contract.methods.ContractStageCount().call();
+        let StageCount = await contract.methods.StageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
         const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
     
@@ -383,10 +383,10 @@ module.exports = {
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
 
         if(max > 0) {
-            ContractStageCount = max;
+            StageCount = max;
         }
     
-        for(let i = 0; i < ContractStageCount; i++) {
+        for(let i = 0; i < StageCount; i++) {
             const ParticipantStageDetails = await contract.methods.ParticipantTotalsDetails(participant_address, i).call();
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
@@ -403,7 +403,7 @@ module.exports = {
     },
     async getEthAmountForTokensAtStage(helpers, contract, token_amount, stage_id) {
         // get stage pricing
-        let stageData = await contract.methods.StageByNumber(stage_id).call();
+        let stageData = await contract.methods.Stages(stage_id).call();
         return token_amount.mul(
             new helpers.BN(stageData.token_price)
         ).div(

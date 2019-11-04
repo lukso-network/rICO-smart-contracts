@@ -215,7 +215,7 @@ describe("Flow Testing", function () {
             
             describe("token sender is projectWalletAddress", async function () { 
 
-                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+                it("transaction reverts \"Contract must be initialized.\"", async function () {
 
                     const initialized = await TestReversibleICO.methods.initialized().call();
                     expect( initialized ).to.be.equal( false );
@@ -236,14 +236,14 @@ describe("Flow Testing", function () {
                             gas: 100000
                         });
 
-                    }, "requireInitialized: Contract must be initialized");
+                    }, "Contract must be initialized.");
 
                 });
             });
             
             describe("token sender is deployerAddress", async function () { 
 
-                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+                it("transaction reverts \"Contract must be initialized.\"", async function () {
 
                     helpers.utils.resetAccountNonceCache(helpers);
 
@@ -277,7 +277,7 @@ describe("Flow Testing", function () {
                             gas: 100000
                         });
 
-                    }, "requireInitialized: Contract must be initialized");
+                    }, "Contract must be initialized.");
 
                 });
             });

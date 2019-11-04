@@ -100,11 +100,11 @@ contract RicoToken is ERC777 {
     }
 
     modifier requireInitialized() {
-        require(initialized == true, "requireInitialized: Contract must be initialized");
+        require(initialized == true, "Contract must be initialized.");
         _;
     }
     modifier requireNotInitialized() {
-        require(initialized == false, "requireNotInitialized: Contract must not be initialized");
+        require(initialized == false, "Contract is already initialized.");
         _;
     }
 

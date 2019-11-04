@@ -377,7 +377,7 @@ describe("Cancel Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
 
-            it("0 value transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+            it("0 value transaction reverts \"Contract must be initialized.\"", async function () {
 
                 const initialized = await TestReversibleICO.methods.initialized().call();
                 expect( initialized ).to.be.equal( false );
@@ -391,11 +391,11 @@ describe("Cancel Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                }, "requireInitialized: Contract must be initialized");
+                }, "Contract must be initialized.");
 
             });
 
-            it("value > 0 transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+            it("value > 0 transaction reverts \"Contract must be initialized.\"", async function () {
 
                 const initialized = await TestReversibleICO.methods.initialized().call();
                 expect( initialized ).to.be.equal( false );
@@ -411,7 +411,7 @@ describe("Cancel Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                }, "requireInitialized: Contract must be initialized");
+                }, "Contract must be initialized.");
 
             });
 
@@ -571,7 +571,7 @@ describe("Cancel Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
 
-            it("0 value transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+            it("0 value transaction reverts \"Contract must be initialized.\"", async function () {
 
                 const initialized = await TestReversibleICO.methods.initialized().call();
                 expect( initialized ).to.be.equal( false );
@@ -584,11 +584,11 @@ describe("Cancel Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                }, "requireInitialized: Contract must be initialized");
+                }, "Contract must be initialized.");
 
             });
 
-            it("value > 0 transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+            it("value > 0 transaction reverts \"Contract must be initialized.\"", async function () {
 
                 const initialized = await TestReversibleICO.methods.initialized().call();
                 expect( initialized ).to.be.equal( false );
@@ -604,7 +604,7 @@ describe("Cancel Testing", function () {
                         value: ContributionAmount.toString(),
                     });
 
-                }, "requireInitialized: Contract must be initialized");
+                }, "Contract must be initialized.");
 
             });
 
@@ -618,7 +618,7 @@ describe("Cancel Testing", function () {
 
 
 async function jumpToContractStage ( ReversibleICO, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
-    const stageData = await ReversibleICO.methods.StageByNumber(stageId).call();
+    const stageData = await ReversibleICO.methods.Stages(stageId).call();
     let block = stageData.start_block;
     if(end) {
         block = stageData.end_block;

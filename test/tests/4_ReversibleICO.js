@@ -105,7 +105,7 @@ describe("ReversibleICO", function () {
         });
 
         it("Property running should be false", async function () {
-            expect(await this.ReversibleICO.methods.running().call()).to.be.equal(false);
+            expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
         });
 
         it("Property frozen should be false", async function () {
@@ -191,7 +191,7 @@ describe("ReversibleICO", function () {
             });
     
             it("Property running should be false", async function () {
-                expect(await this.ReversibleICO.methods.running().call()).to.be.equal(false);
+                expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
             });
     
             it("Property frozen should be false", async function () {
@@ -224,13 +224,13 @@ describe("ReversibleICO", function () {
         
             let allocationStageData;
             before(async function () {
-                allocationStageData = await this.ReversibleICO.methods.StageByNumber(0).call();
+                allocationStageData = await this.ReversibleICO.methods.Stages(0).call();
             });
 
             it("Stage Count is correct", async function () {
                 // account for the allocation stage and add 1
                 const stages = (StageCount + 1);
-                expect(await this.ReversibleICO.methods.ContractStageCount().call()).to.be.equal(stages.toString());
+                expect(await this.ReversibleICO.methods.StageCount().call()).to.be.equal(stages.toString());
             });
 
             it("Allocation commitPhaseStartBlock matches settings", async function () {
@@ -252,7 +252,7 @@ describe("ReversibleICO", function () {
 
             it("First Distribution Stage settings are correct", async function () {
                 const stageRefId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber((stageRefId + 1)).call();
+                const stageData = await this.ReversibleICO.methods.Stages((stageRefId + 1)).call();
                 const stage_block_start = stageData.start_block;
                 const stage_end_block = stageData.end_block;
                 const stage_token_price = stageData.token_price;
@@ -264,7 +264,7 @@ describe("ReversibleICO", function () {
 
             it("Last Distribution Stage settings are correct", async function () {
                 const stageRefId = StageCount - 1;
-                const stageData = await this.ReversibleICO.methods.StageByNumber((stageRefId + 1)).call();
+                const stageData = await this.ReversibleICO.methods.Stages((stageRefId + 1)).call();
                 const stage_block_start = stageData.start_block;
                 const stage_end_block = stageData.end_block;
                 const stage_token_price = stageData.token_price;
@@ -276,7 +276,7 @@ describe("ReversibleICO", function () {
 
             it("Last Distribution Stage end_block matches contract BuyPhaseEndBlock", async function () {
                 const stageRefId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageRefId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageRefId).call();
                 const stage_end_block = stageData.end_block;
                 expect(stage_end_block).to.be.equal(BuyPhaseEndBlock.toString());
             });
@@ -382,7 +382,7 @@ describe("ReversibleICO", function () {
             });
 
             it("Returns 255 after last stage end_block", async function () {
-                const stageData = await this.ReversibleICO.methods.StageByNumber(StageCount).call();
+                const stageData = await this.ReversibleICO.methods.Stages(StageCount).call();
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.end_block + 1
                 ).send({
@@ -396,7 +396,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 0 if getStageAtBlock( Allocation.start_block )", async function () {
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.start_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -404,7 +404,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 0 if getStageAtBlock( Allocation.end_block )", async function () {
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.end_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -412,7 +412,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 1 if getStageAtBlock( stage_1.start_block )", async function () {
                 const stageId = 1;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.start_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -420,7 +420,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 1 if getStageAtBlock( stage_1.end_block )", async function () {
                 const stageId = 1;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.end_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -428,7 +428,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 5 if getStageAtBlock( stage_5.start_block )", async function () {
                 const stageId = 5;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.start_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -436,7 +436,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage 5 if getStageAtBlock( stage_5.end_block )", async function () {
                 const stageId = 5;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.end_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -444,7 +444,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage last stage if getStageAtBlock( last_stage.start_block )", async function () {
                 const stageId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.start_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -452,7 +452,7 @@ describe("ReversibleICO", function () {
 
             it("Returns stage last stage if getStageAtBlock( last_stage.end_block )", async function () {
                 const stageId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.end_block).call()
                 ).to.be.equal( stageId.toString() );
@@ -460,7 +460,7 @@ describe("ReversibleICO", function () {
 
             it("Returns 255 if getStageAtBlock( last_stage.end_block + 1 )", async function () {
                 const stageId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getStageAtBlock(stageData.end_block + 1).call()
                 ).to.be.equal( "255" );
@@ -507,7 +507,7 @@ describe("ReversibleICO", function () {
             });
 
             it("Returns 0 after last stage ended", async function () {
-                const stageData = await this.ReversibleICO.methods.StageByNumber(StageCount).call();
+                const stageData = await this.ReversibleICO.methods.Stages(StageCount).call();
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.end_block + 1
                 ).send({
@@ -522,7 +522,7 @@ describe("ReversibleICO", function () {
 
             it("Returns correct value for Allocation phase", async function () {
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.start_block).call()
                 ).to.be.equal( commitPhasePrice.toString() );
@@ -530,7 +530,7 @@ describe("ReversibleICO", function () {
 
             it("Returns correct value for stage 1", async function () {
                 const stageId = 1;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.start_block).call()
                 ).to.be.equal(
@@ -540,7 +540,7 @@ describe("ReversibleICO", function () {
 
             it("Returns correct value for stage 5", async function () {
                 const stageId = 5;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.start_block).call()
                 ).to.be.equal(
@@ -550,7 +550,7 @@ describe("ReversibleICO", function () {
 
             it("Returns correct value for last stage", async function () {
                 const stageId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.start_block).call()
                 ).to.be.equal(
@@ -560,7 +560,7 @@ describe("ReversibleICO", function () {
 
             it("Returns 0 after last stage ended", async function () {
                 const stageId = StageCount;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 expect(
                     await this.ReversibleICO.methods.getPriceAtBlock(stageData.end_block + 1).call()
                 ).to.be.equal( "0" );
@@ -573,7 +573,7 @@ describe("ReversibleICO", function () {
             it("Returns correct value for 1 eth & Allocation stage", async function () {
                 const ethValue = helpers.solidity.ether * 1;
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
                 
                 const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
                     new helpers.BN("10").pow( new BN("18") )
@@ -588,7 +588,7 @@ describe("ReversibleICO", function () {
             it("Returns correct value for 1 eth & stage 1", async function () {
                 const ethValue = helpers.solidity.ether * 1;
                 const stageId = 1;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
 
                 const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
                     new helpers.BN("10").pow( new BN("18") )
@@ -603,7 +603,7 @@ describe("ReversibleICO", function () {
             it("Returns correct value for 0.002 eth & Allocation stage ( results in 1 full token )", async function () {
                 const ethValue = helpers.solidity.ether * 0.002;
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
 
                 const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
                     new helpers.BN("10").pow( new BN("18") )
@@ -621,7 +621,7 @@ describe("ReversibleICO", function () {
             it("Returns correct value for 1 wei & Allocation stage ( results in 500 token grains )", async function () {
                 const ethValue = 1;
                 const stageId = 0;
-                const stageData = await this.ReversibleICO.methods.StageByNumber(stageId).call();
+                const stageData = await this.ReversibleICO.methods.Stages(stageId).call();
 
                 const calculatedTokenAmount = new helpers.BN(ethValue.toString()).mul(
                     new helpers.BN("10").pow( new BN("18") )
@@ -647,7 +647,7 @@ describe("ReversibleICO", function () {
 
             describe("if msg.sender is not whitelistControllerAddress", async function () { 
 
-                it("transaction reverts \"onlyWhitelistController: Only Whitelist Controller can call this method\"", async function () {
+                it("transaction reverts \"Only the whitelist controller can call this method.\"", async function () {
 
                     await helpers.assertInvalidOpcode( async () => {
 
@@ -669,7 +669,7 @@ describe("ReversibleICO", function () {
                         ).send({
                             from: TransactionSender
                         });
-                    }, "onlyWhitelistController: Only Whitelist Controller can call this method");
+                    }, "Only the whitelist controller can call this method.");
                 });
 
             });
@@ -692,7 +692,7 @@ describe("ReversibleICO", function () {
                         expect( test ).to.be.equal( false );
                     });
 
-                    it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+                    it("transaction reverts with \"Contract must be initialized.\"", async function () {
                         await helpers.assertInvalidOpcode( async () => {
 
                             const initialized = await TestReversibleICO.methods.initialized().call();
@@ -704,7 +704,7 @@ describe("ReversibleICO", function () {
                             ).send({
                                 from: whitelistControllerAddress
                             });
-                        }, "requireInitialized: Contract must be initialized");
+                        }, "Contract must be initialized.");
                     });
                 });
                 

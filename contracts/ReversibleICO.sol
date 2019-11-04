@@ -99,8 +99,8 @@ contract ReversibleICO is IERC777Recipient {
     function ()
         external
         payable
-        initialized
-        notFrozen
+        isInitialized
+        isNotFrozen
     {
         if(msg.value >= minContribution) {
             // accept contribution for processing
@@ -125,7 +125,7 @@ contract ReversibleICO is IERC777Recipient {
     )
         public
         onlyDeployer
-        notInitialized
+        isNotInitialized
     {
 
         // Assign address variables
@@ -170,9 +170,8 @@ contract ReversibleICO is IERC777Recipient {
             lastStageBlockEnd = StageN.end_block;
         }
 
-        BuyPhaseEndBlock = lastStageBlockEnd;
-
         BuyPhaseStartBlock = commitPhaseEndBlock + 1;
+        BuyPhaseEndBlock = lastStageBlockEnd;
         BuyPhaseBlockCount = lastStageBlockEnd - BuyPhaseStartBlock;
 
         initialized = true;
@@ -186,13 +185,13 @@ contract ReversibleICO is IERC777Recipient {
         22797 - Case 2: lower than stage[X].end_block
         22813 - Case 3: exactly at stage[X].end_block
 
-        Doing an interation and validating on each item range can go upto 37391 gas for 13 stages.
+        Doing an iteration and validating on each item range can go upto 37391 gas for 13 stages.
     */
     function getCurrentStage() public view returns ( uint8 ) {
         return getStageAtBlock(getCurrentBlockNumber());
     }
 
-    function getStageAtBlock(uint256 selectedBlock) public view returns ( uint8 ) {
+    function getStageAtBlock(uint256 _selectedBlock) public view returns ( uint8 ) {
 
         // *NOTE: if selectedBlock is end block.. the participant will get the correct
         //        stage now but their new transaction will end up in the
@@ -202,15 +201,18 @@ contract ReversibleICO is IERC777Recipient {
         // @TODO: decide how we want to handle this on the frontend,
         //        contract should always display proper data.
         //
-        if ( selectedBlock <= commitPhaseEndBlock ) {
+
+        // return commit phase, stage 0
+        if ( _selectedBlock <= commitPhaseEndBlock ) {
             return 0;
         }
 
+        // find buy phase stage n
         // solidity floors division results, thus we get what we're looking for.
-        uint256 num = (selectedBlock - commitPhaseEndBlock) / (StageBlockCount + 1) + 1;
+        uint256 num = (_selectedBlock - commitPhaseEndBlock) / (StageBlockCount + 1) + 1;
 
         // last block of each stage always computes as stage + 1
-        if(Stages[uint8(num)-1].end_block == selectedBlock) {
+        if(Stages[uint8(num)-1].end_block == _selectedBlock) {
             // save some gas and just return instead of decrementing.
             return uint8(num - 1);
         }
@@ -246,7 +248,7 @@ contract ReversibleICO is IERC777Recipient {
     public view returns (uint256)
     {
         // add token decimals to value before division, that way we increase precision.
-        // return (_ethValue * (10 ** 18)) / StageByNumber[_stageId].token_price;
+        // return (_ethValue * (10 ** 18)) / Stages[_stageId].token_price;
         return _ethValue.mul(
             (10 ** 18)
         ).div( Stages[_stageId].token_price );
@@ -258,7 +260,7 @@ contract ReversibleICO is IERC777Recipient {
     )
     public view returns (uint256)
     {
-        // return (_token_amount * StageByNumber[_stageId].token_price) / (10 ** 18);
+        // return (_token_amount * Stages[_stageId].token_price) / (10 ** 18);
         return _token_amount.mul(
             Stages[_stageId].token_price
         ).div(
@@ -369,8 +371,8 @@ contract ReversibleICO is IERC777Recipient {
     */
     function commit()
         internal
-        initialized
-        notFrozen
+        isInitialized
+        isNotFrozen
     {
         // add to received value to receivedETH
         receivedETH += msg.value;
@@ -559,8 +561,8 @@ contract ReversibleICO is IERC777Recipient {
     function cancel()
         public
         payable
-        initialized
-        notFrozen
+        isInitialized
+        isNotFrozen
     {
         if(ParticipantsByAddress[msg.sender].whitelisted == true) {
             revert("cancel: Please send tokens back to this contract in order to withdraw ETH.");
@@ -728,8 +730,8 @@ contract ReversibleICO is IERC777Recipient {
         bytes calldata operatorData
     )
         external
-        initialized
-        // notFrozen TODO??
+        isInitialized
+        // isNotFrozen TODO??
         // requireNotEnded
     {
         // Rico should only receive tokens from the Rico Token Tracker.
@@ -759,8 +761,8 @@ contract ReversibleICO is IERC777Recipient {
         uint8 _mode
     )
         public
-        initialized
-        notFrozen
+        isInitialized
+        isNotFrozen
         onlyWhitelistController
     {
         Participant storage ParticipantRecord = ParticipantsByAddress[_address];
@@ -858,7 +860,7 @@ contract ReversibleICO is IERC777Recipient {
             //   - return all tokens bought through contributing.
             // if in development phase ( stage 1 to 12 )
             //   - calculate and return
-            // else if after endBlock
+            // else if after end_block
             //   - return 0
             if(blockNumber < BuyPhaseStartBlock) {
 
@@ -894,7 +896,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     function projectWithdraw(uint256 ethAmount)
         public
-        initialized
+        isInitialized
     {
         require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
 
@@ -971,13 +973,13 @@ contract ReversibleICO is IERC777Recipient {
         _;
     }
 
-    modifier initialized() {
+    modifier isInitialized() {
         require(initialized == true, "Contract must be initialized.");
         _;
     }
 
-    modifier notInitialized() {
-        require(initialized == false, "Contract can not be initialized again.");
+    modifier isNotInitialized() {
+        require(initialized == false, "Contract is already initialized.");
         _;
     }
 
@@ -1001,12 +1003,12 @@ contract ReversibleICO is IERC777Recipient {
 //        _;
 //    }
 
-    modifier frozen() {
+    modifier isFrozen() {
         require(frozen == true, "Contract is frozen.");
         _;
     }
 
-    modifier notFrozen() {
+    modifier isNotFrozen() {
         require(frozen == false, "Contract can not be frozen.");
         _;
     }

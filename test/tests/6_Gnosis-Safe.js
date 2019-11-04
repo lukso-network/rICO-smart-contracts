@@ -364,7 +364,7 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(true);
 
                 expect(
-                    await this.ReversibleICO.methods.running().call()
+                    await this.ReversibleICO.methods.started().call()
                 ).to.be.equal(false);
 
                 expect(

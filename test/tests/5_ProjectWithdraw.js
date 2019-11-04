@@ -215,7 +215,7 @@ describe("ProjectWithdraw Testing", function () {
             
             describe("caller is projectWalletAddress", async function () { 
 
-                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+                it("transaction reverts \"Contract must be initialized.\"", async function () {
 
                     const initialized = await TestReversibleICO.methods.initialized().call();
                     expect( initialized ).to.be.equal( false );
@@ -225,14 +225,14 @@ describe("ProjectWithdraw Testing", function () {
                             from: projectWalletAddress,
                             gas: 100000
                         });
-                    }, "requireInitialized: Contract must be initialized");
+                    }, "Contract must be initialized.");
 
                 });
             });
             
             describe("caller is deployerAddress", async function () { 
 
-                it("transaction reverts \"requireInitialized: Contract must be initialized\"", async function () {
+                it("transaction reverts \"Contract must be initialized.\"", async function () {
 
                     helpers.utils.resetAccountNonceCache(helpers);
 
@@ -244,7 +244,7 @@ describe("ProjectWithdraw Testing", function () {
                             from: deployerAddress,
                             gas: 100000
                         });
-                    }, "requireInitialized: Contract must be initialized");
+                    }, "Contract must be initialized.");
 
                 });
             });
@@ -401,7 +401,7 @@ describe("ProjectWithdraw Testing", function () {
                         let AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         let AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
                         let AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        let AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.ProjectETHWithdrawn().call() );
+                        let AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
 
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
                         console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
@@ -430,7 +430,7 @@ describe("ProjectWithdraw Testing", function () {
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
                         AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.ProjectETHWithdrawn().call() );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
                         AfterWithdrawETHWithdrawn = new BN( await ReversibleICOInstance.methods.returnedETH().call() );
 
 

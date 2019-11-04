@@ -484,7 +484,7 @@ describe("ERC777 - RICO Token", async function () {
                     await testToken.methods
                         .transfer(accounts[3], 1)
                         .send({ from: holder, gas:100000 });
-                }, "requireInitialized: Contract must be initialized");
+                }, "Contract must be initialized.");
                 
             });
             
@@ -493,7 +493,7 @@ describe("ERC777 - RICO Token", async function () {
                     await this.RicoToken.methods
                         .setup(_ricoAddress)
                         .send({ from: holder });
-                }, "requireNotInitialized: Contract must not be initialized");
+                }, "Contract is already initialized.");
 
             });
         });
