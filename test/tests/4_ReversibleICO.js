@@ -44,10 +44,10 @@ describe("ReversibleICO", function () {
 
     const deployerAddress = accounts[0];
     const whitelistControllerAddress = accounts[1];
-    let TokenTrackerAddress, stageValidation = [], currentBlock, StartBlock,
+    let TokenContractAddress, stageValidation = [], currentBlock, StartBlock,
         AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
         StageBlockCount, StagePriceIncrease, EndBlock;
-    let TokenTrackerInstance;
+    let TokenContractInstance;
 
     before(async function () {
         // test requires ERC1820.instance
@@ -65,7 +65,7 @@ describe("ReversibleICO", function () {
 
         helpers.addresses.Rico = this.ReversibleICO.receipt.contractAddress;        
 
-        TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
+        TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers,
             "RicoToken",
             {
@@ -76,9 +76,9 @@ describe("ReversibleICO", function () {
             }
         );
 
-        TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
+        TokenContractAddress = TokenContractInstance.receipt.contractAddress;
 
-        await TokenTrackerInstance.methods.setup(
+        await TokenContractInstance.methods.setup(
             helpers.addresses.Rico
         ).send({
             from: holder,  // initial token supply holder
@@ -116,8 +116,8 @@ describe("ReversibleICO", function () {
             expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
         });
 
-        it("Property TokenTrackerAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.TokenTrackerAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+        it("Property TokenContractAddress should be address(0x0)", async function () {
+            expect(await this.ReversibleICO.methods.TokenContractAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
         it("Property whitelistControllerAddress should be address(0x0)", async function () {
@@ -168,7 +168,7 @@ describe("ReversibleICO", function () {
             }
 
             await this.ReversibleICO.methods.addSettings(
-                TokenTrackerAddress,        // address _TokenTrackerAddress
+                TokenContractAddress,        // address _TokenContractAddress
                 whitelistControllerAddress, // address _whitelistControllerAddress
                 projectWalletAddress,       // address _projectWalletAddress
                 StartBlock,                 // uint256 _StartBlock
@@ -202,8 +202,8 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
             });
     
-            it("Property TokenTrackerAddress should be deployed ERC777 Token Contract address", async function () {
-                expect(await this.ReversibleICO.methods.TokenTrackerAddress().call()).to.be.equal(TokenTrackerAddress);
+            it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
+                expect(await this.ReversibleICO.methods.TokenContractAddress().call()).to.be.equal(TokenContractAddress);
             });
     
             it("Property whitelistControllerAddress should be " + whitelistControllerAddress, async function () {
@@ -290,8 +290,8 @@ describe("ReversibleICO", function () {
         const ERC777data = web3.utils.sha3('777TestData');
 
         before(async function () {
-            TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
-            await TokenTrackerInstance.methods.send(
+            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+            await TokenContractInstance.methods.send(
                 helpers.addresses.Rico,
                 RicoSaleSupply,
                 ERC777data
@@ -313,7 +313,7 @@ describe("ReversibleICO", function () {
 
             it("RICO Contract should have the correct token balance ("+RicoSaleSupply+")", async function () {
                 expect(
-                    await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call()
+                    await TokenContractInstance.methods.balanceOf(helpers.addresses.Rico).call()
                 ).to.be.equal(RicoSaleSupply.toString());
             });
 
@@ -321,7 +321,7 @@ describe("ReversibleICO", function () {
                 expect(
                     await this.ReversibleICO.methods.TokenSupply().call()
                 ).to.be.equal(
-                    await TokenTrackerInstance.methods.balanceOf(helpers.addresses.Rico).call()
+                    await TokenContractInstance.methods.balanceOf(helpers.addresses.Rico).call()
                 );
             });
 
@@ -863,7 +863,7 @@ describe("ReversibleICO", function () {
                             });
 
                             it("Participant Token Balance is correct", async function () { 
-                                const ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestAcceptParticipant).call();
+                                const ParticipantTokenBalance = await TokenContractInstance.methods.balanceOf(TestAcceptParticipant).call();
 
                                 let TokenAmount = new helpers.BN();
 
@@ -943,7 +943,7 @@ describe("ReversibleICO", function () {
 
                             before(async function () {
 
-                                initialParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestRejectParticipant).call();
+                                initialParticipantTokenBalance = await TokenContractInstance.methods.balanceOf(TestRejectParticipant).call();
 
                                 let Participant = await this.ReversibleICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
                                 expect(
@@ -983,7 +983,7 @@ describe("ReversibleICO", function () {
                             it("Participant Token Balance is the same as initial", async function () { 
 
                                 // since we're rejecting their contribution.. new balance should be the same as initial.
-                                const ParticipantTokenBalance = await TokenTrackerInstance.methods.balanceOf(TestRejectParticipant).call();
+                                const ParticipantTokenBalance = await TokenContractInstance.methods.balanceOf(TestRejectParticipant).call();
                                 expect(
                                     ParticipantTokenBalance.toString()
                                 ).to.be.equal( 

@@ -52,10 +52,10 @@ let snapshots = [];
 const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
-let TokenTrackerAddress, ReversibleICOAddress, stageValidation = [], currentBlock, 
+let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenTrackerInstance, 
-    TokenTrackerReceipt, ReversibleICOInstance, ReversibleICOReceipt;
+    StageBlockCount, StagePriceIncrease, EndBlock, TokenContractInstance,
+    TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 let deployments = {};
 
@@ -78,8 +78,8 @@ async function doFreshDeployment(name) {
     /*
     *   Deploy Token Contract
     */
-    
-    TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
+
+    TokenContractInstance = await helpers.utils.deployNewContractInstance(
         helpers, "RicoToken", {
             from: holder,
             arguments: [
@@ -90,8 +90,8 @@ async function doFreshDeployment(name) {
             gasPrice: helpers.solidity.gwei * 10
         }
     );
-    TokenTrackerReceipt = TokenTrackerInstance.receipt;
-    TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
+    TokenContractReceipt = TokenContractInstance.receipt;
+    TokenContractAddress = TokenContractInstance.receipt.contractAddress;
 
     /*
     *   Deploy RICO Contract
@@ -101,7 +101,7 @@ async function doFreshDeployment(name) {
     ReversibleICOAddress = ReversibleICOInstance.receipt.contractAddress;
     // helpers.addresses.Rico = ReversibleICOAddress;
 
-    await TokenTrackerInstance.methods.setup(
+    await TokenContractInstance.methods.setup(
         ReversibleICOAddress
     ).send({
         from: holder,  // initial token supply holder
@@ -147,7 +147,7 @@ async function doFreshDeployment(name) {
     }
 
     await ReversibleICOInstance.methods.addSettings(
-        TokenTrackerAddress,        // address _TokenTrackerAddress
+        TokenContractAddress,        // address _TokenContractAddress
         whitelistControllerAddress, // address _whitelistControllerAddress
         projectWalletAddress,          // address _projectWalletAddress
         StartBlock,                 // uint256 _StartBlock
@@ -162,7 +162,7 @@ async function doFreshDeployment(name) {
     });
 
     // transfer tokens to rico
-    await TokenTrackerInstance.methods.send(
+    await TokenContractInstance.methods.send(
         ReversibleICOInstance.receipt.contractAddress,
         RicoSaleSupply,
         ERC777data
@@ -172,7 +172,7 @@ async function doFreshDeployment(name) {
     });
 
     expect(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
@@ -182,14 +182,14 @@ async function doFreshDeployment(name) {
     deployments[name] = {
         "name": name,
         "rico_address": ReversibleICOInstance.receipt.contractAddress,
-        "token_address": TokenTrackerInstance.receipt.contractAddress,
+        "token_address": TokenContractInstance.receipt.contractAddress,
     };
 
     // save deployments to file.
     saveDeploymentsToFile(deployments);
     
     return {
-        TokenTrackerInstance,
+        TokenContractInstance,
         ReversibleICOInstance,
     }
 };

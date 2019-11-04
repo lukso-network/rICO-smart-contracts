@@ -335,7 +335,7 @@ describe("Gnosis Safe Integration", function () {
                 }
 
                 let settingsData = this.Rico.methods.addSettings(
-                    TokenTrackerAddress,            // address _TokenTrackerAddress
+                    TokenContractAddress,            // address _TokenContractAddress
                     whitelistControllerAddress,     // address _whitelistControllerAddress
                     projectWalletAddress,           // address _projectWalletAddress
                     StartBlock,                     // uint256 _StartBlock
@@ -376,8 +376,8 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(false);
 
                 expect(
-                    await this.ReversibleICO.methods.TokenTrackerAddress().call()
-                ).to.be.equal(TokenTrackerAddress);
+                    await this.ReversibleICO.methods.TokenContractAddress().call()
+                ).to.be.equal(TokenContractAddress);
 
                 expect(
                     await this.ReversibleICO.methods.whitelistControllerAddress().call()

@@ -15,16 +15,23 @@ import "./zeppelin/introspection/IERC1820Registry.sol";
 
 contract ReversibleICO is IERC777Recipient {
 
+    /*
+    *   Instances
+    */
     using SafeMath for uint256;
 
     IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
-    address public TokenTrackerAddress;
-    IERC777 public TokenTracker;
+    IERC777 public TokenContract;
 
-    address public whitelistControllerAddress;
+    /*
+    *   Addresses
+    */
+    address public deployerAddress;
+    address public TokenContractAddress;
     address public projectWalletAddress;
+    address public whitelistControllerAddress;
 
     /*
     *   Contract Settings
@@ -42,7 +49,7 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public acceptedETH = 0;
     uint256 public withdrawnETH = 0;
 
-    // commited eth
+    // Committed ETH
     uint256 public contributorsETH = 0;
 
     // uint256 public projectETH = 0;
@@ -73,11 +80,6 @@ contract ReversibleICO is IERC777Recipient {
 
     mapping ( uint8 => ContractStage ) public StageByNumber;
     uint8 public ContractStageCount = 0;
-
-    /*
-    *   Addresses
-    */
-    address public deployerAddress;
 
     /*
     *   Internals
@@ -123,7 +125,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     function addSettings(
-        address _TokenTrackerAddress,
+        address _TokenContractAddress,
         address _whitelistControllerAddress,
         address _projectWalletAddress,
         uint256 _StartBlock,
@@ -137,13 +139,13 @@ contract ReversibleICO is IERC777Recipient {
         onlyDeployer
         requireNotInitialized
     {
-        // addresses
-        TokenTrackerAddress = _TokenTrackerAddress;
+        // assign addresses
+        TokenContractAddress = _TokenContractAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
         projectWalletAddress = _projectWalletAddress;
 
-        // initialize ERC777 TokenTracker
-        TokenTracker = IERC777(TokenTrackerAddress);
+        // initialize ERC777 TokenContract
+        TokenContract = IERC777(TokenContractAddress);
 
         // Allocation settings
         StartBlock = _StartBlock;
@@ -363,7 +365,7 @@ contract ReversibleICO is IERC777Recipient {
     *   Recalculate Funds allocation
     */
     function availableEth() public view returns (uint256) {
-        return TokenTracker.balanceOf(address(this)).mul(
+        return TokenContract.balanceOf(address(this)).mul(
             StageByNumber[getCurrentStage()].token_price
         ).div( 10 ** 18 );
     }
@@ -492,7 +494,7 @@ contract ReversibleICO is IERC777Recipient {
                     // allocate tokens to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
-                    TokenTracker.send(_receiver, newTokenAmount, data);
+                    TokenContract.send(_receiver, newTokenAmount, data);
                 }
 
                 // if stored value is too high to accept we then have
@@ -702,7 +704,7 @@ contract ReversibleICO is IERC777Recipient {
                     // allocate tokens to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
-                    TokenTracker.send(_from, ReturnTokenAmount, data);
+                    TokenContract.send(_from, ReturnTokenAmount, data);
                 }
 
                 // Adjust globals
@@ -738,7 +740,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // Rico should only receive tokens from the Rico Token Tracker.
         // any other transaction should revert
-        require(msg.sender == address(TokenTracker), "ERC777TokensRecipient: Invalid token");
+        require(msg.sender == address(TokenContract), "ERC777TokensRecipient: Invalid token");
 
         // 2 cases
         if(from == projectWalletAddress) {

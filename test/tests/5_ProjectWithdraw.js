@@ -53,10 +53,10 @@ let snapshots = [];
 const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
-let TokenTrackerAddress, ReversibleICOAddress, stageValidation = [], currentBlock, 
+let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenTrackerInstance, 
-    TokenTrackerReceipt, ReversibleICOInstance, ReversibleICOReceipt;
+    StageBlockCount, StagePriceIncrease, EndBlock, TokenContractInstance,
+    TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 async function revertToFreshDeployment() {
 
@@ -80,7 +80,7 @@ async function revertToFreshDeployment() {
         /*
         *   Deploy Token Contract
         */       
-        TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
+        TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
                 arguments: [
@@ -91,10 +91,10 @@ async function revertToFreshDeployment() {
                 gasPrice: helpers.solidity.gwei * 10
             }
         );
-        TokenTrackerReceipt = TokenTrackerInstance.receipt;
-        TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
-        console.log("      TOKEN Gas used for deployment:", TokenTrackerInstance.receipt.gasUsed);
-        console.log("      Contract Address:", TokenTrackerAddress);
+        TokenContractReceipt = TokenContractInstance.receipt;
+        TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+        console.log("      TOKEN Gas used for deployment:", TokenContractInstance.receipt.gasUsed);
+        console.log("      Contract Address:", TokenContractAddress);
 
         /*
         *   Deploy RICO Contract
@@ -108,7 +108,7 @@ async function revertToFreshDeployment() {
         console.log("      Contract Address:", ReversibleICOAddress);
         console.log("");
 
-        await TokenTrackerInstance.methods.setup(
+        await TokenContractInstance.methods.setup(
             ReversibleICOAddress
         ).send({
             from: holder,  // initial token supply holder
@@ -135,7 +135,7 @@ async function revertToFreshDeployment() {
         EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.addSettings(
-            TokenTrackerAddress,        // address _TokenTrackerAddress
+            TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress
             StartBlock,                 // uint256 _StartBlock
@@ -150,7 +150,7 @@ async function revertToFreshDeployment() {
         });
 
         // transfer tokens to rico
-        await TokenTrackerInstance.methods.send(
+        await TokenContractInstance.methods.send(
             ReversibleICOInstance.receipt.contractAddress,
             RicoSaleSupply,
             ERC777data
@@ -160,7 +160,7 @@ async function revertToFreshDeployment() {
         });
 
         expect(
-            await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+            await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
         
         // create snapshot
@@ -170,8 +170,8 @@ async function revertToFreshDeployment() {
     }
 
     // reinitialize instances so revert works properly.
-    TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
-    TokenTrackerInstance.receipt = TokenTrackerReceipt;
+    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+    TokenContractInstance.receipt = TokenContractReceipt;
     ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
 
@@ -181,13 +181,13 @@ async function revertToFreshDeployment() {
     ).to.be.bignumber.equal( new helpers.BN(0) );
 
     expect(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
         await ReversibleICOInstance.methods.TokenSupply().call()
     ).to.be.equal(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     );
 };
 
@@ -411,11 +411,11 @@ describe("ProjectWithdraw Testing", function () {
                         // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 2 );
                         
                         const ReturnTokenAmount = new BN(
-                            await TokenTrackerInstance.methods.balanceOf(participant_1).call()
+                            await TokenContractInstance.methods.balanceOf(participant_1).call()
                         );
                         
                         // send full token balance back to rico
-                        let withdrawTx = await TokenTrackerInstance.methods.send(
+                        let withdrawTx = await TokenContractInstance.methods.send(
                             ReversibleICOInstance.receipt.contractAddress,
                             ReturnTokenAmount.toString(),
                             ERC777data
@@ -520,7 +520,7 @@ describe("ProjectWithdraw Testing", function () {
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0 
@@ -531,17 +531,17 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
 
                     const ParticipantTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     const ParticipantLockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     
                     // locked + unlocked = balance
@@ -557,7 +557,7 @@ describe("ProjectWithdraw Testing", function () {
                     );
 
                     // send full token balance back to rico
-                    let withdrawTx = await TokenTrackerInstance.methods.send(
+                    let withdrawTx = await TokenContractInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
                         ReturnTokenAmount.toString(),
                         ERC777data
@@ -571,16 +571,16 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
                     const ParticipantTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantUnlockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
@@ -638,11 +638,11 @@ describe("ProjectWithdraw Testing", function () {
                     const TestParticipantAddress = participant_1;
                     const ShouldHaveLockedAmount = new BN("0");
                     const ReturnTokenAmount = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0 
@@ -653,17 +653,17 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
 
                     const ParticipantTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     const ParticipantLockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     
                     // locked + unlocked = balance
@@ -679,7 +679,7 @@ describe("ProjectWithdraw Testing", function () {
                     );
 
                     // send full token balance back to rico
-                    let withdrawTx = await TokenTrackerInstance.methods.send(
+                    let withdrawTx = await TokenContractInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
                         ReturnTokenAmount.toString(),
                         ERC777data
@@ -693,16 +693,16 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
                     const ParticipantTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantUnlockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
@@ -762,10 +762,10 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
                     const ParticipantTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     let currentStage = await ReversibleICOInstance.methods.getCurrentStage().call();
@@ -793,10 +793,10 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
                     const ParticipantTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     let txGasCost = new helpers.BN(newContributionTx.gasUsed).mul(
@@ -839,11 +839,11 @@ describe("ProjectWithdraw Testing", function () {
                     const TestParticipantAddress = participant_1;
                     const ShouldHaveLockedAmount = new BN("0");
                     const ReturnTokenAmount = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0 
@@ -854,17 +854,17 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
 
                     const ParticipantTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     const ParticipantLockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     
                     // locked + unlocked = balance
@@ -880,7 +880,7 @@ describe("ProjectWithdraw Testing", function () {
                     );
 
                     // send full token balance back to rico
-                    let withdrawTx = await TokenTrackerInstance.methods.send(
+                    let withdrawTx = await TokenContractInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
                         ReturnTokenAmount.toString(),
                         ERC777data
@@ -894,16 +894,16 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
                     const ContractTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
                     );
                     const ParticipantTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantUnlockedTokenBalanceAfter = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
@@ -954,14 +954,14 @@ describe("ProjectWithdraw Testing", function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0 
@@ -972,7 +972,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     await helpers.assertInvalidOpcode( async () => {
                         // attempt to send full token balance back to rico
-                        let withdrawTx = await TokenTrackerInstance.methods.send(
+                        let withdrawTx = await TokenContractInstance.methods.send(
                             ReversibleICOInstance.receipt.contractAddress,
                             ReturnTokenAmount.toString(),
                             ERC777data
@@ -1047,14 +1047,14 @@ describe("ProjectWithdraw Testing", function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
-                        await TokenTrackerInstance.methods.balanceOf(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
                     const ParticipantLockedTokenBalanceBefore = new BN(
-                        await TokenTrackerInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0 
@@ -1065,7 +1065,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     await helpers.assertInvalidOpcode( async () => {
                         // attempt to send full token balance back to rico
-                        let withdrawTx = await TokenTrackerInstance.methods.send(
+                        let withdrawTx = await TokenContractInstance.methods.send(
                             ReversibleICOInstance.receipt.contractAddress,
                             ReturnTokenAmount.toString(),
                             ERC777data
@@ -1113,7 +1113,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 }
 
 
-async function displayContractStats(contract, TokenTrackerInstance) {
+async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEth().call();
     let receivedETH = await contract.methods.receivedETH().call();
@@ -1122,7 +1122,7 @@ async function displayContractStats(contract, TokenTrackerInstance) {
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
     let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
-    let ricoTokenBalance = await TokenTrackerInstance.methods.balanceOf(contract.receipt.contractAddress).call();
+    let ricoTokenBalance = await TokenContractInstance.methods.balanceOf(contract.receipt.contractAddress).call();
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
