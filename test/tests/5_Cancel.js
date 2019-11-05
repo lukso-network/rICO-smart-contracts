@@ -489,12 +489,12 @@ describe("Cancel Testing", function () {
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.ParticipantTotalsDetails(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(new helpers.BN(
-                        ParticipantStageDetails.received
+                        ParticipantStageDetails.committed_eth
                     ));
                 }
 
                 expect( 
-                    ParticipantByAddress.received.toString()
+                    ParticipantByAddress.committed_eth.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -524,7 +524,7 @@ describe("Cancel Testing", function () {
                 // contribution amount is returned
                 .add(ContributionTotals);
 
-                expect( 
+                expect(
                     ParticipantAccountBalanceAfterCancel.toString()
                 ).to.be.equal(
                     ParticipantAccountBalanceAfterCancelValidation.toString()

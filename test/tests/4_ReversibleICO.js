@@ -920,7 +920,7 @@ describe("ReversibleICO", function () {
                                         currentStage
                                     ).call();
 
-                                    const received = (parseInt(StageDetails.received, 10) );
+                                    const received = (parseInt(StageDetails.committed_eth, 10) );
                                     const returned = (parseInt(StageDetails.returned, 10) );
                                     const accepted = (parseInt(StageDetails.accepted, 10) );
                                     const withdrawn = (parseInt(StageDetails.withdrawn, 10) );
@@ -1026,7 +1026,7 @@ describe("ReversibleICO", function () {
 
                                     let ParticipantByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(TestRejectParticipant).call();
                                     
-                                    const received = (parseInt(ParticipantByAddress.received, 10) );
+                                    const received = (parseInt(ParticipantByAddress.committed_eth, 10) );
                                     const returned = (parseInt(ParticipantByAddress.returned, 10) );
                                     const accepted = (parseInt(ParticipantByAddress.accepted, 10) );
                                     const withdrawn = (parseInt(ParticipantByAddress.withdrawn, 10) );

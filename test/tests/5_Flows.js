@@ -1463,7 +1463,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEth().call();
-    let receivedETH = await contract.methods.receivedETH().call();
+    let committedETH = await contract.methods.committedETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let acceptedETH = await contract.methods.acceptedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
@@ -1473,7 +1473,7 @@ async function displayContractStats(contract, TokenContractInstance) {
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
-    console.log("receivedETH:        ", helpers.utils.toEth(helpers,receivedETH) + " eth");
+    console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
     console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
     console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");

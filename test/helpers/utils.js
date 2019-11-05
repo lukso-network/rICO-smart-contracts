@@ -352,7 +352,7 @@ module.exports = {
     },
     async displayContributions(helpers, contract, participant_address, max = null) {
 
-        let receivedETH = await contract.methods.receivedETH().call();
+        let committedETH = await contract.methods.committedETH().call();
         let returnedETH = await contract.methods.returnedETH().call();
         let acceptedETH = await contract.methods.acceptedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
@@ -366,14 +366,14 @@ module.exports = {
     
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, receivedETH.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
         console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, returnedETH.toString()) +" eth" );
         console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, acceptedETH.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, withdrawnETH.toString()) +" eth" );
         
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.received.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.committed_eth.toString()) +" eth" );
         console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned.toString()) +" eth" );
         console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn.toString()) +" eth" );
@@ -390,7 +390,7 @@ module.exports = {
             const ParticipantStageDetails = await contract.methods.ParticipantTotalsDetails(participant_address, i).call();
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
-            console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.received.toString() ) +" eth" );
+            console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.committed_eth.toString() ) +" eth" );
             console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned.toString() ) +" eth" );
             console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted.toString() ) +" eth" );
             console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn.toString() ) +" eth" );

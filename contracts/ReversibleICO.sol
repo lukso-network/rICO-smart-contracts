@@ -38,7 +38,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     uint256 public TokenSupply = 0;
 
-    uint256 public receivedETH = 0;
+    uint256 public committedETH = 0;
     uint256 public returnedETH = 0;
     uint256 public acceptedETH = 0;
     uint256 public withdrawnETH = 0;
@@ -102,11 +102,13 @@ contract ReversibleICO is IERC777Recipient {
         isInitialized
         isNotFrozen
     {
+        // accept contribution for processing
         if(msg.value >= minContribution) {
-            // accept contribution for processing
             commit();
+
+        // Participant cancels commitment during commit phase (Stage 0),
+        // OR if they've not been whitelisted yet.
         } else {
-            // Participant cancels commitment during Allocation Stage if they've not been whitelisted yet.
             cancel();
         }
     }
@@ -287,15 +289,15 @@ contract ReversibleICO is IERC777Recipient {
 //        bool _type
 //    );
 //
-    struct Contribution {
-        uint256 value;
-        uint256 received;
-        uint256 returned;
-        uint256 block;
-        uint256 tokens;
-        uint8   stageId;
-        uint8   state;
-    }
+//    struct Contribution {
+//        uint256 value;
+//        uint256 received;
+//        uint256 returned;
+//        uint256 block;
+//        uint256 tokens;
+//        uint8   stageId;
+//        uint8   state;
+//    }
 
     enum ApplicationEventTypes {
         NOT_SET,        // will match default value of a mapping result
@@ -331,7 +333,7 @@ contract ReversibleICO is IERC777Recipient {
     );
 
     struct TotalsByStage {
-        uint256 received;		    // msg.value
+        uint256 committed_eth;		    // msg.value
         uint256 returned;		    // received - accepted
         uint256 accepted;		    // lower than msg.value if maxCap already reached
         uint256 withdrawn;		    // withdrawn from current stage
@@ -343,7 +345,7 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool   whitelisted;
         uint16  contributionsCount;
-        uint256 received;	        // msg.value
+        uint256 committed_eth;	        // msg.value
         uint256 returned;	        // received - accepted
         uint256 accepted;	        // lower than msg.value if maxCap already reached
         uint256 withdrawn;	        // cancel() / withdraw()
@@ -374,8 +376,8 @@ contract ReversibleICO is IERC777Recipient {
         isInitialized
         isNotFrozen
     {
-        // add to received value to receivedETH
-        receivedETH += msg.value;
+        // add to received value to committedETH
+        committedETH += msg.value;
 
         // Participant initial state record
         Participant storage ParticipantRecord = ParticipantsByAddress[msg.sender];
@@ -409,11 +411,11 @@ contract ReversibleICO is IERC777Recipient {
 
         // per account
         ParticipantRecord.contributionsCount++;
-        ParticipantRecord.received += _ReceivedValue;
+        ParticipantRecord.committed_eth += _ReceivedValue;
 
         // per stage
         TotalsByStage storage byStage = ParticipantRecord.byStage[currentStage];
-        byStage.received += _ReceivedValue;
+        byStage.committed_eth += _ReceivedValue;
 
         // add contribution tokens to totals
         // these will change when contribution is accepted if we hit max cap
@@ -447,7 +449,7 @@ contract ReversibleICO is IERC777Recipient {
 
             uint256 processedTotals = ParticipantRecord.accepted + ParticipantRecord.returned;
 
-            if(processedTotals < ParticipantRecord.received) {
+            if(processedTotals < ParticipantRecord.committed_eth) {
 
                 // handle the case when we have reserved more tokens than globally available
                 ParticipantRecord.tokens_reserved -= byStage.tokens_reserved;
@@ -455,7 +457,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 uint256 MaxAcceptableValue = availableEth();
 
-                uint256 NewAcceptedValue = byStage.received - byStage.accepted;
+                uint256 NewAcceptedValue = byStage.committed_eth - byStage.accepted;
                 uint256 ReturnValue = 0;
 
                 // if incomming value is higher than what we can accept,
@@ -463,7 +465,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 if(NewAcceptedValue > MaxAcceptableValue) {
                     NewAcceptedValue = MaxAcceptableValue;
-                    ReturnValue = byStage.received - byStage.returned - byStage.accepted -
+                    ReturnValue = byStage.committed_eth - byStage.returned - byStage.accepted -
                                 byStage.withdrawn - NewAcceptedValue;
 
                     // return values
@@ -518,7 +520,7 @@ contract ReversibleICO is IERC777Recipient {
         // but just to make sure take withdrawn and returned into account.
         // to handle the case when whitelister whitelists someone, then rejects
         // them, then whitelists them back
-        uint256 ParticipantAvailableEth = ParticipantRecord.received -
+        uint256 ParticipantAvailableEth = ParticipantRecord.committed_eth -
                                           ParticipantRecord.withdrawn -
                                           ParticipantRecord.returned;
 
@@ -565,14 +567,15 @@ contract ReversibleICO is IERC777Recipient {
         isNotFrozen
     {
         if(ParticipantsByAddress[msg.sender].whitelisted == true) {
-            revert("cancel: Please send tokens back to this contract in order to withdraw ETH.");
+            revert("ETH returned, please send tokens to this contract in order to withdraw your ETH.");
         }
+        // better: require(ParticipantsByAddress[msg.sender].whitelisted == true, "ETH returned, please send tokens to this contract in order to withdraw your ETH.");
 
         if(canCancelBySendingEthToContract(msg.sender)) {
             cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
-        revert("cancel: Participant has no contributions.");
+        revert("Participant has no contributions.");
     }
 
     /*
@@ -613,7 +616,7 @@ contract ReversibleICO is IERC777Recipient {
         returns ( bool )
     {
         Participant storage ParticipantRecord = ParticipantsByAddress[participantAddress];
-        if( ParticipantRecord.received > 0 && ParticipantRecord.received > ParticipantRecord.returned ) {
+        if( ParticipantRecord.committed_eth > 0 && ParticipantRecord.committed_eth > ParticipantRecord.returned ) {
             return true;
         }
         return false;
@@ -935,7 +938,7 @@ contract ReversibleICO is IERC777Recipient {
         address _address,
         uint8 _stageId
     ) public view returns (
-        uint256 received,
+        uint256 committed_eth,
         uint256 returned,
         uint256 accepted,
         uint256 withdrawn,
@@ -948,7 +951,7 @@ contract ReversibleICO is IERC777Recipient {
             .byStage[_stageId];
 
         return (
-            TotalsRecord.received,
+            TotalsRecord.committed_eth,
             TotalsRecord.returned,
             TotalsRecord.accepted,
             TotalsRecord.withdrawn,
