@@ -338,7 +338,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 accepted_eth;		    // lower than msg.value if maxCap already reached
         uint256 withdrawn_eth;		    // withdrawn from current stage
         uint256 reserved_tokens;    // tokens bought in this stage
-        uint256 awarded_tokens;	    // tokens already sent to the participant in this stage
+        uint256 bought_tokens;	    // tokens already sent to the participant in this stage
         uint256 returned_tokens;	// tokens returned by participant to contract
     }
 
@@ -350,7 +350,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 accepted_eth;	        // lower than msg.value if maxCap already reached
         uint256 withdrawn_eth;	        // cancel() / withdraw()
         uint256 reserved_tokens;    // total tokens bought in all stages
-        uint256 awarded_tokens;	    // total tokens already sent to the participant in all stages
+        uint256 bought_tokens;	    // total tokens already sent to the participant in all stages
         uint256 returned_tokens;    // total tokens returned by participant to contract in all stages
         mapping ( uint8 => TotalsByStage ) byStage;
     }
@@ -486,8 +486,8 @@ contract ReversibleICO is IERC777Recipient {
                         NewAcceptedValue, _stageId
                     );
 
-                    byStage.awarded_tokens += newTokenAmount;
-                    ParticipantRecord.awarded_tokens += newTokenAmount;
+                    byStage.bought_tokens += newTokenAmount;
+                    ParticipantRecord.bought_tokens += newTokenAmount;
 
                     // allocate tokens to participant
                     bytes memory data;
@@ -668,7 +668,7 @@ contract ReversibleICO is IERC777Recipient {
 
                     uint256 tokens_in_stage = getLockedFromAmountAtBlock(
                         ParticipantRecord.byStage[stage_id].reserved_tokens +
-                        ParticipantRecord.byStage[stage_id].awarded_tokens,
+                        ParticipantRecord.byStage[stage_id].bought_tokens,
                         currentBlockNumber
                     ) - ParticipantRecord.byStage[stage_id].returned_tokens;
 
@@ -847,7 +847,7 @@ contract ReversibleICO is IERC777Recipient {
 
         return getLockedFromAmountAtBlock(
             ParticipantsByAddress[_address].reserved_tokens +
-            ParticipantsByAddress[_address].awarded_tokens,
+            ParticipantsByAddress[_address].bought_tokens,
             getCurrentBlockNumber()
         ) - ParticipantsByAddress[_address].returned_tokens;
     }
@@ -943,7 +943,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 accepted_eth,
         uint256 withdrawn_eth,
         uint256 reserved_tokens,
-        uint256 awarded_tokens,
+        uint256 bought_tokens,
         uint256 returned_tokens
     ) {
 
@@ -956,7 +956,7 @@ contract ReversibleICO is IERC777Recipient {
             TotalsRecord.accepted_eth,
             TotalsRecord.withdrawn_eth,
             TotalsRecord.reserved_tokens,
-            TotalsRecord.awarded_tokens,
+            TotalsRecord.bought_tokens,
             TotalsRecord.returned_tokens
         );
     }

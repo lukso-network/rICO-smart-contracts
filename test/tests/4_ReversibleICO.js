@@ -870,7 +870,7 @@ describe("ReversibleICO", function () {
                                 for(let i = 0; i < StageCount; i++) {
                                     const ParticipantStageDetails = await this.ReversibleICO.methods.ParticipantTotalsDetails(TestAcceptParticipant, i).call();
                                     TokenAmount = TokenAmount.add(new helpers.BN(
-                                        ParticipantStageDetails.awarded_tokens
+                                        ParticipantStageDetails.bought_tokens
                                     ));
                                 }
 
@@ -1151,7 +1151,7 @@ describe("ReversibleICO", function () {
                 const stageId = 0;
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
                 const ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_6).call();
-                const ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                const ContractContributionTokens = ParticipantsByAddress.bought_tokens;
     
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
                 // make sure we return full purchased amount.
@@ -1186,7 +1186,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
     
                 const ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                const ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                const ContractContributionTokens = ParticipantsByAddress.bought_tokens;
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
@@ -1208,7 +1208,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
     
                 const ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                const ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                const ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1225,7 +1225,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
     
                 const ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                const ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                const ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1243,7 +1243,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
     
                 const ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                const ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                const ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1261,7 +1261,7 @@ describe("ReversibleICO", function () {
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true);
     
                 let ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                let ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                let ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1280,7 +1280,7 @@ describe("ReversibleICO", function () {
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1);
     
                 let ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                let ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                let ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1294,7 +1294,7 @@ describe("ReversibleICO", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1000);
     
                 ParticipantsByAddress = await this.ReversibleICO.methods.ParticipantsByAddress(participant_1).call();
-                ContractContributionTokens = ParticipantsByAddress.awarded_tokens;
+                ContractContributionTokens = ParticipantsByAddress.bought_tokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
     
                 getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();

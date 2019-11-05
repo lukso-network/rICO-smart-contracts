@@ -378,7 +378,7 @@ module.exports = {
         console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted_eth.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn_eth.toString()) +" eth" );
         console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.reserved_tokens.toString()) +" tokens" );
-        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.awarded_tokens.toString()) +" tokens" );
+        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.bought_tokens.toString()) +" tokens" );
         console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned_tokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
 
@@ -395,7 +395,7 @@ module.exports = {
             console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted_eth.toString() ) +" eth" );
             console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn_eth.toString() ) +" eth" );
             console.log("reserved_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.reserved_tokens.toString() ) +" tokens" );
-            console.log("awarded_tokens:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.awarded_tokens.toString() ) +" tokens" );
+            console.log("bought_tokens:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.bought_tokens.toString() ) +" tokens" );
             console.log("returned_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned_tokens.toString() ) +" tokens" );
         }
     
@@ -452,7 +452,7 @@ module.exports = {
 
                     let tokenAmount = new helpers.BN(ParticipantRecordbyStage.reserved_tokens)
                         .add(
-                            new helpers.BN(ParticipantRecordbyStage.awarded_tokens)
+                            new helpers.BN(ParticipantRecordbyStage.bought_tokens)
                         )
 
                     let tokens_in_stage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
