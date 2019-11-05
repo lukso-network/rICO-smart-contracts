@@ -691,7 +691,7 @@ describe("Flow Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    // if in allocation stage (0) then unlocked need to be 0 
+                    // if in commit stage (0) then unlocked need to be 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);

@@ -299,10 +299,10 @@ module.exports = {
 
         tokenAmount = new helpers.BN(tokenAmount);
         if(currentBlock < BuyPhaseStartBlock) {
-            // allocation phase
+            // commit phase
             return tokenAmount;
         } else if(currentBlock < BuyPhaseEndBlock) {
-            // distribution phase
+            // buy  phase
             const precision = 20;
             const unlocked = tokenAmount.mul(
                 new helpers.BN(
@@ -374,12 +374,12 @@ module.exports = {
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
         console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.committed_eth.toString()) +" eth" );
-        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned.toString()) +" eth" );
-        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted.toString()) +" eth" );
-        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn.toString()) +" eth" );
-        console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_reserved.toString()) +" tokens" );
-        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_awarded.toString()) +" tokens" );
-        console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_returned.toString()) +" tokens" );
+        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned_eth.toString()) +" eth" );
+        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted_eth.toString()) +" eth" );
+        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn_eth.toString()) +" eth" );
+        console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.reserved_tokens.toString()) +" tokens" );
+        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.awarded_tokens.toString()) +" tokens" );
+        console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned_tokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
 
         if(max > 0) {
@@ -391,12 +391,12 @@ module.exports = {
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
             console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.committed_eth.toString() ) +" eth" );
-            console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned.toString() ) +" eth" );
-            console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted.toString() ) +" eth" );
-            console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn.toString() ) +" eth" );
-            console.log("tokens_reserved:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_reserved.toString() ) +" tokens" );
-            console.log("tokens_awarded:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_awarded.toString() ) +" tokens" );
-            console.log("tokens_returned:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_returned.toString() ) +" tokens" );
+            console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned_eth.toString() ) +" eth" );
+            console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted_eth.toString() ) +" eth" );
+            console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn_eth.toString() ) +" eth" );
+            console.log("reserved_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.reserved_tokens.toString() ) +" tokens" );
+            console.log("awarded_tokens:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.awarded_tokens.toString() ) +" tokens" );
+            console.log("returned_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned_tokens.toString() ) +" tokens" );
         }
     
         console.log("\n");
@@ -450,15 +450,15 @@ module.exports = {
                     let ParticipantRecordbyStage = await contract.methods.ParticipantTotalsDetails(_from, stage_id).call();
                    
 
-                    let tokenAmount = new helpers.BN(ParticipantRecordbyStage.tokens_reserved)
+                    let tokenAmount = new helpers.BN(ParticipantRecordbyStage.reserved_tokens)
                         .add(
-                            new helpers.BN(ParticipantRecordbyStage.tokens_awarded)
+                            new helpers.BN(ParticipantRecordbyStage.awarded_tokens)
                         )
 
                     let tokens_in_stage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
                         helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount
                     ).sub( 
-                        new helpers.BN(ParticipantRecordbyStage.tokens_returned.toString()) 
+                        new helpers.BN(ParticipantRecordbyStage.returned_tokens.toString())
                     );
                     
                     // only try to process stages that actually have tokens in them.
