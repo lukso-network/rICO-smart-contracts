@@ -387,7 +387,7 @@ module.exports = {
         }
     
         for(let i = 0; i < StageCount; i++) {
-            const ParticipantStageDetails = await contract.methods.ParticipantTotalsDetails(participant_address, i).call();
+            const ParticipantStageDetails = await contract.methods.getParticipantDetailsByStage(participant_address, i).call();
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
             console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.committed_eth.toString() ) +" eth" );
@@ -447,7 +447,7 @@ module.exports = {
                 for( let i = currentStageNumber; i >= 0; i-- ) {
                     let stage_id = i;
 
-                    let ParticipantRecordbyStage = await contract.methods.ParticipantTotalsDetails(_from, stage_id).call();
+                    let ParticipantRecordbyStage = await contract.methods.getParticipantDetailsByStage(_from, stage_id).call();
                    
 
                     let tokenAmount = new helpers.BN(ParticipantRecordbyStage.reserved_tokens)

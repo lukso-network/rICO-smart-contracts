@@ -26,6 +26,14 @@ contract ReversibleICO is IERC777Recipient {
     IERC777 public TokenContract;
 
     /*
+    *   Contract States
+    */
+    bool public initialized = false;
+    bool public frozen = false;
+    bool public started = false;
+    bool public ended = false;
+
+    /*
     *   Addresses
     */
     address public deployerAddress;
@@ -62,10 +70,13 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public BuyPhaseStartBlock;
     uint256 public BuyPhaseEndBlock;
     uint256 public BuyPhaseBlockCount;
+
     uint256 public StageBlockCount;
 
     /*
-    *   Buy phase (Stage 1-n)
+    *   Stages
+    *   Stage 0 = commit phase
+    *   Stage 1-n = buy phase
     */
     struct Stage {
         uint256 start_block;
@@ -75,14 +86,74 @@ contract ReversibleICO is IERC777Recipient {
 
     mapping ( uint8 => Stage ) public Stages;
     uint8 public StageCount = 0;
-
+    
     /*
-    *   Contract States
+    * Participants
     */
-    bool public initialized = false;
-    bool public frozen = false;
-    bool public started = false;
-    bool public ended = false;
+
+    struct Participant {
+        bool   whitelisted;
+        uint16  contributionsCount;
+        uint256 committed_eth;	        // msg.value
+        uint256 returned_eth;	        // committed_eth - accepted_eth
+        uint256 accepted_eth;	        // lower than msg.value if maxCap already reached
+        uint256 withdrawn_eth;	        // cancel() / withdraw()
+        uint256 reserved_tokens;        // total tokens bought in all stages
+        uint256 bought_tokens;	        // total tokens already sent to the participant in all stages
+        uint256 returned_tokens;        // total tokens returned by participant to contract in all stages
+        mapping ( uint8 => ParticipantDetailsByStage ) byStage;
+    }
+
+    mapping ( address => Participant ) public ParticipantsByAddress;
+    mapping ( uint256 => address ) public ParticipantsById;
+    uint256 public ParticipantCount = 0;
+
+    struct ParticipantDetailsByStage {
+        uint256 committed_eth;		    // msg.value
+        uint256 returned_eth;		    // committed_eth - accepted_eth
+        uint256 accepted_eth;		    // lower than msg.value if maxCap already reached
+        uint256 withdrawn_eth;		    // withdrawn from current stage
+        uint256 reserved_tokens;        // tokens bought in this stage
+        uint256 bought_tokens;	        // tokens already sent to the participant in this stage
+        uint256 returned_tokens;	    // tokens returned by participant to contract
+    }
+    
+    /*
+    * Events
+    */
+
+    enum ApplicationEventTypes {
+        NOT_SET,        // will match default value of a mapping result
+        CONTRIBUTION_NEW,
+        CONTRIBUTION_CANCEL,
+        PARTICIPANT_CANCEL,
+        WHITELIST_CANCEL,
+        WHITELIST_ACCEPT,
+        COMMIT_ACCEPT,
+        PROJECT_WITHDRAW
+    }
+
+    event ApplicationEvent (
+        uint8 indexed _type,
+        uint16 indexed _id,
+        address indexed _from,
+        uint256 _value
+    );
+
+    enum TransferTypes {
+        NOT_SET,
+        AUTOMATIC_RETURN,
+        WHITELIST_CANCEL,
+        PARTICIPANT_CANCEL,
+        PARTICIPANT_WITHDRAW,
+        PROJECT_WITHDRAW
+    }
+
+    event TransferEvent (
+        uint8 indexed _type,
+        address indexed _to,
+        uint256 indexed _value
+    );
 
 
     // ------------------------------------------------------------------------------------------------
@@ -92,25 +163,6 @@ contract ReversibleICO is IERC777Recipient {
     constructor() public {
         deployerAddress = msg.sender;
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
-    }
-
-
-    // FALLBACK function
-    function ()
-        external
-        payable
-        isInitialized
-        isNotFrozen
-    {
-        // accept contribution for processing
-        if(msg.value >= minContribution) {
-            commit();
-
-        // Participant cancels commitment during commit phase (Stage 0),
-        // OR if they've not been whitelisted yet.
-        } else {
-            cancel();
-        }
     }
 
 
@@ -180,10 +232,105 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
+    * FALLBACK function
+    * Allows for ETH contributions, and canceling of pending contributions
+    */
+    function ()
+    external
+    payable
+    isInitialized
+    isNotFrozen
+    {
+        // accept contribution for processing
+        if(msg.value >= minContribution) {
+            commit();
+
+            // Participant cancels commitment during commit phase (Stage 0),
+            // OR if they've not been whitelisted yet.
+        } else {
+            cancel();
+        }
+    }
+
+    /*
+    * ERC777TokensRecipient method for receiving tokens
+    */
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    )
+    external
+    isInitialized
+        // isNotFrozen TODO??
+        // requireNotEnded
+    {
+        // Rico should only receive tokens from the Rico Token Tracker.
+        // any other transaction should revert
+        require(msg.sender == address(TokenContract), "ERC777TokensRecipient: Invalid token");
+
+        // 2 cases
+        if(from == projectWalletAddress) {
+            // 1 - project wallet adds tokens to the sale
+            // Save the token amount allocated to this address
+            TokenSupply += amount;
+            return;
+        } else {
+
+            // 2 - rico contributor sends tokens back
+            withdraw(from, amount);
+        }
+
+    }
+
+    /*
+    *   Project Withdraw
+    */
+    function projectWithdraw(uint256 ethAmount)
+    external
+    isInitialized
+    {
+        require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
+
+        uint256 unlocked = getProjectAvailableEth();
+        require(ethAmount <= unlocked, "projectWithdraw: Specified ETH value too large.");
+
+        projectWithdrawCount++;
+        projectETHWithdrawn += ethAmount;
+
+
+        emit ApplicationEvent(
+            uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
+            uint16(projectWithdrawCount),
+            projectWalletAddress,
+            ethAmount
+        );
+
+        emit TransferEvent(uint8(TransferTypes.PROJECT_WITHDRAW), projectWalletAddress, ethAmount);
+        address(uint160(projectWalletAddress)).transfer(ethAmount);
+    }
+
+    function getProjectAvailableEth() public view returns (uint256 _amount) {
+        uint256 available = acceptedETH.sub(withdrawnETH);
+        uint256 unlocked = available.mul(
+            getCurrentUnlockRatio()
+        ).div(10 ** 20);
+        return unlocked.sub(projectETHWithdrawn).add(projectETHAllocated);
+    }
+
+
+    /*
+    * Helpers
+    */
+
+    /*
         Do we want to normalise for gas usage ?!
         ( ie. add useless computation just to have the same gas used at all times ? )
 
-        22023 - Case 1: lower than commit end
+        22023 - Case 1: lower than commit phase end
         22797 - Case 2: lower than stage[X].end_block
         22813 - Case 3: exactly at stage[X].end_block
 
@@ -270,94 +417,9 @@ contract ReversibleICO is IERC777Recipient {
         );
     }
 
-    /*
-    *   Participants
-    */
-//
-//    event ExitEvent (
-//        address indexed _participant,
-//        uint256 indexed _token_amount,
-//        uint256 indexed _eth_amount,
-//        uint8 _type,
-//        bool is_partial
-//    );
-//
-//    event DebugEvent (
-//        uint256 indexed _id,
-//        uint256 indexed a,
-//        uint256 indexed b,
-//        bool _type
-//    );
-//
-//    struct Contribution {
-//        uint256 value;
-//        uint256 received;
-//        uint256 returned;
-//        uint256 block;
-//        uint256 tokens;
-//        uint8   stageId;
-//        uint8   state;
-//    }
 
-    enum ApplicationEventTypes {
-        NOT_SET,        // will match default value of a mapping result
-        CONTRIBUTION_NEW,
-        CONTRIBUTION_CANCEL,
-		PARTICIPANT_CANCEL,
-		WHITELIST_CANCEL,
-		WHITELIST_ACCEPT,
-        COMMIT_ACCEPT,
-        PROJECT_WITHDRAW
-    }
+    // ------------------------------------------------------------------------------------------------
 
-    event ApplicationEvent (
-        uint8 indexed _type,
-        uint16 indexed _id,
-        address indexed _from,
-        uint256 _value
-    );
-
-    enum TransferTypes {
-        NOT_SET,
-        AUTOMATIC_RETURN,
-        WHITELIST_CANCEL,
-        PARTICIPANT_CANCEL,
-        PARTICIPANT_WITHDRAW,
-        PROJECT_WITHDRAW
-    }
-
-    event TransferEvent (
-        uint8 indexed _type,
-        address indexed _to,
-        uint256 indexed _value
-    );
-
-    struct TotalsByStage {
-        uint256 committed_eth;		    // msg.value
-        uint256 returned_eth;		    // received - accepted_eth
-        uint256 accepted_eth;		    // lower than msg.value if maxCap already reached
-        uint256 withdrawn_eth;		    // withdrawn from current stage
-        uint256 reserved_tokens;    // tokens bought in this stage
-        uint256 bought_tokens;	    // tokens already sent to the participant in this stage
-        uint256 returned_tokens;	// tokens returned by participant to contract
-    }
-
-    struct Participant {
-        bool   whitelisted;
-        uint16  contributionsCount;
-        uint256 committed_eth;	        // msg.value
-        uint256 returned_eth;	        // committed_eth - accepted_eth
-        uint256 accepted_eth;	        // lower than msg.value if maxCap already reached
-        uint256 withdrawn_eth;	        // cancel() / withdraw()
-        uint256 reserved_tokens;    // total tokens bought in all stages
-        uint256 bought_tokens;	    // total tokens already sent to the participant in all stages
-        uint256 returned_tokens;    // total tokens returned by participant to contract in all stages
-        mapping ( uint8 => TotalsByStage ) byStage;
-    }
-
-    mapping ( address => Participant ) public ParticipantsByAddress;
-    mapping ( uint256 => address ) public ParticipantsById;
-    uint256 public ParticipantCount = 0;
 
     /*
     *   Recalculate Funds allocation
@@ -414,7 +476,7 @@ contract ReversibleICO is IERC777Recipient {
         ParticipantRecord.committed_eth += _ReceivedValue;
 
         // per stage
-        TotalsByStage storage byStage = ParticipantRecord.byStage[currentStage];
+        ParticipantDetailsByStage storage byStage = ParticipantRecord.byStage[currentStage];
         byStage.committed_eth += _ReceivedValue;
 
         // add contribution tokens to totals
@@ -445,7 +507,7 @@ contract ReversibleICO is IERC777Recipient {
         for(uint8 i = 0; i <= currentStage; i++) {
             uint8 _stageId = i;
 
-            TotalsByStage storage byStage = ParticipantRecord.byStage[_stageId];
+            ParticipantDetailsByStage storage byStage = ParticipantRecord.byStage[_stageId];
 
             uint256 processedTotals = ParticipantRecord.accepted_eth + ParticipantRecord.returned_eth;
 
@@ -619,138 +681,9 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
-    /*
-    *   Withdraw ( ERC777TokensRecipient method )
-    */
-    function withdraw(address _from, uint256 _returned_token_amount) internal {
-
-        // Whitelisted contributor sends tokens back to the RICO contract
-        // - unlinke cancel() method, this allows variable amounts.
-        // - latest contributions get returned first.
-
-        Participant storage ParticipantRecord = ParticipantsByAddress[_from];
-
-        // this is needed otherwise participants that can call cancel() can bypass
-        if(ParticipantRecord.whitelisted == true) {
-
-            uint256 currentBlockNumber = getCurrentBlockNumber();
-
-            // Contributors can send more tokens than they have locked,
-            // thus make sure we only try to return for said amount
-            uint256 RemainingTokenAmount = _returned_token_amount;
-            uint256 maxLocked = getLockedTokenAmount(_from);
-            uint256 ReturnTokenAmount = 0;
-
-            if(RemainingTokenAmount > maxLocked) {
-                ReturnTokenAmount = RemainingTokenAmount - maxLocked;
-                RemainingTokenAmount = maxLocked;
-            }
-
-            if(RemainingTokenAmount > 0) {
-
-                // go through stages starting with current stage
-                // take stage token amount and remove from "amount participant wants to return"
-                // get eth amount in said stage for that token amount
-                // set stage tokens to 0
-                // if stage tokens < remaining tokens to process, just sub remaining from stage
-                // this way we can receive tokens in current stage / later stages and process them again.
-
-                uint256 ReturnETHAmount = 0;
-
-                uint8 currentStageNumber = getCurrentStage();
-                for( uint8 stage_id = currentStageNumber; stage_id >= 0; stage_id-- ) {
-
-                    // calculate how many tokens are actually locked in this stage
-                    // and only use those for return.
-
-                    uint256 tokens_in_stage = getLockedFromAmountAtBlock(
-                        ParticipantRecord.byStage[stage_id].reserved_tokens +
-                        ParticipantRecord.byStage[stage_id].bought_tokens,
-                        currentBlockNumber
-                    ) - ParticipantRecord.byStage[stage_id].returned_tokens;
-
-                    // only try to process stages that actually have tokens in them.
-                    if(tokens_in_stage > 0) {
-
-                        if (RemainingTokenAmount < tokens_in_stage ) {
-                            tokens_in_stage = RemainingTokenAmount;
-                        }
-                        uint256 CurrentETHAmount = getEthAmountForTokensAtStage(tokens_in_stage, stage_id);
-
-                        ParticipantRecord.returned_tokens += tokens_in_stage;
-                        ParticipantRecord.byStage[stage_id].returned_tokens += tokens_in_stage;
-
-                        // get eth for tokens in current stage
-                        ReturnETHAmount = ReturnETHAmount.add(CurrentETHAmount);
-                        ParticipantRecord.byStage[stage_id].withdrawn_eth += CurrentETHAmount;
-
-                        // remove processed token amount from requested amount
-                        RemainingTokenAmount = RemainingTokenAmount.sub(tokens_in_stage);
-
-                        // break loop if remaining amount = 0
-                        if(RemainingTokenAmount == 0) {
-                            break;
-                        }
-                    }
-                }
-
-                if(ReturnTokenAmount > 0) {
-                    // return overflow tokens received
-
-                    // allocate tokens to participant
-                    bytes memory data;
-                    // solium-disable-next-line security/no-send
-                    TokenContract.send(_from, ReturnTokenAmount, data);
-                }
-
-                // Adjust globals
-                withdrawnETH += ReturnETHAmount;
-
-                // allocate remaining eth to project directly
-                // ProjectETHAllocated
-
-                ParticipantRecord.withdrawn_eth += ReturnETHAmount;
-                address(uint160(_from)).transfer(ReturnETHAmount);
-                emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, ReturnETHAmount);
-                return;
-            }
-        }
-
-        // If address is not Whitelisted a call to this results in a revert
-        revert("withdraw: Withdraw not possible. Participant has no locked tokens.");
-    }
 
 
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    )
-        external
-        isInitialized
-        // isNotFrozen TODO??
-        // requireNotEnded
-    {
-        // Rico should only receive tokens from the Rico Token Tracker.
-        // any other transaction should revert
-        require(msg.sender == address(TokenContract), "ERC777TokensRecipient: Invalid token");
-
-        // 2 cases
-        if(from == projectWalletAddress) {
-            // 1 - project wallet adds tokens to the sale
-            // Save the token amount allocated to this address
-            TokenSupply += amount;
-            return;
-        } else {
-
-            // 2 - rico contributor sends tokens back
-            withdraw(from, amount);
-        }
-
-    }
+    // ------------------------------------------------------------------------------------------------
 
 
     /*
@@ -890,40 +823,105 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
-
     /*
-    *   Project Withdraw
+    *   Withdraw
     */
-    function projectWithdraw(uint256 ethAmount)
-        public
-        isInitialized
-    {
-        require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
+    function withdraw(address _from, uint256 _returned_token_amount) internal {
 
-        uint256 unlocked = getProjectAvailableEth();
-        require(ethAmount <= unlocked, "projectWithdraw: Specified ETH value too large.");
+        // Whitelisted contributor sends tokens back to the RICO contract
+        // - unlinke cancel() method, this allows variable amounts.
+        // - latest contributions get returned first.
 
-        projectWithdrawCount++;
-        projectETHWithdrawn += ethAmount;
+        Participant storage ParticipantRecord = ParticipantsByAddress[_from];
 
+        // this is needed otherwise participants that can call cancel() can bypass
+        if(ParticipantRecord.whitelisted == true) {
 
-        emit ApplicationEvent(
-            uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
-            uint16(projectWithdrawCount),
-            projectWalletAddress,
-            ethAmount
-        );
+            uint256 currentBlockNumber = getCurrentBlockNumber();
 
-        emit TransferEvent(uint8(TransferTypes.PROJECT_WITHDRAW), projectWalletAddress, ethAmount);
-        address(uint160(projectWalletAddress)).transfer(ethAmount);
-    }
+            // Contributors can send more tokens than they have locked,
+            // thus make sure we only try to return for said amount
+            uint256 RemainingTokenAmount = _returned_token_amount;
+            uint256 maxLocked = getLockedTokenAmount(_from);
+            uint256 ReturnTokenAmount = 0;
 
-    function getProjectAvailableEth() public view returns (uint256 _amount) {
-        uint256 available = acceptedETH.sub(withdrawnETH);
-        uint256 unlocked = available.mul(
-            getCurrentUnlockRatio()
-        ).div(10 ** 20);
-        return unlocked.sub(projectETHWithdrawn).add(projectETHAllocated);
+            if(RemainingTokenAmount > maxLocked) {
+                ReturnTokenAmount = RemainingTokenAmount - maxLocked;
+                RemainingTokenAmount = maxLocked;
+            }
+
+            if(RemainingTokenAmount > 0) {
+
+                // go through stages starting with current stage
+                // take stage token amount and remove from "amount participant wants to return"
+                // get eth amount in said stage for that token amount
+                // set stage tokens to 0
+                // if stage tokens < remaining tokens to process, just sub remaining from stage
+                // this way we can receive tokens in current stage / later stages and process them again.
+
+                uint256 ReturnETHAmount = 0;
+
+                uint8 currentStageNumber = getCurrentStage();
+                for( uint8 stage_id = currentStageNumber; stage_id >= 0; stage_id-- ) {
+
+                    // calculate how many tokens are actually locked in this stage
+                    // and only use those for return.
+
+                    uint256 tokens_in_stage = getLockedFromAmountAtBlock(
+                        ParticipantRecord.byStage[stage_id].reserved_tokens +
+                        ParticipantRecord.byStage[stage_id].bought_tokens,
+                        currentBlockNumber
+                    ) - ParticipantRecord.byStage[stage_id].returned_tokens;
+
+                    // only try to process stages that actually have tokens in them.
+                    if(tokens_in_stage > 0) {
+
+                        if (RemainingTokenAmount < tokens_in_stage ) {
+                            tokens_in_stage = RemainingTokenAmount;
+                        }
+                        uint256 CurrentETHAmount = getEthAmountForTokensAtStage(tokens_in_stage, stage_id);
+
+                        ParticipantRecord.returned_tokens += tokens_in_stage;
+                        ParticipantRecord.byStage[stage_id].returned_tokens += tokens_in_stage;
+
+                        // get eth for tokens in current stage
+                        ReturnETHAmount = ReturnETHAmount.add(CurrentETHAmount);
+                        ParticipantRecord.byStage[stage_id].withdrawn_eth += CurrentETHAmount;
+
+                        // remove processed token amount from requested amount
+                        RemainingTokenAmount = RemainingTokenAmount.sub(tokens_in_stage);
+
+                        // break loop if remaining amount = 0
+                        if(RemainingTokenAmount == 0) {
+                            break;
+                        }
+                    }
+                }
+
+                if(ReturnTokenAmount > 0) {
+                    // return overflow tokens received
+
+                    // allocate tokens to participant
+                    bytes memory data;
+                    // solium-disable-next-line security/no-send
+                    TokenContract.send(_from, ReturnTokenAmount, data);
+                }
+
+                // Adjust globals
+                withdrawnETH += ReturnETHAmount;
+
+                // allocate remaining eth to project directly
+                // ProjectETHAllocated
+
+                ParticipantRecord.withdrawn_eth += ReturnETHAmount;
+                address(uint160(_from)).transfer(ReturnETHAmount);
+                emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, ReturnETHAmount);
+                return;
+            }
+        }
+
+        // If address is not Whitelisted a call to this results in a revert
+        revert("withdraw: Withdraw not possible. Participant has no locked tokens.");
     }
 
     /*
@@ -931,7 +929,7 @@ contract ReversibleICO is IERC777Recipient {
     */
 
     // direct call: ParticipantsByAddress[_address].byStage[_stageId]._accepted
-    function ParticipantTotalsDetails(
+    function getParticipantDetailsByStage(
         address _address,
         uint8 _stageId
     ) public view returns (
@@ -944,7 +942,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 returned_tokens
     ) {
 
-        TotalsByStage storage TotalsRecord = ParticipantsByAddress[_address]
+        ParticipantDetailsByStage storage TotalsRecord = ParticipantsByAddress[_address]
             .byStage[_stageId];
 
         return (
@@ -982,26 +980,6 @@ contract ReversibleICO is IERC777Recipient {
         require(initialized == false, "Contract is already initialized.");
         _;
     }
-
-//    modifier requireRunning() {
-//        require(ended == true, "requireRunning: RICO must be running");
-//        _;
-//    }
-//
-//    modifier requireNotRunning() {
-//        require(ended == false, "requireRunning: RICO must not be running");
-//        _;
-//    }
-
-//    modifier requireEnded() {
-//        require(ended == true, "requireEnded: RICO period must have ended");
-//        _;
-//    }
-//
-//    modifier requireNotEnded() {
-//        require(ended == false, "requireEnded: RICO period must not have ended");
-//        _;
-//    }
 
     modifier isFrozen() {
         require(frozen == true, "Contract is frozen.");

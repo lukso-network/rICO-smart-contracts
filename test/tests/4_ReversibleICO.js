@@ -868,7 +868,7 @@ describe("ReversibleICO", function () {
                                 let TokenAmount = new helpers.BN();
 
                                 for(let i = 0; i < StageCount; i++) {
-                                    const ParticipantStageDetails = await this.ReversibleICO.methods.ParticipantTotalsDetails(TestAcceptParticipant, i).call();
+                                    const ParticipantStageDetails = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestAcceptParticipant, i).call();
                                     TokenAmount = TokenAmount.add(new helpers.BN(
                                         ParticipantStageDetails.bought_tokens
                                     ));
@@ -914,7 +914,7 @@ describe("ReversibleICO", function () {
                                 it("Last Contribution is processed and has valid parameters", async function () {
 
                                     let currentStage = await this.ReversibleICO.methods.getCurrentStage().call();
-                                    const StageDetails = await this.ReversibleICO.methods.ParticipantTotalsDetails(
+                                    const StageDetails = await this.ReversibleICO.methods.getParticipantDetailsByStage(
                                         TestAcceptParticipant,
                                         // indexed from 0, thus inital count will match last id
                                         currentStage
