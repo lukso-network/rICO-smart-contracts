@@ -136,7 +136,7 @@ async function revertToFreshDeployment() {
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
 
-        await ReversibleICOInstance.methods.addSettings(
+        await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress

@@ -134,7 +134,7 @@ async function revertToFreshDeployment() {
 
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-        await ReversibleICOInstance.methods.addSettings(
+        await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress
@@ -497,8 +497,8 @@ describe("ProjectWithdraw Testing", function () {
 
                 });
 
-                it("getCancelModeStates() returns (false, true)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                it("getCancelMode() returns (false, true)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
@@ -1037,8 +1037,8 @@ describe("ProjectWithdraw Testing", function () {
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
                 });
 
-                it("getCancelModeStates() returns (false, false)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                it("getCancelMode() returns (false, false)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -1115,7 +1115,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
 async function displayContractStats(contract, TokenContractInstance) {
 
-    let maxEth = await contract.methods.availableEth().call();
+    let maxEth = await contract.methods.availableEthAtStage().call();
     let committedETH = await contract.methods.committedETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let acceptedETH = await contract.methods.acceptedETH().call();

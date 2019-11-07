@@ -126,7 +126,7 @@ describe("ReversibleICO", function () {
 
     });
 
-    describe("Stage 2 - Initialisation - addSettings()", function () {
+    describe("Stage 2 - Initialisation - init()", function () {
 
         before(async function () {
 
@@ -167,7 +167,7 @@ describe("ReversibleICO", function () {
                 lastStageBlockEnd = end_block;
             }
 
-            await this.ReversibleICO.methods.addSettings(
+            await this.ReversibleICO.methods.init(
                 TokenContractAddress,        // address _TokenContractAddress
                 whitelistControllerAddress, // address _whitelistControllerAddress
                 projectWalletAddress,       // address _projectWalletAddress

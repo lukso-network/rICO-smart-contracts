@@ -146,7 +146,7 @@ async function doFreshDeployment(name) {
         lastStageBlockEnd = end_block;
     }
 
-    await ReversibleICOInstance.methods.addSettings(
+    await ReversibleICOInstance.methods.init(
         TokenContractAddress,        // address _TokenContractAddress
         whitelistControllerAddress, // address _whitelistControllerAddress
         projectWalletAddress,          // address _projectWalletAddress

@@ -334,7 +334,7 @@ describe("Gnosis Safe Integration", function () {
                     lastStageBlockEnd = end_block;
                 }
 
-                let settingsData = this.Rico.methods.addSettings(
+                let settingsData = this.Rico.methods.init(
                     TokenContractAddress,            // address _TokenContractAddress
                     whitelistControllerAddress,     // address _whitelistControllerAddress
                     projectWalletAddress,           // address _projectWalletAddress

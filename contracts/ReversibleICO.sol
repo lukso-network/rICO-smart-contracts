@@ -114,7 +114,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
 
-    function addSettings(
+    function init(
         address _TokenContractAddress,
         address _whitelistControllerAddress,
         address _projectWalletAddress,
@@ -362,9 +362,9 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Recalculate Funds allocation
     */
-    function availableEth() public view returns (uint256) {
+    function availableEthAtStage(uint8 _stage) public view returns (uint256) {
         return TokenContract.balanceOf(address(this)).mul(
-            Stages[getCurrentStage()].token_price
+            Stages[_stage].token_price
         ).div( 10 ** 18 );
     }
 
@@ -455,7 +455,7 @@ contract ReversibleICO is IERC777Recipient {
                 ParticipantRecord.reserved_tokens -= byStage.reserved_tokens;
                 byStage.reserved_tokens = 0;
 
-                uint256 MaxAcceptableValue = availableEth();
+                uint256 MaxAcceptableValue = availableEthAtStage(currentStage);
 
                 uint256 NewAcceptedValue = byStage.committed_eth - byStage.accepted_eth;
                 uint256 ReturnValue = 0;
@@ -558,7 +558,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
-    *   Participant cancels commitment if they've not been whitelisted yet.
+    *   Participant can cancel their pending ETH commitment, if they've not been whitelisted yet.
     */
     function cancel()
         public
@@ -566,12 +566,9 @@ contract ReversibleICO is IERC777Recipient {
         isInitialized
         isNotFrozen
     {
-        if(ParticipantsByAddress[msg.sender].whitelisted == true) {
-            revert("ETH returned, please send tokens to this contract in order to withdraw your ETH.");
-        }
-        // better: require(ParticipantsByAddress[msg.sender].whitelisted == true, "ETH returned, please send tokens to this contract in order to withdraw your ETH.");
+        require(ParticipantsByAddress[msg.sender].whitelisted != true, "You can't cancel your ETH commitment after you got whitelisted, please send tokens to this contract in order to withdraw your ETH.");
 
-        if(canCancelBySendingEthToContract(msg.sender)) {
+        if(canCancelByEth(msg.sender)) {
             cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
@@ -579,9 +576,9 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
-    *   Return cancel modes for a participant address, frontend only
+    *   Return cancel modes for a participant address, informational only
     */
-    function getCancelModeStates(address participantAddress)
+    function getCancelMode(address participantAddress)
         external
         view
         returns ( bool byEth, bool byTokens )
@@ -592,14 +589,14 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage ParticipantRecord = ParticipantsByAddress[participantAddress];
         if(ParticipantRecord.whitelisted == true) {
             // byEth remains false as they need to send tokens back.
-            byTokens = canCancelBySendingTokensBack(participantAddress);
+            byTokens = canCancelByTokens(participantAddress);
         } else {
             // byTokens remains false as the participant should have no tokens to send back anyway.
-            byEth = canCancelBySendingEthToContract(participantAddress);
+            byEth = canCancelByEth(participantAddress);
         }
     }
 
-    function canCancelBySendingTokensBack(address participantAddress)
+    function canCancelByTokens(address participantAddress)
         public
         view
         returns ( bool )
@@ -610,7 +607,7 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
-    function canCancelBySendingEthToContract(address participantAddress)
+    function canCancelByEth(address participantAddress)
         public
         view
         returns ( bool )

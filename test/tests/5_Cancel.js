@@ -139,7 +139,7 @@ async function revertToFreshDeployment() {
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
 
-        await ReversibleICOInstance.methods.addSettings(
+        await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress
@@ -203,7 +203,7 @@ describe("Cancel Testing", function () {
         await revertToFreshDeployment();
     });
     
-    describe("view getCancelModeStates(address participantAddress)", async function () { 
+    describe("view getCancelMode(address participantAddress)", async function () {
 
         before(async function () { 
             await revertToFreshDeployment();
@@ -212,7 +212,7 @@ describe("Cancel Testing", function () {
         describe("contract in stage 1 or 2 ( not initialized with settings )", async function () { 
             
             it("should return (false, false) as no participant actually exists", async function () {
-                let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                 expect(CancelStates[0]).to.be.equal(false);
                 expect(CancelStates[1]).to.be.equal(false);
             });
@@ -230,7 +230,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (false, false)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -252,7 +252,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(true);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -282,7 +282,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (false, true) => cancel by sending tokens back to contract", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
@@ -299,7 +299,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (false, false)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -321,7 +321,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(true);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -351,7 +351,7 @@ describe("Cancel Testing", function () {
                 });
 
                 it("should return (false, true) => cancel by sending tokens back to contract", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModeStates(participant_1).call();
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
