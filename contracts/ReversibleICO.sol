@@ -135,7 +135,7 @@ contract ReversibleICO is IERC777Recipient {
 
     event ApplicationEvent (
         uint8 indexed _type,
-        uint16 indexed _id,
+        uint32 indexed _id,
         address indexed _address,
         uint256 _value
     );
@@ -326,7 +326,7 @@ contract ReversibleICO is IERC777Recipient {
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
-            uint16(projectWithdrawCount),
+            uint32(projectWithdrawCount),
             projectWalletAddress,
             ethAmount
         );
@@ -802,7 +802,7 @@ contract ReversibleICO is IERC777Recipient {
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
-            ParticipantRecord.contributionsCount,
+            uint32(ParticipantRecord.contributionsCount),
             _from,
             _ReceivedValue
         );
@@ -877,7 +877,7 @@ contract ReversibleICO is IERC777Recipient {
                     emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _from, ReturnValue);
                 }
 
-                emit ApplicationEvent(_event_type, _stageId, _from, NewAcceptedValue);
+                emit ApplicationEvent(_event_type, uint32(_stageId), _from, NewAcceptedValue);
             }
         }
     }
@@ -923,7 +923,7 @@ contract ReversibleICO is IERC777Recipient {
 
             emit ApplicationEvent(
                 _event_type,
-                ParticipantRecord.contributionsCount,
+                uint32(ParticipantRecord.contributionsCount),
                 _from,
                 ParticipantAvailableEth
             );

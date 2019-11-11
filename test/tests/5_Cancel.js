@@ -537,7 +537,7 @@ describe("Testing canceling", function () {
                 assert.equal(eventFilter.length, 1, 'TransferEvent event not received.');
 
                 eventFilter = helpers.utils.hasEvent(
-                    cancelTx, 'ApplicationEvent(uint8,uint16,address,uint256)'
+                    cancelTx, 'ApplicationEvent(uint8,uint32,address,uint256)'
                 );
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
                 
