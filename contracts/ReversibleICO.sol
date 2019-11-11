@@ -123,35 +123,35 @@ contract ReversibleICO is IERC777Recipient {
     */
 
     enum ApplicationEventTypes {
-        NOT_SET,        // will match default value of a mapping result
-        CONTRIBUTION_NEW,
-        CONTRIBUTION_CANCEL,
-        PARTICIPANT_CANCEL,
-        WHITELIST_CANCEL,
-        WHITELIST_ACCEPT,
-        COMMIT_ACCEPT,
-        PROJECT_WITHDRAW
+        NOT_SET,                // 0; will match default value of a mapping result
+        CONTRIBUTION_NEW,       // 1
+        CONTRIBUTION_CANCEL,    // 2
+        PARTICIPANT_CANCEL,     // 3
+        WHITELIST_REJECT,       // 4
+        WHITELIST_APPROVE,      // 5
+        COMMITMENT_ACCEPTED,    // 6
+        PROJECT_WITHDRAW        // 7
     }
 
     event ApplicationEvent (
         uint8 indexed _type,
         uint16 indexed _id,
-        address indexed _from,
+        address indexed _address,
         uint256 _value
     );
 
     enum TransferTypes {
-        NOT_SET,
-        AUTOMATIC_RETURN,
-        WHITELIST_CANCEL,
-        PARTICIPANT_CANCEL,
-        PARTICIPANT_WITHDRAW,
-        PROJECT_WITHDRAW
+        NOT_SET,                // 0
+        AUTOMATIC_RETURN,       // 1
+        WHITELIST_REJECT,       // 2
+        PARTICIPANT_CANCEL,     // 3
+        PARTICIPANT_WITHDRAW,   // 4
+        PROJECT_WITHDRAW        // 5
     }
 
     event TransferEvent (
         uint8 indexed _type,
-        address indexed _to,
+        address indexed _address,
         uint256 indexed _value
     );
 
@@ -346,7 +346,7 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Whitelisting or Rejecting
     */
-    function whitelistOrReject(
+    function whitelistApproveOrReject(
         address _address,
         uint8 _mode
     )
@@ -357,20 +357,20 @@ contract ReversibleICO is IERC777Recipient {
     {
         Participant storage ParticipantRecord = ParticipantsByAddress[_address];
 
-        if(_mode == uint8(ApplicationEventTypes.WHITELIST_ACCEPT)) {
+        if(_mode == uint8(ApplicationEventTypes.WHITELIST_APPROVE)) {
             ParticipantRecord.whitelisted = true;
 
             // accept all contributions
             acceptContributionsForAddress(_address, _mode);
 
-        } else if(_mode == uint8(ApplicationEventTypes.WHITELIST_CANCEL)) {
+        } else if(_mode == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
             ParticipantRecord.whitelisted = false;
 
             // cancel all contributions
             cancelContributionsForAddress(_address, _mode);
 
         } else {
-            revert("whitelistOrReject: invalid mode specified.");
+            revert("whitelistApproveOrReject: invalid mode specified.");
         }
 
     }
@@ -378,11 +378,11 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Whitelisting or Rejecting multiple addresses
     *   start is 0 / count is 10, should be fine for most
-    *   for special cases we just use the whitelistOrReject method
+    *   for special cases we just use the whitelistApproveOrReject method
     */
-    function whitelistOrRejectMultiple(address[] memory _address, uint8 _mode) public {
+    function whitelistApproveOrRejectMultiple(address[] memory _address, uint8 _mode) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
-            whitelistOrReject(_address[i], _mode);
+            whitelistApproveOrReject(_address[i], _mode);
         }
     }
 
@@ -672,7 +672,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // if whitelisted, process the contribution automatically
         if(ParticipantRecord.whitelisted == true) {
-            acceptContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.COMMIT_ACCEPT));
+            acceptContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
         }
     }
 
@@ -780,11 +780,9 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev
     /// just records every contribution
     /// does not return anything or care about overselling
-    function recordNewContribution(address _receiver, uint256 _ReceivedValue)
-    internal
-    {
+    function recordNewContribution(address _from, uint256 _ReceivedValue) internal {
         uint8 currentStage = getCurrentStage();
-        Participant storage ParticipantRecord = ParticipantsByAddress[_receiver];
+        Participant storage ParticipantRecord = ParticipantsByAddress[_from];
 
         // per account
         ParticipantRecord.contributionsCount++;
@@ -805,18 +803,18 @@ contract ReversibleICO is IERC777Recipient {
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
             ParticipantRecord.contributionsCount,
-            _receiver,
+            _from,
             _ReceivedValue
         );
     }
 
     function acceptContributionsForAddress(
-        address _receiver,
+        address _from,
         uint8 _event_type
     )
     internal
     {
-        Participant storage ParticipantRecord = ParticipantsByAddress[_receiver];
+        Participant storage ParticipantRecord = ParticipantsByAddress[_from];
 
         uint8 currentStage = getCurrentStage();
         for(uint8 i = 0; i <= currentStage; i++) {
@@ -869,29 +867,29 @@ contract ReversibleICO is IERC777Recipient {
                     // allocate tokens to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
-                    TokenContract.send(_receiver, newTokenAmount, data);
+                    TokenContract.send(_from, newTokenAmount, data);
                 }
 
                 // if stored value is too high to accept we then have
                 // a return value we must send back to our participant.
                 if(ReturnValue > 0) {
-                    address(uint160(_receiver)).transfer(ReturnValue);
-                    emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _receiver, ReturnValue);
+                    address(uint160(_from)).transfer(ReturnValue);
+                    emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _from, ReturnValue);
                 }
 
-                emit ApplicationEvent(_event_type, _stageId, _receiver, NewAcceptedValue);
+                emit ApplicationEvent(_event_type, _stageId, _from, NewAcceptedValue);
             }
         }
     }
 
     function cancelContributionsForAddress(
-        address _receiver,
+        address _from,
         uint8 _event_type
     )
     internal
     {
 
-        Participant storage ParticipantRecord = ParticipantsByAddress[_receiver];
+        Participant storage ParticipantRecord = ParticipantsByAddress[_from];
         // one should only be able to cancel if they haven't been whitelisted
 
         // but just to make sure take withdrawn and returned into account.
@@ -913,20 +911,20 @@ contract ReversibleICO is IERC777Recipient {
             withdrawnETH += ParticipantAvailableEth;
 
             // send eth back to participant including received value
-            address(uint160(_receiver)).transfer(ParticipantAvailableEth + msg.value);
+            address(uint160(_from)).transfer(ParticipantAvailableEth + msg.value);
 
             uint8 currentTransferEventType = 0;
-            if(_event_type == uint8(ApplicationEventTypes.WHITELIST_CANCEL)) {
-                currentTransferEventType = uint8(TransferTypes.WHITELIST_CANCEL);
+            if(_event_type == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
+                currentTransferEventType = uint8(TransferTypes.WHITELIST_REJECT);
             } else if (_event_type == uint8(ApplicationEventTypes.PARTICIPANT_CANCEL)) {
                 currentTransferEventType = uint8(TransferTypes.PARTICIPANT_CANCEL);
             }
-            emit TransferEvent(currentTransferEventType, _receiver, ParticipantAvailableEth);
+            emit TransferEvent(currentTransferEventType, _from, ParticipantAvailableEth);
 
             emit ApplicationEvent(
                 _event_type,
                 ParticipantRecord.contributionsCount,
-                _receiver,
+                _from,
                 ParticipantAvailableEth
             );
         } else {

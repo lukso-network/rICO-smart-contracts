@@ -21,9 +21,9 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_CANCEL:4,
-    WHITELIST_ACCEPT:5,
-    COMMIT_ACCEPT:6,
+    WHITELIST_REJECT:4,
+    WHITELIST_APPROVE:5,
+    COMMITMENT_ACCEPTED:6,
     ACCEPT:7,
     REJECT:8,
     CANCEL:9
@@ -32,7 +32,7 @@ const ApplicationEventTypes = {
 const TransferTypes = {
     NOT_SET:0,
     AUTOMATIC_REFUND:1,
-    WHITELIST_CANCEL:2,
+    WHITELIST_REJECT:2,
     PARTICIPANT_CANCEL:3,
     PARTICIPANT_WITHDRAW:4,
     PROJECT_WITHDRAW:5
@@ -295,9 +295,9 @@ describe("Website States", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            await Instances.ReversibleICOInstance.methods.whitelistOrReject(
+            await Instances.ReversibleICOInstance.methods.whitelistApproveOrReject(
                 participant_1,
-                ApplicationEventTypes.WHITELIST_ACCEPT
+                ApplicationEventTypes.WHITELIST_APPROVE
             ).send({
                 from: whitelistControllerAddress
             });

@@ -20,9 +20,9 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_CANCEL:4,
-    WHITELIST_ACCEPT:5,
-    COMMIT_ACCEPT:6,
+    WHITELIST_REJECT:4,
+    WHITELIST_APPROVE:5,
+    COMMITMENT_ACCEPTED:6,
     ACCEPT:7,
     REJECT:8,
     CANCEL:9
@@ -31,7 +31,7 @@ const ApplicationEventTypes = {
 const TransferTypes = {
     NOT_SET:0,
     AUTOMATIC_REFUND:1,
-    WHITELIST_CANCEL:2,
+    WHITELIST_REJECT:2,
     PARTICIPANT_CANCEL:3,
     PARTICIPANT_WITHDRAW:4,
     PROJECT_WITHDRAW:5
@@ -637,7 +637,7 @@ describe("ReversibleICO", function () {
         });
 
 
-        describe("transaction whitelistOrReject(address,mode,start_at,count)", async function () { 
+        describe("transaction whitelistApproveOrReject(address,mode,start_at,count)", async function () {
 
             before(async function () {
                 // jump to commit start
@@ -663,9 +663,9 @@ describe("ReversibleICO", function () {
                             await this.ReversibleICO.methods.initialized().call()
                         ).to.be.equal( true );
 
-                        await this.ReversibleICO.methods.whitelistOrReject(
+                        await this.ReversibleICO.methods.whitelistApproveOrReject(
                             accounts[1],
-                            ApplicationEventTypes.WHITELIST_ACCEPT
+                            ApplicationEventTypes.WHITELIST_APPROVE
                         ).send({
                             from: TransactionSender
                         });
@@ -698,9 +698,9 @@ describe("ReversibleICO", function () {
                             const initialized = await TestReversibleICO.methods.initialized().call();
                             expect( initialized ).to.be.equal( false );
 
-                            await TestReversibleICO.methods.whitelistOrReject(
+                            await TestReversibleICO.methods.whitelistApproveOrReject(
                                 accounts[1],
-                                ApplicationEventTypes.WHITELIST_ACCEPT
+                                ApplicationEventTypes.WHITELIST_APPROVE
                             ).send({
                                 from: whitelistControllerAddress
                             });
@@ -715,9 +715,9 @@ describe("ReversibleICO", function () {
                     
                         it("transaction is accepted and participant address is whitelisted", async function () {
 
-                            await this.ReversibleICO.methods.whitelistOrReject(
+                            await this.ReversibleICO.methods.whitelistApproveOrReject(
                                 accounts[3],
-                                ApplicationEventTypes.WHITELIST_ACCEPT
+                                ApplicationEventTypes.WHITELIST_APPROVE
                             ).send({
                                 from: whitelistControllerAddress
                             });
@@ -812,42 +812,42 @@ describe("ReversibleICO", function () {
 
                         });
 
-                        describe("supplied mode is wrong.. (not WHITELIST_ACCEPT / WHITELIST_CANCEL) ", async function () { 
+                        describe("supplied mode is wrong.. (not WHITELIST_APPROVE / WHITELIST_REJECT) ", async function () {
 
-                            it("transaction reverts \"whitelistOrReject: invalid mode specified.\"", async function () {
+                            it("transaction reverts \"whitelistApproveOrReject: invalid mode specified.\"", async function () {
                                 await helpers.assertInvalidOpcode( async () => {
-                                    await this.ReversibleICO.methods.whitelistOrReject(
+                                    await this.ReversibleICO.methods.whitelistApproveOrReject(
                                         TestAcceptParticipant,
                                         ApplicationEventTypes.NOT_SET
                                     ).send({
                                         from: whitelistControllerAddress
                                     });
-                                }, "whitelistOrReject: invalid mode specified.");
+                                }, "whitelistApproveOrReject: invalid mode specified.");
                             });
 
                         });
 
-                        describe("supplied mode is ApplicationEventTypes.WHITELIST_ACCEPT", async function () { 
+                        describe("supplied mode is ApplicationEventTypes.WHITELIST_APPROVE", async function () {
 
                             const ContributionCountToProcess = 15;
-                            let whitelistOrRejectTx;
+                            let whitelistApproveOrRejectTx;
 
                             before(async function () {
-                                whitelistOrRejectTx = await this.ReversibleICO.methods.whitelistOrReject(
+                                whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
                                     TestAcceptParticipant,
-                                    ApplicationEventTypes.WHITELIST_ACCEPT
+                                    ApplicationEventTypes.WHITELIST_APPROVE
                                 ).send({
                                     from: whitelistControllerAddress
                                 });
                             });
 
                             it("transaction is accepted", async function () {
-                                expect( whitelistOrRejectTx.status ).to.be.equal( true );
+                                expect( whitelistApproveOrRejectTx.status ).to.be.equal( true );
                             });
 
                             it("ApplicationEvent emitted", async function () {
                                 expect(
-                                    whitelistOrRejectTx.events.hasOwnProperty('ApplicationEvent')
+                                    whitelistApproveOrRejectTx.events.hasOwnProperty('ApplicationEvent')
                                 ).to.be.equal(
                                     true
                                 );
@@ -935,10 +935,10 @@ describe("ReversibleICO", function () {
                         });
 
 
-                        describe("supplied mode is ApplicationEventTypes.WHITELIST_CANCEL", async function () { 
+                        describe("supplied mode is ApplicationEventTypes.WHITELIST_REJECT", async function () {
 
                             const ContributionCountToProcess = 15;
-                            let whitelistOrRejectTx;
+                            let whitelistApproveOrRejectTx;
                             let initialParticipantTokenBalance;
 
                             before(async function () {
@@ -950,9 +950,9 @@ describe("ReversibleICO", function () {
                                     Participant.whitelisted
                                 ).to.be.equal( false );
                                 
-                                whitelistOrRejectTx = await this.ReversibleICO.methods.whitelistOrReject(
+                                whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
                                     TestRejectParticipant,
-                                    ApplicationEventTypes.WHITELIST_CANCEL
+                                    ApplicationEventTypes.WHITELIST_REJECT
                                 ).send({
                                     from: whitelistControllerAddress
                                 });
@@ -960,12 +960,12 @@ describe("ReversibleICO", function () {
                             });
 
                             it("transaction is accepted", async function () {
-                                expect( whitelistOrRejectTx.status ).to.be.equal( true );
+                                expect( whitelistApproveOrRejectTx.status ).to.be.equal( true );
                             });
 
                             it("ContributionEvent emitted event count matches", async function () {
                                 expect(
-                                    whitelistOrRejectTx.events.hasOwnProperty('ApplicationEvent')
+                                    whitelistApproveOrRejectTx.events.hasOwnProperty('ApplicationEvent')
                                 ).to.be.equal(
                                     true
                                 );
@@ -1136,9 +1136,9 @@ describe("ReversibleICO", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
     
-                let whitelistOrRejectTx = await this.ReversibleICO.methods.whitelistOrReject(
+                let whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
                     participant_1,
-                    ApplicationEventTypes.WHITELIST_ACCEPT
+                    ApplicationEventTypes.WHITELIST_APPROVE
                 ).send({
                     from: whitelistControllerAddress
                 });
