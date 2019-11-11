@@ -127,9 +127,9 @@ contract ReversibleICO is IERC777Recipient {
         CONTRIBUTION_NEW,       // 1
         CONTRIBUTION_CANCEL,    // 2
         PARTICIPANT_CANCEL,     // 3
-        WHITELIST_REJECT,       // 4
+        COMMITMENT_ACCEPTED,    // 4
         WHITELIST_APPROVE,      // 5
-        COMMITMENT_ACCEPTED,    // 6
+        WHITELIST_REJECT,       // 6
         PROJECT_WITHDRAW        // 7
     }
 
@@ -270,12 +270,12 @@ contract ReversibleICO is IERC777Recipient {
     )
     external
     isInitialized
-        // isNotFrozen TODO??
-        // requireNotEnded
+    // isNotFrozen TODO??
+    // requireNotEnded
     {
         // Rico should only receive tokens from the Rico Token Tracker.
         // any other transaction should revert
-        require(msg.sender == address(TokenContract), "ERC777TokensRecipient: Invalid token");
+        require(msg.sender == address(TokenContract), "Invalid token sent.");
 
         // 2 cases
         if(from == projectWalletAddress) {
@@ -299,7 +299,7 @@ contract ReversibleICO is IERC777Recipient {
     isInitialized
     isNotFrozen
     {
-        require(ParticipantsByAddress[msg.sender].whitelisted != true, "You can't cancel your ETH commitment after you got whitelisted, please send tokens to this contract in order to withdraw your ETH.");
+        require(ParticipantsByAddress[msg.sender].whitelisted != true, "Commitment canceling only possible using tokens after you got whitelisted.");
 
         if(canCancelByEth(msg.sender)) {
             cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
@@ -315,10 +315,10 @@ contract ReversibleICO is IERC777Recipient {
     external
     isInitialized
     {
-        require(msg.sender == projectWalletAddress, "projectWithdraw: only projectWalletAddress.");
+        require(msg.sender == projectWalletAddress, "Only project wallet address.");
 
         uint256 unlocked = getProjectAvailableEth();
-        require(ethAmount <= unlocked, "projectWithdraw: Specified ETH value too large.");
+        require(ethAmount <= unlocked, "Requested amount to large, not enough unlocked ETH available.");
 
         projectWithdrawCount++;
         projectETHWithdrawn += ethAmount;
@@ -345,6 +345,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /*
     *   Whitelisting or Rejecting
+    *
+    *   Possible modes: WHITELIST_APPROVE: 5, WHITELIST_REJECT: 6
     */
     function whitelistApproveOrReject(
         address _address,
@@ -370,7 +372,7 @@ contract ReversibleICO is IERC777Recipient {
             cancelContributionsForAddress(_address, _mode);
 
         } else {
-            revert("whitelistApproveOrReject: invalid mode specified.");
+            revert("Invalid mode specified.");
         }
 
     }
@@ -774,7 +776,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // If address is not Whitelisted a call to this results in a revert
-        revert("withdraw: Withdraw not possible. Participant has no locked tokens.");
+        revert("Withdraw not possible. Participant has no locked tokens.");
     }
 
     /// @dev
@@ -893,8 +895,8 @@ contract ReversibleICO is IERC777Recipient {
         // one should only be able to cancel if they haven't been whitelisted
 
         // but just to make sure take withdrawn and returned into account.
-        // to handle the case when whitelister whitelists someone, then rejects
-        // them, then whitelists them back
+        // to handle the case when whitelist controller whitelists some one, then rejects
+        // them, then whitelists them again.
         uint256 ParticipantAvailableEth = ParticipantRecord.committed_eth -
         ParticipantRecord.withdrawn_eth -
         ParticipantRecord.returned_eth;
@@ -928,7 +930,7 @@ contract ReversibleICO is IERC777Recipient {
                 ParticipantAvailableEth
             );
         } else {
-            revert("cancel: Participant has not contributed any eth.");
+            revert("Participant has not contributed any ETH yet.");
         }
     }
 

@@ -20,9 +20,9 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_REJECT:4,
+    COMMITMENT_ACCEPTED:4,
     WHITELIST_APPROVE:5,
-    COMMITMENT_ACCEPTED:6,
+    WHITELIST_REJECT:6,
     ACCEPT:7,
     REJECT:8,
     CANCEL:9
@@ -394,7 +394,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is deployerAddress ", async function () { 
 
-                    it("transaction reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                    it("transaction reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -426,7 +426,7 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                        }, "Withdraw not possible. Participant has no locked tokens.");
 
                     });
 
@@ -438,7 +438,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is projectWalletAddress", async function () { 
 
-                    it("transaction reverts \"ERC777TokensRecipient: Invalid token\"", async function () {
+                    it("transaction reverts \"Invalid token sent.\"", async function () {
 
                         helpers.utils.resetAccountNonceCache(helpers);
 
@@ -461,14 +461,14 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "ERC777TokensRecipient: Invalid token");
+                        }, "Invalid token sent.");
 
                     });
                 });
 
                 describe("token sender is deployerAddress ", async function () { 
 
-                    it("transaction reverts \"ERC777TokensRecipient: Invalid token\"", async function () {
+                    it("transaction reverts \"Invalid token sent.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -500,7 +500,7 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "ERC777TokensRecipient: Invalid token");
+                        }, "Invalid token sent.");
 
                     });
 
@@ -525,7 +525,7 @@ describe("Flow Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     // our participant somehow got some tokens that they then attempt to send for withdraw
 
@@ -566,7 +566,7 @@ describe("Flow Testing", function () {
                             gas: 500000
                         });
 
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });
@@ -593,7 +593,7 @@ describe("Flow Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     // our participant somehow got some tokens that they then attempt to send for withdraw
 
@@ -634,7 +634,7 @@ describe("Flow Testing", function () {
                             gas: 500000
                         });
 
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });
@@ -1300,7 +1300,7 @@ describe("Flow Testing", function () {
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
                 });
 
-                it("sending unlocked tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -1331,7 +1331,7 @@ describe("Flow Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });
@@ -1391,7 +1391,7 @@ describe("Flow Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending unlocked tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -1422,7 +1422,7 @@ describe("Flow Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });

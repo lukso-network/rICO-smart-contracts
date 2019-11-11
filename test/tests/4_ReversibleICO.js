@@ -20,12 +20,10 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_REJECT:4,
+    COMMITMENT_ACCEPTED:4,
     WHITELIST_APPROVE:5,
-    COMMITMENT_ACCEPTED:6,
-    ACCEPT:7,
-    REJECT:8,
-    CANCEL:9
+    WHITELIST_REJECT:6,
+    PROJECT_WITHDRAW:7
 }
 
 const TransferTypes = {
@@ -814,7 +812,7 @@ describe("ReversibleICO", function () {
 
                         describe("supplied mode is wrong.. (not WHITELIST_APPROVE / WHITELIST_REJECT) ", async function () {
 
-                            it("transaction reverts \"whitelistApproveOrReject: invalid mode specified.\"", async function () {
+                            it("transaction reverts \"Invalid mode specified.\"", async function () {
                                 await helpers.assertInvalidOpcode( async () => {
                                     await this.ReversibleICO.methods.whitelistApproveOrReject(
                                         TestAcceptParticipant,
@@ -822,7 +820,7 @@ describe("ReversibleICO", function () {
                                     ).send({
                                         from: whitelistControllerAddress
                                     });
-                                }, "whitelistApproveOrReject: invalid mode specified.");
+                                }, "Invalid mode specified.");
                             });
 
                         });

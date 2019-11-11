@@ -20,9 +20,9 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_REJECT:4,
+    COMMITMENT_ACCEPTED:4,
     WHITELIST_APPROVE:5,
-    COMMITMENT_ACCEPTED:6,
+    WHITELIST_REJECT:6,
     PROJECT_WITHDRAW:7
 }
 
@@ -259,28 +259,28 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () { 
 
-                    it("reverts \"projectWithdraw: Specified ETH value too large.\"", async function () {
+                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () { 
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "projectWithdraw: Specified ETH value too large.");
+                        }, "Requested amount to large, not enough unlocked ETH available.");
 
                     });
                 });
 
                 describe("caller not projectWalletAddress", async function () { 
 
-                    it("reverts \"projectWithdraw: only projectWalletAddress.\"", async function () {
+                    it("reverts \"Only project wallet address.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () { 
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: deployerAddress,
                                 gas: 100000
                             });
-                        }, "projectWithdraw: only projectWalletAddress.");
+                        }, "Only project wallet address.");
 
                     });
                 });
@@ -304,14 +304,14 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () { 
 
-                    it("reverts \"projectWithdraw: Specified ETH value too large.\"", async function () {
+                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () { 
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "projectWithdraw: Specified ETH value too large.");
+                        }, "Requested amount to large, not enough unlocked ETH available.");
 
                     });
                 });
@@ -344,14 +344,14 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () { 
 
-                    it("reverts \"projectWithdraw: Specified ETH value too large.\"", async function () {
+                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () { 
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "projectWithdraw: Specified ETH value too large.");
+                        }, "Requested amount to large, not enough unlocked ETH available.");
 
                     });
                 });
@@ -387,7 +387,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () { 
 
-                    it("reverts \"projectWithdraw: Specified ETH value too large.\"", async function () {
+                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
 
                         let Available = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH: ", helpers.utils.toEth(helpers, Available.toString() ) +" eth" );
@@ -948,7 +948,7 @@ describe("ProjectWithdraw Testing", function () {
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
                 });
 
-                it("sending unlocked tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -979,7 +979,7 @@ describe("ProjectWithdraw Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });
@@ -1041,7 +1041,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending unlocked tokens to Rico reverts \"withdraw: Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -1072,7 +1072,7 @@ describe("ProjectWithdraw Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "withdraw: Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
                 });
             });
