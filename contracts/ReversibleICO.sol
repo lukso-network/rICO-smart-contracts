@@ -28,10 +28,10 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Contract States
     */
-    bool public initialized = false;
-    bool public frozen = false;
-    bool public started = false;
-    bool public ended = false;
+    bool public initialized; // default: false
+    bool public frozen; // default: false
+    bool public started; // default: false
+    bool public ended; // default: false
 
     /*
     *   Addresses
@@ -44,16 +44,16 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Public Variables
     */
-    uint256 public TokenSupply = 0;
+    uint256 public TokenSupply; // default: 0
 
-    uint256 public committedETH = 0;
-    uint256 public returnedETH = 0;
-    uint256 public acceptedETH = 0;
-    uint256 public withdrawnETH = 0;
+    uint256 public committedETH; // default: 0
+    uint256 public returnedETH; // default: 0
+    uint256 public acceptedETH; // default: 0
+    uint256 public withdrawnETH; // default: 0
 
-    uint256 public projectWithdrawCount = 0;
-    uint256 public projectETHAllocated = 0;
-    uint256 public projectETHWithdrawn = 0;
+    uint256 public projectWithdrawCount; // default: 0
+    uint256 public projectETHAllocated; // default: 0
+    uint256 public projectETHWithdrawn; // default: 0
 
     // minimum amount of eth we accept for a contribution
     // everything lower will trigger a withdraw, as well as sending back pending ETH
@@ -85,7 +85,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     mapping ( uint8 => Stage ) public Stages;
-    uint8 public StageCount = 0;
+    uint8 public StageCount; // default: 0
     
     /*
     * Participants
