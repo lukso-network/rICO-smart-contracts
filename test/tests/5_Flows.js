@@ -519,8 +519,8 @@ describe("Flow Testing", function () {
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
                 });
 
-                it("getCancelMode() returns (false, false)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
+                it("getCancelModes() returns (false, false)", async function () {
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -587,8 +587,8 @@ describe("Flow Testing", function () {
                     });
                 });
 
-                it("getCancelMode() returns (true, false)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
+                it("getCancelModes() returns (true, false)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(true);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
@@ -672,8 +672,8 @@ describe("Flow Testing", function () {
 
                 });
 
-                it("getCancelMode() returns (false, true)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
+                it("getCancelModes() returns (false, true)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
@@ -841,8 +841,8 @@ describe("Flow Testing", function () {
 
                 });
 
-                it("getCancelMode() returns (false, true)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
+                it("getCancelModes() returns (false, true)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
@@ -1385,8 +1385,8 @@ describe("Flow Testing", function () {
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
                 });
 
-                it("getCancelMode() returns (false, false)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelMode(participant_1).call();
+                it("getCancelModes() returns (false, false)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(false);
                 });
