@@ -93,7 +93,7 @@ contract ReversibleICO is IERC777Recipient {
 
     struct Participant {
         bool   whitelisted;
-        uint16  contributionsCount;
+        uint32  contributionsCount;
         uint256 committed_eth;	        // msg.value
         uint256 returned_eth;	        // committed_eth - accepted_eth
         uint256 accepted_eth;	        // lower than msg.value if maxCap already reached
