@@ -55,8 +55,8 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectETHAllocated; // default: 0
     uint256 public projectETHWithdrawn; // default: 0
 
-    // minimum amount of eth we accept for a contribution
-    // everything lower will trigger a withdraw, as well as sending back pending ETH
+    // Minimum amount of ETH we accept for a contribution
+    // everything lower will trigger a canceling of pending ETH
     uint256 public minContribution = 0.001 ether;
 
     /*
