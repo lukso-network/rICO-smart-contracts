@@ -14,13 +14,13 @@ contract RicoToken is ERC777 {
     bool public initialized; // default: false
 
     constructor(
-        uint256 initialSupply,
+        uint256 _initialSupply,
         address[] memory _defaultOperators
     )
         ERC777("LYXeToken", "LYXe", _defaultOperators)
         public
     {
-        _mint(msg.sender, msg.sender, initialSupply, "", "");
+        _mint(msg.sender, msg.sender, _initialSupply, "", "");
         manager = msg.sender;
         frozen = true;
     }
@@ -45,53 +45,53 @@ contract RicoToken is ERC777 {
         frozen = _status;
     }
 
-    function getLockedBalance(address owner) public returns(uint) {
-        return rICO.getLockedTokenAmount(owner);
+    function getLockedBalance(address _owner) public returns(uint) {
+        return rICO.getLockedTokenAmount(_owner);
     }
 
-    function getUnlockedBalance(address owner) public returns(uint) {
-        return balanceOf(owner).sub(rICO.getLockedTokenAmount(owner));
+    function getUnlockedBalance(address _owner) public returns(uint) {
+        return balanceOf(_owner).sub(rICO.getLockedTokenAmount(_owner));
     }
 
     // We should override burn as well. So users can't burn locked amounts
     function _burn(
-        address operator,
-        address from,
-        uint256 amount,
-        bytes memory data,
-        bytes memory operatorData
+        address _operator,
+        address _from,
+        uint256 _amount,
+        bytes memory _data,
+        bytes memory _operatorData
     )
         internal
         requireNotFrozen
     {
-        require(amount <= getUnlockedBalance(from), "getUnlockedBalance: Insufficient funds");
-        ERC777._burn(operator, from, amount, data, operatorData);
+        require(_amount <= getUnlockedBalance(_from), "getUnlockedBalance: Insufficient funds");
+        ERC777._burn(_operator, _from, _amount, _data, _operatorData);
     }
 
     // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
     // ricoAddress can receive any amount for withdraw functionality
     function _move(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes memory userData,
-        bytes memory operatorData
+        address _operator,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _userData,
+        bytes memory _operatorData
     )
         internal
         requireNotFrozen
         requireInitialized
     {
 
-        if(to == address(rICO)) {
+        if(_to == address(rICO)) {
             // full balance can be sent back to rico
-            require(amount <= balanceOf(from), "getUnlockedBalance: Insufficient funds");
+            require(_amount <= balanceOf(_from), "getUnlockedBalance: Insufficient funds");
         } else {
             // for every other address limit to unlocked balance
-            require(amount <= getUnlockedBalance(from), "getUnlockedBalance: Insufficient funds");
+            require(_amount <= getUnlockedBalance(_from), "getUnlockedBalance: Insufficient funds");
         }
 
-        ERC777._move(operator, from, to, amount, userData, operatorData);
+        ERC777._move(_operator, _from, _to, _amount, _userData, _operatorData);
     }
 
     modifier onlyManager() {
