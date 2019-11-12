@@ -437,7 +437,7 @@ describe("ERC777 - RICO Token", async function () {
             let locked = amount.div( new BN(2) );
 
             it("works if amount is lower or equal to balance", async function() {
-                
+
                 await this.RicoToken.methods
                     .transfer(accounts[3], amount.toString())
                     .send({ from: holder });
@@ -450,7 +450,7 @@ describe("ERC777 - RICO Token", async function () {
                     .burn(1, ERC777data)
                     .send({ from: accounts[3], gas: 100000 });
             });
-            
+
             it("throws if amount is not unlocked", async function() {
                 await helpers.assertInvalidOpcode(async () => {
                     await this.RicoToken.methods
@@ -464,7 +464,7 @@ describe("ERC777 - RICO Token", async function () {
         describe("Token coverage", async () => {
 
             it("_move() will throw if contract is not initialized", async function() {
-                
+
                 let testToken = await helpers.utils.deployNewContractInstance(
                     helpers,
                     "RicoToken",
@@ -484,16 +484,16 @@ describe("ERC777 - RICO Token", async function () {
                     await testToken.methods
                         .transfer(accounts[3], 1)
                         .send({ from: holder, gas:100000 });
-                }, "requireInitialized: Contract must be initialized");
-                
+                }, "Contract must be initialized.");
+
             });
-            
+
             it("setup() will throw if called again", async function() {
                 await helpers.assertInvalidOpcode(async () => {
                     await this.RicoToken.methods
                         .setup(_ricoAddress)
                         .send({ from: holder });
-                }, "requireNotInitialized: Contract must not be initialized");
+                }, "Contract is already initialized.");
 
             });
         });

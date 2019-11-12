@@ -20,18 +20,16 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_CANCEL:4,
-    WHITELIST_ACCEPT:5,
-    COMMIT_ACCEPT:6,
-    ACCEPT:7,
-    REJECT:8,
-    CANCEL:9
+    COMMITMENT_ACCEPTED:4,
+    WHITELIST_APPROVE:5,
+    WHITELIST_REJECT:6,
+    PROJECT_WITHDRAW:7
 }
 
 const TransferTypes = {
     NOT_SET:0,
     AUTOMATIC_RETURN:1,
-    WHITELIST_CANCEL:2,
+    WHITELIST_REJECT:2,
     PARTICIPANT_CANCEL:3,
     PARTICIPANT_WITHDRAW:4,
     PROJECT_WITHDRAW:5
@@ -53,10 +51,10 @@ let snapshots = [];
 const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
-let TokenTrackerAddress, ReversibleICOAddress, stageValidation = [], currentBlock, 
-    StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenTrackerInstance, 
-    TokenTrackerReceipt, ReversibleICOInstance, ReversibleICOReceipt;
+let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
+    TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 async function revertToFreshDeployment() {
 
@@ -73,15 +71,15 @@ async function revertToFreshDeployment() {
         // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
         snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
 
-        // reset account nonces.. 
+        // reset account nonces..
         helpers.utils.resetAccountNonceCache(helpers);
     } else {
 
         /*
         *   Deploy Token Contract
         */
-       
-        TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
+
+        TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
                 arguments: [
@@ -92,10 +90,10 @@ async function revertToFreshDeployment() {
                 gasPrice: helpers.solidity.gwei * 10
             }
         );
-        TokenTrackerReceipt = TokenTrackerInstance.receipt;
-        TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
-        console.log("      TOKEN Gas used for deployment:", TokenTrackerInstance.receipt.gasUsed);
-        console.log("      Contract Address:", TokenTrackerAddress);
+        TokenContractReceipt = TokenContractInstance.receipt;
+        TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+        console.log("      TOKEN Gas used for deployment:", TokenContractInstance.receipt.gasUsed);
+        console.log("      Contract Address:", TokenContractAddress);
 
         /*
         *   Deploy RICO Contract
@@ -109,7 +107,7 @@ async function revertToFreshDeployment() {
         console.log("      Contract Address:", ReversibleICOAddress);
         console.log("");
 
-        await TokenTrackerInstance.methods.setup(
+        await TokenContractInstance.methods.setup(
             ReversibleICOAddress
         ).send({
             from: holder,  // initial token supply holder
@@ -119,40 +117,40 @@ async function revertToFreshDeployment() {
         *   Add RICO Settings
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-            
+
         // starts in one day
-        StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
-        
+        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+
         // 22 days allocation
-        AllocationBlockCount = blocksPerDay * 22;                   
-        AllocationPrice = helpers.solidity.ether * 0.002;
+        commitPhaseBlockCount = blocksPerDay * 22;
+        commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         StageCount = 12;
-        StageBlockCount = blocksPerDay * 30;      
+        StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        AllocationEndBlock = StartBlock + AllocationBlockCount;
+        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
-        EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
 
-        await ReversibleICOInstance.methods.addSettings(
-            TokenTrackerAddress,        // address _TokenTrackerAddress
+        await ReversibleICOInstance.methods.init(
+            TokenContractAddress,        // address _tokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
             projectWalletAddress,          // address _projectWalletAddress
-            StartBlock,                 // uint256 _StartBlock
-            AllocationBlockCount,       // uint256 _AllocationBlockCount,
-            AllocationPrice,            // uint256 _AllocationPrice in wei
-            StageCount,                 // uint8   _StageCount
-            StageBlockCount,            // uint256 _StageBlockCount
-            StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+            commitPhaseStartBlock,                 // uint256 _StartBlock
+            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+            commitPhasePrice,            // uint256 _commitPhasePrice in wei
+            StageCount,                 // uint8   _stageCount
+            StageBlockCount,            // uint256 _stageBlockCount
+            StagePriceIncrease          // uint256 _stagePriceIncrease in wei
         ).send({
             from: deployerAddress,  // deployer
             gas: 3000000
         });
 
         // transfer tokens to rico
-        await TokenTrackerInstance.methods.send(
+        await TokenContractInstance.methods.send(
             ReversibleICOInstance.receipt.contractAddress,
             RicoSaleSupply,
             ERC777data
@@ -162,9 +160,9 @@ async function revertToFreshDeployment() {
         });
 
         expect(
-            await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+            await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
-        
+
 
         // create snapshot
         if (snapshotsEnabled) {
@@ -173,37 +171,37 @@ async function revertToFreshDeployment() {
     }
 
     // reinitialize instances so revert works properly.
-    TokenTrackerInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenTrackerAddress);
-    TokenTrackerInstance.receipt = TokenTrackerReceipt;
+    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+    TokenContractInstance.receipt = TokenContractReceipt;
     ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
 
     // do some validation
-    expect( 
+    expect(
         await helpers.utils.getBalance(helpers, ReversibleICOAddress)
     ).to.be.bignumber.equal( new helpers.BN(0) );
 
     expect(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
-        await ReversibleICOInstance.methods.TokenSupply().call()
+        await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     );
 };
 
 describe("Contribution Testing", function () {
 
-    before(async function () { 
+    before(async function () {
         await revertToFreshDeployment();
     });
 
-    describe("transaction () => fallback method", async function () { 
+    describe("transaction () => fallback method", async function () {
 
-        describe("contract in Allocation phase", async function () { 
-            
+        describe("contract in Allocation phase", async function () {
+
             before(async () => {
                 await revertToFreshDeployment();
                 helpers.utils.resetAccountNonceCache(helpers);
@@ -215,7 +213,7 @@ describe("Contribution Testing", function () {
             it("value >= rico.minContribution results in a new contribution", async function () {
 
                 let contributionCount = 0;
-                let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const initialContributionsCount = ParticipantByAddress.contributionsCount;
 
                 const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
@@ -243,9 +241,9 @@ describe("Contribution Testing", function () {
                 });
                 contributionCount++;
 
-                let whitelistOrRejectTx = await ReversibleICOInstance.methods.whitelistOrReject(
+                let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
                     participant_1,
-                    ApplicationEventTypes.WHITELIST_ACCEPT
+                    ApplicationEventTypes.WHITELIST_APPROVE
                 ).send({
                     from: whitelistControllerAddress
                 });
@@ -258,10 +256,10 @@ describe("Contribution Testing", function () {
                 });
                 contributionCount++;
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const afterContributionsCount = ParticipantByAddress.contributionsCount;
 
-                expect( 
+                expect(
                     afterContributionsCount.toString()
                 ).to.be.equal(
                     (parseInt(initialContributionsCount) + contributionCount).toString()
@@ -271,4 +269,3 @@ describe("Contribution Testing", function () {
         });
     });
 });
-

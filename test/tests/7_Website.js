@@ -21,18 +21,16 @@ const ApplicationEventTypes = {
     CONTRIBUTION_NEW:1,
     CONTRIBUTION_CANCEL:2,
     PARTICIPANT_CANCEL:3,
-    WHITELIST_CANCEL:4,
-    WHITELIST_ACCEPT:5,
-    COMMIT_ACCEPT:6,
-    ACCEPT:7,
-    REJECT:8,
-    CANCEL:9
+    COMMITMENT_ACCEPTED:4,
+    WHITELIST_APPROVE:5,
+    WHITELIST_REJECT:6,
+    PROJECT_WITHDRAW: 7
 }
 
 const TransferTypes = {
     NOT_SET:0,
     AUTOMATIC_REFUND:1,
-    WHITELIST_CANCEL:2,
+    WHITELIST_REJECT:2,
     PARTICIPANT_CANCEL:3,
     PARTICIPANT_WITHDRAW:4,
     PROJECT_WITHDRAW:5
@@ -52,10 +50,10 @@ let snapshots = [];
 const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
-let TokenTrackerAddress, ReversibleICOAddress, stageValidation = [], currentBlock, 
-    StartBlock, AllocationBlockCount, AllocationPrice, AllocationEndBlock, StageCount,
-    StageBlockCount, StagePriceIncrease, EndBlock, TokenTrackerInstance, 
-    TokenTrackerReceipt, ReversibleICOInstance, ReversibleICOReceipt;
+let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
+    TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
 let deployments = {};
 
@@ -64,7 +62,7 @@ function saveDeploymentsToFile(data) {
         if(err) {
             return console.log(err);
         }
-    }); 
+    });
 }
 
 async function doFreshDeployment(name) {
@@ -78,8 +76,8 @@ async function doFreshDeployment(name) {
     /*
     *   Deploy Token Contract
     */
-    
-    TokenTrackerInstance = await helpers.utils.deployNewContractInstance(
+
+    TokenContractInstance = await helpers.utils.deployNewContractInstance(
         helpers, "RicoToken", {
             from: holder,
             arguments: [
@@ -90,8 +88,8 @@ async function doFreshDeployment(name) {
             gasPrice: helpers.solidity.gwei * 10
         }
     );
-    TokenTrackerReceipt = TokenTrackerInstance.receipt;
-    TokenTrackerAddress = TokenTrackerInstance.receipt.contractAddress;
+    TokenContractReceipt = TokenContractInstance.receipt;
+    TokenContractAddress = TokenContractInstance.receipt.contractAddress;
 
     /*
     *   Deploy RICO Contract
@@ -101,7 +99,7 @@ async function doFreshDeployment(name) {
     ReversibleICOAddress = ReversibleICOInstance.receipt.contractAddress;
     // helpers.addresses.Rico = ReversibleICOAddress;
 
-    await TokenTrackerInstance.methods.setup(
+    await TokenContractInstance.methods.setup(
         ReversibleICOAddress
     ).send({
         from: holder,  // initial token supply holder
@@ -111,31 +109,31 @@ async function doFreshDeployment(name) {
     *   Add RICO Settings
     */
     currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-        
+
     // starts in one day
-    StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1; 
-    
+    commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+
     // 22 days allocation
-    AllocationBlockCount = blocksPerDay * 22;                   
-    AllocationPrice = helpers.solidity.ether * 0.002;
+    commitPhaseBlockCount = blocksPerDay * 22;
+    commitPhasePrice = helpers.solidity.ether * 0.002;
 
     // 12 x 30 day periods for distribution
     StageCount = 12;
-    StageBlockCount = blocksPerDay * 30;      
+    StageBlockCount = blocksPerDay * 30;
     StagePriceIncrease = helpers.solidity.ether * 0.0001;
-    AllocationEndBlock = StartBlock + AllocationBlockCount;
+    commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
     // for validation
-    EndBlock = AllocationEndBlock + ( (StageBlockCount + 1) * StageCount );
+    BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
-    const StageStartBlock = AllocationEndBlock;
+    const StageStartBlock = commitPhaseEndBlock;
     let lastStageBlockEnd = StageStartBlock;
 
     for(let i = 0; i < StageCount; i++) {
 
         const start_block = lastStageBlockEnd + 1;
         const end_block = lastStageBlockEnd + StageBlockCount + 1;
-        const token_price = AllocationPrice + ( StagePriceIncrease * ( i +  1) );
+        const token_price = commitPhasePrice + ( StagePriceIncrease * ( i +  1) );
 
         stageValidation.push( {
             start_block: start_block,
@@ -146,13 +144,13 @@ async function doFreshDeployment(name) {
         lastStageBlockEnd = end_block;
     }
 
-    await ReversibleICOInstance.methods.addSettings(
-        TokenTrackerAddress,        // address _TokenTrackerAddress
+    await ReversibleICOInstance.methods.init(
+        TokenContractAddress,        // address _TokenContractAddress
         whitelistControllerAddress, // address _whitelistControllerAddress
         projectWalletAddress,          // address _projectWalletAddress
-        StartBlock,                 // uint256 _StartBlock
-        AllocationBlockCount,       // uint256 _AllocationBlockCount,
-        AllocationPrice,            // uint256 _AllocationPrice in wei
+        commitPhaseStartBlock,                 // uint256 _StartBlock
+        commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+        commitPhasePrice,            // uint256 _commitPhasePrice in wei
         StageCount,                 // uint8   _StageCount
         StageBlockCount,            // uint256 _StageBlockCount
         StagePriceIncrease          // uint256 _StagePriceIncrease in wei
@@ -162,7 +160,7 @@ async function doFreshDeployment(name) {
     });
 
     // transfer tokens to rico
-    await TokenTrackerInstance.methods.send(
+    await TokenContractInstance.methods.send(
         ReversibleICOInstance.receipt.contractAddress,
         RicoSaleSupply,
         ERC777data
@@ -172,32 +170,32 @@ async function doFreshDeployment(name) {
     });
 
     expect(
-        await TokenTrackerInstance.methods.balanceOf(ReversibleICOAddress).call()
+        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
-        await ReversibleICOInstance.methods.TokenSupply().call()
+        await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     deployments[name] = {
         "name": name,
         "rico_address": ReversibleICOInstance.receipt.contractAddress,
-        "token_address": TokenTrackerInstance.receipt.contractAddress,
+        "token_address": TokenContractInstance.receipt.contractAddress,
     };
 
     // save deployments to file.
     saveDeploymentsToFile(deployments);
-    
+
     return {
-        TokenTrackerInstance,
+        TokenContractInstance,
         ReversibleICOInstance,
     }
 };
 
 describe("Website States", function () {
 
-    describe("contract in stage 0 - 1 day before Allocation Start", async function () { 
-        
+    describe("contract in stage 0 - 1 day before Allocation Start", async function () {
+
         const name = "stage_0_before_allocation";
         let Instances;
         before(async () => {
@@ -213,12 +211,12 @@ describe("Website States", function () {
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
-            
+
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start", async function () {
+
         const name = "stage_0_at_allocation";
         let Instances;
         before(async () => {
@@ -235,12 +233,12 @@ describe("Website States", function () {
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
-            
+
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist no", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist no", async function () {
+
         const name = "stage_0_at_allocation_one_contribution_whitelist_no";
         let Instances;
         before(async () => {
@@ -248,7 +246,7 @@ describe("Website States", function () {
             Instances = await doFreshDeployment(name);
             currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-            
+
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -266,20 +264,20 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
             expect(
-                await Instances.ReversibleICOInstance.methods.ParticipantCount().call()
-            ).to.be.equal( "1" );  
+                await Instances.ReversibleICOInstance.methods.participantCount().call()
+            ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.ParticipantsById(1).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.ParticipantsByAddress(participant_address).call();
-            
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+
             expect(
                 Participant.whitelisted
             ).to.be.equal( false );
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist yes", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist yes", async function () {
+
         const name = "stage_0_at_allocation_one_contribution_whitelist_yes";
         let Instances;
         before(async () => {
@@ -287,7 +285,7 @@ describe("Website States", function () {
             Instances = await doFreshDeployment(name);
             currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-            
+
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -295,9 +293,9 @@ describe("Website States", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            await Instances.ReversibleICOInstance.methods.whitelistOrReject(
+            await Instances.ReversibleICOInstance.methods.whitelistApproveOrReject(
                 participant_1,
-                ApplicationEventTypes.WHITELIST_ACCEPT
+                ApplicationEventTypes.WHITELIST_APPROVE
             ).send({
                 from: whitelistControllerAddress
             });
@@ -312,16 +310,16 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
             expect(
-                await Instances.ReversibleICOInstance.methods.ParticipantCount().call()
-            ).to.be.equal( "1" );  
+                await Instances.ReversibleICOInstance.methods.participantCount().call()
+            ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.ParticipantsById(1).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.ParticipantsByAddress(participant_address).call();
-            
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+
             expect(
                 Participant.whitelisted
             ).to.be.equal( true );
         });
     });
-    
+
 });

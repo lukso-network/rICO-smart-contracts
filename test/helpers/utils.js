@@ -1,4 +1,4 @@
-const web3util      = require('web3-utils');
+const web3util = require('web3-utils');
 const dateFormat    = require('dateformat');
 
 /*
@@ -153,7 +153,7 @@ module.exports = {
         if(options && options.from) {
             from = options.from;
         }
-        
+
         if(options && options.gas) {
             gas = options.gas;
         }
@@ -172,7 +172,7 @@ module.exports = {
         if(options && options.arguments) {
             deployArguments.arguments = options.arguments;
         }
-        
+
         if(helpers.networkName == "coverage") {
             // override gas and gas price for coverage runs no matter what.
             gas = helpers.networkConfig.gas;
@@ -272,45 +272,45 @@ module.exports = {
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
     },
-    getCurrentUnlockRatio(helpers, currentBlock, DistributionStartBlock, EndBlock, precision) {
+    getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
 
         currentBlock = new helpers.BN(currentBlock);
-        DistributionStartBlock = new helpers.BN(DistributionStartBlock);
-        EndBlock = new helpers.BN(EndBlock);
+        BuyPhaseStartBlock = new helpers.BN(BuyPhaseStartBlock);
+        BuyPhaseEndBlock = new helpers.BN(BuyPhaseEndBlock);
         precision = new helpers.BN(precision);
 
         if(
-            currentBlock.toNumber() > DistributionStartBlock.toNumber()  
-            && currentBlock.toNumber() < EndBlock.toNumber()) 
+            currentBlock.toNumber() > BuyPhaseStartBlock.toNumber()
+            && currentBlock.toNumber() < BuyPhaseEndBlock.toNumber())
         {
-            const passedBlocks = currentBlock.sub(DistributionStartBlock);
-            const DistributionBlockLength = new helpers.BN(EndBlock).sub(DistributionStartBlock);
+            const passedBlocks = currentBlock.sub(BuyPhaseStartBlock);
+            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock);
             return passedBlocks.mul(
                 new helpers.BN("10").pow( new helpers.BN(precision) )
-            ).div(new helpers.BN(DistributionBlockLength));
-        } else if (currentBlock.toNumber() >= EndBlock.toNumber()) {
-            return 0; 
+            ).div(new helpers.BN(BuyPhaseBlockCount));
+        } else if (currentBlock.toNumber() >= BuyPhaseEndBlock.toNumber()) {
+            return 0;
         } else {
             return 0;
         }
 
     },
-    calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, DistributionStartBlock, EndBlock, tokenAmount) {
+    calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount) {
 
         tokenAmount = new helpers.BN(tokenAmount);
-        if(currentBlock < DistributionStartBlock) {
-            // allocation phase
+        if(currentBlock < BuyPhaseStartBlock) {
+            // commit phase
             return tokenAmount;
-        } else if(currentBlock < EndBlock) {
-            // distribution phase
+        } else if(currentBlock < BuyPhaseEndBlock) {
+            // buy  phase
             const precision = 20;
             const unlocked = tokenAmount.mul(
                 new helpers.BN(
                     helpers.utils.getCurrentUnlockRatio(
                         helpers,
                         currentBlock,
-                        DistributionStartBlock,
-                        EndBlock,
+                        BuyPhaseStartBlock,
+                        BuyPhaseEndBlock,
                         new helpers.BN(precision)
                     )
                 )
@@ -324,88 +324,88 @@ module.exports = {
         }
     },
     async getTokenAmountForEthAtStage(helpers, contract, ethValue, stageId) {
-        const stageData = await contract.methods.StageByNumber(stageId).call();
+        const stageData = await contract.methods.stages(stageId).call();
         return new helpers.BN(ethValue.toString()).mul(
             new helpers.BN("10").pow( new helpers.BN("18") )
         ).div(
-            new helpers.BN(stageData.token_price)
+            new helpers.BN(stageData.tokenPrice)
         );
     },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
-        const stageData = await contract.methods.StageByNumber(stageId).call();
-        let block = stageData.start_block;
+        const stageData = await contract.methods.stages(stageId).call();
+        let block = stageData.startBlock;
         if(end) {
-            block = stageData.end_block;
+            block = stageData.endBlock;
         }
-    
+
         if(addToBlockNumber !== false) {
             block = parseInt(block) + parseInt(addToBlockNumber);
         }
-    
+
         await contract.methods.jumpToBlockNumber(
             block
         ).send({
             from: deployerAddress, gas: 100000
         });
-    
+
         return block;
     },
     async displayContributions(helpers, contract, participant_address, max = null) {
 
-        let receivedETH = await contract.methods.receivedETH().call();
+        let committedETH = await contract.methods.committedETH().call();
         let returnedETH = await contract.methods.returnedETH().call();
         let acceptedETH = await contract.methods.acceptedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
-    
-        let ParticipantByAddress = await contract.methods.ParticipantsByAddress(participant_address).call();
-    
-        let ContractStageCount = await contract.methods.ContractStageCount().call();
+
+        let ParticipantByAddress = await contract.methods.participantsByAddress(participant_address).call();
+
+        let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
         const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
-    
+
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, receivedETH.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
         console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, returnedETH.toString()) +" eth" );
         console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, acceptedETH.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, withdrawnETH.toString()) +" eth" );
-        
+
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.received.toString()) +" eth" );
-        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returned.toString()) +" eth" );
-        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.accepted.toString()) +" eth" );
-        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawn.toString()) +" eth" );
-        console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_reserved.toString()) +" tokens" );
-        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_awarded.toString()) +" tokens" );
-        console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.tokens_returned.toString()) +" tokens" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, ParticipantByAddress.committedETH.toString()) +" eth" );
+        console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returnedETH.toString()) +" eth" );
+        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, ParticipantByAddress.acceptedETH.toString()) +" eth" );
+        console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawnETH.toString()) +" eth" );
+        console.log("Total reserved Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.reservedTokens.toString()) +" tokens" );
+        console.log("Total awarded Tokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.boughtTokens.toString()) +" tokens" );
+        console.log("Total returned Tokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.returnedTokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
 
         if(max > 0) {
-            ContractStageCount = max;
+            StageCount = max;
         }
-    
-        for(let i = 0; i < ContractStageCount; i++) {
-            const ParticipantStageDetails = await contract.methods.ParticipantTotalsDetails(participant_address, i).call();
+
+        for(let i = 0; i < StageCount; i++) {
+            const ParticipantStageDetails = await contract.methods.getParticipantDetailsByStage(participant_address, i).call();
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
-            console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.received.toString() ) +" eth" );
-            console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returned.toString() ) +" eth" );
-            console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.accepted.toString() ) +" eth" );
-            console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawn.toString() ) +" eth" );
-            console.log("tokens_reserved:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_reserved.toString() ) +" tokens" );
-            console.log("tokens_awarded:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_awarded.toString() ) +" tokens" );
-            console.log("tokens_returned:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.tokens_returned.toString() ) +" tokens" );
+            console.log("received:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.committedETH.toString() ) +" eth" );
+            console.log("returned:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.returnedETH.toString() ) +" eth" );
+            console.log("accepted:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.acceptedETH.toString() ) +" eth" );
+            console.log("withdrawn:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.withdrawnETH.toString() ) +" eth" );
+            console.log("reserved_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.reservedTokens.toString() ) +" tokens" );
+            console.log("bought_tokens:   ", helpers.utils.toEth(helpers,ParticipantStageDetails.boughtTokens.toString() ) +" tokens" );
+            console.log("returned_tokens:  ", helpers.utils.toEth(helpers,ParticipantStageDetails.returnedTokens.toString() ) +" tokens" );
         }
-    
+
         console.log("\n");
     },
     async getEthAmountForTokensAtStage(helpers, contract, token_amount, stage_id) {
         // get stage pricing
-        let stageData = await contract.methods.StageByNumber(stage_id).call();
+        let stageData = await contract.methods.stages(stage_id).call();
         return token_amount.mul(
-            new helpers.BN(stageData.token_price)
+            new helpers.BN(stageData.tokenPrice)
         ).div(
             new helpers.BN("10").pow(
                 new helpers.BN("18")
@@ -424,10 +424,10 @@ module.exports = {
         };
 
         const currentBlockNumber = parseInt(await contract.methods.getCurrentBlockNumber().call());
-        const EndBlock = parseInt(await contract.methods.EndBlock().call());
-        const DistributionStartBlock = parseInt(await contract.methods.DistributionStartBlock().call());
+        const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
+        const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
         const maxLocked = new helpers.BN( await contract.methods.getLockedTokenAmount(_from).call() );
-        const ParticipantRecord = await contract.methods.ParticipantsByAddress(_from).call();
+        const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
 
         if(ParticipantRecord.whitelisted == true) {
 
@@ -447,31 +447,31 @@ module.exports = {
                 for( let i = currentStageNumber; i >= 0; i-- ) {
                     let stage_id = i;
 
-                    let ParticipantRecordbyStage = await contract.methods.ParticipantTotalsDetails(_from, stage_id).call();
-                   
+                    let ParticipantRecordbyStage = await contract.methods.getParticipantDetailsByStage(_from, stage_id).call();
 
-                    let tokenAmount = new helpers.BN(ParticipantRecordbyStage.tokens_reserved)
+
+                    let tokenAmount = new helpers.BN(ParticipantRecordbyStage.reservedTokens)
                         .add(
-                            new helpers.BN(ParticipantRecordbyStage.tokens_awarded)
+                            new helpers.BN(ParticipantRecordbyStage.boughtTokens)
                         )
 
                     let tokens_in_stage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                        helpers, currentBlockNumber, DistributionStartBlock, EndBlock, tokenAmount
-                    ).sub( 
-                        new helpers.BN(ParticipantRecordbyStage.tokens_returned.toString()) 
+                        helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount
+                    ).sub(
+                        new helpers.BN(ParticipantRecordbyStage.returnedTokens.toString())
                     );
-                    
+
                     // only try to process stages that actually have tokens in them.
                     if(tokens_in_stage.gt( new helpers.BN("0") )) {
 
                         if (RemainingTokenAmount.lt(tokens_in_stage)) {
                             tokens_in_stage = RemainingTokenAmount;
                         }
-                        
+
                         let CurrentETHAmount = await helpers.utils.getEthAmountForTokensAtStage(
                             helpers, contract, tokens_in_stage, stage_id
                         );
-                        
+
                         // get eth for tokens in current stage
                         ReturnETHAmount = ReturnETHAmount.add(
                             CurrentETHAmount
@@ -496,7 +496,7 @@ module.exports = {
             return returnValues;
         }
         return returnValues;
-        
+
     }
-    
+
 };

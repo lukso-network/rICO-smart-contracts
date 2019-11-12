@@ -301,29 +301,29 @@ describe("Gnosis Safe Integration", function () {
                     .call();
 
                 // starts in one day
-                StartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+                commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
 
                 // 22 days allocation
-                AllocationBlockCount = blocksPerDay * 22;
-                AllocationPrice = helpers.solidity.ether * 0.002;
+                commitPhaseBlockCount = blocksPerDay * 22;
+                commitPhasePrice = helpers.solidity.ether * 0.002;
 
                 // 12 x 30 day periods for distribution
                 StageCount = 12;
                 StageBlockCount = blocksPerDay * 30;
                 StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
-                AllocationEndBlock = StartBlock + AllocationBlockCount;
+                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
                 // for validation
-                EndBlock = AllocationEndBlock + (StageBlockCount + 1) * StageCount;
+                BuyPhaseEndBlock = commitPhaseEndBlock + (StageBlockCount + 1) * StageCount;
 
-                const StageStartBlock = AllocationEndBlock;
+                const StageStartBlock = commitPhaseEndBlock;
                 let lastStageBlockEnd = StageStartBlock;
 
                 for (let i = 0; i < StageCount; i++) {
                     const start_block = lastStageBlockEnd + 1;
                     const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                    const token_price = AllocationPrice + StagePriceIncrease * (i + 1);
+                    const token_price = commitPhasePrice + StagePriceIncrease * (i + 1);
 
                     stageValidation.push({
                         start_block: start_block,
@@ -334,13 +334,13 @@ describe("Gnosis Safe Integration", function () {
                     lastStageBlockEnd = end_block;
                 }
 
-                let settingsData = this.Rico.methods.addSettings(
-                    TokenTrackerAddress,            // address _TokenTrackerAddress
+                let settingsData = this.Rico.methods.init(
+                    TokenContractAddress,            // address _TokenContractAddress
                     whitelistControllerAddress,     // address _whitelistControllerAddress
                     projectWalletAddress,           // address _projectWalletAddress
-                    StartBlock,                     // uint256 _StartBlock
-                    AllocationBlockCount,           // uint256 _AllocationBlockCount,
-                    AllocationPrice,                // uint256 _AllocationPrice in wei
+                    commitPhaseStartBlock,                     // uint256 _commitPhaseStartBlock
+                    commitPhaseBlockCount,           // uint256 _commitPhaseBlockCount,
+                    commitPhasePrice,                // uint256 _commitPhasePrice in wei
                     StageCount,                     // uint8   _StageCount
                     StageBlockCount,                // uint256 _StageBlockCount
                     StagePriceIncrease              // uint256 _StagePriceIncrease in wei
@@ -364,7 +364,7 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(true);
 
                 expect(
-                    await this.ReversibleICO.methods.running().call()
+                    await this.ReversibleICO.methods.started().call()
                 ).to.be.equal(false);
 
                 expect(
@@ -376,8 +376,8 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(false);
 
                 expect(
-                    await this.ReversibleICO.methods.TokenTrackerAddress().call()
-                ).to.be.equal(TokenTrackerAddress);
+                    await this.ReversibleICO.methods.TokenContractAddress().call()
+                ).to.be.equal(TokenContractAddress);
 
                 expect(
                     await this.ReversibleICO.methods.whitelistControllerAddress().call()
@@ -388,8 +388,8 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(projectWalletAddress);
 
                 expect(
-                    await this.ReversibleICO.methods.EndBlock().call()
-                ).to.be.equal(EndBlock.toString());
+                    await this.ReversibleICO.methods.BuyPhaseEndBlock().call()
+                ).to.be.equal(BuyPhaseEndBlock.toString());
             });
 
             it("Can transfer tokens to the Rico Contract", async function () {
