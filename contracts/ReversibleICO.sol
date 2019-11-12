@@ -261,12 +261,12 @@ contract ReversibleICO is IERC777Recipient {
     * ERC777TokensRecipient method for receiving tokens
     */
     function tokensReceived(
-        address _operator,
+        address,
         address _from,
-        address _to,
+        address,
         uint256 _amount,
-        bytes calldata _userData,
-        bytes calldata _operatorData
+        bytes calldata,
+        bytes calldata
     )
     external
     isInitialized
