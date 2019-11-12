@@ -8,9 +8,10 @@ The rICO tries to solve that by keeping investors in control of their funds over
 ## Functionality
 
 The rICO is set in stages that can be defined in the `init` function.
-stage 0 is seen as the "commit phase":
-In this period no ETH from the contract moves to the project, investors can commit or reverse their commitment by sending back the tokens.
-Stage 1-x is called "buy phase", this is where the committed ETH gradually buy the token over time. ETH that already bought tokens is withdrawable by the project. While ETH that is just committed, can be withdrawn by any investor at any point in time, by sending back tokens to the rICO smart contract.
+
+**Stage 0** is seen as the **"commit phase"**: In this period no ETH from the contract moves to the project, investors can commit or reverse their commitment by sending back the tokens.
+
+**Stage 1-x** is called **"buy phase"**, this is where the committed ETH gradually buy the token over time. ETH that already bought tokens is withdrawable by the project. While ETH that is just committed, can be withdrawn by any investor at any point in time, by sending back tokens to the rICO smart contract.
 
 Each stage can also have a price increase, so that committing early is rewarded.
 The scheme looks a little bit as follows:
