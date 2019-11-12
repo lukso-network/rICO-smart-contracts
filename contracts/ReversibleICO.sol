@@ -98,9 +98,10 @@ contract ReversibleICO is IERC777Recipient {
         uint256 returnedETH;	        // committedETH - acceptedETH
         uint256 acceptedETH;	        // lower than msg.value if maxCap already reached
         uint256 withdrawnETH;	        // cancel() / withdraw()
-        uint256 reservedTokens;        // total tokens bought in all stages
+        uint256 allocated;              // allocated to project when contributing or exiting
+        uint256 reservedTokens;         // total tokens bought in all stages
         uint256 boughtTokens;	        // total tokens already sent to the participant in all stages
-        uint256 returnedTokens;        // total tokens returned by participant to contract in all stages
+        uint256 returnedTokens;         // total tokens returned by participant to contract in all stages
         mapping ( uint8 => ParticipantDetailsByStage ) byStage;
     }
 
@@ -113,9 +114,10 @@ contract ReversibleICO is IERC777Recipient {
         uint256 returnedETH;		    // committedETH - acceptedETH
         uint256 acceptedETH;		    // lower than msg.value if maxCap already reached
         uint256 withdrawnETH;		    // withdrawn from current stage
-        uint256 reservedTokens;        // tokens bought in this stage
+        uint256 allocatedETH;           // allocated to project when contributing or exiting
+        uint256 reservedTokens;         // tokens bought in this stage
         uint256 boughtTokens;	        // tokens already sent to the participant in this stage
-        uint256 returnedTokens;	    // tokens returned by participant to contract
+        uint256 returnedTokens;	        // tokens returned by participant to contract
     }
 
     /*
@@ -299,7 +301,10 @@ contract ReversibleICO is IERC777Recipient {
     isInitialized
     isNotFrozen
     {
-        require(participantsByAddress[msg.sender].whitelisted != true, "Commitment canceling only possible using tokens after you got whitelisted.");
+        require(
+            participantsByAddress[msg.sender].whitelisted != true,
+            "Commitment canceling only possible using tokens after you got whitelisted."
+        );
 
         if(canCancelByEth(msg.sender)) {
             cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
@@ -336,11 +341,22 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     function getProjectAvailableEth() public view returns (uint256 _amount) {
-        uint256 available = acceptedETH.sub(withdrawnETH);
-        uint256 unlocked = available.mul(
+
+        uint256 remainingFromAllocation = 0;
+        if(projectETHAllocated > projectETHWithdrawn) {
+            remainingFromAllocation = projectETHAllocated.sub(projectETHWithdrawn);
+        }
+
+        uint256 globalAvailable = acceptedETH
+            .sub(withdrawnETH)
+            .sub(projectETHWithdrawn)
+            .sub(remainingFromAllocation);
+
+        uint256 unlocked = globalAvailable.mul(
             getCurrentUnlockRatio()
         ).div(10 ** 20);
-        return unlocked.sub(projectETHWithdrawn).add(projectETHAllocated);
+
+        return unlocked.add(remainingFromAllocation);
     }
 
     /*
@@ -454,26 +470,26 @@ contract ReversibleICO is IERC777Recipient {
         address _address,
         uint8 _stageId
     ) public view returns (
-        uint256 committedETH,
-        uint256 returnedETH,
-        uint256 acceptedETH,
-        uint256 withdrawnETH,
-        uint256 reservedTokens,
-        uint256 boughtTokens,
-        uint256 returnedTokens
+        uint256 stageCommittedETH,
+        uint256 stageReturnedETH,
+        uint256 stageAcceptedETH,
+        uint256 stageWithdrawnETH,
+        uint256 stageReservedTokens,
+        uint256 stageBoughtTokens,
+        uint256 stageReturnedTokens
     ) {
 
         ParticipantDetailsByStage storage totalsRecord = participantsByAddress[_address]
         .byStage[_stageId];
 
         return (
-        totalsRecord.committedETH,
-        totalsRecord.returnedETH,
-        totalsRecord.acceptedETH,
-        totalsRecord.withdrawnETH,
-        totalsRecord.reservedTokens,
-        totalsRecord.boughtTokens,
-        totalsRecord.returnedTokens
+            totalsRecord.committedETH,
+            totalsRecord.returnedETH,
+            totalsRecord.acceptedETH,
+            totalsRecord.withdrawnETH,
+            totalsRecord.reservedTokens,
+            totalsRecord.boughtTokens,
+            totalsRecord.returnedTokens
         );
     }
 
@@ -603,8 +619,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 uint256 unlocked = bought.mul(
                     getCurrentUnlockRatio()
-                ).div(10 ** uint256(precision)
-                );
+                ).div(10 ** uint256(precision));
 
                 return bought.sub(unlocked);
 
@@ -698,11 +713,14 @@ contract ReversibleICO is IERC777Recipient {
             uint256 remainingTokenAmount = _returnedTokenAmount;
             uint256 maxLocked = getLockedTokenAmount(_from);
             uint256 returnTokenAmount;
+            uint256 allocatedEthAmount = 0;
 
             if(remainingTokenAmount > maxLocked) {
                 returnTokenAmount = remainingTokenAmount - maxLocked;
                 remainingTokenAmount = maxLocked;
             }
+
+            projectETHAllocated = projectETHAllocated.sub(participantRecord.allocated);
 
             if(remainingTokenAmount > 0) {
 
@@ -713,10 +731,15 @@ contract ReversibleICO is IERC777Recipient {
                 // if stage tokens < remaining tokens to process, just sub remaining from stage
                 // this way we can receive tokens in current stage / later stages and process them again.
 
-                uint256 returnETHAmount;
+                uint256 returnETHAmount; // defaults to 0
 
                 uint8 currentStageNumber = getCurrentStage();
                 for( uint8 stageId = currentStageNumber; stageId >= 0; stageId-- ) {
+
+                    // total tokens
+                    uint256 totalInStage = participantRecord.byStage[stageId].reservedTokens +
+                        participantRecord.byStage[stageId].boughtTokens -
+                        participantRecord.byStage[stageId].returnedTokens;
 
                     // calculate how many tokens are actually locked in this stage
                     // and only use those for return.
@@ -742,6 +765,15 @@ contract ReversibleICO is IERC777Recipient {
                         returnETHAmount = returnETHAmount.add(currentETHAmount);
                         participantRecord.byStage[stageId].withdrawnETH += currentETHAmount;
 
+                        // allocated to project
+                        uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
+                            totalInStage.sub(tokensInStage),    // unlocked token amount
+                            stageId
+                        );
+
+                        allocatedEthAmount += unlockedETHAmount;
+                        participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
+
                         // remove processed token amount from requested amount
                         remainingTokenAmount = remainingTokenAmount.sub(tokensInStage);
 
@@ -761,11 +793,14 @@ contract ReversibleICO is IERC777Recipient {
                     tokenContract.send(_from, returnTokenAmount, data);
                 }
 
+                participantRecord.withdrawnETH += returnETHAmount;
+
                 // Adjust globals
                 withdrawnETH += returnETHAmount;
 
                 // allocate remaining eth to project directly
-                // ProjectETHAllocated
+                participantRecord.allocated = allocatedEthAmount;
+                projectETHAllocated = projectETHAllocated.add(participantRecord.allocated);
 
                 participantRecord.withdrawnETH += returnETHAmount;
                 address(uint160(_from)).transfer(returnETHAmount);
@@ -773,7 +808,6 @@ contract ReversibleICO is IERC777Recipient {
                 return;
             }
         }
-
         // If address is not Whitelisted a call to this results in a revert
         revert("Withdraw not possible. Participant has no locked tokens.");
     }
@@ -897,8 +931,8 @@ contract ReversibleICO is IERC777Recipient {
         // to handle the case when whitelist controller whitelists some one, then rejects
         // them, then whitelists them again.
         uint256 participantAvailableETH = participantRecord.committedETH -
-        participantRecord.withdrawnETH -
-        participantRecord.returnedETH;
+            participantRecord.withdrawnETH -
+            participantRecord.returnedETH;
 
         if(participantAvailableETH > 0) {
             // Adjust globals
@@ -909,7 +943,9 @@ contract ReversibleICO is IERC777Recipient {
             participantRecord.withdrawnETH += participantAvailableETH;
 
             // globals
-            withdrawnETH += participantAvailableETH;
+            // since this balance was never actually "accepted" it counts as returned
+            // otherwise it interferes with project withdraw calculations
+            returnedETH += participantAvailableETH;
 
             // send eth back to participant including received value
             address(uint160(_from)).transfer(participantAvailableETH + msg.value);

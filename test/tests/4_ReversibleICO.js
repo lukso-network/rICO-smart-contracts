@@ -868,7 +868,7 @@ describe("ReversibleICO", function () {
                                 for(let i = 0; i < StageCount; i++) {
                                     const ParticipantStageDetails = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestAcceptParticipant, i).call();
                                     TokenAmount = TokenAmount.add(new helpers.BN(
-                                        ParticipantStageDetails.boughtTokens
+                                        ParticipantStageDetails.stageBoughtTokens
                                     ));
                                 }
 
@@ -918,13 +918,13 @@ describe("ReversibleICO", function () {
                                         currentStage
                                     ).call();
 
-                                    const received = (parseInt(StageDetails.committedETH, 10) );
-                                    const returned = (parseInt(StageDetails.returnedETH, 10) );
-                                    const accepted = (parseInt(StageDetails.acceptedETH, 10) );
-                                    const withdrawn = (parseInt(StageDetails.withdrawnETH, 10) );
-
+                                    const commited = (parseInt(StageDetails.stageCommittedETH, 10) );
+                                    const returned = (parseInt(StageDetails.stageReturnedETH, 10) );
+                                    const accepted = (parseInt(StageDetails.stageAcceptedETH, 10) );
+                                    const withdrawn = (parseInt(StageDetails.stageWithdrawnETH, 10) );
+                                    
                                     const processedTotals = accepted + returned + withdrawn;
-                                    expect( processedTotals ).to.be.equal(received);
+                                    expect( processedTotals ).to.be.equal(commited);
 
                                 });
 
