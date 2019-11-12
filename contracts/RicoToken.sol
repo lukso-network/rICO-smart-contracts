@@ -10,8 +10,8 @@ contract RicoToken is ERC777 {
 
     ReversibleICO public rICO;
     address public manager;
-    bool public frozen = false;
-    bool public initialized = false;
+    bool public frozen; // default: false
+    bool public initialized; // default: false
 
     constructor(
         uint256 initialSupply,
