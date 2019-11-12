@@ -110,7 +110,7 @@ contract ReversibleICO is IERC777Recipient {
 
     struct ParticipantDetailsByStage {
         uint256 committedETH;		    // msg.value
-        uint256 returnedETH;		    // committedETH - accepted_eth
+        uint256 returnedETH;		    // committedETH - acceptedETH
         uint256 acceptedETH;		    // lower than msg.value if maxCap already reached
         uint256 withdrawnETH;		    // withdrawn from current stage
         uint256 reservedTokens;        // tokens bought in this stage
@@ -219,7 +219,7 @@ contract ReversibleICO is IERC777Recipient {
             stageN.endBlock = lastStageBlockEnd + _stageBlockCount + 1;
             stageN.tokenPrice = _commitPhasePrice + ( _stagePriceIncrease * (i) );
 
-            stageCount++; // StageCount = n + 1
+            stageCount++; // stageCount = n + 1
 
             lastStageBlockEnd = stageN.endBlock;
         }
@@ -454,13 +454,13 @@ contract ReversibleICO is IERC777Recipient {
         address _address,
         uint8 _stageId
     ) public view returns (
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        uint256
+        uint256 committedETH,
+        uint256 returnedETH,
+        uint256 acceptedETH,
+        uint256 withdrawnETH,
+        uint256 reservedTokens,
+        uint256 boughtTokens,
+        uint256 returnedTokens
     ) {
 
         ParticipantDetailsByStage storage totalsRecord = participantsByAddress[_address]

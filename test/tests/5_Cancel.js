@@ -74,14 +74,14 @@ async function revertToFreshDeployment() {
         // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
         snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
 
-        // reset account nonces.. 
+        // reset account nonces..
         helpers.utils.resetAccountNonceCache(helpers);
     } else {
 
         /*
         *   Deploy Token Contract
         */
-       
+
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
@@ -120,17 +120,17 @@ async function revertToFreshDeployment() {
         *   Add RICO Settings
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-            
+
         // starts in one day
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-        
+
         // 22 days allocation
         commitPhaseBlockCount = blocksPerDay * 22;
         commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         StageCount = 12;
-        StageBlockCount = blocksPerDay * 30;      
+        StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
         commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
@@ -165,7 +165,7 @@ async function revertToFreshDeployment() {
         expect(
             await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
-        
+
 
         // create snapshot
         if (snapshotsEnabled) {
@@ -180,7 +180,7 @@ async function revertToFreshDeployment() {
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
 
     // do some validation
-    expect( 
+    expect(
         await helpers.utils.getBalance(helpers, ReversibleICOAddress)
     ).to.be.bignumber.equal( new helpers.BN(0) );
 
@@ -189,7 +189,7 @@ async function revertToFreshDeployment() {
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
-        await ReversibleICOInstance.methods.TokenSupply().call()
+        await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(
         await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     );
@@ -197,18 +197,18 @@ async function revertToFreshDeployment() {
 
 describe("Testing canceling", function () {
 
-    before(async function () { 
+    before(async function () {
         await revertToFreshDeployment();
     });
-    
+
     describe("view getCancelModes(address participantAddress)", async function () {
 
-        before(async function () { 
+        before(async function () {
             await revertToFreshDeployment();
         });
-        
-        describe("contract in stage 1 or 2 ( not initialized with settings )", async function () { 
-            
+
+        describe("contract in stage 1 or 2 ( not initialized with settings )", async function () {
+
             it("should return (false, false) as no participant actually exists", async function () {
                 let CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                 expect(CancelStates[0]).to.be.equal(false);
@@ -218,9 +218,9 @@ describe("Testing canceling", function () {
         });
 
 
-        describe("contract in Allocation phase", async function () { 
-            
-            describe("participant has no contributions", async function () { 
+        describe("contract in Allocation phase", async function () {
+
+            describe("participant has no contributions", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -234,7 +234,7 @@ describe("Testing canceling", function () {
                 });
             });
 
-            describe("participant is not whitelisted and has 1 contribution", async function () { 
+            describe("participant is not whitelisted and has 1 contribution", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -246,7 +246,7 @@ describe("Testing canceling", function () {
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
                         gasPrice: helpers.networkConfig.gasPrice
-                    });                
+                    });
                 });
 
                 it("should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract", async function () {
@@ -256,7 +256,7 @@ describe("Testing canceling", function () {
                 });
             });
 
-            describe("participant is whitelisted and has 1 contribution", async function () { 
+            describe("participant is whitelisted and has 1 contribution", async function () {
                 before(async () => {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
@@ -287,9 +287,9 @@ describe("Testing canceling", function () {
             });
         });
 
-        describe("contract in Distribution phase", async function () { 
-            
-            describe("participant has no contributions", async function () { 
+        describe("contract in Distribution phase", async function () {
+
+            describe("participant has no contributions", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -303,7 +303,7 @@ describe("Testing canceling", function () {
                 });
             });
 
-            describe("participant is not whitelisted and has 1 contribution", async function () { 
+            describe("participant is not whitelisted and has 1 contribution", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -315,7 +315,7 @@ describe("Testing canceling", function () {
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
                         gasPrice: helpers.networkConfig.gasPrice
-                    });                
+                    });
                 });
 
                 it("should return (true, false) => cancel by sending eth value smaller than 0.001 eth to contract", async function () {
@@ -325,7 +325,7 @@ describe("Testing canceling", function () {
                 });
             });
 
-            describe("participant is whitelisted and has 1 contribution", async function () { 
+            describe("participant is whitelisted and has 1 contribution", async function () {
                 before(async () => {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5);
@@ -359,18 +359,18 @@ describe("Testing canceling", function () {
 
     });
 
-    describe("transaction () => fallback method", async function () { 
+    describe("transaction () => fallback method", async function () {
 
-        describe("contract in stage 1 or 2 ( not initialized with settings )", async function () { 
-            
+        describe("contract in stage 1 or 2 ( not initialized with settings )", async function () {
+
             let TestReversibleICO;
 
             before(async () => {
                 helpers.utils.resetAccountNonceCache(helpers);
-    
+
                 // deploy mock contract so we can set block times. ( ReversibleICOMock )
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
-    
+
                 // jump to contract start
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
@@ -415,8 +415,8 @@ describe("Testing canceling", function () {
 
         });
 
-        describe("contract in Allocation phase", async function () { 
-            
+        describe("contract in Allocation phase", async function () {
+
             before(async () => {
                 await revertToFreshDeployment();
                 helpers.utils.resetAccountNonceCache(helpers);
@@ -427,7 +427,7 @@ describe("Testing canceling", function () {
 
             it("value >= rico.minContribution results in a new contribution", async function () {
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const initialContributionsCount = ParticipantByAddress.contributionsCount;
 
                 const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
@@ -437,11 +437,11 @@ describe("Testing canceling", function () {
                     value: ContributionAmount.toString(),
                     gasPrice: helpers.networkConfig.gasPrice
                 });
-                
-                ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+
+                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const afterContributionsCount = ParticipantByAddress.contributionsCount;
 
-                expect( 
+                expect(
                     afterContributionsCount.toString()
                 ).to.be.equal(
                     (parseInt(initialContributionsCount) + 1).toString()
@@ -462,18 +462,18 @@ describe("Testing canceling", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const initialContributionsCount = ParticipantByAddress.contributionsCount;
 
                 const ContributionTxCost = new helpers.BN( ContributionTx.gasUsed ).mul(
                     new helpers.BN(helpers.networkConfig.gasPrice)
                 );
                 const ParticipantAccountBalanceAfterContribution = await helpers.utils.getBalance(helpers, participant_1);
-                const ParticipantAccountBalanceAfterContributionValidation = new helpers.BN( 
+                const ParticipantAccountBalanceAfterContributionValidation = new helpers.BN(
                     ParticipantAccountBalanceInitial
                 ).sub(ContributionTxCost).sub(ContributionAmount);
 
-                expect( 
+                expect(
                     ParticipantAccountBalanceAfterContribution.toString()
                 ).to.be.equal(
                     ParticipantAccountBalanceAfterContributionValidation.toString()
@@ -481,18 +481,18 @@ describe("Testing canceling", function () {
 
 
                 // validate contributions
-                ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 let ContributionTotals = new helpers.BN("0");
 
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(new helpers.BN(
-                        ParticipantStageDetails.committed_eth
+                        ParticipantStageDetails.committedETH
                     ));
                 }
 
-                expect( 
-                    ParticipantByAddress.committed_eth.toString()
+                expect(
+                    ParticipantByAddress.committedETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -515,7 +515,7 @@ describe("Testing canceling", function () {
                     new helpers.BN(helpers.networkConfig.gasPrice)
                 );
                 const ParticipantAccountBalanceAfterCancel = await helpers.utils.getBalance(helpers, participant_1);
-                const ParticipantAccountBalanceAfterCancelValidation = new helpers.BN( 
+                const ParticipantAccountBalanceAfterCancelValidation = new helpers.BN(
                     ParticipantAccountBalanceAfterContributionValidation
                 ).sub(CancelTxCost)
                 // cancel amount is returned already
@@ -527,7 +527,7 @@ describe("Testing canceling", function () {
                 ).to.be.equal(
                     ParticipantAccountBalanceAfterCancelValidation.toString()
                 );
-                
+
                 // validate fired events
                 let eventFilter = helpers.utils.hasEvent(
                     cancelTx, 'TransferEvent(uint8,address,uint256)'
@@ -538,12 +538,12 @@ describe("Testing canceling", function () {
                     cancelTx, 'ApplicationEvent(uint8,uint32,address,uint256)'
                 );
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
-                
-                ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+
+                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                 const afterContributionsCount = ParticipantByAddress.contributionsCount;
 
                 // no additional contributions logged.
-                expect( 
+                expect(
                     afterContributionsCount.toString()
                 ).to.be.equal(
                     initialContributionsCount.toString()
@@ -556,15 +556,15 @@ describe("Testing canceling", function () {
     describe("transaction cancel()", async function () {
 
         describe("contract in stage 1 or 2 ( not initialized with settings )", async function () {
-            
+
             let TestReversibleICO;
 
             before(async () => {
                 helpers.utils.resetAccountNonceCache(helpers);
-    
+
                 // deploy mock contract so we can set block times. ( ReversibleICOMock )
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
-    
+
                 // jump to contract start
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
@@ -610,7 +610,7 @@ describe("Testing canceling", function () {
 
     });
 
-    
+
 
 });
 
@@ -634,4 +634,3 @@ async function jumpToContractStage ( ReversibleICO, deployerAddress, stageId, en
 
     return block;
 }
-

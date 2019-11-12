@@ -62,7 +62,7 @@ function saveDeploymentsToFile(data) {
         if(err) {
             return console.log(err);
         }
-    }); 
+    });
 }
 
 async function doFreshDeployment(name) {
@@ -109,17 +109,17 @@ async function doFreshDeployment(name) {
     *   Add RICO Settings
     */
     currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-        
+
     // starts in one day
     commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-    
+
     // 22 days allocation
     commitPhaseBlockCount = blocksPerDay * 22;
     commitPhasePrice = helpers.solidity.ether * 0.002;
 
     // 12 x 30 day periods for distribution
     StageCount = 12;
-    StageBlockCount = blocksPerDay * 30;      
+    StageBlockCount = blocksPerDay * 30;
     StagePriceIncrease = helpers.solidity.ether * 0.0001;
     commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
@@ -174,7 +174,7 @@ async function doFreshDeployment(name) {
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
-        await ReversibleICOInstance.methods.TokenSupply().call()
+        await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(RicoSaleSupply.toString());
 
     deployments[name] = {
@@ -185,7 +185,7 @@ async function doFreshDeployment(name) {
 
     // save deployments to file.
     saveDeploymentsToFile(deployments);
-    
+
     return {
         TokenContractInstance,
         ReversibleICOInstance,
@@ -194,8 +194,8 @@ async function doFreshDeployment(name) {
 
 describe("Website States", function () {
 
-    describe("contract in stage 0 - 1 day before Allocation Start", async function () { 
-        
+    describe("contract in stage 0 - 1 day before Allocation Start", async function () {
+
         const name = "stage_0_before_allocation";
         let Instances;
         before(async () => {
@@ -211,12 +211,12 @@ describe("Website States", function () {
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
-            
+
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start", async function () {
+
         const name = "stage_0_at_allocation";
         let Instances;
         before(async () => {
@@ -233,12 +233,12 @@ describe("Website States", function () {
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
-            
+
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist no", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist no", async function () {
+
         const name = "stage_0_at_allocation_one_contribution_whitelist_no";
         let Instances;
         before(async () => {
@@ -246,7 +246,7 @@ describe("Website States", function () {
             Instances = await doFreshDeployment(name);
             currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-            
+
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -264,20 +264,20 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
             expect(
-                await Instances.ReversibleICOInstance.methods.ParticipantCount().call()
-            ).to.be.equal( "1" );  
+                await Instances.ReversibleICOInstance.methods.participantCount().call()
+            ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.ParticipantsById(1).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.ParticipantsByAddress(participant_address).call();
-            
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+
             expect(
                 Participant.whitelisted
             ).to.be.equal( false );
         });
     });
 
-    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist yes", async function () { 
-        
+    describe("contract in stage 0 - at first block in Allocation Start - 1 contrib - whitelist yes", async function () {
+
         const name = "stage_0_at_allocation_one_contribution_whitelist_yes";
         let Instances;
         before(async () => {
@@ -285,7 +285,7 @@ describe("Website States", function () {
             Instances = await doFreshDeployment(name);
             currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-            
+
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -310,16 +310,16 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
             ).to.be.equal( "0" );
             expect(
-                await Instances.ReversibleICOInstance.methods.ParticipantCount().call()
-            ).to.be.equal( "1" );  
+                await Instances.ReversibleICOInstance.methods.participantCount().call()
+            ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.ParticipantsById(1).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.ParticipantsByAddress(participant_address).call();
-            
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+
             expect(
                 Participant.whitelisted
             ).to.be.equal( true );
         });
     });
-    
+
 });

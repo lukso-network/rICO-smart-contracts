@@ -73,13 +73,13 @@ async function revertToFreshDeployment() {
         // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
         snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
 
-        // reset account nonces.. 
+        // reset account nonces..
         helpers.utils.resetAccountNonceCache(helpers);
     } else {
 
         /*
         *   Deploy Token Contract
-        */       
+        */
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
                 from: holder,
@@ -118,17 +118,17 @@ async function revertToFreshDeployment() {
         *   Add RICO Settings
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-            
+
         // starts in one day
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-        
+
         // 22 days allocation
         commitPhaseBlockCount = blocksPerDay * 22;
         commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         StageCount = 12;
-        StageBlockCount = blocksPerDay * 30;      
+        StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
         commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
@@ -162,7 +162,7 @@ async function revertToFreshDeployment() {
         expect(
             await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
         ).to.be.equal(RicoSaleSupply.toString());
-        
+
         // create snapshot
         if (snapshotsEnabled) {
             snapshots[SnapShotKey] = await helpers.web3.evm.snapshot();
@@ -176,7 +176,7 @@ async function revertToFreshDeployment() {
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
 
     // do some validation
-    expect( 
+    expect(
         await helpers.utils.getBalance(helpers, ReversibleICOAddress)
     ).to.be.bignumber.equal( new helpers.BN(0) );
 
@@ -185,7 +185,7 @@ async function revertToFreshDeployment() {
     ).to.be.equal(RicoSaleSupply.toString());
 
     expect(
-        await ReversibleICOInstance.methods.TokenSupply().call()
+        await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(
         await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
     );
@@ -193,27 +193,27 @@ async function revertToFreshDeployment() {
 
 describe("Flow Testing", function () {
 
-    before(async function () { 
+    before(async function () {
         await revertToFreshDeployment();
     });
-    
-    describe("tokensReceived() - sending ERC777 tokens to rico contract", async function () { 
 
-        describe("0 - contract not initialized with settings", async function () { 
+    describe("tokensReceived() - sending ERC777 tokens to rico contract", async function () {
+
+        describe("0 - contract not initialized with settings", async function () {
 
             let TestReversibleICO;
 
-            before(async function () { 
+            before(async function () {
                 helpers.utils.resetAccountNonceCache(helpers);
-    
+
                 // deploy mock contract so we can set block times. ( ReversibleICOMock )
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
-    
+
                 // jump to contract start
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
-            
-            describe("token sender is projectWalletAddress", async function () { 
+
+            describe("token sender is projectWalletAddress", async function () {
 
                 it("transaction reverts \"Contract must be initialized.\"", async function () {
 
@@ -225,7 +225,7 @@ describe("Flow Testing", function () {
                         new BN("10").pow(new BN("18"))
                     ).toString();
 
-                    await helpers.assertInvalidOpcode( async function () { 
+                    await helpers.assertInvalidOpcode( async function () {
 
                         await TokenContractInstance.methods.send(
                             TestReversibleICO.receipt.contractAddress,
@@ -240,8 +240,8 @@ describe("Flow Testing", function () {
 
                 });
             });
-            
-            describe("token sender is deployerAddress", async function () { 
+
+            describe("token sender is deployerAddress", async function () {
 
                 it("transaction reverts \"Contract must be initialized.\"", async function () {
 
@@ -283,13 +283,13 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("1 - contract initialized with settings", async function () { 
+        describe("1 - contract initialized with settings", async function () {
 
             let TestReversibleICO, TestReversibleICOAddress, TestTokenContract, TestTokenContractAddress;
 
-            before(async function () { 
+            before(async function () {
                 helpers.utils.resetAccountNonceCache(helpers);
-    
+
                 // deploy everything except sending tokens to rico
 
                 TestTokenContract = await helpers.utils.deployNewContractInstance(
@@ -322,17 +322,17 @@ describe("Flow Testing", function () {
                 *   Add RICO Settings
                 */
                 currentBlock = await TestReversibleICO.methods.getCurrentBlockNumber().call();
-                        
+
                 // starts in one day
                 commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-                
+
                 // 22 days allocation
                 commitPhaseBlockCount = blocksPerDay * 22;
                 commitPhasePrice = helpers.solidity.ether * 0.002;
 
                 // 12 x 30 day periods for distribution
                 StageCount = 12;
-                StageBlockCount = blocksPerDay * 30;      
+                StageBlockCount = blocksPerDay * 30;
                 StagePriceIncrease = helpers.solidity.ether * 0.0001;
                 commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
 
@@ -357,10 +357,10 @@ describe("Flow Testing", function () {
                 // jump to contract start
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
-            
-            describe("using configured token", async function () { 
 
-                describe("token sender is projectWalletAddress", async function () { 
+            describe("using configured token", async function () {
+
+                describe("token sender is projectWalletAddress", async function () {
 
                     it("token amount is accepted and TokenSupply is correct", async function () {
 
@@ -384,7 +384,7 @@ describe("Flow Testing", function () {
                         });
 
                         expect(
-                            await TestReversibleICO.methods.TokenSupply().call()
+                            await TestReversibleICO.methods.tokenSupply().call()
                         ).to.be.equal(
                             testAmount
                         );
@@ -392,7 +392,7 @@ describe("Flow Testing", function () {
                     });
                 });
 
-                describe("token sender is deployerAddress ", async function () { 
+                describe("token sender is deployerAddress ", async function () {
 
                     it("transaction reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
@@ -433,10 +433,10 @@ describe("Flow Testing", function () {
                 });
 
             });
-            
-            describe("using different token", async function () { 
 
-                describe("token sender is projectWalletAddress", async function () { 
+            describe("using different token", async function () {
+
+                describe("token sender is projectWalletAddress", async function () {
 
                     it("transaction reverts \"Invalid token sent.\"", async function () {
 
@@ -466,7 +466,7 @@ describe("Flow Testing", function () {
                     });
                 });
 
-                describe("token sender is deployerAddress ", async function () { 
+                describe("token sender is deployerAddress ", async function () {
 
                     it("transaction reverts \"Invalid token sent.\"", async function () {
 
@@ -507,12 +507,12 @@ describe("Flow Testing", function () {
                 });
 
             });
-            
+
         });
 
-        describe("2 - contract in Allocation phase", async function () { 
+        describe("2 - contract in Allocation phase", async function () {
 
-            describe("participant is not whitelisted and has no contributions", async function () { 
+            describe("participant is not whitelisted and has no contributions", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -543,7 +543,7 @@ describe("Flow Testing", function () {
                         from: holder,
                         gas: 100000
                     });
-                    
+
                     const ParticipantTokenBalance = new BN(
                         await TokenContractInstance.methods.balanceOf(participant_1).call()
                     );
@@ -571,7 +571,7 @@ describe("Flow Testing", function () {
                 });
             });
 
-            describe("participant is not whitelisted and has 1 contribution", async function () { 
+            describe("participant is not whitelisted and has 1 contribution", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -611,7 +611,7 @@ describe("Flow Testing", function () {
                         from: holder,
                         gas: 100000
                     });
-                    
+
                     const ParticipantTokenBalance = new BN(
                         await TokenContractInstance.methods.balanceOf(participant_1).call()
                     );
@@ -640,7 +640,7 @@ describe("Flow Testing", function () {
             });
 
 
-            describe("participant is whitelisted and has 2 contributions", async function () { 
+            describe("participant is whitelisted and has 2 contributions", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -710,7 +710,7 @@ describe("Flow Testing", function () {
                     const ParticipantLockedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    
+
                     // locked + unlocked = balance
                     expect(
                         ParticipantLockedTokenBalanceBefore.add(
@@ -796,9 +796,9 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("3 - contract in Distribution phase ( stage 6 - last block )", async function () { 
+        describe("3 - contract in Distribution phase ( stage 6 - last block )", async function () {
 
-            describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () { 
+            describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -851,23 +851,23 @@ describe("Flow Testing", function () {
                 it("participant can withdraw a small amount of eth by sending tokens back to contract", async function () {
 
                     const TestParticipantAddress = participant_1;
-                    
+
                     // return 1 eth worth of tokens in current stage
                     const ethAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
                     const ReturnTokenAmount = new BN(
                         await helpers.utils.getTokenAmountForEthAtStage(
                             helpers,
-                            ReversibleICOInstance, 
+                            ReversibleICOInstance,
                             ethAmount,
                             6
-                        ) 
+                        )
                     );
 
                     const ParticipantUnlockedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    // since we're in a later stage, unlocked need to be above 0 
+                    // since we're in a later stage, unlocked need to be above 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
@@ -887,7 +887,7 @@ describe("Flow Testing", function () {
                     const ParticipantLockedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    
+
                     // locked + unlocked = balance
                     expect(
                         ParticipantLockedTokenBalanceBefore.add(
@@ -967,7 +967,7 @@ describe("Flow Testing", function () {
 
                     // Tokens: unlocked validation - the same
                     expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
-                    
+
                     // accounting for price rounding errors
                     if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
                         expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new helpers.BN("1") ));
@@ -989,7 +989,7 @@ describe("Flow Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    // since we're in a later stage, unlocked need to be above 0 
+                    // since we're in a later stage, unlocked need to be above 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
@@ -1009,7 +1009,7 @@ describe("Flow Testing", function () {
                     const ParticipantLockedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    
+
                     // locked + unlocked = balance
                     expect(
                         ParticipantLockedTokenBalanceBefore.add(
@@ -1089,7 +1089,7 @@ describe("Flow Testing", function () {
 
                     // Tokens: unlocked validation - the same
                     expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
-                    
+
                     expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfter );
 
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
@@ -1101,7 +1101,7 @@ describe("Flow Testing", function () {
                     const TestParticipantAddress = participant_1;
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-                    let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                    let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                     const initialContributionsCount = ParticipantByAddress.contributionsCount;
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -1126,15 +1126,15 @@ describe("Flow Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(TestParticipantAddress).call();
+                    ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(TestParticipantAddress).call();
                     const afterContributionsCount = ParticipantByAddress.contributionsCount;
-    
-                    expect( 
+
+                    expect(
                         afterContributionsCount.toString()
                     ).to.be.equal(
                         (parseInt(initialContributionsCount) + 1).toString()
                     );
-    
+
                     const ContractBalanceAfter = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                     const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
 
@@ -1177,7 +1177,7 @@ describe("Flow Testing", function () {
                         // add tokens that were allocated
                         .sub( expectedTokenAmount );
                     expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
-                    
+
 
                 });
 
@@ -1194,7 +1194,7 @@ describe("Flow Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    // since we're in a later stage, unlocked need to be above 0 
+                    // since we're in a later stage, unlocked need to be above 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
@@ -1214,7 +1214,7 @@ describe("Flow Testing", function () {
                     const ParticipantLockedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    
+
                     // locked + unlocked = balance
                     expect(
                         ParticipantLockedTokenBalanceBefore.add(
@@ -1294,7 +1294,7 @@ describe("Flow Testing", function () {
 
                     // Tokens: unlocked validation - the same
                     expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
-                    
+
                     expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfter );
 
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
@@ -1314,7 +1314,7 @@ describe("Flow Testing", function () {
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
-                    // since we're in a later stage, unlocked need to be above 0 
+                    // since we're in a later stage, unlocked need to be above 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     // since we already sent back all our tokens.. we should have 0 locked remaining
@@ -1337,9 +1337,9 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("4 - contract after Distribution phase", async function () { 
+        describe("4 - contract after Distribution phase", async function () {
 
-            describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () { 
+            describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -1405,7 +1405,7 @@ describe("Flow Testing", function () {
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
-                    // since we're in a later stage, unlocked need to be above 0 
+                    // since we're in a later stage, unlocked need to be above 0
                     expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     // since we already sent back all our tokens.. we should have 0 locked remaining
@@ -1429,7 +1429,7 @@ describe("Flow Testing", function () {
         });
     });
 
-    
+
 });
 
 async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
@@ -1444,12 +1444,12 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     let amount1 = await contract.methods.getLockedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
-    
+
     console.log("participant: ", participant);
     console.log("gas V:   ", tx1.gasUsed);
     console.log("amount:  ", helpers.utils.toFullToken(helpers, new helpers.BN(amount1) ));
     console.log("tokensV3:", helpers.utils.toFullToken(
-            helpers, helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens) 
+            helpers, helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
         )
     );
 

@@ -6,7 +6,7 @@ const expect = helpers.expect
 describe("ERC1820 - Token Registry", function () {
 
     describe("Step 1 - Before deployment state", function () {
-        
+
         it("Contract Code at address: " + helpers.ERC1820.ContractAddress + " should be 0x", async function () {
             const ContractCode = await new helpers.web3Instance.eth.getCode(helpers.ERC1820.ContractAddress);
             expect( ContractCode ).to.be.equal( "0x" );
@@ -25,7 +25,7 @@ describe("ERC1820 - Token Registry", function () {
     });
 
     describe("Step 2 - Deployment preparation", function () {
-        
+
         let valueTransferTx, initialFundsSupplierBalance, txGasPrice;
         before(async function () {
 
@@ -72,7 +72,7 @@ describe("ERC1820 - Token Registry", function () {
 
 
     describe("Step 3 - ERC1820 Deployment", function () {
-        
+
         let deploymentTx;
         before(async function () {
 
@@ -84,7 +84,7 @@ describe("ERC1820 - Token Registry", function () {
             console.log("");
 
         });
-        
+
         describe("Validation after ERC1820 Registry contract deployment", function () {
 
             describe("Transaction", function () {
