@@ -437,15 +437,15 @@ describe("ProjectWithdraw Testing", function () {
                         let AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         let AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
                         let AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        let AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        let AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
+                        let AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        let AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
 
                         console.log("");
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
                         console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
                         console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
                         console.log("");
                         // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 2 );
 
@@ -468,16 +468,16 @@ describe("ProjectWithdraw Testing", function () {
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
                         AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
                         AfterWithdrawETHWithdrawn = new BN( await ReversibleICOInstance.methods.returnedETH().call() );
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
 
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
                         console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
                         console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
                         console.log("returnedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawETHWithdrawn.toString() ) +" eth" );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
                         let ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
@@ -508,14 +508,14 @@ describe("ProjectWithdraw Testing", function () {
                         AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
                         console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
                         AfterWithdrawETHWithdrawn = new BN( await ReversibleICOInstance.methods.returnedETH().call() );
                         console.log("returnedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawETHWithdrawn.toString() ) +" eth" );
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
@@ -547,11 +547,11 @@ describe("ProjectWithdraw Testing", function () {
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
@@ -570,11 +570,11 @@ describe("ProjectWithdraw Testing", function () {
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
@@ -600,11 +600,11 @@ describe("ProjectWithdraw Testing", function () {
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
@@ -622,11 +622,11 @@ describe("ProjectWithdraw Testing", function () {
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectETHAllocated().call() );
-                        console.log("projectETHAllocated: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectETHWithdrawn().call() );
-                        console.log("projectETHWithdrawn: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
+                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
@@ -1357,7 +1357,7 @@ async function displayContractStats(contract, TokenContractInstance) {
     let acceptedETH = await contract.methods.acceptedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
-    let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
+    let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
     let ricoTokenBalance = await TokenContractInstance.methods.balanceOf(contract.receipt.contractAddress).call();
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
@@ -1367,6 +1367,6 @@ async function displayContractStats(contract, TokenContractInstance) {
     console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");
     console.log("projectETH:         ", helpers.utils.toEth(helpers,projectETH) + " eth");
-    console.log("projectETHWithdrawn:", helpers.utils.toEth(helpers,projectETHWithdrawn) + " eth");
+    console.log("projectWithdrawnETH:", helpers.utils.toEth(helpers,projectWithdrawnETH) + " eth");
     console.log("\n");
 }

@@ -52,8 +52,8 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public withdrawnETH; // default: 0
 
     uint256 public projectWithdrawCount; // default: 0
-    uint256 public projectETHAllocated; // default: 0
-    uint256 public projectETHWithdrawn; // default: 0
+    uint256 public projectAllocatedETH; // default: 0
+    uint256 public projectWithdrawnETH; // default: 0
 
     // Minimum amount of ETH we accept for a contribution
     // everything lower will trigger a canceling of pending ETH
@@ -326,7 +326,7 @@ contract ReversibleICO is IERC777Recipient {
         require(_ethAmount <= unlocked, "Requested amount to large, not enough unlocked ETH available.");
 
         projectWithdrawCount++;
-        projectETHWithdrawn += _ethAmount;
+        projectWithdrawnETH += _ethAmount;
 
 
         emit ApplicationEvent(
@@ -343,13 +343,13 @@ contract ReversibleICO is IERC777Recipient {
     function getProjectAvailableEth() public view returns (uint256 _amount) {
 
         uint256 remainingFromAllocation = 0;
-        if(projectETHAllocated > projectETHWithdrawn) {
-            remainingFromAllocation = projectETHAllocated.sub(projectETHWithdrawn);
+        if(projectAllocatedETH > projectWithdrawnETH) {
+            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
         }
 
         uint256 globalAvailable = acceptedETH
             .sub(withdrawnETH)
-            .sub(projectETHWithdrawn)
+            .sub(projectWithdrawnETH)
             .sub(remainingFromAllocation);
 
         uint256 unlocked = globalAvailable.mul(
@@ -720,7 +720,7 @@ contract ReversibleICO is IERC777Recipient {
                 remainingTokenAmount = maxLocked;
             }
 
-            projectETHAllocated = projectETHAllocated.sub(participantRecord.allocatedETH);
+            projectAllocatedETH = projectAllocatedETH.sub(participantRecord.allocatedETH);
 
             if(remainingTokenAmount > 0) {
 
@@ -800,7 +800,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 // allocate remaining eth to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
-                projectETHAllocated = projectETHAllocated.add(participantRecord.allocatedETH);
+                projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
 
                 participantRecord.withdrawnETH += returnETHAmount;
                 address(uint160(_from)).transfer(returnETHAmount);

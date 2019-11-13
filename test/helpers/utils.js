@@ -356,7 +356,7 @@ module.exports = {
         let returnedETH = await contract.methods.returnedETH().call();
         let acceptedETH = await contract.methods.acceptedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
-        let allocatedETH = await contract.methods.projectETHAllocated().call();
+        let allocatedETH = await contract.methods.projectAllocatedETH().call();
         let ProjectETHWithdrawn = await contract.methods.ProjectETHWithdrawn().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
