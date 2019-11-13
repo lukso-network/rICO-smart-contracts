@@ -249,7 +249,7 @@ describe("ProjectWithdraw Testing", function () {
             });
         });
 
-        describe("1 - contract in Allocation phase", async function () {
+        describe("1 - contract in commit phase", async function () {
 
             describe("no contributions", async function () {
 
@@ -360,7 +360,7 @@ describe("ProjectWithdraw Testing", function () {
         });
         */
 
-        describe("2 - contract in Distribution phase ( stage 1 - last block )", async function () {
+        describe("2 - contract in buy phase ( stage 1 - last block )", async function () {
 
             describe("One whitelisted contribution in contract", async function () { 
                 const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
@@ -1225,7 +1225,7 @@ describe("ProjectWithdraw Testing", function () {
         });
 
         /*
-        describe("3 - contract after Distribution phase", async function () {
+        describe("3 - contract after buy phase", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 

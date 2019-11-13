@@ -200,7 +200,7 @@ describe("Contribution Testing", function () {
 
     describe("transaction () => fallback method", async function () {
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             before(async () => {
                 await revertToFreshDeployment();

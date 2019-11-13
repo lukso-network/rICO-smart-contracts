@@ -218,7 +218,7 @@ describe("Testing canceling", function () {
         });
 
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             describe("participant has no contributions", async function () {
 
@@ -287,7 +287,7 @@ describe("Testing canceling", function () {
             });
         });
 
-        describe("contract in Distribution phase", async function () {
+        describe("contract in buy phase", async function () {
 
             describe("participant has no contributions", async function () {
 
@@ -415,7 +415,7 @@ describe("Testing canceling", function () {
 
         });
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             before(async () => {
                 await revertToFreshDeployment();

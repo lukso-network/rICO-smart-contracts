@@ -510,7 +510,7 @@ describe("Flow Testing", function () {
 
         });
 
-        describe("2 - contract in Allocation phase", async function () {
+        describe("2 - contract in commit phase", async function () {
 
             describe("participant is not whitelisted and has no contributions", async function () {
 
@@ -796,7 +796,7 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("3 - contract in Distribution phase ( stage 6 - last block )", async function () {
+        describe("3 - contract in buy phase ( stage 6 - last block )", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
@@ -1337,7 +1337,7 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("4 - contract after Distribution phase", async function () {
+        describe("4 - contract after buy phase", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 

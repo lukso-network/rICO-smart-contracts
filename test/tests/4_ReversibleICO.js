@@ -468,7 +468,7 @@ describe("ReversibleICO", function () {
 
         describe("view getCurrentPrice()", async function () {
 
-            it("Returns correct value for Allocation phase", async function () {
+            it("Returns correct value for commit phase", async function () {
                 const stageId = 0;
                 await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
                 expect( await this.ReversibleICO.methods.getCurrentPrice().call() ).to.be.equal( commitPhasePrice.toString() );
@@ -518,7 +518,7 @@ describe("ReversibleICO", function () {
 
         describe("view getPriceAtBlock(uint256)", async function () {
 
-            it("Returns correct value for Allocation phase", async function () {
+            it("Returns correct value for commit phase", async function () {
                 const stageId = 0;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 expect(

@@ -98,7 +98,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 returnedETH;	        // committedETH - acceptedETH
         uint256 acceptedETH;	        // lower than msg.value if maxCap already reached
         uint256 withdrawnETH;	        // cancel() / withdraw()
-        uint256 allocated;              // allocated to project when contributing or exiting
+        uint256 allocatedETH;              // allocated to project when contributing or exiting
         uint256 reservedTokens;         // total tokens bought in all stages
         uint256 boughtTokens;	        // total tokens already sent to the participant in all stages
         uint256 returnedTokens;         // total tokens returned by participant to contract in all stages
@@ -720,7 +720,7 @@ contract ReversibleICO is IERC777Recipient {
                 remainingTokenAmount = maxLocked;
             }
 
-            projectETHAllocated = projectETHAllocated.sub(participantRecord.allocated);
+            projectETHAllocated = projectETHAllocated.sub(participantRecord.allocatedETH);
 
             if(remainingTokenAmount > 0) {
 
@@ -799,8 +799,8 @@ contract ReversibleICO is IERC777Recipient {
                 withdrawnETH += returnETHAmount;
 
                 // allocate remaining eth to project directly
-                participantRecord.allocated = allocatedEthAmount;
-                projectETHAllocated = projectETHAllocated.add(participantRecord.allocated);
+                participantRecord.allocatedETH = allocatedEthAmount;
+                projectETHAllocated = projectETHAllocated.add(participantRecord.allocatedETH);
 
                 participantRecord.withdrawnETH += returnETHAmount;
                 address(uint160(_from)).transfer(returnETHAmount);
