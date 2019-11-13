@@ -353,22 +353,22 @@ contract ReversibleICO is IERC777Recipient {
             .sub(projectWithdrawnETH)
             .sub(remainingFromAllocation);
 
-        // multiply the available ETH with the ratio that belongs to the project now
+        // multiply the available ETH with the percentage that belongs to the project now
         uint256 unlocked = globalAvailable.mul(
-            getCurrentUnlockRatio()
+            getCurrentUnlockPercentage()
         ).div(10 ** 20);
 
         return unlocked.add(remainingFromAllocation);
     }
 
     /*
-    *   Whitelisting or Rejecting
+    *   Whitelists or Rejects a participants address
     *
     *   Possible modes: WHITELIST_APPROVE: 5, WHITELIST_REJECT: 6
     */
-    function whitelistApproveOrReject(
+    function whitelist(
         address _address,
-        uint8 _mode
+        bool _approve
     )
     public
     isInitialized
@@ -377,32 +377,27 @@ contract ReversibleICO is IERC777Recipient {
     {
         Participant storage participantRecord = participantsByAddress[_address];
 
-        if(_mode == uint8(ApplicationEventTypes.WHITELIST_APPROVE)) {
+        if(_approve) {
             participantRecord.whitelisted = true;
 
             // accept all contributions
-            acceptContributionsForAddress(_address, _mode);
+            acceptContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_APPROVE));
 
-        } else if(_mode == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
+        } else {
             participantRecord.whitelisted = false;
 
             // cancel all contributions
-            cancelContributionsForAddress(_address, _mode);
-
-        } else {
-            revert("Invalid mode specified.");
+            cancelContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_REJECT));
         }
 
     }
 
     /*
     *   Whitelisting or Rejecting multiple addresses
-    *   start is 0 / count is 10, should be fine for most
-    *   for special cases we just use the whitelistApproveOrReject method
     */
-    function whitelistApproveOrRejectMultiple(address[] memory _address, uint8 _mode) public {
+    function whitelistMultiple(address[] memory _address, bool _approve) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
-            whitelistApproveOrReject(_address[i], _mode);
+            whitelist(_address[i], _approve);
         }
     }
 
@@ -620,7 +615,7 @@ contract ReversibleICO is IERC777Recipient {
                 uint256 bought = _tokenAmount;
 
                 uint256 unlocked = bought.mul(
-                    getCurrentUnlockRatio()
+                    getCurrentUnlockPercentage()
                 ).div(10 ** uint256(precision));
 
                 return bought.sub(unlocked);
@@ -636,10 +631,11 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
-    *   Returns unlock ratio multiplied by 10 to the power of precision
+    *   Calculates the percentage of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
+    *   Returns unlock percentage multiplied by 10 to the power of precision
     *  ( should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals )
     */
-    function getCurrentUnlockRatio() public view returns(uint256) {
+    function getCurrentUnlockPercentage() public view returns(uint256) {
         uint8 precision = 20;
         uint256 currentBlock = getCurrentBlockNumber();
 

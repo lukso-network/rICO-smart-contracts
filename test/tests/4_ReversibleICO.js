@@ -635,7 +635,7 @@ describe("ReversibleICO", function () {
         });
 
 
-        describe("transaction whitelistApproveOrReject(address,mode,start_at,count)", async function () {
+        describe("transaction whitelist(address,approve)", async function () {
 
             before(async function () {
                 // jump to commit start
@@ -661,9 +661,9 @@ describe("ReversibleICO", function () {
                             await this.ReversibleICO.methods.initialized().call()
                         ).to.be.equal( true );
 
-                        await this.ReversibleICO.methods.whitelistApproveOrReject(
+                        await this.ReversibleICO.methods.whitelist(
                             accounts[1],
-                            ApplicationEventTypes.WHITELIST_APPROVE
+                            true
                         ).send({
                             from: TransactionSender
                         });
@@ -696,9 +696,9 @@ describe("ReversibleICO", function () {
                             const initialized = await TestReversibleICO.methods.initialized().call();
                             expect( initialized ).to.be.equal( false );
 
-                            await TestReversibleICO.methods.whitelistApproveOrReject(
+                            await TestReversibleICO.methods.whitelist(
                                 accounts[1],
-                                ApplicationEventTypes.WHITELIST_APPROVE
+                                true
                             ).send({
                                 from: whitelistControllerAddress
                             });
@@ -713,9 +713,9 @@ describe("ReversibleICO", function () {
 
                         it("transaction is accepted and participant address is whitelisted", async function () {
 
-                            await this.ReversibleICO.methods.whitelistApproveOrReject(
+                            await this.ReversibleICO.methods.whitelist(
                                 accounts[3],
-                                ApplicationEventTypes.WHITELIST_APPROVE
+                                true
                             ).send({
                                 from: whitelistControllerAddress
                             });
@@ -810,42 +810,27 @@ describe("ReversibleICO", function () {
 
                         });
 
-                        describe("supplied mode is wrong.. (not WHITELIST_APPROVE / WHITELIST_REJECT) ", async function () {
-
-                            it("transaction reverts \"Invalid mode specified.\"", async function () {
-                                await helpers.assertInvalidOpcode( async () => {
-                                    await this.ReversibleICO.methods.whitelistApproveOrReject(
-                                        TestAcceptParticipant,
-                                        ApplicationEventTypes.NOT_SET
-                                    ).send({
-                                        from: whitelistControllerAddress
-                                    });
-                                }, "Invalid mode specified.");
-                            });
-
-                        });
-
-                        describe("supplied mode is ApplicationEventTypes.WHITELIST_APPROVE", async function () {
+                        describe("supplied mode TRUE", async function () {
 
                             const ContributionCountToProcess = 15;
-                            let whitelistApproveOrRejectTx;
+                            let whitelistTx;
 
                             before(async function () {
-                                whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
+                                whitelistTx = await this.ReversibleICO.methods.whitelist(
                                     TestAcceptParticipant,
-                                    ApplicationEventTypes.WHITELIST_APPROVE
+                                    true,
                                 ).send({
                                     from: whitelistControllerAddress
                                 });
                             });
 
                             it("transaction is accepted", async function () {
-                                expect( whitelistApproveOrRejectTx.status ).to.be.equal( true );
+                                expect( whitelistTx.status ).to.be.equal( true );
                             });
 
                             it("ApplicationEvent emitted", async function () {
                                 expect(
-                                    whitelistApproveOrRejectTx.events.hasOwnProperty('ApplicationEvent')
+                                    whitelistTx.events.hasOwnProperty('ApplicationEvent')
                                 ).to.be.equal(
                                     true
                                 );
@@ -933,10 +918,10 @@ describe("ReversibleICO", function () {
                         });
 
 
-                        describe("supplied mode is ApplicationEventTypes.WHITELIST_REJECT", async function () {
+                        describe("supplied mode is FALSE", async function () {
 
                             const ContributionCountToProcess = 15;
-                            let whitelistApproveOrRejectTx;
+                            let whitelistTx;
                             let initialParticipantTokenBalance;
 
                             before(async function () {
@@ -948,9 +933,9 @@ describe("ReversibleICO", function () {
                                     Participant.whitelisted
                                 ).to.be.equal( false );
 
-                                whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
+                                whitelistTx = await this.ReversibleICO.methods.whitelist(
                                     TestRejectParticipant,
-                                    ApplicationEventTypes.WHITELIST_REJECT
+                                    false,
                                 ).send({
                                     from: whitelistControllerAddress
                                 });
@@ -958,12 +943,12 @@ describe("ReversibleICO", function () {
                             });
 
                             it("transaction is accepted", async function () {
-                                expect( whitelistApproveOrRejectTx.status ).to.be.equal( true );
+                                expect( whitelistTx.status ).to.be.equal( true );
                             });
 
                             it("ContributionEvent emitted event count matches", async function () {
                                 expect(
-                                    whitelistApproveOrRejectTx.events.hasOwnProperty('ApplicationEvent')
+                                    whitelistTx.events.hasOwnProperty('ApplicationEvent')
                                 ).to.be.equal(
                                     true
                                 );
@@ -1050,7 +1035,7 @@ describe("ReversibleICO", function () {
 
         });
 
-        describe("view getCurrentUnlockRatio()", async function () {
+        describe("view getCurrentUnlockPercentage()", async function () {
 
             const precision = 20;
             let BuyPhaseStartBlock, BuyPhaseBlockCount;
@@ -1065,8 +1050,8 @@ describe("ReversibleICO", function () {
                 let stageId = 0;
                 // jump to stage commit start block - 1
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
-                let contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                let calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                let contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                let calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
 
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( contractRatio.toString() ).to.be.equal( "0" );
@@ -1074,8 +1059,8 @@ describe("ReversibleICO", function () {
                 stageId = 1;
                 // jump to stage start_block - 1
                 currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
-                contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
 
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( contractRatio.toString() ).to.be.equal( "0" );
@@ -1087,8 +1072,8 @@ describe("ReversibleICO", function () {
                 const stageId = 1;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, false, 1 );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
             });
@@ -1097,8 +1082,8 @@ describe("ReversibleICO", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
             });
@@ -1107,8 +1092,8 @@ describe("ReversibleICO", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 1 );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockRatio().call();
-                const calculatedRatio = helpers.utils.getCurrentUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toString() ).to.be.equal("0");
             });
@@ -1134,9 +1119,9 @@ describe("ReversibleICO", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                let whitelistApproveOrRejectTx = await this.ReversibleICO.methods.whitelistApproveOrReject(
+                let whitelistTx = await this.ReversibleICO.methods.whitelist(
                     participant_1,
-                    ApplicationEventTypes.WHITELIST_APPROVE
+                    true,
                 ).send({
                     from: whitelistControllerAddress
                 });

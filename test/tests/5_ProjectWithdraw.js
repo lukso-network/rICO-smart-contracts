@@ -334,9 +334,9 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -378,9 +378,9 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -535,11 +535,11 @@ describe("ProjectWithdraw Testing", function () {
 
                         console.log("");
 
-                        console.log("whitelistApproveOrRejectTx:" );
+                        console.log("whitelistTx:" );
 
-                        whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                        whitelistTx = await ReversibleICOInstance.methods.whitelist(
                             participant_2,
-                            ApplicationEventTypes.WHITELIST_APPROVE,
+                            true,
                         ).send({
                             from: whitelistControllerAddress
                         });
@@ -611,11 +611,11 @@ describe("ProjectWithdraw Testing", function () {
                         
 
                         console.log("");
-                        console.log("whitelistApproveOrRejectTx participant_3:" );
+                        console.log("whitelistTx participant_3:" );
 
-                        whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                        whitelistTx = await ReversibleICOInstance.methods.whitelist(
                             participant_3,
-                            ApplicationEventTypes.WHITELIST_REJECT,
+                            false,
                         ).send({
                             from: whitelistControllerAddress
                         });
@@ -652,9 +652,9 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -706,9 +706,9 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1243,9 +1243,9 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1342,8 +1342,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockRatio(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
+    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }

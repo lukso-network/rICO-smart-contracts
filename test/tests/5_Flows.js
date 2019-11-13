@@ -656,9 +656,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -814,9 +814,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1355,9 +1355,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1453,8 +1453,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockRatio(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
+    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }
