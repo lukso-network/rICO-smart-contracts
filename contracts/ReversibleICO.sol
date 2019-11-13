@@ -347,11 +347,13 @@ contract ReversibleICO is IERC777Recipient {
             remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
         }
 
+        // calculate ETH that is globally available
         uint256 globalAvailable = acceptedETH
             .sub(withdrawnETH)
             .sub(projectWithdrawnETH)
             .sub(remainingFromAllocation);
 
+        // multiply the available ETH with the ratio that belongs to the project now
         uint256 unlocked = globalAvailable.mul(
             getCurrentUnlockRatio()
         ).div(10 ** 20);
