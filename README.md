@@ -16,7 +16,7 @@ The rICO is set in stages that can be defined in the `init` function.
 Each stage can also have a price increase, so that committing early is rewarded.
 The scheme looks a little bit as follows:
 
-![alt text](https://github.com/lukso-network/RICO-smart-contracts/raw/refactoring/rICO-diagram.png "rICO Diagram")
+![alt text](https://github.com/lukso-network/rICO-smart-contracts/raw/master/rICO-diagram.png "rICO Diagram")
 
 ### What happens if somebody commits during stage 1-x
 
