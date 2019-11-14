@@ -259,8 +259,7 @@ describe("ERC777 - ERC20 Token compatibility", function() {
       .approve(accounts[1], numberString)
       .send({ from: creator });
     const allowance = await HST.methods.allowance(creator, accounts[1]).call();
-    const allowanceNum = helpers.web3util.hexToNumberString(allowance);
-    assert.equal(allowanceNum, numberString);
+    assert.equal(allowance.toString(), numberString);
   });
 
   it("allowance: should start with zero", async function() {

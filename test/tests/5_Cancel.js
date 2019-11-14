@@ -218,7 +218,7 @@ describe("Testing canceling", function () {
         });
 
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             describe("participant has no contributions", async function () {
 
@@ -270,9 +270,9 @@ describe("Testing canceling", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE
+                        true
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -287,7 +287,7 @@ describe("Testing canceling", function () {
             });
         });
 
-        describe("contract in Distribution phase", async function () {
+        describe("contract in buy phase", async function () {
 
             describe("participant has no contributions", async function () {
 
@@ -339,9 +339,9 @@ describe("Testing canceling", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE
+                        true
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -415,7 +415,7 @@ describe("Testing canceling", function () {
 
         });
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             before(async () => {
                 await revertToFreshDeployment();
@@ -487,7 +487,7 @@ describe("Testing canceling", function () {
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(new helpers.BN(
-                        ParticipantStageDetails.committedETH
+                        ParticipantStageDetails.stageCommittedETH
                     ));
                 }
 

@@ -200,7 +200,7 @@ describe("Contribution Testing", function () {
 
     describe("transaction () => fallback method", async function () {
 
-        describe("contract in Allocation phase", async function () {
+        describe("contract in commit phase", async function () {
 
             before(async () => {
                 await revertToFreshDeployment();
@@ -241,9 +241,9 @@ describe("Contribution Testing", function () {
                 });
                 contributionCount++;
 
-                let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                     participant_1,
-                    ApplicationEventTypes.WHITELIST_APPROVE
+                    true
                 ).send({
                     from: whitelistControllerAddress
                 });

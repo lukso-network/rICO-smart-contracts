@@ -510,7 +510,7 @@ describe("Flow Testing", function () {
 
         });
 
-        describe("2 - contract in Allocation phase", async function () {
+        describe("2 - contract in commit phase", async function () {
 
             describe("participant is not whitelisted and has no contributions", async function () {
 
@@ -656,9 +656,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -796,7 +796,7 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("3 - contract in Distribution phase ( stage 6 - last block )", async function () {
+        describe("3 - contract in buy phase ( stage 6 - last block )", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
@@ -814,9 +814,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1337,7 +1337,7 @@ describe("Flow Testing", function () {
             });
         });
 
-        describe("4 - contract after Distribution phase", async function () {
+        describe("4 - contract after buy phase", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
@@ -1355,9 +1355,9 @@ describe("Flow Testing", function () {
                     });
 
                     // whitelist and accept contribution
-                    let whitelistApproveOrRejectTx = await ReversibleICOInstance.methods.whitelistApproveOrReject(
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
                         participant_1,
-                        ApplicationEventTypes.WHITELIST_APPROVE,
+                        true,
                     ).send({
                         from: whitelistControllerAddress
                     });
@@ -1453,8 +1453,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockRatio(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockRatio(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
+    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }
@@ -1468,7 +1468,7 @@ async function displayContractStats(contract, TokenContractInstance) {
     let acceptedETH = await contract.methods.acceptedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
-    let projectETHWithdrawn = await contract.methods.projectETHWithdrawn().call();
+    let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
     let ricoTokenBalance = await TokenContractInstance.methods.balanceOf(contract.receipt.contractAddress).call();
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
@@ -1478,6 +1478,6 @@ async function displayContractStats(contract, TokenContractInstance) {
     console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");
     console.log("projectETH:         ", helpers.utils.toEth(helpers,projectETH) + " eth");
-    console.log("projectETHWithdrawn:", helpers.utils.toEth(helpers,projectETHWithdrawn) + " eth");
+    console.log("projectWithdrawnETH:", helpers.utils.toEth(helpers,projectWithdrawnETH) + " eth");
     console.log("\n");
 }

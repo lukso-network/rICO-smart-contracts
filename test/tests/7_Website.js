@@ -293,9 +293,9 @@ describe("Website States", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            await Instances.ReversibleICOInstance.methods.whitelistApproveOrReject(
+            await Instances.ReversibleICOInstance.methods.whitelist(
                 participant_1,
-                ApplicationEventTypes.WHITELIST_APPROVE
+                true,
             ).send({
                 from: whitelistControllerAddress
             });
