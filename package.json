@@ -15,7 +15,8 @@
     "test-single-reuse": "scripts/run_tests.sh single use-existing",
     "testToHtml": "scripts/testOutputToHtml.sh",
     "start-all-rpcs": "scripts/rpcs/start_all.sh",
-    "stop-all-rpcs": "scripts/rpcs/stop_all.sh"
+    "stop-all-rpcs": "scripts/rpcs/stop_all.sh",
+    "merge-contracts": "sol-merger './contracts/*.sol' ./contracts-merged"
   },
   "preinstall": "rm -rf node_modules/*/.git/",
   "bin": {
@@ -47,6 +48,7 @@
     "ethereumjs-util": "^6.1.0",
     "ganache-cli": "6.4.4",
     "openzeppelin-test-helpers": "^0.4.0",
+    "sol-merger": "^1.1.1",
     "solc": "0.5.10",
     "solidity-coverage": "^0.6.4",
     "truffle": "^5.0.26",
