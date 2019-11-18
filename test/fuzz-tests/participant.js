@@ -35,12 +35,12 @@ class Participant extends Actor {
     /* External */
 
     // commit ETH to the rICO contract
-    commit() {
+    commit(ETH) {
 
     }
 
     // withdraw ETH from the rICO contract
-    withdraw() {
+    withdraw(Token) {
 
     }
 

@@ -28,7 +28,7 @@ class Project extends Actor {
     /* External */
 
     // withdraw ETH from the rICO contract
-    withdraw() {
+    withdraw(ETH) {
 
     }
 
