@@ -1,7 +1,7 @@
 /*
- * source       https://github.com/mickys/rico-poc/
- * @name        RICO
- * @package     rico-poc
+ * source       https://github.com/lukso-network/rICO-smart-contracts
+ * @name        rICO
+ * @package     rICO-smart-contracts
  * @author      Micky Socaci <micky@nowlive.ro>
  * @license     MIT
 */
