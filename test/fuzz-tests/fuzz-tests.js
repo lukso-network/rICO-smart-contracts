@@ -13,8 +13,15 @@ module.exports = {
             "  ----------------------------------------------------------------"
         );
 
-        let deployer = require("./deployer.js");
-        await deployer.run(init);
+        const deployer = require("./deployer.js");
+        const deployment = await deployer.run(init);
+
+        // contract instances
+        const rICOToken = deployment.contracts.rICOToken;
+        const rICO = deployment.contracts.rICO;
+
+        // contract addresses
+        const addresses = deployment.addresses;
 
         init.helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -22,14 +29,11 @@ module.exports = {
             "  ----------------------------------------------------------------"
         );
 
-        // console.log(init);
+        // jump to allocation block 
+        await helpers.utils.jumpToContractStage ( rICO, ContractsDeployer, 0 );
 
-        // Setup and deploy ERC1820
-        // Deploy and setup rICO
-
-        // create 1000 actors
-
-        // create 1 project
+        // create 1000 actors ( each needs a wallet, and accounts[0] to transfer over some funds )
+        // each action needs validator
 
         // randomise actions of actors and call `test()` on each actor after each action
 

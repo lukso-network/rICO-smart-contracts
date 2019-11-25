@@ -117,20 +117,17 @@ module.exports = {
             gas: 100000
         });
 
-        // jump to allocation block 
-        await helpers.utils.jumpToContractStage ( rICO, ContractsDeployer, 0 );
-
-        // create 1000 actors ( each needs a wallet, and accounts[0] to transfer over some funds )
-        // each action needs validator
-
-
-        // create 1 project
-
-        // randomise actions of actors and call `test()` on each actor after each action
-
-        // EXAMPLE:
-        // loop over ALL BLOCKS in the rICO
-     
+        return {
+            addresses: {
+                ContractsDeployer: ContractsDeploye,
+                whitelistControllerAddress: whitelistControllerAddress,
+                projectWalletAddress: projectWalletAddress,
+            },
+            contracts: {
+                rICOToken:rICOToken,
+                rICO:rICO
+            }
+        }
     },
     async deployERC1820 (init) {
 
