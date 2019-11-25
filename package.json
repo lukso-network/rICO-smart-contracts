@@ -10,6 +10,7 @@
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "scripts/run_coverage.sh",
     "test": "scripts/run_tests.sh all refresh",
+    "fuzz": "scripts/run_fuzz.sh all refresh",
     "test-reuse": "scripts/run_tests.sh all use-existing",
     "test-single": "scripts/run_tests.sh single",
     "test-single-reuse": "scripts/run_tests.sh single use-existing",
