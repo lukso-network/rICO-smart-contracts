@@ -20,39 +20,56 @@ contract ReversibleICO is IERC777Recipient {
     */
     using SafeMath for uint256;
 
+    /// @dev the address of the introspection registry contract deployed on Ethereum mainnet.
     IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
+    /// @dev the actuall Rico token contract
     IERC777 public tokenContract;
 
     /*
     *   Contract States
     */
+    /// @dev it is set to true after the deployer initializes the contract.
     bool public initialized; // default: false
+    /// @dev the contract get frozen only in case of an emergency
     bool public frozen; // default: false
+    //TODO unused variable
     bool public started; // default: false
     bool public ended; // default: false
 
     /*
     *   Addresses
     */
+    /// @dev the deployer is only allowed to initialize the contract.
     address public deployerAddress;
+    /// @dev the actual Rico token contract address.
     address public tokenContractAddress;
+    // the address of wallet handling the funds raised.
     address public projectWalletAddress;
+    // only the whitelist controller can whitelist addresses.
     address public whitelistControllerAddress;
 
     /*
     *   Public Variables
     */
+    /// @dev total amount tokens minted
     uint256 public tokenSupply; // default: 0
 
+    /// @dev total amount of ETH commited
     uint256 public committedETH; // default: 0
+    /// @dev total amount of ETH returned
     uint256 public returnedETH; // default: 0
+    /// @dev total amount of ETH accepted
     uint256 public acceptedETH; // default: 0
+    /// @dev total amount of ETH withdrawn
     uint256 public withdrawnETH; // default: 0
 
+    /// @dev denotes how many times the project has withdrawn from the funds raised
     uint256 public projectWithdrawCount; // default: 0
+    /// @dev total amount allocated to the contract
     uint256 public projectAllocatedETH; // default: 0
+    /// @dev total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH; // default: 0
 
     // Minimum amount of ETH we accept for a contribution
@@ -62,15 +79,23 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Commit phase (Stage 0)
     */
+    /// @dev initial token price (commit phase)
     uint256 public commitPhasePrice;
+    /// @dev block number that indicates the start of the commitment phase
     uint256 public commitPhaseStartBlock;
+    /// @dev block number that indicates the end of the RICO period
     uint256 public commitPhaseEndBlock;
+    /// @dev the duration of the RICO period in blocks
     uint256 public commitPhaseBlockCount;
 
+    /// @dev block number that indicates the start of the 1st buying phase
     uint256 public buyPhaseStartBlock;
+    /// @dev block number that indicates the end of the buying phase
     uint256 public buyPhaseEndBlock;
+    /// @dev the duration of the buying period in blocks
     uint256 public buyPhaseBlockCount;
 
+    /// @dev the duration of each stage in blocks
     uint256 public stageBlockCount;
 
     /*
@@ -105,9 +130,12 @@ contract ReversibleICO is IERC777Recipient {
         mapping ( uint8 => ParticipantDetailsByStage ) byStage;
     }
 
+    /// @dev identifies participants' stats by their address
     mapping ( address => Participant ) public participantsByAddress;
+    /// @dev identifies participants' address by their unique ID
     mapping ( uint256 => address ) public participantsById;
-    uint256 public participantCount = 0;
+    /// @dev total number of RICO participants
+    uint256 public participantCount;
 
     struct ParticipantDetailsByStage {
         uint256 committedETH;		    // msg.value
