@@ -189,7 +189,7 @@ contract ReversibleICO is IERC777Recipient {
     // ------------------------------------------------------------------------------------------------
 
 
-    // Constructor
+    /// @dev Constructor sets the deployer and defines ERC777TokensRecipient interface support
     constructor() public {
         deployerAddress = msg.sender;
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
@@ -245,17 +245,21 @@ contract ReversibleICO is IERC777Recipient {
         for(uint8 i = 1; i <= _stageCount; i++) {
 
             Stage storage stageN = stages[stageCount]; // stageCount = n
+            // each new stage starts after the previous phase's endBlock
             stageN.startBlock = lastStageBlockEnd + 1;
             stageN.endBlock = lastStageBlockEnd + _stageBlockCount + 1;
+            // at each stage the token price increases by _stagePriceIncrease * #stage
             stageN.tokenPrice = _commitPhasePrice + ( _stagePriceIncrease * (i) );
-
-            stageCount++; // stageCount = n + 1
+            // stageCount = n + 1
+            stageCount++;
 
             lastStageBlockEnd = stageN.endBlock;
         }
 
+        // the buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
         buyPhaseEndBlock = lastStageBlockEnd;
+        // the duration of the buyPhase in blocks
         buyPhaseBlockCount = lastStageBlockEnd - buyPhaseStartBlock;
 
         initialized = true;
