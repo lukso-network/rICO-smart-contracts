@@ -326,7 +326,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
-    *   Participant can cancel their pending ETH commitment, if they are not whitelisted yet.
+    *   Participants can cancel their pending ETH commitment only if they are not whitelisted yet.
     */
     function cancel()
     public
@@ -559,6 +559,8 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
+    /// @dev Returns true if participant's has committed ETH and the amount is greater than the amount returned.
+    /// @param _participantAddress the address to be checked.
     function canCancelByEth(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
         if(participantRecord.committedETH > 0 && participantRecord.committedETH > participantRecord.returnedETH ) {
@@ -1000,31 +1002,37 @@ contract ReversibleICO is IERC777Recipient {
     *   Modifiers
     */
 
+    /// @dev Checks if the sender is the deployer.
     modifier onlyDeployer() {
         require(msg.sender == deployerAddress, "Only the deployer can call this method.");
         _;
     }
 
+    /// @dev Checks if the sender is the whitelist controller.
     modifier onlyWhitelistController() {
         require(msg.sender == whitelistControllerAddress, "Only the whitelist controller can call this method.");
         _;
     }
 
+    /// @dev Requires the contract to have been initiallized
     modifier isInitialized() {
         require(initialized == true, "Contract must be initialized.");
         _;
     }
 
+    /// @dev Requires the contract to NOT have been initiallized
     modifier isNotInitialized() {
         require(initialized == false, "Contract is already initialized.");
         _;
     }
 
+    /// @dev Requires the contract to be frozen
     modifier isFrozen() {
-        require(frozen == true, "Contract is frozen.");
+        require(frozen == true, "Contract is not frozen.");
         _;
     }
 
+    /// @dev Requires the contract to be non-frozen
     modifier isNotFrozen() {
         require(frozen == false, "Contract can not be frozen.");
         _;
