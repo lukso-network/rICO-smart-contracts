@@ -333,12 +333,15 @@ contract ReversibleICO is IERC777Recipient {
     isInitialized
     isNotFrozen
     {
+        // only non-whitelisted participants can cancel their contribution
         require(
             participantsByAddress[msg.sender].whitelisted != true,
             "Commitment canceling only possible using tokens after you got whitelisted."
         );
 
+        // if there is available committed ETH...
         if(canCancelByEth(msg.sender)) {
+            // ...cancel participant's contribution
             cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
@@ -559,7 +562,7 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
-    /// @dev Returns true if participant's has committed ETH and the amount is greater than the amount returned.
+    /// @dev Returns true if participant has committed ETH and the amount is greater than the amount returned so far.
     /// @param _participantAddress the address to be checked.
     function canCancelByEth(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
@@ -843,6 +846,7 @@ contract ReversibleICO is IERC777Recipient {
                 projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
 
                 participantRecord.withdrawnETH += returnETHAmount; //DUPLICATE??
+                // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);
                 emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
                 return;
@@ -957,6 +961,9 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
+    /// @dev Cancels all of the participant's contributions so far.
+    /// @param _from participant's address
+    /// @param _eventType reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
     function cancelContributionsForAddress(
         address _from,
         uint8 _eventType
@@ -964,43 +971,51 @@ contract ReversibleICO is IERC777Recipient {
     internal
     {
 
-        Participant storage participantRecord = participantsByAddress[_from];
-        // one should only be able to cancel if they haven't been whitelisted
+        // one should only be able to cancel if they haven't been whitelisted yet...
+        // ...but just to make sure take withdrawn and returned into account.
+        // This is to handle the case when whitelist controller whitelists someone, then rejects...
+        // ...then whitelists them again.
 
-        // but just to make sure take withdrawn and returned into account.
-        // to handle the case when whitelist controller whitelists some one, then rejects
-        // them, then whitelists them again.
+        Participant storage participantRecord = participantsByAddress[_from];
+
+        // calculate participant's available ETH i.e. commited - withdrawnETH - returnedETH
         uint256 participantAvailableETH = participantRecord.committedETH -
             participantRecord.withdrawnETH -
             participantRecord.returnedETH;
 
         if(participantAvailableETH > 0) {
-            // Set Participant audit values
+            // update total ETH returned
+            returnedETH += participantAvailableETH;
+
+            // update participant's audit values
             participantRecord.reservedTokens = 0;
             participantRecord.withdrawnETH += participantAvailableETH;
 
-            // globals
+
             // since this balance was never actually "accepted" it counts as returned
             // otherwise it interferes with project withdraw calculations
-            returnedETH += participantAvailableETH;
+            returnedETH += participantAvailableETH; // TO DO: REMOVE DUPLICATE!!!
 
-            // send eth back to participant including received value
+            // transfer ETH back to participant including received value
             address(uint160(_from)).transfer(participantAvailableETH + msg.value);
 
             uint8 currentTransferEventType;
+
             if(_eventType == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
                 currentTransferEventType = uint8(TransferTypes.WHITELIST_REJECT);
             } else if (_eventType == uint8(ApplicationEventTypes.PARTICIPANT_CANCEL)) {
                 currentTransferEventType = uint8(TransferTypes.PARTICIPANT_CANCEL);
             }
-            emit TransferEvent(currentTransferEventType, _from, participantAvailableETH);
 
+            // event emission
+            emit TransferEvent(currentTransferEventType, _from, participantAvailableETH);
             emit ApplicationEvent(
                 _eventType,
                 uint32(participantRecord.contributionsCount),
                 _from,
                 participantAvailableETH
             );
+
         } else {
             revert("Participant has not contributed any ETH yet.");
         }
