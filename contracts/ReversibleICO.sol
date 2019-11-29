@@ -259,7 +259,7 @@ contract ReversibleICO is IERC777Recipient {
         // the buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
         buyPhaseEndBlock = lastStageBlockEnd;
-        // the duration of the buyPhase in blocks
+        // the duration of buyPhase in blocks
         buyPhaseBlockCount = lastStageBlockEnd - buyPhaseStartBlock;
 
         initialized = true;
@@ -307,8 +307,8 @@ contract ReversibleICO is IERC777Recipient {
     // isNotFrozen TODO??
     // requireNotEnded
     {
-        // Rico should only receive tokens from the Rico Token Tracker.
-        // any other transaction should revert
+        // rICO should only receive tokens from the Rico Token Tracker.
+        // transactions from any other sender should revert
         require(msg.sender == address(tokenContract), "Invalid token sent.");
 
         // 2 cases
@@ -730,7 +730,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     function withdraw(address _from, uint256 _returnedTokenAmount) internal {
 
-        // Whitelisted contributor sends tokens back to the RICO contract
+        // Whitelisted contributor sends tokens back to the RICO contract.
         // - unlinke cancel() method, this allows variable amounts.
         // - latest contributions get returned first.
 
@@ -746,55 +746,62 @@ contract ReversibleICO is IERC777Recipient {
             uint256 remainingTokenAmount = _returnedTokenAmount;
             uint256 maxLocked = getLockedTokenAmount(_from);
             uint256 returnTokenAmount;
-            uint256 allocatedEthAmount = 0;
+            uint256 allocatedEthAmount;
 
+            // if returned amount is greater than the locked amount...
+            // set it equal to locked, keep track of the overflow tokens (remainingTokenAmount)
             if(remainingTokenAmount > maxLocked) {
                 returnTokenAmount = remainingTokenAmount - maxLocked;
                 remainingTokenAmount = maxLocked;
             }
 
+            // decrease the total allocated ETH by the equivalent participant's allocated amount
             projectAllocatedETH = projectAllocatedETH.sub(participantRecord.allocatedETH);
 
             if(remainingTokenAmount > 0) {
 
                 // go through stages starting with current stage
                 // take stage token amount and remove from "amount participant wants to return"
-                // get eth amount in said stage for that token amount
+                // get ETH amount in said stage for that token amount
                 // set stage tokens to 0
-                // if stage tokens < remaining tokens to process, just sub remaining from stage
+                // if stage tokens < remaining tokens to process, just subtract remaining from stage
                 // this way we can receive tokens in current stage / later stages and process them again.
 
                 uint256 returnETHAmount; // defaults to 0
 
                 uint8 currentStageNumber = getCurrentStage();
-                for( uint8 stageId = currentStageNumber; stageId >= 0; stageId-- ) {
 
-                    // total tokens
+                for(uint8 stageId = currentStageNumber; stageId >= 0; stageId--) {
+
+                    // total participant tokens at the current stage i.e. reserved + bought - returned
                     uint256 totalInStage = participantRecord.byStage[stageId].reservedTokens +
                         participantRecord.byStage[stageId].boughtTokens -
                         participantRecord.byStage[stageId].returnedTokens;
 
-                    // calculate how many tokens are actually locked in this stage
-                    // and only use those for return.
-
+                    // calculate how many tokens are actually locked at this stage...
+                    // ...(at the current block number) and use only those for returning.
+                    // reserved + bought - returned (at currentStage & currentBlock)
                     uint256 tokensInStage = getLockedTokenAmountAtBlock(
                         participantRecord.byStage[stageId].reservedTokens +
                         participantRecord.byStage[stageId].boughtTokens,
                         currentBlockNumber
                     ) - participantRecord.byStage[stageId].returnedTokens;
 
-                    // only try to process stages that actually have tokens in them.
+                    // only try to process stages that the participant has actually tokens reserved.
                     if(tokensInStage > 0) {
 
+                        // if the remaining amount is less than the amount available in the current stage
                         if (remainingTokenAmount < tokensInStage ) {
                             tokensInStage = remainingTokenAmount;
                         }
+                        //get the equivalent amount of returned tokens in ETH
                         uint256 currentETHAmount = getEthAmountForTokensAtStage(tokensInStage, stageId);
 
+                        //increase the returned tokens counters accordingly
                         participantRecord.returnedTokens += tokensInStage;
                         participantRecord.byStage[stageId].returnedTokens += tokensInStage;
 
-                        // get eth for tokens in current stage
+                        // increase the corresponding ETH counters
                         returnETHAmount = returnETHAmount.add(currentETHAmount);
                         participantRecord.byStage[stageId].withdrawnETH += currentETHAmount;
 
@@ -817,23 +824,25 @@ contract ReversibleICO is IERC777Recipient {
                     }
                 }
 
+                // return overflow tokens received
                 if(returnTokenAmount > 0) {
-                    // return overflow tokens received
-
-                    // allocate tokens to participant
+                    // send tokens back participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
                     tokenContract.send(_from, returnTokenAmount, data);
                 }
 
-                // Adjust globals
+                // increase participant's withdrawnETH counter
+                participantRecord.withdrawnETH += returnETHAmount;
+
+                // Update total ETH withdrawn
                 withdrawnETH += returnETHAmount;
 
-                // allocate remaining eth to project directly
+                // allocate remaining ETH to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
                 projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
 
-                participantRecord.withdrawnETH += returnETHAmount;
+                participantRecord.withdrawnETH += returnETHAmount; //DUPLICATE??
                 address(uint160(_from)).transfer(returnETHAmount);
                 emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
                 return;
