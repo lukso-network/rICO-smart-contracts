@@ -357,13 +357,19 @@ contract ReversibleICO is IERC777Recipient {
     {
         require(msg.sender == projectWalletAddress, "Only project wallet address.");
 
+        // get project unlocked ETH (available for withdrawing)
         uint256 unlocked = getProjectAvailableEth();
-        require(_ethAmount <= unlocked, "Requested amount to large, not enough unlocked ETH available.");
+        require(_ethAmount <= unlocked, "Requested amount too big, not enough unlocked ETH available.");
 
+        // update stats:  #project withdrawals, total amount withdrawn by the project
         projectWithdrawCount++;
         projectWithdrawnETH += _ethAmount;
 
 
+        // transfer ETH to project wallet
+        address(uint160(projectWalletAddress)).transfer(_ethAmount);
+
+        // event emission
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
             uint32(projectWithdrawCount),
@@ -372,17 +378,20 @@ contract ReversibleICO is IERC777Recipient {
         );
 
         emit TransferEvent(uint8(TransferTypes.PROJECT_WITHDRAW), projectWalletAddress, _ethAmount);
-        address(uint160(projectWalletAddress)).transfer(_ethAmount);
     }
 
+    /// @dev Returns project's unlocked (i.e. available for withdrawing) ETH
     function getProjectAvailableEth() public view returns (uint256 _amount) {
 
-        uint256 remainingFromAllocation = 0;
+        uint256 remainingFromAllocation;
+
+        // calculate the ammount of allocated ETH not withdrawn yet
         if(projectAllocatedETH > projectWithdrawnETH) {
             remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
         }
 
-        // calculate ETH that is globally available
+        // calculate ETH that is globally available:
+        // available = accepted - withdrawn - projectWithdrawn - projectNotWithdrawn
         uint256 globalAvailable = acceptedETH
             .sub(withdrawnETH)
             .sub(projectWithdrawnETH)
@@ -393,6 +402,7 @@ contract ReversibleICO is IERC777Recipient {
             getCurrentUnlockPercentage()
         ).div(10 ** 20);
 
+        // available = unlocked + projectNotWithdrawn
         return unlocked.add(remainingFromAllocation);
     }
 
