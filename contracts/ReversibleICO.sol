@@ -423,18 +423,14 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_address];
 
         if(_approve) {
+            // if participants are approved: whitelist them and accept their contributions
             participantRecord.whitelisted = true;
-
-            // accept all contributions
             acceptContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_APPROVE));
-
         } else {
+            // if participants are not approved: remove them from whitelist and cacnel their contributions
             participantRecord.whitelisted = false;
-
-            // cancel all contributions
             cancelContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_REJECT));
         }
-
     }
 
     /*
@@ -897,6 +893,7 @@ contract ReversibleICO is IERC777Recipient {
         );
     }
 
+    /// @dev
     function acceptContributionsForAddress(
         address _from,
         uint8 _eventType
@@ -904,8 +901,8 @@ contract ReversibleICO is IERC777Recipient {
     internal
     {
         Participant storage participantRecord = participantsByAddress[_from];
-
         uint8 currentStage = getCurrentStage();
+
         for(uint8 i = 0; i <= currentStage; i++) {
             uint8 stageId = i;
 
@@ -919,20 +916,21 @@ contract ReversibleICO is IERC777Recipient {
                 participantRecord.reservedTokens -= byStage.reservedTokens;
                 byStage.reservedTokens = 0;
 
+                // the maximum amount is equal to the total available ETH at the current stage
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
 
+                // the per stage accepted amount: committedETH - acceptedETH
                 uint256 newAcceptedValue = byStage.committedETH - byStage.acceptedETH;
-                uint256 returnValue = 0;
+                uint256 returnValue;
 
                 // if incomming value is higher than what we can accept,
                 // just accept the difference and return the rest
-
                 if(newAcceptedValue > maxAcceptableValue) {
                     newAcceptedValue = maxAcceptableValue;
                     returnValue = byStage.committedETH - byStage.returnedETH - byStage.acceptedETH -
                     byStage.withdrawnETH - newAcceptedValue;
 
-                    // return values
+                    //update return values
                     returnedETH += returnValue;
                     participantRecord.returnedETH += returnValue;
                     byStage.returnedETH = returnValue;
@@ -940,18 +938,19 @@ contract ReversibleICO is IERC777Recipient {
 
                 if(newAcceptedValue > 0) {
 
-                    // Globals add to processed value to acceptedETH
+                    // update values by adding the new accepted amount
                     acceptedETH += newAcceptedValue;
                     participantRecord.acceptedETH += newAcceptedValue;
-
                     byStage.acceptedETH += newAcceptedValue;
 
+                    // calculate the equivalent token amount
                     uint256 newTokenAmount = getTokenAmountForEthAtStage(
                         newAcceptedValue, stageId
                     );
 
-                    byStage.boughtTokens += newTokenAmount;
+                    // update participant's token amounts
                     participantRecord.boughtTokens += newTokenAmount;
+                    byStage.boughtTokens += newTokenAmount;
 
                     // allocate tokens to participant
                     bytes memory data;
@@ -959,8 +958,8 @@ contract ReversibleICO is IERC777Recipient {
                     tokenContract.send(_from, newTokenAmount, data);
                 }
 
-                // if stored value is too high to accept we then have
-                // a return value we must send back to our participant.
+                // if the incoming amount is too big to accept, then...
+                // ... we must tranfer back the difference.
                 if(returnValue > 0) {
                     address(uint160(_from)).transfer(returnValue);
                     emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _from, returnValue);
