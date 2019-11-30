@@ -56,8 +56,8 @@ class Project extends Actor {
 
     // recalculate expected balances
     recalculateExpectedBalances() {
-    ...
-        this.expectedBalances.ETH = ...;
+        // ...
+        // this.expectedBalances.ETH = ...;
     }
 
     // check if the expected and current balances match

@@ -6,15 +6,29 @@
 
 module.exports = {
     async run (init) {
+        
+        const helpers = init.helpers;
+        const numberOfParticipants = 16;
+        const rICOSettings = { blocksPerDay: 24 };
 
-        init.helpers.utils.toLog(
+        const deployer = require("./deployer.js");
+
+        helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
-            "  Step 2 - Run Deployment \n" +
+            "  Step 2 - Initialize Participants \n" +
             "  ----------------------------------------------------------------"
         );
 
-        const deployer = require("./deployer.js");
-        const deployment = await deployer.run(init);
+        const participants = await deployer.createParticipants(init, numberOfParticipants);
+        
+        // console.log(participants);
+
+        helpers.utils.toLog(
+            " ----------------------------------------------------------------\n" +
+            "  Step 3 - Run Deployment \n" +
+            "  ----------------------------------------------------------------"
+        );
+        const deployment = await deployer.run(init, rICOSettings);
 
         // contract instances
         const rICOToken = deployment.contracts.rICOToken;
@@ -23,29 +37,41 @@ module.exports = {
         // contract addresses
         const addresses = deployment.addresses;
 
-        init.helpers.utils.toLog(
+        console.log("    rICO Settings");
+        const commitPhaseStartBlock = await rICO.methods.commitPhaseStartBlock().call();
+        console.log("      commitPhaseStartBlock:", commitPhaseStartBlock);
+        const commitPhaseEndBlock = await rICO.methods.commitPhaseEndBlock().call();
+        console.log("      commitPhaseEndBlock:  ", commitPhaseEndBlock);
+
+        const buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
+        console.log("      buyPhaseStartBlock:   ", buyPhaseStartBlock);
+        const buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
+        console.log("      buyPhaseEndBlock:     ", buyPhaseEndBlock);
+
+        console.log("");
+        const rICOBlockLength = buyPhaseEndBlock - commitPhaseStartBlock;
+        console.log("      rICO block length:", rICOBlockLength);
+
+
+        helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
-            "  Step 3 - Run Tests \n" +
+            "  Step 4 - Run Tests \n" +
             "  ----------------------------------------------------------------"
         );
 
         // jump to allocation block 
-        await helpers.utils.jumpToContractStage ( rICO, ContractsDeployer, 0 );
-
-        // create 1000 actors ( each needs a wallet, and accounts[0] to transfer over some funds )
-        // each action needs validator
+        await helpers.utils.jumpToContractStage ( rICO, deployment.addresses.ContractsDeployer, 0 );
 
         // randomise actions of actors and call `test()` on each actor after each action
 
-        // EXAMPLE:
-        // loop over ALL BLOCKS in the rICO
-        for(let i = 0; i > 200; i++) {
+        for(let i = 0; i < rICOBlockLength; i++) {
 
-            let stage = 0;// get current stage
+            /*
+            let stage = 0; // get current stage
             
             // loop for ACTORS
             let random = x; //number between 0 - 1000 (participants)
-            for (let i = 0; i > random; i++) {
+            for (let i = 0; i < random; i++) {
 
                 actor[i].setStage(stage, tokenPrice);
 
@@ -57,9 +83,10 @@ module.exports = {
                 actor[i].witdraw(10);
                 actor[i].test();
             }
-
+            */
+           
             // sometimes, make project do something ()
         }        
-
+        
     }
 } 

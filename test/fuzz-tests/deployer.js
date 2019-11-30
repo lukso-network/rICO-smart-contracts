@@ -4,19 +4,19 @@
  * @author Fabian Vogelsteller <@frozeman>, Micky Socaci <micky@nowlive.ro>
 */
 
+const Participant = require("./participant.js");
+
 module.exports = {
-    async run (init) {
+    async run (init, settings) {
 
         const helpers = init.setup.helpers;
-        const BN = helpers.BN;
-        const MAX_UINT256 = helpers.MAX_UINT256;
         const expect = helpers.expect
-        const ContractsDeployer = init.accounts[1];
-        const whitelistControllerAddress = init.accounts[2];
-        const projectWalletAddress = init.accounts[3];
+        const ContractsDeployer = init.accounts[2];
+        const whitelistControllerAddress = init.accounts[3];
+        const projectWalletAddress = init.accounts[4];
         const RicoSaleSupply = init.setup.settings.token.sale.toString();
         const ERC777data = helpers.web3Instance.utils.sha3('777TestData');
-        const blocksPerDay = 6450;
+        const blocksPerDay = settings.blocksPerDay // 6450;
 
         /*
          * Deployment - ERC1820
@@ -119,7 +119,7 @@ module.exports = {
 
         return {
             addresses: {
-                ContractsDeployer: ContractsDeploye,
+                ContractsDeployer: ContractsDeployer,
                 whitelistControllerAddress: whitelistControllerAddress,
                 projectWalletAddress: projectWalletAddress,
             },
@@ -248,8 +248,6 @@ module.exports = {
     async deployrICO(init, ContractsDeployer) {
 
         const helpers = init.setup.helpers;
-        const BN = helpers.BN;
-        const MAX_UINT256 = helpers.MAX_UINT256;
         const expect = helpers.expect
 
         if (helpers.ERC1820.instance == false) {
@@ -268,5 +266,98 @@ module.exports = {
         expect(await ReversibleICO.methods.initialized().call()).to.be.equal(false);
 
         return ReversibleICO.receipt;
+    },
+    async createLightwallet(init, numAddresses) {
+        const helpers = init.setup.helpers;
+        const util = require("util");
+        const lightwallet = require("eth-lightwallet");
+
+        // Create lightwallet accounts
+        const createVault = util
+            .promisify(lightwallet.keystore.createVault)
+            .bind(lightwallet.keystore);
+        const keystore = await createVault({
+            hdPathString: "m/44'/60'/0'/0",
+            seedPhrase:
+                "pull rent tower word science patrol economy legal yellow kit frequent fat",
+            password: "test",
+            salt: "testsalt"
+        });
+        const keyFromPassword = await util
+            .promisify(keystore.keyFromPassword)
+            .bind(keystore)("test");
+        keystore.generateNewAddress(keyFromPassword, numAddresses);
+    
+        // convert signers to proper checksummed addresses
+        const accounts = keystore.getAddresses().map((value) => {
+            return {
+                address: helpers.web3.utils.toChecksumAddress(value),
+                privateKey: keystore.exportPrivateKey(value, keyFromPassword),
+            };
+        });
+    
+        return {
+            keystore: keystore,
+            accounts: accounts,
+            passwords: keyFromPassword
+        };
+    },
+    async createParticipants(init, numberOfParticipants) {
+
+        const helpers = init.setup.helpers;
+        const BN = helpers.BN;
+        const expect = helpers.expect
+
+        console.log("    Creating "+numberOfParticipants+" participants");
+        console.log("      Funding Addresses with ETH ranging from 1 to 50");
+
+        const wallet = await this.createLightwallet(init, numberOfParticipants);
+        const txGasPrice = 20000000000; // 20 gwei
+        const initialFundsSupplier = init.accounts[0];
+
+        const participants = [];
+        // since ganache is synchronous. no point in complicating things.
+        for(let i = 0; i < wallet.accounts.length; i++) {
+            const account = wallet.accounts[i];
+
+            const value = helpers.solidity.etherBN.mul(
+                new BN( Math.floor(Math.random() * 50) + 1 )
+            );
+
+            const initialAccountBalance = await helpers.utils.getBalance(helpers, account.address);
+            expect( initialAccountBalance ).to.be.bignumber.equal( '0', 'initialAccountBalance');
+
+            const initialFundsSupplierBalance = await helpers.utils.getBalance(helpers, initialFundsSupplier);
+
+            // transfer ETH from initialFundsSupplier to Participant and validate
+            const valueTransferTx = await helpers.web3Instance.eth.sendTransaction({
+                from: initialFundsSupplier,
+                to: account.address,
+                value: value,
+                gasPrice: txGasPrice,
+            });
+
+            // validate supplier balance
+            const newSupplierBalance = await helpers.utils.getBalance(helpers, initialFundsSupplier);
+            let combinedValue = new helpers.BN( valueTransferTx.gasUsed.toString() )
+            combinedValue = combinedValue.mul( new helpers.BN( txGasPrice ) );
+            combinedValue = combinedValue.add( value );
+            const newCalculatedBalance = initialFundsSupplierBalance.sub(combinedValue);
+            expect( newSupplierBalance ).to.be.bignumber.equal( newCalculatedBalance, 'newCalculatedBalance');
+            
+            // validate participant balance
+            const newAccountBalance = await helpers.utils.getBalance(helpers, account.address);
+            expect( newAccountBalance ).to.be.bignumber.equal( value , 'newAccountBalance');
+
+            console.log("      ["+i+"]", account.address, helpers.utils.toEth(helpers, value) + " eth" );
+
+            participants.push( 
+                new Participant( {init, wallet, account}, value)
+            );
+        }
+
+        return participants;
     }
+
+
 } 

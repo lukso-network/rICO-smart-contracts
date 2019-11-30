@@ -9,10 +9,15 @@ const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
+const Actor = require("./actorBase.js");
 
 class Participant extends Actor {
+    
     // set the defaults
-    constructor(ETH) {
+    constructor(properties, ETH) {
+        super();
+
+        this.properties = properties;
 
         // should be add the tokenPrice?
         // and do the calculation based on the current token price?
@@ -63,8 +68,8 @@ class Participant extends Actor {
 
     // recalculate expected balances
     recalculateExpectedBalances() {
-        ...
-        this.expectedBalances.ETH = ...;
+        // ...
+        // this.expectedBalances.ETH = ...;
     }
 
     // check if the expected and current balances match
@@ -75,3 +80,5 @@ class Participant extends Actor {
         expect(this.expectedBalances.unlockedToken).to.be.equal(this.currentBalances.unlockedToken, 'Unlocked Token balance is not as expected.');
     }
 }
+
+module.exports = Participant;

@@ -5,13 +5,13 @@
 */
 
 class Actor {
-    constructor(stage, tokenPrice) {
+    constructor() {
         // set also block number?
         // the less we need to set on the actors sides, the better.
         // lets treat the actors like they know nothing about the rICO, besides which stage they are in
 
-        this.stage = stage;
-        this.tokenPrice = tokenPrice;
+        this.stage = 0;
+        this.tokenPrice = 0;
     }
 
     // sets the current stage, so that the actor can calculate its expected balances
@@ -20,3 +20,5 @@ class Actor {
         this.tokenPrice = tokenPrice;
     }
 }
+
+module.exports = Actor;

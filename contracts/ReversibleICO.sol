@@ -791,8 +791,6 @@ contract ReversibleICO is IERC777Recipient {
                     tokenContract.send(_from, returnTokenAmount, data);
                 }
 
-                participantRecord.withdrawnETH += returnETHAmount;
-
                 // Adjust globals
                 withdrawnETH += returnETHAmount;
 
@@ -933,9 +931,6 @@ contract ReversibleICO is IERC777Recipient {
             participantRecord.returnedETH;
 
         if(participantAvailableETH > 0) {
-            // Adjust globals
-            returnedETH += participantAvailableETH;
-
             // Set Participant audit values
             participantRecord.reservedTokens = 0;
             participantRecord.withdrawnETH += participantAvailableETH;
