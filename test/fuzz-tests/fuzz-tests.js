@@ -4,14 +4,27 @@
  * @author Fabian Vogelsteller <@frozeman>, Micky Socaci <micky@nowlive.ro>
 */
 
+const deployer = require("./deployer.js");
+const whitelister = require("./whitelister.js");
+
 module.exports = {
     async run (init) {
         
         const helpers = init.helpers;
         const numberOfParticipants = 16;
-        const rICOSettings = { blocksPerDay: 24 };
+        // allocate 1 extra eth to each participant
+        const participantTxBalance = init.helpers.solidity.etherBN; 
+        const rICOSettings = { 
 
-        const deployer = require("./deployer.js");
+            ContractsDeployer: init.accounts[2],
+            whitelistControllerAddress: init.accounts[3],
+            projectWalletAddress: init.accounts[4],
+
+            blocksPerDay:    5,     // 6450;
+            commitPhaseDays: 4,     // 22;
+            StageDays:       5,     // 30;
+        };
+
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -19,7 +32,19 @@ module.exports = {
             "  ----------------------------------------------------------------"
         );
 
-        const participants = await deployer.createParticipants(init, numberOfParticipants);
+        init.deployment = {
+            addresses: {
+                ContractsDeployer: null,
+                whitelistControllerAddress: null,
+                projectWalletAddress: null,
+            },
+            contracts: {
+                rICOToken: null,
+                rICO: null
+            }
+        };
+
+        const participants = await deployer.createParticipants(init, numberOfParticipants, participantTxBalance);
         
         // console.log(participants);
 
@@ -29,6 +54,7 @@ module.exports = {
             "  ----------------------------------------------------------------"
         );
         const deployment = await deployer.run(init, rICOSettings);
+        init.deployment = deployment;
 
         // contract instances
         const rICOToken = deployment.contracts.rICOToken;
@@ -37,21 +63,23 @@ module.exports = {
         // contract addresses
         const addresses = deployment.addresses;
 
-        console.log("    rICO Settings");
-        const commitPhaseStartBlock = await rICO.methods.commitPhaseStartBlock().call();
-        console.log("      commitPhaseStartBlock:", commitPhaseStartBlock);
-        const commitPhaseEndBlock = await rICO.methods.commitPhaseEndBlock().call();
-        console.log("      commitPhaseEndBlock:  ", commitPhaseEndBlock);
-
-        const buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
-        console.log("      buyPhaseStartBlock:   ", buyPhaseStartBlock);
-        const buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
-        console.log("      buyPhaseEndBlock:     ", buyPhaseEndBlock);
-
-        console.log("");
+        const commitPhaseStartBlock = parseInt(await rICO.methods.commitPhaseStartBlock().call(), 10);
+        const commitPhaseEndBlock = parseInt(await rICO.methods.commitPhaseEndBlock().call(), 10);
+        const buyPhaseStartBlock = parseInt(await rICO.methods.buyPhaseStartBlock().call(), 10);
+        const buyPhaseEndBlock = parseInt(await rICO.methods.buyPhaseEndBlock().call(), 10);
         const rICOBlockLength = buyPhaseEndBlock - commitPhaseStartBlock;
+
+        console.log("    rICO Settings");
+        console.log("      commitPhaseStartBlock:", commitPhaseStartBlock);
+        console.log("      commitPhaseEndBlock:  ", commitPhaseEndBlock);
+        console.log("      buyPhaseStartBlock:   ", buyPhaseStartBlock);
+        console.log("      buyPhaseEndBlock:     ", buyPhaseEndBlock);
+        console.log("");
         console.log("      rICO block length:", rICOBlockLength);
 
+        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelistControllerAddress);
+
+        console.log("      Whitelister:", Whitelister.address);
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -65,7 +93,42 @@ module.exports = {
         // randomise actions of actors and call `test()` on each actor after each action
 
         for(let i = 0; i < rICOBlockLength; i++) {
+            
+            // block relative to rICO start.
+            const block = commitPhaseStartBlock + i;
+            await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
 
+            const currentStage = await rICO.methods.getCurrentStage().call();
+            const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
+
+            console.log(
+                "   ",
+                "block:", block,
+                "stage:", currentStage,
+                "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth"
+            );
+
+
+            if(i == 5) {
+                const participant = participants[0];
+                const actions = await participant.getCurrentlyAvailableActions();
+                console.log("getAvailableActions", actions);
+
+                participant.displayBalances();
+                await participant.commit( participant.currentBalances.ETH );
+                await participant.test();
+                participant.displayBalances();
+
+                break;
+            }
+
+
+
+
+
+
+            // const stageData = await contract.methods.stages(stageId).call();
+            
             /*
             let stage = 0; // get current stage
             
@@ -84,7 +147,7 @@ module.exports = {
                 actor[i].test();
             }
             */
-           
+
             // sometimes, make project do something ()
         }        
         

@@ -10,13 +10,17 @@ module.exports = {
     async run (init, settings) {
 
         const helpers = init.setup.helpers;
-        const expect = helpers.expect
-        const ContractsDeployer = init.accounts[2];
-        const whitelistControllerAddress = init.accounts[3];
-        const projectWalletAddress = init.accounts[4];
+        const expect = helpers.expect;
+
+        const ContractsDeployer = settings.ContractsDeployer;
+        const whitelistControllerAddress = settings.whitelistControllerAddress;
+        const projectWalletAddress = settings.projectWalletAddress;
+        const blocksPerDay = settings.blocksPerDay // 6450;
+        const commitPhaseDays = settings.commitPhaseDays // 22;
+        const StageDays = settings.StageDays // 30;
+        
         const RicoSaleSupply = init.setup.settings.token.sale.toString();
         const ERC777data = helpers.web3Instance.utils.sha3('777TestData');
-        const blocksPerDay = settings.blocksPerDay // 6450;
 
         /*
          * Deployment - ERC1820
@@ -63,18 +67,18 @@ module.exports = {
          */
         const rICO = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", helpers.addresses.Rico);
 
-        let currentBlock = await rICO.methods.getCurrentBlockNumber().call();
+        const currentBlock = await helpers.web3Instance.eth.getBlockNumber();
 
         // starts in one day
         const commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
 
         // 22 days allocation
-        const commitPhaseBlockCount = blocksPerDay * 22;
+        const commitPhaseBlockCount = blocksPerDay * commitPhaseDays;
         const commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         const StageCount = 12;
-        const StageBlockCount = blocksPerDay * 30;
+        const StageBlockCount = blocksPerDay * StageDays;
         const StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
         await rICO.methods.init(
@@ -126,6 +130,10 @@ module.exports = {
             contracts: {
                 rICOToken:rICOToken,
                 rICO:rICO
+            },
+            cache: {
+                commitPhaseStartBlock: await rICO.methods.commitPhaseStartBlock().call(),
+                buyPhaseEndBlock: await rICO.methods.buyPhaseEndBlock().call()
             }
         }
     },
@@ -292,24 +300,26 @@ module.exports = {
         const accounts = keystore.getAddresses().map((value) => {
             return {
                 address: helpers.web3.utils.toChecksumAddress(value),
+                pwDerivedKey: keyFromPassword,
                 privateKey: keystore.exportPrivateKey(value, keyFromPassword),
             };
         });
     
         return {
+            lightwallet: lightwallet,
             keystore: keystore,
             accounts: accounts,
             passwords: keyFromPassword
         };
     },
-    async createParticipants(init, numberOfParticipants) {
+    async createParticipants(init, numberOfParticipants, participantTxBalance) {
 
         const helpers = init.setup.helpers;
         const BN = helpers.BN;
         const expect = helpers.expect
 
         console.log("    Creating "+numberOfParticipants+" participants");
-        console.log("      Funding Addresses with ETH ranging from 1 to 50");
+        console.log("      Funding Addresses with ETH ranging from 1 to 50 ( +1 for tx gas costs )");
 
         const wallet = await this.createLightwallet(init, numberOfParticipants);
         const txGasPrice = 20000000000; // 20 gwei
@@ -323,6 +333,11 @@ module.exports = {
             const value = helpers.solidity.etherBN.mul(
                 new BN( Math.floor(Math.random() * 50) + 1 )
             );
+            
+            const actualValue = value.add(
+                // add extra eth for tx costs
+                participantTxBalance
+            );
 
             const initialAccountBalance = await helpers.utils.getBalance(helpers, account.address);
             expect( initialAccountBalance ).to.be.bignumber.equal( '0', 'initialAccountBalance');
@@ -333,7 +348,7 @@ module.exports = {
             const valueTransferTx = await helpers.web3Instance.eth.sendTransaction({
                 from: initialFundsSupplier,
                 to: account.address,
-                value: value,
+                value: actualValue,
                 gasPrice: txGasPrice,
             });
 
@@ -341,18 +356,18 @@ module.exports = {
             const newSupplierBalance = await helpers.utils.getBalance(helpers, initialFundsSupplier);
             let combinedValue = new helpers.BN( valueTransferTx.gasUsed.toString() )
             combinedValue = combinedValue.mul( new helpers.BN( txGasPrice ) );
-            combinedValue = combinedValue.add( value );
+            combinedValue = combinedValue.add( actualValue );
             const newCalculatedBalance = initialFundsSupplierBalance.sub(combinedValue);
             expect( newSupplierBalance ).to.be.bignumber.equal( newCalculatedBalance, 'newCalculatedBalance');
             
             // validate participant balance
             const newAccountBalance = await helpers.utils.getBalance(helpers, account.address);
-            expect( newAccountBalance ).to.be.bignumber.equal( value , 'newAccountBalance');
+            expect( newAccountBalance ).to.be.bignumber.equal( actualValue , 'newAccountBalance');
 
             console.log("      ["+i+"]", account.address, helpers.utils.toEth(helpers, value) + " eth" );
 
             participants.push( 
-                new Participant( {init, wallet, account}, value)
+                new Participant( {init, wallet, account}, value, participantTxBalance)
             );
         }
 

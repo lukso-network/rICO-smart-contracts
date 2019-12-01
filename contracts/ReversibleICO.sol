@@ -664,6 +664,7 @@ contract ReversibleICO is IERC777Recipient {
     function commit()
     internal
     isInitialized
+    isRunning
     isNotFrozen
     {
         // add to received value to committedETH
@@ -996,5 +997,12 @@ contract ReversibleICO is IERC777Recipient {
         require(frozen == false, "Contract can not be frozen.");
         _;
     }
+
+    modifier isRunning() {
+        uint256 blockNumber = getCurrentBlockNumber();
+        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Contract outside buyin range");
+        _;
+    }
+
 
 }
