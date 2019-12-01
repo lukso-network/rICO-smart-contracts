@@ -462,15 +462,21 @@ contract ReversibleICO is IERC777Recipient {
 
         Doing an iteration and validating on each item range can go upto 37391 gas for 13 stages.
     */
+
+    /// @dev Returns the current stage i.e. at the current block number.
     function getCurrentStage() public view returns ( uint8 ) {
         return getStageAtBlock(getCurrentBlockNumber());
     }
 
+    /// @dev Returns the current token price i.e. at the current block number.
     function getCurrentPrice() public view returns ( uint256 ) {
         return getPriceAtBlock(getCurrentBlockNumber());
     }
 
+    /// @dev Returns the token price at the specified block height.
+    /// @param _blockNumber the block height at which we want to retrieve the token price.
     function getPriceAtBlock(uint256 _blockNumber) public view returns ( uint256 ) {
+        // first retrieve the stage that the block belongs to
         uint8 stage = getStageAtBlock(_blockNumber);
         if(stage < stageCount) {
             return stages[stage].tokenPrice;
@@ -479,6 +485,9 @@ contract ReversibleICO is IERC777Recipient {
         return 0;
     }
 
+    /// @dev Returns the amount of tokens that ETH would buy (i.e. reverse ratio) at a specified stage.
+    /// @param _ethValue the ETH amount in wei.
+    /// @param _stageId the stage we are interested in.
     function getTokenAmountForEthAtStage(uint256 _ethValue, uint8 _stageId) public view returns (uint256) {
         // Since our tokens cost less than 1 eth, and decimals are 18
         // 1 wei will always buy something.
@@ -490,6 +499,9 @@ contract ReversibleICO is IERC777Recipient {
         ).div( stages[_stageId].tokenPrice );
     }
 
+    /// @dev Returns the amount of ETH (in wei) that tokens are worth (i.e. ratio) at a specified stage.
+    /// @param _tokenAmount the amount of token.
+    /// @param _stageId the stage we are interested in.
     function getEthAmountForTokensAtStage(uint256 _tokenAmount, uint8 _stageId) public view returns (uint256) {
         // return (_token_amount * Stages[_stageId].token_price) / (10 ** 18);
         return _tokenAmount.mul(
@@ -507,7 +519,10 @@ contract ReversibleICO is IERC777Recipient {
     function getParticipantDetailsByStage(
         address _address,
         uint8 _stageId
-    ) public view returns (
+    )
+    public
+    view
+    returns (
         uint256 stageCommittedETH,
         uint256 stageReturnedETH,
         uint256 stageAcceptedETH,
@@ -515,7 +530,8 @@ contract ReversibleICO is IERC777Recipient {
         uint256 stageReservedTokens,
         uint256 stageBoughtTokens,
         uint256 stageReturnedTokens
-    ) {
+    )
+    {
 
         ParticipantDetailsByStage storage totalsRecord = participantsByAddress[_address]
         .byStage[_stageId];
@@ -536,8 +552,8 @@ contract ReversibleICO is IERC777Recipient {
     */
     function getLockedTokenAmount(address _participantAddress) public view returns (uint256) {
 
-        // since we want to display token amounts even when they're not already
-        // transferred to their accounts, we use reserved + awarded
+        // since we want to display token amounts even when they are not already
+        // transferred to their accounts, we use reserved + bought
         return getLockedTokenAmountAtBlock(
             participantsByAddress[_participantAddress].reservedTokens +
             participantsByAddress[_participantAddress].boughtTokens,
@@ -561,6 +577,8 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
+    /// @dev Returns true if the participant has locked tokens in current stage.
+    /// @param _participantAddress the address of the relevant participant.
     function canCancelByTokens(address _participantAddress) public  view  returns (bool) {
         if(getLockedTokenAmount(_participantAddress) > 0) {
             return true;
@@ -568,8 +586,14 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
+<<<<<<< Updated upstream
     /// @dev Returns true if participant has committed ETH and the amount is greater than the amount returned so far.
     /// @param _participantAddress the address to be checked.
+||||||| merged common ancestors
+=======
+    /// @dev Returns true if participant has committed ETH and the amount is greater than the amount returned so far.
+    /// @param _participantAddress the address of the relevant participant.
+>>>>>>> Stashed changes
     function canCancelByEth(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
         if(participantRecord.committedETH > 0 && participantRecord.committedETH > participantRecord.returnedETH ) {
@@ -589,7 +613,9 @@ contract ReversibleICO is IERC777Recipient {
         return block.number;
     }
 
-    function getStageAtBlock(uint256 _selectedBlock) public view returns ( uint8 ) {
+    /// @dev Returns the stage at which the given block belongs to.
+    /// @param _selectedBlock the block number.
+    function getStageAtBlock(uint256 _selectedBlock) public view returns (uint8) {
 
         // *NOTE: if selectedBlock is end block.. the participant will get the correct
         //        stage now but their new transaction will end up in the
@@ -628,6 +654,8 @@ contract ReversibleICO is IERC777Recipient {
     *   Recalculate Funds allocation
     */
     function availableEthAtStage(uint8 _stage) public view returns (uint256) {
+        // multiply the number of tokens held by the contract with the token price...
+        // ... at the specified stage and perform precision adjustments(div).
         return tokenContract.balanceOf(address(this)).mul(
             stages[_stage].tokenPrice
         ).div( 10 ** 18 );
@@ -636,13 +664,14 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   ERC777 - get the amount of locked tokens at current block number
     */
+
     function getLockedTokenAmountAtBlock(uint256 _tokenAmount, uint256 _blockNumber) public view returns (uint256) {
 
         if(_tokenAmount > 0) {
 
             // if before "development / buy  phase" ( stage 0 )
             //   - return all tokens bought through contributing.
-            // if in development phase ( stage 1 to 12 )
+            // if in development phase ( stage 1 to n )
             //   - calculate and return
             // else if after end_block
             //   - return 0
@@ -665,7 +694,7 @@ contract ReversibleICO is IERC777Recipient {
 
             } else {
 
-                // after contract end
+                // after buyPhase's end
                 return 0;
             }
         } else {
@@ -678,11 +707,13 @@ contract ReversibleICO is IERC777Recipient {
     *   Returns unlock percentage multiplied by 10 to the power of precision
     *  ( should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals )
     */
-    function getCurrentUnlockPercentage() public view returns(uint256) {
+    function getCurrentUnlockPercentage() public view returns (uint256) {
         uint8 precision = 20;
+        // get current block
         uint256 currentBlock = getCurrentBlockNumber();
 
         if(currentBlock > buyPhaseStartBlock && currentBlock < buyPhaseEndBlock) {
+            // get the number of blocks that have "elapsed" since the buyPhase start
             uint256 passedBlocks = currentBlock.sub(buyPhaseStartBlock);
             return passedBlocks.mul(
                 10 ** uint256(precision)
@@ -930,7 +961,7 @@ contract ReversibleICO is IERC777Recipient {
                     returnValue = byStage.committedETH - byStage.returnedETH - byStage.acceptedETH -
                     byStage.withdrawnETH - newAcceptedValue;
 
-                    //update return values
+                    // update return values
                     returnedETH += returnValue;
                     participantRecord.returnedETH += returnValue;
                     byStage.returnedETH = returnValue;
