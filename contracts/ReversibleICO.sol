@@ -15,6 +15,7 @@ import "./zeppelin/introspection/IERC1820Registry.sol";
 
 contract ReversibleICO is IERC777Recipient {
 
+
     /*
     *   Instances
     */
@@ -24,8 +25,9 @@ contract ReversibleICO is IERC777Recipient {
     IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
-    /// @dev the actuall Rico token contract
+    /// @dev the actual rICO token contract
     IERC777 public tokenContract;
+
 
     /*
     *   Contract States
@@ -38,24 +40,25 @@ contract ReversibleICO is IERC777Recipient {
     bool public started; // default: false
     bool public ended; // default: false
 
+
     /*
     *   Addresses
     */
     /// @dev the deployer is only allowed to initialize the contract.
     address public deployerAddress;
-    /// @dev the actual Rico token contract address.
+    /// @dev the actual rICO token contract address.
     address public tokenContractAddress;
     // the address of wallet handling the funds raised.
     address public projectWalletAddress;
     // only the whitelist controller can whitelist addresses.
     address public whitelistControllerAddress;
 
+
     /*
     *   Public Variables
     */
     /// @dev total amount tokens minted
     uint256 public tokenSupply; // default: 0
-
     /// @dev total amount of ETH commited
     uint256 public committedETH; // default: 0
     /// @dev total amount of ETH returned
@@ -64,17 +67,16 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public acceptedETH; // default: 0
     /// @dev total amount of ETH withdrawn
     uint256 public withdrawnETH; // default: 0
-
     /// @dev denotes how many times the project has withdrawn from the funds raised
     uint256 public projectWithdrawCount; // default: 0
     /// @dev total amount allocated to the contract
     uint256 public projectAllocatedETH; // default: 0
     /// @dev total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH; // default: 0
-
-    // Minimum amount of ETH we accept for a contribution
-    // everything lower will trigger a canceling of pending ETH
+    // Minimum amount of ETH accepted for a contribution
+    // everything lower than that will trigger a canceling of pending ETH
     uint256 public minContribution = 0.001 ether;
+
 
     /*
     *   Commit phase (Stage 0)
@@ -83,25 +85,27 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public commitPhasePrice;
     /// @dev block number that indicates the start of the commitment phase
     uint256 public commitPhaseStartBlock;
-    /// @dev block number that indicates the end of the RICO period
+    /// @dev block number that indicates the end of the rICO period
     uint256 public commitPhaseEndBlock;
-    /// @dev the duration of the RICO period in blocks
+    /// @dev the duration of the rICO period in blocks
     uint256 public commitPhaseBlockCount;
 
-    /// @dev block number that indicates the start of the 1st buying phase
+
+    /*
+    *   Buy phases (Stages 1-n)
+    */
+    /// @dev block number that indicates the start of the 1st buy phase
     uint256 public buyPhaseStartBlock;
-    /// @dev block number that indicates the end of the buying phase
+    /// @dev block number that indicates the end of the buy phase
     uint256 public buyPhaseEndBlock;
-    /// @dev the duration of the buying period in blocks
+    /// @dev the duration of the buy period in blocks
     uint256 public buyPhaseBlockCount;
 
-    /// @dev the duration of each stage in blocks
-    uint256 public stageBlockCount;
 
     /*
     *   Stages
     *   Stage 0 = commit phase
-    *   Stage 1-n = buy phase
+    *   Stages 1-n = buy phase
     */
     struct Stage {
         uint256 startBlock;
@@ -111,11 +115,12 @@ contract ReversibleICO is IERC777Recipient {
 
     mapping ( uint8 => Stage ) public stages;
     uint8 public stageCount; // default: 0
+    /// @dev the duration of each stage in blocks
+    uint256 public stageBlockCount;
 
     /*
     * Participants
     */
-
     struct Participant {
         bool   whitelisted;
         uint32  contributionsCount;
@@ -130,13 +135,6 @@ contract ReversibleICO is IERC777Recipient {
         mapping ( uint8 => ParticipantDetailsByStage ) byStage;
     }
 
-    /// @dev identifies participants' stats by their address
-    mapping ( address => Participant ) public participantsByAddress;
-    /// @dev identifies participants' address by their unique ID
-    mapping ( uint256 => address ) public participantsById;
-    /// @dev total number of RICO participants
-    uint256 public participantCount;
-
     struct ParticipantDetailsByStage {
         uint256 committedETH;		    // msg.value
         uint256 returnedETH;		    // committedETH - acceptedETH
@@ -148,10 +146,17 @@ contract ReversibleICO is IERC777Recipient {
         uint256 returnedTokens;	        // tokens returned by participant to contract
     }
 
+    /// @dev identifies participants' stats by their address
+    mapping ( address => Participant ) public participantsByAddress;
+    /// @dev identifies participants' address by their unique ID
+    mapping ( uint256 => address ) public participantsById;
+    /// @dev total number of rICO participants
+    uint256 public participantCount;
+
+
     /*
     * Events
     */
-
     enum ApplicationEventTypes {
         NOT_SET,                // 0; will match default value of a mapping result
         CONTRIBUTION_NEW,       // 1
@@ -195,7 +200,16 @@ contract ReversibleICO is IERC777Recipient {
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
-
+    /// @dev Initializes the contract: only the deployer (set in the constructor) can call this method
+    /// @param _tokenContractAddress the address of the ERC777 rICO token contract.
+    /// @param _whitelistControllerAddress the address of the controller handling whitelisting.
+    /// @param _projectWalletAddress the project wallet that can withdraw the contributions.
+    /// @param _commitPhaseStartBlock the block in which the commit phase starts.
+    /// @param _commitPhaseBlockCount the duration of the commit phase in blocks.
+    /// @param _commitPhasePrice the initial token price (in wei) during the commit phase.
+    /// @param _stageCount the number of the rICO stages.
+    /// @param _stageBlockCount the duration of each stage in blocks.
+    /// @param _stagePriceIncrease a factor used to increase the token price at each subsequent stage.
     function init(
         address _tokenContractAddress,
         address _whitelistControllerAddress,
@@ -265,15 +279,13 @@ contract ReversibleICO is IERC777Recipient {
         initialized = true;
     }
 
-    /*
-     * Public functions
-     * The main ways to interact with the rICO.
-     */
 
     /*
-    * FALLBACK function
-    * Allows for ETH contributions, and canceling of pending contributions
-    */
+     * Public functions
+     * The main way to interact with the rICO.
+     */
+
+    /// @dev FALLBACK: depending on the amount received it commits or it cancels contributions.
     function ()
     external
     payable
@@ -291,9 +303,10 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
-    /*
-    * ERC777TokensRecipient method for receiving tokens
-    */
+
+    /// @dev ERC777TokensRecipient implementation for receiving ERC777 tokens.
+    /// @param _from token sender.
+    /// @param _amount token amount.
     function tokensReceived(
         address,
         address _from,
@@ -307,7 +320,7 @@ contract ReversibleICO is IERC777Recipient {
     // isNotFrozen TODO??
     // requireNotEnded
     {
-        // rICO should only receive tokens from the Rico Token Tracker.
+        // rICO should only receive tokens from the rICO Token Tracker.
         // transactions from any other sender should revert
         require(msg.sender == address(tokenContract), "Invalid token sent.");
 
@@ -325,9 +338,8 @@ contract ReversibleICO is IERC777Recipient {
 
     }
 
-    /*
-    *   Participants can cancel their pending ETH commitment only if they are not whitelisted yet.
-    */
+
+    /// @dev Cancels non-whitelisted participant's pending ETH commitment.
     function cancel()
     public
     isInitialized
@@ -348,9 +360,9 @@ contract ReversibleICO is IERC777Recipient {
         revert("Participant has no contributions.");
     }
 
-    /*
-    *   Project Withdraw
-    */
+
+    /// @dev Allows for the project to withdraw ETH.
+    /// param _ethAmount the ETH amount in wei.
     function projectWithdraw(uint256 _ethAmount)
     external
     isInitialized
@@ -380,6 +392,7 @@ contract ReversibleICO is IERC777Recipient {
         emit TransferEvent(uint8(TransferTypes.PROJECT_WITHDRAW), projectWalletAddress, _ethAmount);
     }
 
+
     /// @dev Returns project's unlocked (i.e. available for withdrawing) ETH
     function getProjectAvailableEth() public view returns (uint256 _amount) {
 
@@ -406,11 +419,10 @@ contract ReversibleICO is IERC777Recipient {
         return unlocked.add(remainingFromAllocation);
     }
 
-    /*
-    *   Whitelists or Rejects a participants address
-    *
-    *   Possible modes: WHITELIST_APPROVE: 5, WHITELIST_REJECT: 6
-    */
+
+    /// @dev Whitelists or rejects participants.
+    /// @param _address the participant's address.
+    /// @param _approve true for approved (WHITELIST_APPROVE), false for rejected (WHITELIST_REJECT).
     function whitelist(
         address _address,
         bool _approve
@@ -436,6 +448,9 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   Whitelisting or Rejecting multiple addresses
     */
+    /// @dev Whitelists or rejects a list participants.
+    /// @param _address the list of participants' addresses.
+    /// @param _approve denotes whether they are approved or rejected.
     function whitelistMultiple(address[] memory _address, bool _approve) public {
         for( uint16 i = 0; i < _address.length; i++ ) {
             whitelist(_address[i], _approve);
@@ -448,6 +463,8 @@ contract ReversibleICO is IERC777Recipient {
     * Public view functions
     */
 
+    /// @dev Returns true if the participant is whiteliste or false otherwise.
+    /// @param _address the participant's address.
     function isWhitelisted(address _address) public view returns ( bool ) {
         return participantsByAddress[_address].whitelisted;
     }
@@ -516,6 +533,9 @@ contract ReversibleICO is IERC777Recipient {
     */
 
     // direct call: participantsByAddress[_address].byStage[_stageId]._accepted
+    /// @dev Returns participant's stats.
+    /// @param _address the participant's address.
+    /// @param _stageId the relevant stage.
     function getParticipantDetailsByStage(
         address _address,
         uint8 _stageId
@@ -550,6 +570,8 @@ contract ReversibleICO is IERC777Recipient {
     /*
     *   ERC777 - get the amount of locked tokens at current block number
     */
+    /// @dev Returns the participant's amount of locked tokens at the current block.
+    /// @param _participantAddress the relevant participant's address.
     function getLockedTokenAmount(address _participantAddress) public view returns (uint256) {
 
         // since we want to display token amounts even when they are not already
@@ -562,8 +584,10 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /*
-    *   Return cancel modes for a participant address, informational only
+    *
     */
+    /// @dev Returns the cancel modes for a participant.
+    /// @param _participantAddress the relevant participant's address.
     function getCancelModes(address _participantAddress) external view returns (bool byEth, bool byTokens) {
 
         Participant storage participantRecord = participantsByAddress[_participantAddress];
@@ -586,14 +610,8 @@ contract ReversibleICO is IERC777Recipient {
         return false;
     }
 
-<<<<<<< Updated upstream
-    /// @dev Returns true if participant has committed ETH and the amount is greater than the amount returned so far.
-    /// @param _participantAddress the address to be checked.
-||||||| merged common ancestors
-=======
     /// @dev Returns true if participant has committed ETH and the amount is greater than the amount returned so far.
     /// @param _participantAddress the address of the relevant participant.
->>>>>>> Stashed changes
     function canCancelByEth(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
         if(participantRecord.committedETH > 0 && participantRecord.committedETH > participantRecord.returnedETH ) {
@@ -608,7 +626,7 @@ contract ReversibleICO is IERC777Recipient {
     * Helper public view functions
     */
 
-    // required so we can override when running tests
+    /// @dev Returns current block number: required in order to override it when running tests
     function getCurrentBlockNumber() public view returns (uint256) {
         return block.number;
     }
@@ -650,9 +668,9 @@ contract ReversibleICO is IERC777Recipient {
         return uint8(num);
     }
 
-    /*
-    *   Recalculate Funds allocation
-    */
+
+    /// @dev Calculcates the contract's ETH allocation at a certain stage.
+    /// @param _stage the stage id.
     function availableEthAtStage(uint8 _stage) public view returns (uint256) {
         // multiply the number of tokens held by the contract with the token price...
         // ... at the specified stage and perform precision adjustments(div).
@@ -661,10 +679,10 @@ contract ReversibleICO is IERC777Recipient {
         ).div( 10 ** 18 );
     }
 
-    /*
-    *   ERC777 - get the amount of locked tokens at current block number
-    */
 
+    /// @dev Returns the amount of locked tokens at a certain block.
+    /// @param _tokenAmount the amount on tokens.
+    /// @param _blockNumber the specified block number.
     function getLockedTokenAmountAtBlock(uint256 _tokenAmount, uint256 _blockNumber) public view returns (uint256) {
 
         if(_tokenAmount > 0) {
@@ -707,6 +725,9 @@ contract ReversibleICO is IERC777Recipient {
     *   Returns unlock percentage multiplied by 10 to the power of precision
     *  ( should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals )
     */
+    /// @dev Calculates the percentage of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
+    /// Returns unlock percentage multiplied by 10 to the power of precision.
+    /// (should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals).
     function getCurrentUnlockPercentage() public view returns (uint256) {
         uint8 precision = 20;
         // get current block
@@ -732,9 +753,8 @@ contract ReversibleICO is IERC777Recipient {
     * Internal functions
     */
 
-    /*
-    *   Participant commits funds
-    */
+
+    /// @dev Commits participant's funds.
     function commit()
     internal
     isInitialized
@@ -765,12 +785,13 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
-    /*
-    *   Withdraw
-    */
+
+    /// @dev Allows for a participant to withdraw by sending tokens back to rICO.
+    /// @param _from sender's (participant's) address.
+    /// @param _returnedTokenAmount the amount of tokens returned.
     function withdraw(address _from, uint256 _returnedTokenAmount) internal {
 
-        // Whitelisted contributor sends tokens back to the RICO contract.
+        // Whitelisted contributor sends tokens back to the rICO contract.
         // - unlinke cancel() method, this allows variable amounts.
         // - latest contributions get returned first.
 
@@ -893,26 +914,28 @@ contract ReversibleICO is IERC777Recipient {
         revert("Withdraw not possible. Participant has no locked tokens.");
     }
 
-    /// @dev
-    /// just records every contribution
-    /// does not return anything or care about overselling
+    /// @dev Records a new contribution.
+    /// @param _from participant's address.
+    /// @param _receivedValue the amount contributed.
     function recordNewContribution(address _from, uint256 _receivedValue) internal {
         uint8 currentStage = getCurrentStage();
         Participant storage participantRecord = participantsByAddress[_from];
 
-        // per account
+        // update participant's total stats
         participantRecord.contributionsCount++;
         participantRecord.committedETH += _receivedValue;
 
-        // per stage
+        // update participant's per-stage stats
         ParticipantDetailsByStage storage byStage = participantRecord.byStage[currentStage];
         byStage.committedETH += _receivedValue;
 
-        // add contribution tokens to totals
-        // these will change when contribution is accepted if we hit max cap
+
+        // get the equivalent amount in tokens
         uint256 newTokenAmount = getTokenAmountForEthAtStage(
             _receivedValue, currentStage
         );
+        // update participant's reserved tokens
+        // thee can change when contribution is accepted if max cap is hit
         byStage.reservedTokens += newTokenAmount;
         participantRecord.reservedTokens += newTokenAmount;
 
@@ -924,7 +947,9 @@ contract ReversibleICO is IERC777Recipient {
         );
     }
 
-    /// @dev
+    /// @dev Accept participant's contribution.
+    /// param _from participant's address.
+    /// param _eventType can be either WHITELIST_APPROVE or COMMITMENT_ACCEPTED.
     function acceptContributionsForAddress(
         address _from,
         uint8 _eventType
