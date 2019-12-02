@@ -26,7 +26,6 @@ class Participant extends Actor {
         this.wallet = this.properties.wallet;
         this.extraETH = extraETH;
         this.txCosts = new helpers.BN(0);
-        this.action = [];
         this.byEth = false;
         this.byTokens = false;
 
@@ -78,7 +77,6 @@ class Participant extends Actor {
             actions.push("withdraw");
         }
 
-        this.action = actions;
         return actions;
     }
 
@@ -124,10 +122,10 @@ class Participant extends Actor {
     }
 
     async participantRandomAction(){
-        await this.getCurrentlyAvailableActions();
-        let random = action.length;
+        let actions = await this.getCurrentlyAvailableActions();
+        let random = actions.length;
 
-        for(i = 0; i < action; i++){
+        for(i = 0; i < actions; i++){
             let randomAction = actions[utils.randInt(random)];
 
             if(randomAction === "commit"){
