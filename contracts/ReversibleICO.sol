@@ -903,7 +903,6 @@ contract ReversibleICO is IERC777Recipient {
                 participantRecord.allocatedETH = allocatedEthAmount;
                 projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
 
-                participantRecord.withdrawnETH += returnETHAmount; //DUPLICATE??
                 // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);
                 emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
@@ -1050,16 +1049,13 @@ contract ReversibleICO is IERC777Recipient {
 
         if(participantAvailableETH > 0) {
             // update total ETH returned
+            // since this balance was never actually "accepted" it counts as returned...
+            // ...so it does not interfere with project withdraw calculations
             returnedETH += participantAvailableETH;
 
             // update participant's audit values
             participantRecord.reservedTokens = 0;
             participantRecord.withdrawnETH += participantAvailableETH;
-
-
-            // since this balance was never actually "accepted" it counts as returned
-            // otherwise it interferes with project withdraw calculations
-            returnedETH += participantAvailableETH; // TO DO: REMOVE DUPLICATE!!!
 
             // transfer ETH back to participant including received value
             address(uint160(_from)).transfer(participantAvailableETH + msg.value);
