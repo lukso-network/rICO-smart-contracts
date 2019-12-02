@@ -10,6 +10,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const Actor = require("./actorBase.js");
+const utils = require('../helpers/utils');
 
 class Participant extends Actor {
     
@@ -25,6 +26,9 @@ class Participant extends Actor {
         this.wallet = this.properties.wallet;
         this.extraETH = extraETH;
         this.txCosts = new helpers.BN(0);
+        this.action = [];
+        this.byEth = false;
+        this.byTokens = false;
 
         // should be add the tokenPrice?
         // and do the calculation based on the current token price?
@@ -74,6 +78,7 @@ class Participant extends Actor {
             actions.push("withdraw");
         }
 
+        this.action = actions;
         return actions;
     }
 
@@ -99,23 +104,47 @@ class Participant extends Actor {
     }
 
     // withdraw ETH from the rICO contract
-    async withdraw(TokenAmount = 0) {
+    async withdraw(ETH, TokenAmount) {
 
         // calculation will max out at max available ETH and tokens that can be returned.
         // TokenAmount over max available will set calculation.returned_tokens
+
         const calculation = this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, TokenAmount);
 
         this.expectedBalances.ETH = this.expectedBalances.ETH.add(calculation.eth);
         this.expectedBalances.Token = this.expectedBalances.Token.sub(calculation.withdrawn_tokens);
+
+        // signed value tx for withdrawing ETH and sending tokens back to the contract.
+        await this.sendValueTx(this.expectedBalances.ETH, this.address);
+        await this.sendValueTx(this.expectedBalances.Token, this.address);
     }
 
     async updateAfterWhitelisting(tokenAmount) {
         this.expectedBalances.Token = this.expectedBalances.Token.add(tokenAmount);
     }
 
+    async participantRandomAction(){
+        await this.getCurrentlyAvailableActions();
+        let random = action.length;
+
+        for(i = 0; i < action; i++){
+            let randomAction = actions[utils.randInt(random)];
+
+            if(randomAction === "commit"){
+
+                // randomly commit ETH (value of ETH ranges from 0 - 5)
+                this.commit(utils.randInt(5));
+            }
+            else if(randomAction === "withdraw"){
+                this.withdraw(TokenAmount = 0);
+            }
+        }
+    }
+
     async test() {
         await this.readBalances();
         this.sanityCheck();
+        this.participantRandomAction();
     }
 
     displayBalances() {

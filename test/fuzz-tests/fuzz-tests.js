@@ -111,7 +111,7 @@ module.exports = {
 
             if(i == 5) {
                 const participant = participants[0];
-                const actions = await participant.getCurrentlyAvailableActions();
+                const actions = await participant.participantRandomAction();
                 console.log("getAvailableActions", actions);
 
                 participant.displayBalances();

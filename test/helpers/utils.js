@@ -65,6 +65,21 @@ module.exports = {
         let solAccUtils = artifacts.require('SolidityAccountUtils');
         return solAccUtils.new().then(function(instance){ return instance.transferTo(_to, {value: _val, from: _from}) });
     },
+    // using rejection sampling
+    randInt(range) {
+        if (range > MAX_RANGE) {
+          throw new Error(`Sorry, range cannot be more than ${MAX_RANGE}`);
+        }   
+        // Calculating max allowable range
+        let q = Math.floor(MAX_RANGE / range);
+        let max = q * range;
+      
+        let n;
+        do {
+          n = sample();
+        } while (n >= max);
+        return n % range;
+    },
 
     /*
         This is useless for testing.. time is going to really depend on testrpc internal time,
