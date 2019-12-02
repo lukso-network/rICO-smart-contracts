@@ -887,7 +887,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 // return overflow tokens received
                 if(returnTokenAmount > 0) {
-                    // send tokens back participant
+                    // send tokens back to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
                     tokenContract.send(_from, returnTokenAmount, data);
