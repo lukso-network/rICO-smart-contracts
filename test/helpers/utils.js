@@ -1,6 +1,9 @@
 const web3util = require('web3-utils');
 const dateFormat    = require('dateformat');
 
+const MAX_RANGE = 256;
+const crypto = require('crypto');
+
 /*
  ascii escape codes
 
@@ -76,9 +79,13 @@ module.exports = {
       
         let n;
         do {
-          n = sample();
+          n = this.sample();
         } while (n >= max);
         return n % range;
+    },
+
+    sample(){
+        return crypto.randomBytes(1).readUInt8();
     },
 
     /*

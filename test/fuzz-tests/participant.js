@@ -125,7 +125,8 @@ class Participant extends Actor {
         let actions = await this.getCurrentlyAvailableActions();
         let random = actions.length;
 
-        for(i = 0; i < actions; i++){
+        // This number of times an action is called can be configured. 
+        for(let i = 0; i < 10; i++){
             let randomAction = actions[utils.randInt(random)];
 
             if(randomAction === "commit"){
