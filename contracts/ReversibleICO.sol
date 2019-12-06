@@ -25,9 +25,6 @@ contract ReversibleICO is IERC777Recipient {
     IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
-    /// @dev The actual rICO token contract instance.
-    IERC777 public tokenContract;
-
 
     /*
     *   Contract States
@@ -245,10 +242,6 @@ contract ReversibleICO is IERC777Recipient {
         stageBlockCount = _stageBlockCount;
 
 
-        // initialize ERC777 tokenContract
-        tokenContract = IERC777(tokenContractAddress);
-
-
         // Setup stage 0: The commit phase.
         Stage storage stage0 = stages[stageCount];
         // stageCount = 0
@@ -333,7 +326,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // rICO should only receive tokens from the rICO Token Tracker.
         // transactions from any other sender should revert
-        require(msg.sender == address(tokenContract), "Invalid token sent.");
+        require(msg.sender == tokenContractAddress, "Invalid token sent.");
 
         // 2 cases
         if (_from == projectWalletAddress) {
@@ -720,7 +713,7 @@ contract ReversibleICO is IERC777Recipient {
     function availableEthAtStage(uint8 _stage) public view returns (uint256) {
         // Multiply the number of tokens held by the contract with the token price
         // at the specified stage and perform precision adjustments(div).
-        return tokenContract.balanceOf(address(this)).mul(
+        return IERC777(tokenContractAddress).balanceOf(address(this)).mul(
             stages[_stage].tokenPrice
         ).div(10 ** 18);
     }
@@ -941,7 +934,7 @@ contract ReversibleICO is IERC777Recipient {
                     // send tokens back to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
-                    tokenContract.send(_from, returnTokenAmount, data);
+                    IERC777(tokenContractAddress).send(_from, returnTokenAmount, data);
                 }
 
                 // increase participant's withdrawnETH counter
@@ -1061,7 +1054,7 @@ contract ReversibleICO is IERC777Recipient {
                     // allocate tokens to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
-                    tokenContract.send(_from, newTokenAmount, data);
+                    IERC777(tokenContractAddress).send(_from, newTokenAmount, data);
                 }
 
                 // if the incoming amount is too big to accept, then...
