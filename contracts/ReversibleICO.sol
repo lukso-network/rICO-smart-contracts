@@ -35,10 +35,6 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev The contract can be automatically frozen in case of inconsistencies.
     bool public frozen; // default: false
 
-    // TODO unused variable
-    bool public started; // default: false
-    bool public ended; // default: false
-
 
     /*
     *   Addresses
@@ -1158,14 +1154,6 @@ contract ReversibleICO is IERC777Recipient {
     */
     modifier isNotInitialized() {
         require(initialized == false, "Contract is already initialized.");
-        _;
-    }
-
-    /**
-    @notice Requires the contract to be frozen.
-    */
-    modifier isFrozen() {
-        require(frozen == true, "Contract is not frozen.");
         _;
     }
 
