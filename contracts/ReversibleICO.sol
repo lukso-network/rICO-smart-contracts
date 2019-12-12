@@ -224,7 +224,7 @@ contract ReversibleICO is IERC777Recipient {
     isNotInitialized
     {
 
-        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"start block cannot be set in the past");
+        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"Start block cannot be set in the past.");
 
         // Assign address variables
         tokenContractAddress = _tokenContractAddress;
