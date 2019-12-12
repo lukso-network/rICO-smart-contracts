@@ -56,3 +56,11 @@ sudo apt-get install npm
 ```bash
 npm test
 ```
+
+### Merging contracts for deployment
+
+```bash
+npm run merge-contracts
+```
+
+Outputs the merged contracts in `./contracts-merged`

@@ -344,19 +344,14 @@ contract ReversibleICO is IERC777Recipient {
     */
     function cancel()
     public
+    payable
     isInitialized
     isNotFrozen
     {
-        // Only non-whitelisted participants can cancel their contribution
-        require(
-            participantsByAddress[msg.sender].whitelisted != true,
-            "Commitment canceling only possible using tokens after you got whitelisted."
-        );
-
-        // If there is available committed ETH ...
-        if (canCancelByEth(msg.sender)) {
+        // If there is available pending ETH ...
+        if (hasPendingETH(msg.sender)) {
             // ... cancel participant's contribution.
-            cancelContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
+            cancelContributionsForAddress(msg.sender, msg.value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
         revert("Participant has no contributions.");
@@ -450,7 +445,7 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
             participantRecord.whitelisted = false;
-            cancelContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_REJECT));
+            cancelContributionsForAddress(_address, 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
         }
     }
 
@@ -617,10 +612,10 @@ contract ReversibleICO is IERC777Recipient {
 
         if (participantRecord.whitelisted == true) {
             // byEth remains false as they need to send tokens back.
-            byTokens = canCancelByTokens(_participantAddress);
+            byTokens = canWithdraw(_participantAddress);
         } else {
             // byTokens remains false as the participant should have no tokens to send back anyway.
-            byEth = canCancelByEth(_participantAddress);
+            byEth = hasPendingETH(_participantAddress);
         }
     }
 
@@ -628,7 +623,7 @@ contract ReversibleICO is IERC777Recipient {
     @notice Returns TRUE if the participant has locked tokens in the current stage.
     @param _participantAddress The participant's address.
     */
-    function canCancelByTokens(address _participantAddress) public view returns (bool) {
+    function canWithdraw(address _participantAddress) public view returns (bool) {
         if (getLockedTokenAmount(_participantAddress) > 0) {
             return true;
         }
@@ -636,13 +631,12 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-    @notice Returns TRUE if participant has committed ETH and the amount is greater than the amount returned so far.
+    @notice Returns TRUE if participant has pending ETH and is not whitelisted.
     @param _participantAddress The participant's address.
-    TODO: a bit confusing, as he can only cancel if NOT whitelisted; which is not checked here, but in getCancelModes
     */
-    function canCancelByEth(address _participantAddress) public view returns (bool) {
+    function hasPendingETH(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
-        if (participantRecord.totalReceivedETH > 0 && participantRecord.totalReceivedETH > participantRecord.returnedETH) {
+        if (!participantRecord.whitelisted && participantRecord.totalReceivedETH > 0 && participantRecord.totalReceivedETH > participantRecord.returnedETH) {
             return true;
         }
         return false;
@@ -1068,10 +1062,11 @@ contract ReversibleICO is IERC777Recipient {
     /**
     @notice Cancels all of the participant's contributions so far.
     @param _from Participant's address
+    @param _value the ETH amount sent with the transaction, to return
     @param _eventType Reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
     TODO add whitelisted modifier, on all functions that require such
     */
-    function cancelContributionsForAddress(address _from, uint8 _eventType) internal {
+    function cancelContributionsForAddress(address _from, uint256 _value, uint8 _eventType) internal {
 
         // Participant should only be able to cancel if they haven't been whitelisted yet...
         // ...but just to make sure take withdrawn and returned into account.
@@ -1096,7 +1091,7 @@ contract ReversibleICO is IERC777Recipient {
             participantRecord.withdrawnETH += participantAvailableETH;
 
             // transfer ETH back to participant including received value
-            address(uint160(_from)).transfer(participantAvailableETH + msg.value);
+            address(uint160(_from)).transfer(participantAvailableETH + _value);
 
             uint8 currentTransferEventType;
 
