@@ -54,11 +54,11 @@ contract ReversibleICO is IERC777Recipient {
     */
     /// @dev Total amount tokens minted.
     uint256 public tokenSupply; // default: 0
-    /// @dev Total amount of ETH committed.
+    /// @dev Total amount of ETH received by the smart contract.
     uint256 public totalReceivedETH; // default: 0
     /// @dev Total amount of ETH returned.
     uint256 public returnedETH; // default: 0
-    /// @dev Total amount of ETH accepted.
+    /// @dev Total amount of ETH accepted as a commitment to buy tokens (not including pending).
     uint256 public committedETH; // default: 0
     /// @dev Total amount of ETH withdrawn.
     uint256 public withdrawnETH; // default: 0
@@ -119,26 +119,26 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool whitelisted;
         uint32 contributionsCount;
-        uint256 totalReceivedETH;            // msg.value
+        uint256 totalReceivedETH;       // Total amount of ETH received by the smart contract.
         uint256 returnedETH;            // totalReceivedETH - committedETH
-        uint256 committedETH;            // lower than msg.value if maxCap already reached
-        uint256 withdrawnETH;            // cancel() / withdraw()
+        uint256 committedETH;           // lower than msg.value if maxCap already reached
+        uint256 withdrawnETH;           // cancel() / withdraw()
         uint256 allocatedETH;           // allocated to project when contributing or exiting
         uint256 reservedTokens;         // total tokens bought in all stages
-        uint256 boughtTokens;            // total tokens already sent to the participant in all stages
+        uint256 boughtTokens;           // total tokens already sent to the participant in all stages
         uint256 returnedTokens;         // total tokens returned by participant to contract in all stages
         mapping(uint8 => ParticipantDetailsByStage) byStage;
     }
 
     struct ParticipantDetailsByStage {
-        uint256 totalReceivedETH;            // msg.value
+        uint256 totalReceivedETH;       // Total amount of ETH received by the smart contract.
         uint256 returnedETH;            // totalReceivedETH - committedETH
-        uint256 committedETH;            // lower than msg.value if maxCap already reached
-        uint256 withdrawnETH;            // withdrawn from current stage
+        uint256 committedETH;           // lower than msg.value if maxCap already reached
+        uint256 withdrawnETH;           // withdrawn from current stage
         uint256 allocatedETH;           // allocated to project when contributing or exiting
         uint256 reservedTokens;         // tokens bought in this stage
-        uint256 boughtTokens;            // tokens already sent to the participant in this stage
-        uint256 returnedTokens;            // tokens returned by participant to contract
+        uint256 boughtTokens;           // tokens already sent to the participant in this stage
+        uint256 returnedTokens;         // tokens returned by participant to contract
     }
 
     /// @dev Maps participants stats by their address.
