@@ -102,16 +102,8 @@ describe("ReversibleICO", function () {
             expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(false);
         });
 
-        it("Property running should be false", async function () {
-            expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-        });
-
         it("Property frozen should be false", async function () {
             expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-        });
-
-        it("Property ended should be false", async function () {
-            expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
         });
 
         it("Property TokenContractAddress should be address(0x0)", async function () {
@@ -188,16 +180,8 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(true);
             });
 
-            it("Property running should be false", async function () {
-                expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-            });
-
             it("Property frozen should be false", async function () {
                 expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-            });
-
-            it("Property ended should be false", async function () {
-                expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
             });
 
             it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
@@ -907,7 +891,7 @@ describe("ReversibleICO", function () {
                                     const returned = (parseInt(StageDetails.stageReturnedETH, 10) );
                                     const accepted = (parseInt(StageDetails.stageAcceptedETH, 10) );
                                     const withdrawn = (parseInt(StageDetails.stageWithdrawnETH, 10) );
-                                    
+
                                     const processedTotals = accepted + returned + withdrawn;
                                     expect( processedTotals ).to.be.equal(commited);
 
