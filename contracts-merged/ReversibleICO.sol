@@ -186,9 +186,9 @@ contract ReversibleICO is IERC777Recipient {
     
     uint256 public tokenSupply; 
 
-    uint256 public committedETH; 
+    uint256 public totalReceivedETH;
     uint256 public returnedETH; 
-    uint256 public acceptedETH; 
+    uint256 public committedETH;
     uint256 public withdrawnETH; 
 
     uint256 public projectWithdrawCount; 
@@ -226,9 +226,9 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool   whitelisted;
         uint32  contributionsCount;
-        uint256 committedETH;	        
+        uint256 totalReceivedETH;
         uint256 returnedETH;	        
-        uint256 acceptedETH;	        
+        uint256 committedETH;
         uint256 withdrawnETH;	        
         uint256 allocatedETH;              
         uint256 reservedTokens;         
@@ -242,9 +242,9 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public participantCount = 0;
 
     struct ParticipantDetailsByStage {
-        uint256 committedETH;		    
+        uint256 totalReceivedETH;
         uint256 returnedETH;		    
-        uint256 acceptedETH;		    
+        uint256 committedETH;
         uint256 withdrawnETH;		    
         uint256 allocatedETH;           
         uint256 reservedTokens;         
@@ -466,7 +466,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         
-        uint256 globalAvailable = acceptedETH
+        uint256 globalAvailable = committedETH
             .sub(withdrawnETH)
             .sub(projectWithdrawnETH)
             .sub(remainingFromAllocation);
@@ -579,9 +579,9 @@ contract ReversibleICO is IERC777Recipient {
         .byStage[_stageId];
 
         return (
-            totalsRecord.committedETH,
+            totalsRecord.totalReceivedETH,
             totalsRecord.returnedETH,
-            totalsRecord.acceptedETH,
+            totalsRecord.committedETH,
             totalsRecord.withdrawnETH,
             totalsRecord.reservedTokens,
             totalsRecord.boughtTokens,
@@ -624,7 +624,7 @@ contract ReversibleICO is IERC777Recipient {
 
     function canCancelByEth(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
-        if(participantRecord.committedETH > 0 && participantRecord.committedETH > participantRecord.returnedETH ) {
+        if(participantRecord.totalReceivedETH > 0 && participantRecord.totalReceivedETH > participantRecord.returnedETH ) {
             return true;
         }
         return false;
@@ -748,7 +748,7 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     {
         
-        committedETH += msg.value;
+        totalReceivedETH += msg.value;
 
         
         Participant storage participantRecord = participantsByAddress[msg.sender];
@@ -898,11 +898,11 @@ contract ReversibleICO is IERC777Recipient {
 
         
         participantRecord.contributionsCount++;
-        participantRecord.committedETH += _receivedValue;
+        participantRecord.totalReceivedETH += _receivedValue;
 
         
         ParticipantDetailsByStage storage byStage = participantRecord.byStage[currentStage];
-        byStage.committedETH += _receivedValue;
+        byStage.totalReceivedETH += _receivedValue;
 
         
         
@@ -934,9 +934,9 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetailsByStage storage byStage = participantRecord.byStage[stageId];
 
-            uint256 processedTotals = participantRecord.acceptedETH + participantRecord.returnedETH;
+            uint256 processedTotals = participantRecord.committedETH + participantRecord.returnedETH;
 
-            if(processedTotals < participantRecord.committedETH) {
+            if(processedTotals < participantRecord.totalReceivedETH) {
 
                 
                 participantRecord.reservedTokens -= byStage.reservedTokens;
@@ -944,7 +944,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
 
-                uint256 newAcceptedValue = byStage.committedETH - byStage.acceptedETH;
+                uint256 newAcceptedValue = byStage.totalReceivedETH - byStage.committedETH;
                 uint256 returnValue = 0;
 
                 
@@ -952,7 +952,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 if(newAcceptedValue > maxAcceptableValue) {
                     newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.committedETH - byStage.returnedETH - byStage.acceptedETH -
+                    returnValue = byStage.totalReceivedETH - byStage.returnedETH - byStage.committedETH -
                     byStage.withdrawnETH - newAcceptedValue;
 
                     
@@ -964,10 +964,10 @@ contract ReversibleICO is IERC777Recipient {
                 if(newAcceptedValue > 0) {
 
                     
-                    acceptedETH += newAcceptedValue;
-                    participantRecord.acceptedETH += newAcceptedValue;
+                    committedETH += newAcceptedValue;
+                    participantRecord.committedETH += newAcceptedValue;
 
-                    byStage.acceptedETH += newAcceptedValue;
+                    byStage.committedETH += newAcceptedValue;
 
                     uint256 newTokenAmount = getTokenAmountForEthAtStage(
                         newAcceptedValue, stageId
@@ -1007,7 +1007,7 @@ contract ReversibleICO is IERC777Recipient {
         
         
         
-        uint256 participantAvailableETH = participantRecord.committedETH -
+        uint256 participantAvailableETH = participantRecord.totalReceivedETH -
             participantRecord.withdrawnETH -
             participantRecord.returnedETH;
 

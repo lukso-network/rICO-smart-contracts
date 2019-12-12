@@ -993,9 +993,9 @@ describe("ReversibleICO", function () {
 
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
 
-                                    const received = (parseInt(ParticipantByAddress.committedETH, 10) );
+                                    const received = (parseInt(ParticipantByAddress.totalReceivedETH, 10) );
                                     const returned = (parseInt(ParticipantByAddress.returnedETH, 10) );
-                                    const accepted = (parseInt(ParticipantByAddress.acceptedETH, 10) );
+                                    const accepted = (parseInt(ParticipantByAddress.committedETH, 10) );
                                     const withdrawn = (parseInt(ParticipantByAddress.withdrawnETH, 10) );
 
                                     const processedTotals = accepted + returned + withdrawn;

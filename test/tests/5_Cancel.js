@@ -492,7 +492,7 @@ describe("Testing canceling", function () {
                 }
 
                 expect(
-                    ParticipantByAddress.committedETH.toString()
+                    ParticipantByAddress.totalReceivedETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
