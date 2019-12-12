@@ -352,9 +352,9 @@ module.exports = {
     },
     async displayContributions(helpers, contract, participant_address, max = null) {
 
-        let committedETH = await contract.methods.committedETH().call();
+        let totalReceivedETH = await contract.methods.totalReceivedETH().call();
         let returnedETH = await contract.methods.returnedETH().call();
-        let acceptedETH = await contract.methods.acceptedETH().call();
+        let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
         let allocatedETH = await contract.methods.projectAllocatedETH().call();
         let ProjectETHWithdrawn = await contract.methods.ProjectETHWithdrawn().call();
@@ -369,18 +369,18 @@ module.exports = {
         console.log();
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, totalReceivedETH.toString()) +" eth" );
         console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, returnedETH.toString()) +" eth" );
-        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, acceptedETH.toString()) +" eth" );
+        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, withdrawnETH.toString()) +" eth" );
         console.log("Total amount Allocated:   ", helpers.utils.toEth(helpers, allocatedETH.toString()) +" eth" );
         console.log("Project ETH Withdrawn:    ", helpers.utils.toEth(helpers, ProjectETHWithdrawn.toString()) +" eth" );
 
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
-        console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.committedETH.toString())   +" eth" );
+        console.log("Total totalReceivedETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.totalReceivedETH.toString())   +" eth" );
         console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantByAddress.returnedETH.toString())    +" eth" );
-        console.log("Total acceptedETH:        ", helpers.utils.toEth(helpers, ParticipantByAddress.acceptedETH.toString())    +" eth" );
+        console.log("Total committedETH:        ", helpers.utils.toEth(helpers, ParticipantByAddress.committedETH.toString())    +" eth" );
         console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawnETH.toString())   +" eth" );
         console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.allocatedETH.toString())   +" eth" );
         console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.reservedTokens.toString()) +" tokens" );
@@ -396,9 +396,9 @@ module.exports = {
             const ParticipantStageDetails = await contract.methods.getParticipantDetailsByStage(participant_address, i).call();
             console.log("-------------------------------------------");
             console.log("stageId:          ", i);
-            console.log("committedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )   +" eth" );
+            console.log("totalReceivedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )   +" eth" );
             console.log("returnedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedETH.toString() )    +" eth" );
-            console.log("acceptedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAcceptedETH.toString() )    +" eth" );
+            console.log("committedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAcceptedETH.toString() )    +" eth" );
             console.log("withdrawnETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageWithdrawnETH.toString() )   +" eth" );
             console.log("allocatedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAllocatedETH.toString() )   +" eth" );
             console.log("reservedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReservedTokens.toString() ) +" tokens" );
