@@ -224,7 +224,7 @@ contract ReversibleICO is IERC777Recipient {
     isNotInitialized
     {
 
-        require (_commitPhaseStartBlock > getCurrentBlockNumber,"start block is set in the past");
+        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"start block is set in the past");
 
         // Assign address variables
         tokenContractAddress = _tokenContractAddress;
@@ -253,26 +253,26 @@ contract ReversibleICO is IERC777Recipient {
 
         // Setup stage 1 to n: The buy phase stages
         // Each new stage starts after the previous phase's endBlock
-        uint256 newStageBlockStart = stage0.endBlock + 1;
+        uint256 newStageStartBlock = stage0.endBlock + 1;
 
         for (uint8 i = 1; i <= _stageCount; i++) {
 
             Stage storage stageN = stages[stageCount];
             // stageCount = n
-            stageN.startBlock = newStageBlockStart;
-            stageN.endBlock = newStageBlockStart + _stageBlockCount;
+            stageN.startBlock = newStageStartBlock;
+            stageN.endBlock = newStageStartBlock + _stageBlockCount;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
             stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
             stageCount++;
 
-            newStageBlockStart = stageN.endBlock + 1;
+            newStageStartBlock = stageN.endBlock + 1;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
-        buyPhaseEndBlock = newStageBlockStart - 1;
+        buyPhaseEndBlock = newStageStartBlock - 1;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = newStageBlockStart - buyPhaseStartBlock;
+        buyPhaseBlockCount = newStageStartBlock - buyPhaseStartBlock;
 
         initialized = true;
     }
