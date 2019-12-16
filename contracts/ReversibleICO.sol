@@ -234,7 +234,7 @@ contract ReversibleICO is IERC777Recipient {
         // Assign other variables
         commitPhaseStartBlock = _commitPhaseStartBlock;
         commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount - 1;
         commitPhasePrice = _commitPhasePrice;
 
         stageBlockCount = _stageBlockCount;
@@ -244,7 +244,7 @@ contract ReversibleICO is IERC777Recipient {
         Stage storage stage0 = stages[stageCount];
         // stageCount = 0
         stage0.startBlock = _commitPhaseStartBlock;
-        stage0.endBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        stage0.endBlock = commitPhaseEndBlock;
         stage0.tokenPrice = _commitPhasePrice;
 
         stageCount++;
@@ -253,26 +253,26 @@ contract ReversibleICO is IERC777Recipient {
 
         // Setup stage 1 to n: The buy phase stages
         // Each new stage starts after the previous phase's endBlock
-        uint256 newStageStartBlock = stage0.endBlock + 1;
+        uint256 newStageEndBlock = stage0.endBlock;
 
         for (uint8 i = 1; i <= _stageCount; i++) {
 
             Stage storage stageN = stages[stageCount];
             // stageCount = n
-            stageN.startBlock = newStageStartBlock;
-            stageN.endBlock = newStageStartBlock + _stageBlockCount;
+            stageN.startBlock = newStageEndBlock + 1;
+            stageN.endBlock = newStageEndBlock + _stageBlockCount;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
             stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
             stageCount++;
 
-            newStageStartBlock = stageN.endBlock + 1;
+            newStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
-        buyPhaseEndBlock = newStageStartBlock - 1;
+        buyPhaseEndBlock = newStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = newStageStartBlock - buyPhaseStartBlock;
+        buyPhaseBlockCount = newStageEndBlock - buyPhaseStartBlock + 1;
 
         initialized = true;
     }
