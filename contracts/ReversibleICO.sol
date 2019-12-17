@@ -253,26 +253,26 @@ contract ReversibleICO is IERC777Recipient {
 
         // Setup stage 1 to n: The buy phase stages
         // Each new stage starts after the previous phase's endBlock
-        uint256 newStageEndBlock = stage0.endBlock;
+        uint256 lastStageEndBlock = stage0.endBlock;
 
         for (uint8 i = 1; i <= _stageCount; i++) {
 
             Stage storage stageN = stages[stageCount];
             // stageCount = n
-            stageN.startBlock = newStageEndBlock + 1;
-            stageN.endBlock = newStageEndBlock + _stageBlockCount;
+            stageN.startBlock = lastStageEndBlock + 1;
+            stageN.endBlock = lastStageEndBlock + _stageBlockCount;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
             stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
             stageCount++;
 
-            newStageEndBlock = stageN.endBlock;
+            lastStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
-        buyPhaseEndBlock = newStageEndBlock;
+        buyPhaseEndBlock = lastStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = newStageEndBlock - buyPhaseStartBlock + 1;
+        buyPhaseBlockCount = lastStageEndBlock - buyPhaseStartBlock + 1;
 
         initialized = true;
     }
