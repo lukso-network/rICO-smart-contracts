@@ -679,21 +679,21 @@ contract ReversibleICO is IERC777Recipient {
 
         // Find buy phase stage n
         // solidity floors division results, thus we get what we're looking for.
-        uint256 num = (_blockNumber - commitPhaseEndBlock) / (stageBlockCount + 1) + 1;
+        uint256 stageID = (_blockNumber - commitPhaseEndBlock) / (stageBlockCount + 1) + 1;
 
         // Last block of each stage always computes as stage + 1
-        if (stages[uint8(num) - 1].endBlock == _blockNumber) {
+        /* if (stages[uint8(num) - 1].endBlock == _blockNumber) {
             // save some gas and just return instead of decrementing.
             return uint8(num - 1);
-        }
+        } */
 
         // Return max_uint8 if outside range
         // @TODO: maybe revert ?!
-        if (num >= stageCount) {
+        if (stageID >= stageCount) {
             return 255;
         }
 
-        return uint8(num);
+        return uint8(stageID);
     }
 
 

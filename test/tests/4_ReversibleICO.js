@@ -134,19 +134,18 @@ describe("ReversibleICO", function () {
             StageBlockCount = blocksPerDay * 30;
             StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
-            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
             // for validation
-            BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+            BuyPhaseEndBlock = commitPhaseEndBlock + StageBlockCount * StageCount;
 
-            const StageStartBlock = commitPhaseEndBlock;
-            let lastStageBlockEnd = StageStartBlock;
+            let lastStageBlockEnd = commitPhaseEndBlock;
 
             for(let i = 0; i < StageCount; i++) {
 
                 const start_block = lastStageBlockEnd + 1;
-                const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i +  1) );
+                const end_block = lastStageBlockEnd + StageBlockCount;
+                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i + 1) );
 
                 stageValidation.push( {
                     start_block: start_block,
@@ -154,7 +153,7 @@ describe("ReversibleICO", function () {
                     token_price: token_price
                 });
 
-                lastStageBlockEnd = end_block;
+                    lastStageBlockEnd = end_block;
             }
 
             await this.ReversibleICO.methods.init(
@@ -220,7 +219,7 @@ describe("ReversibleICO", function () {
             });
 
             it("Allocation duration is commitPhaseBlockCount", async function () {
-                const count = allocationStageData.endBlock - allocationStageData.startBlock;
+                const count = allocationStageData.endBlock - allocationStageData.startBlock + 1;
                 expect(count.toString()).to.be.equal(commitPhaseBlockCount.toString());
             });
 
