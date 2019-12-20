@@ -51,6 +51,17 @@ sudo apt-get install nodejs
 sudo apt-get install npm
 ```
 
+### Recommended
+
+- [nvm](https://github.com/nvm-sh/nvm)
+
+```bash
+nvm install v8.17.0
+nvm use v8.17.0
+npm install
+npm run test
+```
+
 ### Running Tests
 
 ```bash
