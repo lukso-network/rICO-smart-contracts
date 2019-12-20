@@ -102,16 +102,8 @@ describe("ReversibleICO", function () {
             expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(false);
         });
 
-        it("Property running should be false", async function () {
-            expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-        });
-
         it("Property frozen should be false", async function () {
             expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-        });
-
-        it("Property ended should be false", async function () {
-            expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
         });
 
         it("Property TokenContractAddress should be address(0x0)", async function () {
@@ -188,16 +180,8 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(true);
             });
 
-            it("Property running should be false", async function () {
-                expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-            });
-
             it("Property frozen should be false", async function () {
                 expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-            });
-
-            it("Property ended should be false", async function () {
-                expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
             });
 
             it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
@@ -907,7 +891,7 @@ describe("ReversibleICO", function () {
                                     const returned = (parseInt(StageDetails.stageReturnedETH, 10) );
                                     const accepted = (parseInt(StageDetails.stageAcceptedETH, 10) );
                                     const withdrawn = (parseInt(StageDetails.stageWithdrawnETH, 10) );
-                                    
+
                                     const processedTotals = accepted + returned + withdrawn;
                                     expect( processedTotals ).to.be.equal(commited);
 
@@ -1009,9 +993,9 @@ describe("ReversibleICO", function () {
 
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
 
-                                    const received = (parseInt(ParticipantByAddress.committedETH, 10) );
+                                    const received = (parseInt(ParticipantByAddress.totalReceivedETH, 10) );
                                     const returned = (parseInt(ParticipantByAddress.returnedETH, 10) );
-                                    const accepted = (parseInt(ParticipantByAddress.acceptedETH, 10) );
+                                    const accepted = (parseInt(ParticipantByAddress.committedETH, 10) );
                                     const withdrawn = (parseInt(ParticipantByAddress.withdrawnETH, 10) );
 
                                     const processedTotals = accepted + returned + withdrawn;

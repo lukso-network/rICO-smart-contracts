@@ -1463,9 +1463,9 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEthAtStage().call();
-    let committedETH = await contract.methods.committedETH().call();
+    let totalReceivedETH = await contract.methods.totalReceivedETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
-    let acceptedETH = await contract.methods.acceptedETH().call();
+    let committedETH = await contract.methods.committedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
     let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
@@ -1473,9 +1473,9 @@ async function displayContractStats(contract, TokenContractInstance) {
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
-    console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
+    console.log("totalReceivedETH:        ", helpers.utils.toEth(helpers,totalReceivedETH) + " eth");
     console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
-    console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
+    console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");
     console.log("projectETH:         ", helpers.utils.toEth(helpers,projectETH) + " eth");
     console.log("projectWithdrawnETH:", helpers.utils.toEth(helpers,projectWithdrawnETH) + " eth");
