@@ -658,7 +658,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-    @notice Returns the stage at a given block.
+    @notice Returns the stage which a given block belongs to.
     @param _blockNumber The block number.
     */
     function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
@@ -672,25 +672,22 @@ contract ReversibleICO is IERC777Recipient {
         //        contract should always display proper data.
         //
 
-        // Return commit phase, stage 0
+        require(_blockNumber >= commitPhaseStartBlock &&  _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
+
+        // Return commit phase (stage 0)
         if (_blockNumber <= commitPhaseEndBlock) {
             return 0;
         }
 
-        // Find buy phase stage n
-        // solidity floors division results, thus we get what we're looking for.
-        uint256 stageID = (_blockNumber - commitPhaseEndBlock) / (stageBlockCount + 1) + 1;
+        // This is the number of blocks starting from the end  of commit phase.
+        uint256 distance = _blockNumber - commitPhaseEndBlock;
+        // Get the stageId, it returns the stageId - 1, commitPhase is stage 0
+        // e.g. distance = 1, stageBlockCount = 5, stageID = 0
+        uint256 stageID = distance / stageBlockCount;
 
-        // Last block of each stage always computes as stage + 1
-        /* if (stages[uint8(num) - 1].endBlock == _blockNumber) {
-            // save some gas and just return instead of decrementing.
-            return uint8(num - 1);
-        } */
-
-        // Return max_uint8 if outside range
-        // @TODO: maybe revert ?!
-        if (stageID >= stageCount) {
-            return 255;
+        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
+        if (distance % stageBlockCount > 0){
+            stageID++;
         }
 
         return uint8(stageID);

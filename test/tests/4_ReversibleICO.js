@@ -362,14 +362,28 @@ describe("ReversibleICO", function () {
                 expect( await this.ReversibleICO.methods.getCurrentStage().call() ).to.be.equal( stageId.toString() );
             });
 
-            it("Returns 255 after last stage end_block", async function () {
+            it("Revert before commit phase start_block", async function () {
+                const stageData = await this.ReversibleICO.methods.stages(0).call();
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.jumpToBlockNumber(
+                        stageData.startBlock - 1
+                    ).send({
+                        from: deployerAddress, gas: 100000
+                    });
+                    await this.ReversibleICO.methods.getCurrentStage().call();
+                }, "Block outside of rICO period.");
+            });
+
+            it("Revert after last stage end_block", async function () {
                 const stageData = await this.ReversibleICO.methods.stages(StageCount).call();
-                await this.ReversibleICO.methods.jumpToBlockNumber(
-                    stageData.endBlock + 1
-                ).send({
-                    from: deployerAddress, gas: 100000
-                });
-                expect( await this.ReversibleICO.methods.getCurrentStage().call() ).to.be.equal( "255" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.jumpToBlockNumber(
+                        stageData.endBlock + 1
+                    ).send({
+                        from: deployerAddress, gas: 100000
+                    });
+                    await this.ReversibleICO.methods.getCurrentStage().call();
+                }, "Block outside of rICO period.");
             });
         });
 
@@ -439,13 +453,14 @@ describe("ReversibleICO", function () {
                 ).to.be.equal( stageId.toString() );
             });
 
-            it("Returns 255 if getStageAtBlock( last_stage.endBlock + 1 )", async function () {
+            it("Reverts if getStageAtBlock( last_stage.endBlock + 1 )", async function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
-                expect(
-                    await this.ReversibleICO.methods.getStageAtBlock(stageData.endBlock + 1).call()
-                ).to.be.equal( "255" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getStageAtBlock(stageData.endBlock + 1).call();
+                }, "Block outside of rICO period.");
             });
+
         });
 
 
@@ -487,15 +502,16 @@ describe("ReversibleICO", function () {
                 );
             });
 
-            it("Returns 0 after last stage ended", async function () {
+            it("Reverts after last stage end block", async function () {
                 const stageData = await this.ReversibleICO.methods.stages(StageCount).call();
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.endBlock + 1
                 ).send({
                     from: deployerAddress, gas: 100000
                 });
-
-                expect( await this.ReversibleICO.methods.getCurrentPrice().call() ).to.be.equal("0");
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getCurrentPrice().call();
+                }, "Block outside of rICO period.");
             });
         });
 
@@ -539,12 +555,12 @@ describe("ReversibleICO", function () {
                 );
             });
 
-            it("Returns 0 after last stage ended", async function () {
+            it("Reverts after last stage end block", async function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
-                expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call()
-                ).to.be.equal( "0" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call();
+                }, "Block outside of rICO period.");
             });
         });
 

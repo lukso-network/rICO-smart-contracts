@@ -284,7 +284,7 @@ module.exports = {
             && currentBlock.toNumber() < BuyPhaseEndBlock.toNumber())
         {
             const passedBlocks = currentBlock.sub(BuyPhaseStartBlock);
-            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock);
+            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock).add(new helpers.BN("1"));
             return passedBlocks.mul(
                 new helpers.BN("10").pow( new helpers.BN(precision) )
             ).div(new helpers.BN(BuyPhaseBlockCount));
@@ -365,7 +365,7 @@ module.exports = {
         let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
         const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
-    
+
         console.log();
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
