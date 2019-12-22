@@ -210,7 +210,7 @@ describe("ReversibleICO", function () {
 
             it("Stage Count is correct", async function () {
                 // account for the commit stage and add 1
-                const stages = (StageCount + 1);
+                const stages = StageCount;
                 expect(await this.ReversibleICO.methods.stageCount().call()).to.be.equal(stages.toString());
             });
 

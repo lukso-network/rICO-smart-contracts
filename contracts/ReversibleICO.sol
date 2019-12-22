@@ -238,42 +238,39 @@ contract ReversibleICO is IERC777Recipient {
         commitPhasePrice = _commitPhasePrice;
 
         stageBlockCount = _stageBlockCount;
-
+        stageCount = _stageCount;
 
         // Setup stage 0: The commit phase.
-        Stage storage stage0 = stages[stageCount];
-        // stageCount = 0
+        Stage storage stage0 = stages[0];
         stage0.startBlock = _commitPhaseStartBlock;
         stage0.endBlock = commitPhaseEndBlock;
         stage0.tokenPrice = _commitPhasePrice;
-
-        stageCount++;
-        // stageCount = 1
-
 
         // Setup stage 1 to n: The buy phase stages
         // Each new stage starts after the previous phase's endBlock
         uint256 lastStageEndBlock = stage0.endBlock;
 
+        // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
-
-            Stage storage stageN = stages[stageCount];
-            // stageCount = n
+            // Get i-th stage
+            Stage storage stageN = stages[i];
+            // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
             stageN.startBlock = lastStageEndBlock + 1;
+            // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
             stageN.endBlock = lastStageEndBlock + _stageBlockCount;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
             stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
-            stageCount++;
-
+            // Store the current stage endBlock in order to update the next one
             lastStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock + 1;
+        // The buy phase ends when the lat stage ends
         buyPhaseEndBlock = lastStageEndBlock;
         // The duration of buyPhase in blocks
         buyPhaseBlockCount = lastStageEndBlock - buyPhaseStartBlock + 1;
-
+        // The contract is now initialized
         initialized = true;
     }
 
@@ -512,7 +509,7 @@ contract ReversibleICO is IERC777Recipient {
     function getPriceAtBlock(uint256 _blockNumber) public view returns (uint256) {
         // first retrieve the stage that the block belongs to
         uint8 stage = getStageAtBlock(_blockNumber);
-        if (stage < stageCount) {
+        if (stage <= stageCount) {
             return stages[stage].tokenPrice;
         }
         // revert with stage not found?
