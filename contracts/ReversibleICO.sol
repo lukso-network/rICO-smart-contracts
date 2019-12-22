@@ -224,7 +224,7 @@ contract ReversibleICO is IERC777Recipient {
     isNotInitialized
     {
 
-        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"start block is set in the past");
+        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"start block cannot be set in the past");
 
         // Assign address variables
         tokenContractAddress = _tokenContractAddress;
@@ -234,7 +234,7 @@ contract ReversibleICO is IERC777Recipient {
         // Assign other variables
         commitPhaseStartBlock = _commitPhaseStartBlock;
         commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount - 1;
+        commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
         commitPhasePrice = _commitPhasePrice;
 
         stageBlockCount = _stageBlockCount;
@@ -251,25 +251,25 @@ contract ReversibleICO is IERC777Recipient {
         uint256 lastStageEndBlock = stage0.endBlock;
 
         // Update stages: start, end, price
-        for (uint8 i = 1; i <= _stageCount; i++) {
+        for (uint256 i = 1; i <= _stageCount; i++) {
             // Get i-th stage
             Stage storage stageN = stages[i];
             // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
-            stageN.startBlock = lastStageEndBlock + 1;
+            stageN.startBlock = lastStageEndBlock.add(1);
             // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
-            stageN.endBlock = lastStageEndBlock + _stageBlockCount;
+            stageN.endBlock = lastStageEndBlock.add(_stageBlockCount);
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
+            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
             // Store the current stage endBlock in order to update the next one
             lastStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-        buyPhaseStartBlock = commitPhaseEndBlock + 1;
+        buyPhaseStartBlock = commitPhaseEndBlock.add(1);
         // The buy phase ends when the lat stage ends
         buyPhaseEndBlock = lastStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = lastStageEndBlock - buyPhaseStartBlock + 1;
+        buyPhaseBlockCount = lastStageEndBlock.sub(buyPhaseStartBlock.add(1);
         // The contract is now initialized
         initialized = true;
     }
