@@ -291,7 +291,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // accept contribution for processing
         if (msg.value >= minContribution) {
-            commit();
+            commit(msg.sender, msg.value);
 
             // Participant cancels commitment during commit phase (Stage 0),
             // OR if they've not been whitelisted yet.
@@ -948,7 +948,7 @@ contract ReversibleICO is IERC777Recipient {
     @param _from Participant's address.
     @param _receivedValue The amount contributed.
     */
-    function recordNewContribution(address _from, uint256 _receivedValue) internal {
+    function recordNewContribution(address _from, uint256 _receivedValue) private {
         uint8 currentStage = getCurrentStage();
         Participant storage participantRecord = participantsByAddress[_from];
 
