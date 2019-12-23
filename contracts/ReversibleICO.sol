@@ -291,7 +291,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // accept contribution for processing
         if (msg.value >= minContribution) {
-            commit();
+            commit(msg.sender, msg.value);
 
             // Participant cancels commitment during commit phase (Stage 0),
             // OR if they've not been whitelisted yet.
@@ -782,33 +782,30 @@ contract ReversibleICO is IERC777Recipient {
     /**
     @notice Commits a participant's ETH.
     */
-    function commit()
+    function commit(address _sender, uint256 _value)
     internal
-    isInitialized
     isRunning
-    isNotFrozen
     {
         // Add to received value to totalReceivedETH
-        totalReceivedETH += msg.value;
+        totalReceivedETH += _value;
 
         // Participant initial state record
-        Participant storage participantRecord = participantsByAddress[msg.sender];
+        Participant storage participantRecord = participantsByAddress[_sender];
 
         // Check if participant already exists
         if (participantRecord.contributionsCount == 0) {
-            // increase participant count
+            // Identify the participants by their Id
+            participantsById[participantCount] = _sender;
+            // Increase participant count
             participantCount++;
-
-            // index
-            participantsById[participantCount] = msg.sender;
         }
 
         // Record contribution into current stage totals for the participant
-        recordNewContribution(msg.sender, msg.value);
+        recordNewContribution(_sender, _value);
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            acceptContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
+            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
         }
     }
 
@@ -948,7 +945,7 @@ contract ReversibleICO is IERC777Recipient {
     @param _from Participant's address.
     @param _receivedValue The amount contributed.
     */
-    function recordNewContribution(address _from, uint256 _receivedValue) internal {
+    function recordNewContribution(address _from, uint256 _receivedValue) private {
         uint8 currentStage = getCurrentStage();
         Participant storage participantRecord = participantsByAddress[_from];
 
