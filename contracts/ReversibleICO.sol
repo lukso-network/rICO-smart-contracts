@@ -945,7 +945,7 @@ contract ReversibleICO is IERC777Recipient {
     @param _from Participant's address.
     @param _receivedValue The amount contributed.
     */
-    function recordNewContribution(address _from, uint256 _receivedValue) private {
+    function recordNewContribution(address _from, uint256 _receivedValue) internal {
         uint8 currentStage = getCurrentStage();
         Participant storage participantRecord = participantsByAddress[_from];
 
