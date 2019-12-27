@@ -13,7 +13,7 @@ const setup = require("./init.js");
 
 async function runTests(init) {
 
-  let tests = require("./fuzz-tests/fuzz-tests.js");
+  let tests = require("./solc_random_tests/random-tests.js");
   await tests.run(init);
 
   console.log("Done");

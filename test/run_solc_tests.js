@@ -43,7 +43,7 @@ async function runTests(init) {
 
     for (let i = 0; i < tests.length; i++) {
       try {
-        mocha.addFile("test/tests/" + tests[i] + ".js");
+        mocha.addFile("test/solc_tests/" + tests[i] + ".js");
       } catch (e) {
         console.log("error:", e);
       }

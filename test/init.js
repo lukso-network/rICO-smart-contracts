@@ -42,13 +42,14 @@ module.exports = {
             expectRevert,
             expectEvent
         } = require("openzeppelin-test-helpers");
+
         const { MAX_UINT256 } = constants;
         const web3util = require("web3-utils");
         const Table = require("cli-table");
-        const utils = require("./helpers/utils");
-        const safeUtils = require("./helpers/safeUtils");
+        const utils = require("./solc_tests/helpers/utils");
+        const safeUtils = require("./solc_tests/helpers/safeUtils");
         const { assert, expect } = require("chai");
-        const { assertInvalidOpcode } = require("./helpers/assertThrow");
+        const { assertInvalidOpcode } = require("./solc_tests/helpers/assertThrow");
 
         utils.toLog(
             " ----------------------------------------------------------------\n" +

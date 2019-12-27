@@ -12,13 +12,7 @@ fi
 echo "--------------------------------------------------------------------"
 ./node_modules/.bin/truffle compile
 
-node test/run_tests.js $1 $2 $3 $4
-
-#if [[ "$1" = "all" ]]; then
-#  ./node_modules/.bin/truffle test --network development
-#else
-#  ./node_modules/.bin/truffle test $3 --network development 
-#fi
+node test/run_solc_random_tests.js $1 $2 $3 $4
 
 echo "--------------------------------------------------------------------"
 echo ""

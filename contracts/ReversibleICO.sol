@@ -510,7 +510,7 @@ contract ReversibleICO is IERC777Recipient {
     function getPriceAtBlock(uint256 _blockNumber) public view returns (uint256) {
         // first retrieve the stage that the block belongs to
         uint8 stage = getStageAtBlock(_blockNumber);
-        if (stage < stageCount) {
+        if (stage <= stageCount) {
             return stages[stage].tokenPrice;
         }
         // revert with stage not found?
@@ -792,8 +792,8 @@ contract ReversibleICO is IERC777Recipient {
     isRunning
     isNotFrozen
     {
-        // Add to received value to totalReceivedETH
-        totalReceivedETH += msg.value;
+        // Add the received value to totalReceivedETH
+        totalReceivedETH = totalReceivedETH.add(msg.value);
 
         // Participant initial state record
         Participant storage participantRecord = participantsByAddress[msg.sender];
@@ -882,7 +882,7 @@ contract ReversibleICO is IERC777Recipient {
                         currentBlockNumber
                     ) - participantRecord.byStage[stageId].returnedTokens;
 
-                    // only try to process stages that the participant has actually tokens reserved.
+                    // only try to process stages that the participant has actually reserved tokens.
                     if (tokensInStage > 0) {
 
                         // if the remaining amount is less than the amount available in the current stage
