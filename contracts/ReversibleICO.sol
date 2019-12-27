@@ -464,7 +464,7 @@ contract ReversibleICO is IERC777Recipient {
     @param _addresses The list of participant address.
     @param _approve Indicates if the provided participants are approved (true) or rejected (false).
     */
-    function whitelist(address[] memory _addresses, bool _approve)
+    function whitelist(address[] calldata _addresses, bool _approve)
     external
     isInitialized
     isNotFrozen
