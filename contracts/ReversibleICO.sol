@@ -224,6 +224,8 @@ contract ReversibleICO is IERC777Recipient {
     isNotInitialized
     {
 
+        require (_commitPhaseStartBlock > getCurrentBlockNumber(),"start block cannot be set in the past");
+
         // Assign address variables
         tokenContractAddress = _tokenContractAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
@@ -232,46 +234,43 @@ contract ReversibleICO is IERC777Recipient {
         // Assign other variables
         commitPhaseStartBlock = _commitPhaseStartBlock;
         commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
         commitPhasePrice = _commitPhasePrice;
 
         stageBlockCount = _stageBlockCount;
-
+        stageCount = _stageCount;
 
         // Setup stage 0: The commit phase.
-        Stage storage stage0 = stages[stageCount];
-        // stageCount = 0
+        Stage storage stage0 = stages[0];
         stage0.startBlock = _commitPhaseStartBlock;
-        stage0.endBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        stage0.endBlock = commitPhaseEndBlock;
         stage0.tokenPrice = _commitPhasePrice;
 
-        stageCount++;
-        // stageCount = 1
-
-
         // Setup stage 1 to n: The buy phase stages
-        uint256 lastStageBlockEnd = stage0.endBlock;
+        // Each new stage starts after the previous phase's endBlock
+        uint256 previousStageEndBlock = stage0.endBlock;
 
+        // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
-
-            Stage storage stageN = stages[stageCount];
-            // stageCount = n
-            // Each new stage starts after the previous phase's endBlock
-            stageN.startBlock = lastStageBlockEnd + 1;
-            stageN.endBlock = lastStageBlockEnd + _stageBlockCount + 1;
+            // Get i-th stage
+            Stage storage stageN = stages[i];
+            // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
+            stageN.startBlock = previousStageEndBlock.add(1);
+            // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
+            stageN.endBlock = previousStageEndBlock.add(_stageBlockCount);
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
-            stageCount++;
-
-            lastStageBlockEnd = stageN.endBlock;
+            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            // Store the current stage endBlock in order to update the next one
+            previousStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-        buyPhaseStartBlock = commitPhaseEndBlock + 1;
-        buyPhaseEndBlock = lastStageBlockEnd;
+        buyPhaseStartBlock = commitPhaseEndBlock.add(1);
+        // The buy phase ends when the lat stage ends
+        buyPhaseEndBlock = previousStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = lastStageBlockEnd - buyPhaseStartBlock;
-
+        buyPhaseBlockCount = previousStageEndBlock.sub(buyPhaseStartBlock).add(1);
+        // The contract is now initialized
         initialized = true;
     }
 
@@ -510,7 +509,7 @@ contract ReversibleICO is IERC777Recipient {
     function getPriceAtBlock(uint256 _blockNumber) public view returns (uint256) {
         // first retrieve the stage that the block belongs to
         uint8 stage = getStageAtBlock(_blockNumber);
-        if (stage < stageCount) {
+        if (stage <= stageCount) {
             return stages[stage].tokenPrice;
         }
         // revert with stage not found?
@@ -656,7 +655,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-    @notice Returns the stage at a given block.
+    @notice Returns the stage which a given block belongs to.
     @param _blockNumber The block number.
     */
     function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
@@ -670,28 +669,25 @@ contract ReversibleICO is IERC777Recipient {
         //        contract should always display proper data.
         //
 
-        // Return commit phase, stage 0
+        require(_blockNumber >= commitPhaseStartBlock &&  _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
+
+        // Return commit phase (stage 0)
         if (_blockNumber <= commitPhaseEndBlock) {
             return 0;
         }
 
-        // Find buy phase stage n
-        // solidity floors division results, thus we get what we're looking for.
-        uint256 num = (_blockNumber - commitPhaseEndBlock) / (stageBlockCount + 1) + 1;
+        // This is the number of blocks starting from the end  of commit phase.
+        uint256 distance = _blockNumber - commitPhaseEndBlock;
+        // Get the stageId, it returns the stageId - 1, commitPhase is stage 0
+        // e.g. distance = 1, stageBlockCount = 5, stageID = 0
+        uint256 stageID = distance / stageBlockCount;
 
-        // Last block of each stage always computes as stage + 1
-        if (stages[uint8(num) - 1].endBlock == _blockNumber) {
-            // save some gas and just return instead of decrementing.
-            return uint8(num - 1);
+        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
+        if (distance % stageBlockCount > 0){
+            stageID++;
         }
 
-        // Return max_uint8 if outside range
-        // @TODO: maybe revert ?!
-        if (num >= stageCount) {
-            return 255;
-        }
-
-        return uint8(num);
+        return uint8(stageID);
     }
 
 
