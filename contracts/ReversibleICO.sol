@@ -251,7 +251,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 previousStageEndBlock = stage0.endBlock;
 
         // Update stages: start, end, price
-        for (uint256 i = 1; i <= _stageCount; i++) {
+        for (uint8 i = 1; i <= _stageCount; i++) {
             // Get i-th stage
             Stage storage stageN = stages[i];
             // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
