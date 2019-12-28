@@ -291,7 +291,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // accept contribution for processing
         if (msg.value >= minContribution) {
-            commit(msg.sender, msg.value);
+            commit();
 
             // Participant cancels commitment during commit phase (Stage 0),
             // OR if they've not been whitelisted yet.

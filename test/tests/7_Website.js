@@ -293,7 +293,7 @@ describe("Website States", function () {
             });
 
             await Instances.ReversibleICOInstance.methods.whitelist(
-                participant_1,
+                [participant_1],
                 true,
             ).send({
                 from: whitelistControllerAddress
