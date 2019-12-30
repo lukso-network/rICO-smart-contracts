@@ -286,15 +286,13 @@ contract ReversibleICO is IERC777Recipient {
     function()
     external
     payable
-    isInitialized
-    isNotFrozen
     {
-        // accept contribution for processing
+        // Accept contributions higher than the minimum amount
         if (msg.value >= minContribution) {
-            commit();
+            commit(msg.sender, msg.value);
 
-            // Participant cancels commitment during commit phase (Stage 0),
-            // OR if they've not been whitelisted yet.
+        // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
+        // This also allows for extended wallet compatibility by sending a non-zereo amount
         } else {
             cancel();
         }
@@ -338,37 +336,49 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-    @notice Commits a participant's ETH.
+    @notice External wrapper for commit() so that a participant can call it directly.
     */
     function commit()
     public
     payable
+    {
+        // reject contributions lower than the minimum amount
+        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
+        // call commit() for processing the contribution
+        commit(msg.sender, msg.value);
+    }
+
+
+    /**
+    @notice Commits a participant's ETH.
+    */
+    function commit(address _sender, uint256 _value)
+    internal
     isInitialized
     isNotFrozen
     isRunning
     {
-        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
 
         // Add to received value to totalReceivedETH
-        totalReceivedETH += msg.value;
+        totalReceivedETH += _value;
 
         // Participant initial state record
-        Participant storage participantRecord = participantsByAddress[msg.sender];
+        Participant storage participantRecord = participantsByAddress[_sender];
 
         // Check if participant already exists
         if (participantRecord.contributionsCount == 0) {
             // Identify the participants by their Id
-            participantsById[participantCount] = msg.sender;
+            participantsById[participantCount] = _sender;
             // Increase participant count
             participantCount++;
         }
 
         // Record contribution into current stage totals for the participant
-        recordNewContribution(msg.sender, msg.value);
+        recordNewContribution(_sender, _value);
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            acceptContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
+            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
         }
     }
 
