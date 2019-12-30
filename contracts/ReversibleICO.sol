@@ -461,36 +461,34 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
     @notice Approves or rejects participants.
-    @param _address The participant's address.
-    @param _approve Boolean of whether they are approved or rejected.
+    @param _addresses The list of participant address.
+    @param _approve Indicates if the provided participants are approved (true) or rejected (false).
     */
-    function whitelist(address _address, bool _approve)
-    public
+    function whitelist(address[] calldata _addresses, bool _approve)
+    external
     isInitialized
     isNotFrozen
     onlyWhitelistController
     {
-        Participant storage participantRecord = participantsByAddress[_address];
+        // Revert if the provided list is empty
+        require(_addresses.length > 0, "Empty list.");
 
-        if (_approve) {
-            // If participants are approved: whitelist them and accept their contributions
-            participantRecord.whitelisted = true;
-            acceptContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_APPROVE));
-        } else {
-            // If participants are not approved: remove them from whitelist and cancel their contributions
-            participantRecord.whitelisted = false;
-            cancelContributionsForAddress(_address, 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
-        }
-    }
+        for (uint256 i = 0; i < _addresses.length; i++) {
 
-    /**
-    @notice Whitelists or rejects a list participants.
-    @param _address The list of participants' addresses.
-    @param _approve Boolean of whether they are approved or rejected.
-    */
-    function whitelistMultiple(address[] memory _address, bool _approve) public {
-        for (uint16 i = 0; i < _address.length; i++) {
-            whitelist(_address[i], _approve);
+            Participant storage participantRecord = participantsByAddress[_addresses[i]];
+
+            if (_approve) {
+                // Check if participant is already in the whitelist (e.g. duplicate list entry)
+                if(!participantRecord.whitelisted){
+                    // If participants are approved: whitelist them and accept their contributions
+                    participantRecord.whitelisted = true;
+                    acceptContributionsForAddress(_addresses[i], uint8(ApplicationEventTypes.WHITELIST_APPROVE));
+                }
+            } else {
+                // If participants are not approved: remove them from whitelist and cancel their contributions
+                participantRecord.whitelisted = false;
+                cancelContributionsForAddress(_addresses[i], 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
+            }
         }
     }
 
@@ -948,7 +946,7 @@ contract ReversibleICO is IERC777Recipient {
     @param _from Participant's address.
     @param _receivedValue The amount contributed.
     */
-    function recordNewContribution(address _from, uint256 _receivedValue) internal {
+    function recordNewContribution(address _from, uint256 _receivedValue) private {
         uint8 currentStage = getCurrentStage();
         Participant storage participantRecord = participantsByAddress[_from];
 

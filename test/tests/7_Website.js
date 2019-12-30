@@ -266,7 +266,7 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.participantCount().call()
             ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
             let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
 
             expect(
@@ -293,7 +293,7 @@ describe("Website States", function () {
             });
 
             await Instances.ReversibleICOInstance.methods.whitelist(
-                participant_1,
+                [participant_1],
                 true,
             ).send({
                 from: whitelistControllerAddress

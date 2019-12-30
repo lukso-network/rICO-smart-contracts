@@ -661,7 +661,7 @@ describe("ReversibleICO", function () {
                         ).to.be.equal( true );
 
                         await this.ReversibleICO.methods.whitelist(
-                            accounts[1],
+                            [accounts[1]],
                             true
                         ).send({
                             from: TransactionSender
@@ -696,7 +696,7 @@ describe("ReversibleICO", function () {
                             expect( initialized ).to.be.equal( false );
 
                             await TestReversibleICO.methods.whitelist(
-                                accounts[1],
+                                [accounts[1]],
                                 true
                             ).send({
                                 from: whitelistControllerAddress
@@ -713,7 +713,7 @@ describe("ReversibleICO", function () {
                         it("transaction is accepted and participant address is whitelisted", async function () {
 
                             await this.ReversibleICO.methods.whitelist(
-                                accounts[3],
+                                [accounts[3]],
                                 true
                             ).send({
                                 from: whitelistControllerAddress
@@ -816,7 +816,7 @@ describe("ReversibleICO", function () {
 
                             before(async function () {
                                 whitelistTx = await this.ReversibleICO.methods.whitelist(
-                                    TestAcceptParticipant,
+                                    [TestAcceptParticipant],
                                     true,
                                 ).send({
                                     from: whitelistControllerAddress
@@ -933,7 +933,7 @@ describe("ReversibleICO", function () {
                                 ).to.be.equal( false );
 
                                 whitelistTx = await this.ReversibleICO.methods.whitelist(
-                                    TestRejectParticipant,
+                                    [TestRejectParticipant],
                                     false,
                                 ).send({
                                     from: whitelistControllerAddress
@@ -1119,7 +1119,7 @@ describe("ReversibleICO", function () {
                 });
 
                 let whitelistTx = await this.ReversibleICO.methods.whitelist(
-                    participant_1,
+                    [participant_1],
                     true,
                 ).send({
                     from: whitelistControllerAddress

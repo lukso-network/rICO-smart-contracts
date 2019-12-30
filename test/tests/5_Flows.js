@@ -657,7 +657,7 @@ describe("Flow Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -815,7 +815,7 @@ describe("Flow Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -1356,7 +1356,7 @@ describe("Flow Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
