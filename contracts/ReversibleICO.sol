@@ -195,6 +195,7 @@ contract ReversibleICO is IERC777Recipient {
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
+
     /**
     @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
 
@@ -294,7 +295,7 @@ contract ReversibleICO is IERC777Recipient {
         // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
         // This also allows for extended wallet compatibility by sending a non-zereo amount
         } else {
-            cancel();
+            cancel(msg.sender, msg.value);
         }
     }
 
@@ -318,7 +319,7 @@ contract ReversibleICO is IERC777Recipient {
         // requireNotEnded
     {
         // rICO should only receive tokens from the rICO Token Tracker.
-        // transactions from any other sender should revert
+        // Transactions from any other sender should revert
         require(msg.sender == tokenContractAddress, "Invalid token sent.");
 
         // 2 cases
@@ -335,6 +336,7 @@ contract ReversibleICO is IERC777Recipient {
 
     }
 
+
     /**
     @notice External wrapper for commit() so that a participant can call it directly.
     */
@@ -342,9 +344,9 @@ contract ReversibleICO is IERC777Recipient {
     public
     payable
     {
-        // reject contributions lower than the minimum amount
+        // Reject contributions lower than the minimum amount
         require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
-        // call commit() for processing the contribution
+        // Call commit() for processing the contribution
         commit(msg.sender, msg.value);
     }
 
@@ -384,18 +386,29 @@ contract ReversibleICO is IERC777Recipient {
 
 
     /**
-    @notice Cancels non-whitelisted participant's pending ETH commitment. Needs to be called by the participant.
+    @notice External wrapper for cancel() so that a participant can call it directly.
     */
     function cancel()
     public
     payable
+    {
+        // Call cancel() for cacelling contribution
+        cancel(msg.sender, msg.value);
+    }
+
+    /**
+    @notice Cancels non-whitelisted participant's pending ETH commitment.
+    */
+    function cancel(address _sender, uint256 _value)
+    internal
     isInitialized
     isNotFrozen
+    isRunning
     {
         // If there is available pending ETH ...
-        if (hasPendingETH(msg.sender)) {
+        if (hasPendingETH(_sender)) {
             // ... cancel participant's contribution.
-            cancelContributionsForAddress(msg.sender, msg.value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
+            cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
         revert("Participant has no contributions.");
