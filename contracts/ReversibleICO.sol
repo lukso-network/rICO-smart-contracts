@@ -362,7 +362,7 @@ contract ReversibleICO is IERC777Recipient {
     {
 
         // Add to received value to totalReceivedETH
-        totalReceivedETH += _value;
+        totalReceivedETH = totalReceivedETH.add(_value);
 
         // Participant initial state record
         Participant storage participantRecord = participantsByAddress[_sender];
@@ -973,11 +973,11 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update participant's total stats
         participantRecord.contributionsCount++;
-        participantRecord.totalReceivedETH += _receivedValue;
+        participantRecord.totalReceivedETH = participantRecord.totalReceivedETH.add(_receivedValue);
 
         // Update participant's per-stage stats
         ParticipantDetailsByStage storage byStage = participantRecord.byStage[currentStage];
-        byStage.totalReceivedETH += _receivedValue;
+        byStage.totalReceivedETH = byStage.totalReceivedETH.add(_receivedValue);
 
 
         // Get the equivalent amount in tokens
@@ -987,8 +987,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update participant's reserved tokens
         // TODO: what does this mean?: then can change when contribution is accepted if max cap is hit
-        byStage.reservedTokens += newTokenAmount;
-        participantRecord.reservedTokens += newTokenAmount;
+        byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
+        participantRecord.reservedTokens = participantRecord.reservedTokens.add(newTokenAmount);
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
@@ -1012,40 +1012,40 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetailsByStage storage byStage = participantRecord.byStage[stageId];
 
-            uint256 processedTotals = participantRecord.committedETH + participantRecord.returnedETH;
+            uint256 processedTotals = participantRecord.committedETH.add(participantRecord.returnedETH);
 
             if (processedTotals < participantRecord.totalReceivedETH) {
 
                 // handle the case when we have reserved more tokens than globally available
-                participantRecord.reservedTokens -= byStage.reservedTokens;
+                participantRecord.reservedTokens = participantRecord.reservedTokens.sub(byStage.reservedTokens);
                 byStage.reservedTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalReceivedETH - committedETH
-                uint256 newAcceptedValue = byStage.totalReceivedETH - byStage.committedETH;
+                uint256 newAcceptedValue = byStage.totalReceivedETH.sub(byStage.committedETH);
                 uint256 returnValue;
 
                 // if incomming value is higher than what we can accept,
                 // just accept the difference and return the rest
                 if (newAcceptedValue > maxAcceptableValue) {
                     newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.totalReceivedETH - byStage.returnedETH - byStage.committedETH -
-                    byStage.withdrawnETH - newAcceptedValue;
+                    returnValue = byStage.totalReceivedETH.sub(byStage.returnedETH).sub(byStage.committedETH)
+                    .sub(byStage.withdrawnETH).sub(newAcceptedValue);
 
                     // update return values
-                    returnedETH += returnValue;
-                    participantRecord.returnedETH += returnValue;
+                    returnedETH = returnedETH.add(returnValue);
+                    participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
                     byStage.returnedETH = returnValue;
                 }
 
                 if (newAcceptedValue > 0) {
 
                     // update values by adding the new accepted amount
-                    committedETH += newAcceptedValue;
-                    participantRecord.committedETH += newAcceptedValue;
-                    byStage.committedETH += newAcceptedValue;
+                    committedETH = committedETH.add(newAcceptedValue);
+                    participantRecord.committedETH = participantRecord.committedETH.add(newAcceptedValue);
+                    byStage.committedETH = byStage.committedETH.add(newAcceptedValue);
 
                     // calculate the equivalent token amount
                     uint256 newTokenAmount = getTokenAmountForEthAtStage(
@@ -1053,8 +1053,8 @@ contract ReversibleICO is IERC777Recipient {
                     );
 
                     // update participant's token amounts
-                    participantRecord.boughtTokens += newTokenAmount;
-                    byStage.boughtTokens += newTokenAmount;
+                    participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
+                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
 
                     // allocate tokens to participant
                     bytes memory data;
@@ -1091,9 +1091,8 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
 
         // Calculate participant's available ETH i.e. totalReceivedETH - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = participantRecord.totalReceivedETH -
-        participantRecord.withdrawnETH -
-        participantRecord.returnedETH;
+        uint256 participantAvailableETH = participantRecord.totalReceivedETH.sub(participantRecord.withdrawnET)
+        .sub(participantRecord.returnedETH);
 
         // Revert if there is no available ETH contribution
         require(participantAvailableETH > 0, "Participant has not contributed any ETH yet.");
@@ -1101,14 +1100,14 @@ contract ReversibleICO is IERC777Recipient {
         // Update total ETH returned
         // Since this balance was never actually "accepted" it counts as returned...
         // ...so it does not interfere with project withdraw calculations
-        returnedETH += participantAvailableETH;
+        returnedETH = returnedETH.add(participantAvailableETH);
 
         // update participant's audit values
         participantRecord.reservedTokens = 0;
-        participantRecord.withdrawnETH += participantAvailableETH;
+        participantRecord.withdrawnETH = participantRecord.withdrawnETH.add(participantAvailableETH);
 
         // transfer ETH back to participant including received value
-        address(uint160(_from)).transfer(participantAvailableETH + _value);
+        address(uint160(_from)).transfer(participantAvailableETH.add(_value));
 
         // event emission
         emit TransferEvent(_eventType, _from, participantAvailableETH);
