@@ -160,7 +160,7 @@ contract ReversibleICO is IERC777Recipient {
         COMMITMENT_ACCEPTED, // 4
         WHITELIST_APPROVE, // 5
         WHITELIST_REJECT, // 6
-        PROJECT_WITHDRAW        // 7
+        PROJECT_WITHDRAW // 7
     }
 
     event ApplicationEvent (
@@ -346,7 +346,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // Reject contributions lower than the minimum amount
         require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
-        // Call commit() for processing the contribution
+        // Call internal commit() for processing the contribution
         commit(msg.sender, msg.value);
     }
 
@@ -392,7 +392,7 @@ contract ReversibleICO is IERC777Recipient {
     public
     payable
     {
-        // Call cancel() for cacelling contribution
+        // Call internal cancel() for processing the request
         cancel(msg.sender, msg.value);
     }
 
@@ -405,13 +405,11 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     isRunning
     {
-        // If there is available pending ETH ...
-        if (hasPendingETH(_sender)) {
-            // ... cancel participant's contribution.
-            cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
-            return;
-        }
-        revert("Participant has no contributions.");
+        // Participant must have pending ETH ...
+        require(hasPendingETH(_sender), "Participant has no contributions.");
+
+        // Cancel participant's contribution.
+        cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
     }
 
 
@@ -1086,50 +1084,40 @@ contract ReversibleICO is IERC777Recipient {
     function cancelContributionsForAddress(address _from, uint256 _value, uint8 _eventType) internal {
 
         // Participant should only be able to cancel if they haven't been whitelisted yet...
-        // ...but just to make sure take withdrawn and returned into account.
+        // ...but just to make sure take 'withdrawn' and 'returned' into account.
         // This is to handle the case when whitelist controller whitelists someone, then rejects...
         // ...then whitelists them again.
 
         Participant storage participantRecord = participantsByAddress[_from];
 
-        // Calculate participant's available ETH i.e. committed - withdrawnETH - returnedETH
+        // Calculate participant's available ETH i.e. totalReceivedETH - withdrawnETH - returnedETH
         uint256 participantAvailableETH = participantRecord.totalReceivedETH -
         participantRecord.withdrawnETH -
         participantRecord.returnedETH;
 
-        if (participantAvailableETH > 0) {
-            // update total ETH returned
-            // since this balance was never actually "accepted" it counts as returned...
-            // ...so it does not interfere with project withdraw calculations
-            returnedETH += participantAvailableETH;
+        // Revert if there is no available ETH contribution
+        require(participantAvailableETH > 0, "Participant has not contributed any ETH yet.");
 
-            // update participant's audit values
-            participantRecord.reservedTokens = 0;
-            participantRecord.withdrawnETH += participantAvailableETH;
+        // Update total ETH returned
+        // Since this balance was never actually "accepted" it counts as returned...
+        // ...so it does not interfere with project withdraw calculations
+        returnedETH += participantAvailableETH;
 
-            // transfer ETH back to participant including received value
-            address(uint160(_from)).transfer(participantAvailableETH + _value);
+        // update participant's audit values
+        participantRecord.reservedTokens = 0;
+        participantRecord.withdrawnETH += participantAvailableETH;
 
-            uint8 currentTransferEventType;
+        // transfer ETH back to participant including received value
+        address(uint160(_from)).transfer(participantAvailableETH + _value);
 
-            if (_eventType == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
-                currentTransferEventType = uint8(TransferTypes.WHITELIST_REJECT);
-            } else if (_eventType == uint8(ApplicationEventTypes.PARTICIPANT_CANCEL)) {
-                currentTransferEventType = uint8(TransferTypes.PARTICIPANT_CANCEL);
-            }
-
-            // event emission
-            emit TransferEvent(currentTransferEventType, _from, participantAvailableETH);
-            emit ApplicationEvent(
-                _eventType,
-                uint32(participantRecord.contributionsCount),
-                _from,
-                participantAvailableETH
-            );
-
-        } else {
-            revert("Participant has not contributed any ETH yet.");
-        }
+        // event emission
+        emit TransferEvent(_eventType, _from, participantAvailableETH);
+        emit ApplicationEvent(
+            _eventType,
+            uint32(participantRecord.contributionsCount),
+            _from,
+            participantAvailableETH
+        );
     }
 
 
