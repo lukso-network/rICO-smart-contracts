@@ -1091,7 +1091,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
 
         // Calculate participant's available ETH i.e. totalReceivedETH - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = participantRecord.totalReceivedETH.sub(participantRecord.withdrawnET)
+        uint256 participantAvailableETH = participantRecord.totalReceivedETH.sub(participantRecord.withdrawnETH)
         .sub(participantRecord.returnedETH);
 
         // Revert if there is no available ETH contribution
