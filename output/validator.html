@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- This file was created with the aha Ansi HTML Adapter. https://github.com/theZiz/aha -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/xml+xhtml; charset=UTF-8" />
+<title>output/validator.log</title>
+</head>
+<body style="color:white; background-color:black">
+<pre>
+
+&gt; ricopoc@0.0.1 test-validator /Volumes/Dev/RICO/validator
+&gt; scripts/run_js.sh all refresh
+
+Starting new ganache-cli instance at port 8545
+exchange neither monster ethics bless cancel ghost excite business record warfare invite
+
+--------------------------------------------------------------------
+ Running all tests in &quot;test&quot; folder:
+--------------------------------------------------------------------
+
+Compiling your contracts...
+===========================
+&gt; Everything is up to date, there is nothing to compile.
+
+<span style="font-weight:bold;color:white;">  ----------------------------------------------------------------
+  Step 1 - Setting up helpers and globals 
+  ---------------------------------------------------------------- </span>
+<span style="font-weight:bold;color:white;">  ----------------------------------------------------------------
+  Step 2 - Run tests 
+  ---------------------------------------------------------------- </span>
+
+
+  Javascript Validator Tests
+    Integrity checking
+      Settings are assigned correctly
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> block is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> commitPhaseStartBlock is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> commitPhaseBlockCount is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> commitPhaseEndBlock is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> buyPhaseStartBlock is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> buyPhaseEndBlock is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> buyPhaseBlockCount is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> blocksPerDay is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> commitPhaseDays is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> StageDays is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> commitPhasePrice is 0.002</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> StagePriceIncrease is 0.0001</span>
+      getBlockNumber()
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> returns block correctly</span>
+      setBlockNumber()
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> sets block correctly</span>
+    Initialization
+      stage generation
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> StageCount is correct</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> pricing increases by 10% for each stage</span>
+    Stage Methods
+      getStageAtBlock(_blockNumber)
+        stage 0
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using startBlock</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using endBlock</span>
+        stage 1
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using startBlock</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using endBlock</span>
+        stage 6
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using startBlock</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using endBlock</span>
+        last stage
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using startBlock</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using endBlock</span>
+        1 block before 0
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return correct stageId using startBlock</span>
+        1 block after last stage
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 255</span>
+    Price Methods
+      getPriceAtBlock(_blockNumber)
+        edge of commit and buy block range
+          before commitPhaseStartBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return commitPhasePrice</span>
+          at commitPhaseStartBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return commitPhasePrice</span>
+          at buyPhaseEndBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return commitPhasePrice</span>
+          after buyPhaseEndBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+        first stage
+          startBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return commitPhasePrice</span>
+          endBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return commitPhasePrice</span>
+          StartBlock price and EndBlock price
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should be higher than 0 and match</span>
+        stage 6
+          startBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return stage tokenPrice</span>
+          endBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return stage tokenPrice</span>
+          StartBlock price and EndBlock price
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should be higher than 0 and match</span>
+        last stage
+          startBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return stage tokenPrice</span>
+          endBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return stage tokenPrice</span>
+          StartBlock price and EndBlock price
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should be higher than 0 and match</span>
+      getTokenAmountForEthAtStage()
+        1 eth
+          stage 0
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 500 tokens</span>
+          stage 1
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 476.190476190476190476 tokens</span>
+          stage 6
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 384.615384615384615384 tokens</span>
+          last stage
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 312.5 tokens</span>
+      getEthAmountForTokensAtStage()
+        1 eth worth of tokens
+          stage 0
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1 eth</span>
+          stage 1
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1 eth minus 1 wei</span>
+          stage 6
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1 eth minus 1 wei</span>
+          last stage
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1 eth</span>
+      getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precision)
+        _currentBlock in range
+          _currentBlock = 0, _startBlock = 0, _endBlock = 100
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+          _currentBlock = 100, _startBlock = 100, _endBlock = 200
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+          _currentBlock = 1, _startBlock = 0, _endBlock = 100
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0.01</span>
+          _currentBlock = 101, _startBlock = 100, _endBlock = 200
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0.01</span>
+          _currentBlock = 50, _startBlock = 0, _endBlock = 100
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0.5</span>
+          _currentBlock = 100, _startBlock = 0, _endBlock = 100
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1</span>
+        _currentBlock ouside range
+          before range =&gt; _currentBlock = 0, _startBlock = 1, _endBlock = 101
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+          after range =&gt; _currentBlock = 101, _startBlock = 0, _endBlock = 100
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 1</span>
+      getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) 
+        _blockNumber in range
+          _tokenAmount = 100, _blockNumber = range * 0.25
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 75</span>
+          _tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 50</span>
+          _tokenAmount = 100, _blockNumber = range * 0.75
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 25</span>
+        _blockNumber outside range
+          block before buyPhaseStartBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return full amount</span>
+          block after buyPhaseEndBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+      getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) 
+        _blockNumber in range
+          _tokenAmount = 100, _blockNumber = range * 0.25
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 25</span>
+          _tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 50</span>
+          _tokenAmount = 100, _blockNumber = range * 0.75
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 75</span>
+        _blockNumber outside range
+          block before buyPhaseStartBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return 0</span>
+          block after buyPhaseEndBlock
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> should return full amount</span>
+
+  Javascript Contract Tests
+    Setup
+      TokenContractInstance
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Deployer has correct balance</span>
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> rICO Contract has correct balance</span>
+    commit()
+      Participant 1 - commits 1 eth
+        Contract State changes after first contribution by a Participant
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+        State changes after a new contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.byStage[currentStage] = byStage
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+      Participant 1 - commits 1 eth - second time
+        Contract State changes after contribution from existing Participant
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount does not change</span>
+        State changes after a new contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.byStage[currentStage] = byStage
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+      Participant 1 - commits 1 eth - third time
+        Contract State changes after contribution from existing Participant
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount does not change</span>
+        State changes after a new contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.byStage[currentStage] = byStage
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+      Participant 2 - commits 1 eth
+      <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount is 2</span>
+        Contract State changes after first contribution by a Participant
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+        State changes after a new contribution
+        <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.byStage[currentStage] = byStage
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+    whitelist()
+      Scenario: Participant 1 gets whitelisted then contributes
+        Participant 1 gets whitelisted
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.whitelisted is now: true</span>
+        Participant 1 - commits 1 eth
+          Contract State changes after first contribution by a Participant
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
+            ParticipantRecord
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+          State changes after a new contribution
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+            ParticipantRecord
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens is 0</span>
+              ParticipantRecord.byStage[currentStage] = byStage
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens is 0</span>
+      Scenario: Participant 1 contributes then gets rejected
+        Participant 1 - commits 1 eth
+          Contract State changes after first contribution by a Participant
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
+            ParticipantRecord
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+          State changes after a new contribution
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalReceivedETH increases by commited value</span>
+            ParticipantRecord
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalReceivedETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+              ParticipantRecord.byStage[currentStage] = byStage
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalReceivedETH increases by commited value</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)</span>
+        Participant 1 gets rejected
+          ParticipantRecord
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.whitelisted is now: false</span>
+
+
+<span style="filter: contrast(70%) brightness(190%);color:lime;"> </span><span style="color:lime;"> 120 passing</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> (82ms)</span>
+
+Done
+--------------------------------------------------------------------
+
+Killing existing ganache-cli instance at pid 20811.
+
+</pre>
+</body>
+</html>

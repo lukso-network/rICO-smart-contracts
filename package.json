@@ -46,6 +46,7 @@
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
     "ganache-cli": "git://github.com/mickys/ganache-cli.git#8e64c2e8f782d8c7e5f855d819001e74bdf48732",
+    "lodash": "^4.17.15",
     "openzeppelin-test-helpers": "^0.4.0",
     "sol-merger": "^1.1.1",
     "solc": "0.5.10",

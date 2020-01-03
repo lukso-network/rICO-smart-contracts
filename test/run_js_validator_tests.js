@@ -12,7 +12,9 @@ async function runTests(init) {
 
   const tests = [
     "1_js_validator",
-    "2_js_contract",
+    "commit.test",
+    "whitelist.test",
+    "_wip",
   ];
 
   init.helpers.utils.toLog(
@@ -28,7 +30,7 @@ async function runTests(init) {
     const mocha = new Mocha();
 
     mocha.useColors(true);
-    mocha.slow(15);
+    mocha.slow(5);
     mocha.timeout(600000);
 
     for (let i = 0; i < tests.length; i++) {

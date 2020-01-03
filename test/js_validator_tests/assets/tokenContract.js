@@ -10,7 +10,7 @@ class TokenContract {
 
     // set the defaults
     constructor(_initialSupply, _deployerAddress) {
-        this.balances = [];
+        this.balances = {};
         this.balances[_deployerAddress] = new BN(_initialSupply);
     }
 

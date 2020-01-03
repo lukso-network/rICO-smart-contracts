@@ -1,0 +1,271 @@
+
+> ricopoc@0.0.1 test-validator /Volumes/Dev/RICO/validator
+> scripts/run_js.sh all refresh
+
+Starting new ganache-cli instance at port 8545
+exchange neither monster ethics bless cancel ghost excite business record warfare invite
+
+--------------------------------------------------------------------
+ Running all tests in "test" folder:
+--------------------------------------------------------------------
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+[1;37m  ----------------------------------------------------------------
+  Step 1 - Setting up helpers and globals 
+  ---------------------------------------------------------------- [0m
+[1;37m  ----------------------------------------------------------------
+  Step 2 - Run tests 
+  ---------------------------------------------------------------- [0m
+
+[0m[0m
+[0m  Javascript Validator Tests[0m
+[0m    Integrity checking[0m
+[0m      Settings are assigned correctly[0m
+      [32m  ✓[0m[90m block is correct[0m
+      [32m  ✓[0m[90m commitPhaseStartBlock is correct[0m
+      [32m  ✓[0m[90m commitPhaseBlockCount is correct[0m
+      [32m  ✓[0m[90m commitPhaseEndBlock is correct[0m
+      [32m  ✓[0m[90m buyPhaseStartBlock is correct[0m
+      [32m  ✓[0m[90m buyPhaseEndBlock is correct[0m
+      [32m  ✓[0m[90m buyPhaseBlockCount is correct[0m
+      [32m  ✓[0m[90m blocksPerDay is correct[0m
+      [32m  ✓[0m[90m commitPhaseDays is correct[0m
+      [32m  ✓[0m[90m StageDays is correct[0m
+      [32m  ✓[0m[90m commitPhasePrice is 0.002[0m
+      [32m  ✓[0m[90m StagePriceIncrease is 0.0001[0m
+[0m      getBlockNumber()[0m
+      [32m  ✓[0m[90m returns block correctly[0m
+[0m      setBlockNumber()[0m
+      [32m  ✓[0m[90m sets block correctly[0m
+[0m    Initialization[0m
+[0m      stage generation[0m
+      [32m  ✓[0m[90m StageCount is correct[0m
+      [32m  ✓[0m[90m pricing increases by 10% for each stage[0m
+[0m    Stage Methods[0m
+[0m      getStageAtBlock(_blockNumber)[0m
+[0m        stage 0[0m
+        [32m  ✓[0m[90m should return correct stageId using startBlock[0m
+        [32m  ✓[0m[90m should return correct stageId using endBlock[0m
+[0m        stage 1[0m
+        [32m  ✓[0m[90m should return correct stageId using startBlock[0m
+        [32m  ✓[0m[90m should return correct stageId using endBlock[0m
+[0m        stage 6[0m
+        [32m  ✓[0m[90m should return correct stageId using startBlock[0m
+        [32m  ✓[0m[90m should return correct stageId using endBlock[0m
+[0m        last stage[0m
+        [32m  ✓[0m[90m should return correct stageId using startBlock[0m
+        [32m  ✓[0m[90m should return correct stageId using endBlock[0m
+[0m        1 block before 0[0m
+        [32m  ✓[0m[90m should return correct stageId using startBlock[0m
+[0m        1 block after last stage[0m
+        [32m  ✓[0m[90m should return 255[0m
+[0m    Price Methods[0m
+[0m      getPriceAtBlock(_blockNumber)[0m
+[0m        edge of commit and buy block range[0m
+[0m          before commitPhaseStartBlock[0m
+          [32m  ✓[0m[90m should return commitPhasePrice[0m
+[0m          at commitPhaseStartBlock[0m
+          [32m  ✓[0m[90m should return commitPhasePrice[0m
+[0m          at buyPhaseEndBlock[0m
+          [32m  ✓[0m[90m should return commitPhasePrice[0m
+[0m          after buyPhaseEndBlock[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m        first stage[0m
+[0m          startBlock[0m
+          [32m  ✓[0m[90m should return commitPhasePrice[0m
+[0m          endBlock[0m
+          [32m  ✓[0m[90m should return commitPhasePrice[0m
+[0m          StartBlock price and EndBlock price[0m
+          [32m  ✓[0m[90m should be higher than 0 and match[0m
+[0m        stage 6[0m
+[0m          startBlock[0m
+          [32m  ✓[0m[90m should return stage tokenPrice[0m
+[0m          endBlock[0m
+          [32m  ✓[0m[90m should return stage tokenPrice[0m
+[0m          StartBlock price and EndBlock price[0m
+          [32m  ✓[0m[90m should be higher than 0 and match[0m
+[0m        last stage[0m
+[0m          startBlock[0m
+          [32m  ✓[0m[90m should return stage tokenPrice[0m
+[0m          endBlock[0m
+          [32m  ✓[0m[90m should return stage tokenPrice[0m
+[0m          StartBlock price and EndBlock price[0m
+          [32m  ✓[0m[90m should be higher than 0 and match[0m
+[0m      getTokenAmountForEthAtStage()[0m
+[0m        1 eth[0m
+[0m          stage 0[0m
+          [32m  ✓[0m[90m should return 500 tokens[0m
+[0m          stage 1[0m
+          [32m  ✓[0m[90m should return 476.190476190476190476 tokens[0m
+[0m          stage 6[0m
+          [32m  ✓[0m[90m should return 384.615384615384615384 tokens[0m
+[0m          last stage[0m
+          [32m  ✓[0m[90m should return 312.5 tokens[0m
+[0m      getEthAmountForTokensAtStage()[0m
+[0m        1 eth worth of tokens[0m
+[0m          stage 0[0m
+          [32m  ✓[0m[90m should return 1 eth[0m
+[0m          stage 1[0m
+          [32m  ✓[0m[90m should return 1 eth minus 1 wei[0m
+[0m          stage 6[0m
+          [32m  ✓[0m[90m should return 1 eth minus 1 wei[0m
+[0m          last stage[0m
+          [32m  ✓[0m[90m should return 1 eth[0m
+[0m      getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precision)[0m
+[0m        _currentBlock in range[0m
+[0m          _currentBlock = 0, _startBlock = 0, _endBlock = 100[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m          _currentBlock = 100, _startBlock = 100, _endBlock = 200[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m          _currentBlock = 1, _startBlock = 0, _endBlock = 100[0m
+          [32m  ✓[0m[90m should return 0.01[0m
+[0m          _currentBlock = 101, _startBlock = 100, _endBlock = 200[0m
+          [32m  ✓[0m[90m should return 0.01[0m
+[0m          _currentBlock = 50, _startBlock = 0, _endBlock = 100[0m
+          [32m  ✓[0m[90m should return 0.5[0m
+[0m          _currentBlock = 100, _startBlock = 0, _endBlock = 100[0m
+          [32m  ✓[0m[90m should return 1[0m
+[0m        _currentBlock ouside range[0m
+[0m          before range => _currentBlock = 0, _startBlock = 1, _endBlock = 101[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m          after range => _currentBlock = 101, _startBlock = 0, _endBlock = 100[0m
+          [32m  ✓[0m[90m should return 1[0m
+[0m      getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) [0m
+[0m        _blockNumber in range[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.25[0m
+          [32m  ✓[0m[90m should return 75[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )[0m
+          [32m  ✓[0m[90m should return 50[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.75[0m
+          [32m  ✓[0m[90m should return 25[0m
+[0m        _blockNumber outside range[0m
+[0m          block before buyPhaseStartBlock[0m
+          [32m  ✓[0m[90m should return full amount[0m
+[0m          block after buyPhaseEndBlock[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m      getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) [0m
+[0m        _blockNumber in range[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.25[0m
+          [32m  ✓[0m[90m should return 25[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )[0m
+          [32m  ✓[0m[90m should return 50[0m
+[0m          _tokenAmount = 100, _blockNumber = range * 0.75[0m
+          [32m  ✓[0m[90m should return 75[0m
+[0m        _blockNumber outside range[0m
+[0m          block before buyPhaseStartBlock[0m
+          [32m  ✓[0m[90m should return 0[0m
+[0m          block after buyPhaseEndBlock[0m
+          [32m  ✓[0m[90m should return full amount[0m
+
+[0m  Javascript Contract Tests[0m
+[0m    Setup[0m
+[0m      TokenContractInstance[0m
+      [32m  ✓[0m[90m Deployer has correct balance[0m
+      [32m  ✓[0m[90m rICO Contract has correct balance[0m
+[0m    commit()[0m
+[0m      Participant 1 - commits 1 eth[0m
+[0m        Contract State changes after first contribution by a Participant[0m
+        [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
+        [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+[0m        State changes after a new contribution[0m
+        [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+          [32m  ✓[0m[90m participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
+            [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m      Participant 1 - commits 1 eth - second time[0m
+[0m        Contract State changes after contribution from existing Participant[0m
+        [32m  ✓[0m[90m Contract.participantCount does not change[0m
+[0m        State changes after a new contribution[0m
+        [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+          [32m  ✓[0m[90m participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
+            [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m      Participant 1 - commits 1 eth - third time[0m
+[0m        Contract State changes after contribution from existing Participant[0m
+        [32m  ✓[0m[90m Contract.participantCount does not change[0m
+[0m        State changes after a new contribution[0m
+        [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+          [32m  ✓[0m[90m participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
+            [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m      Participant 2 - commits 1 eth[0m
+      [32m  ✓[0m[90m Contract.participantCount is 2[0m
+[0m        Contract State changes after first contribution by a Participant[0m
+        [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
+        [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+[0m        State changes after a new contribution[0m
+        [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+          [32m  ✓[0m[90m participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
+            [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m    whitelist()[0m
+[0m      Scenario: Participant 1 gets whitelisted then contributes[0m
+[0m        Participant 1 gets whitelisted[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord.whitelisted is now: true[0m
+[0m        Participant 1 - commits 1 eth[0m
+[0m          Contract State changes after first contribution by a Participant[0m
+          [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
+          [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
+[0m            ParticipantRecord[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+[0m          State changes after a new contribution[0m
+          [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m            ParticipantRecord[0m
+            [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m participantRecord.reservedTokens is 0[0m
+[0m              ParticipantRecord.byStage[currentStage] = byStage[0m
+              [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+              [32m  ✓[0m[90m byStage.reservedTokens is 0[0m
+[0m      Scenario: Participant 1 contributes then gets rejected[0m
+[0m        Participant 1 - commits 1 eth[0m
+[0m          Contract State changes after first contribution by a Participant[0m
+          [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
+          [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
+[0m            ParticipantRecord[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+[0m          State changes after a new contribution[0m
+          [32m  ✓[0m[90m Contract.totalReceivedETH increases by commited value[0m
+[0m            ParticipantRecord[0m
+            [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.totalReceivedETH increases by commited value[0m
+            [32m  ✓[0m[90m participantRecord.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m              ParticipantRecord.byStage[currentStage] = byStage[0m
+              [32m  ✓[0m[90m byStage.totalReceivedETH increases by commited value[0m
+              [32m  ✓[0m[90m byStage.reservedTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m        Participant 1 gets rejected[0m
+[0m          ParticipantRecord[0m
+          [32m  ✓[0m[90m ParticipantRecord.whitelisted is now: false[0m
+
+
+[92m [0m[32m 120 passing[0m[90m (82ms)[0m
+
+Done
+--------------------------------------------------------------------
+
+Killing existing ganache-cli instance at pid 20811.
+

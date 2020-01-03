@@ -574,13 +574,13 @@ contract ReversibleICO is IERC777Recipient {
         ParticipantDetailsByStage storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
 
         return (
-        totalsRecord.totalReceivedETH,
-        totalsRecord.returnedETH,
-        totalsRecord.committedETH,
-        totalsRecord.withdrawnETH,
-        totalsRecord.reservedTokens,
-        totalsRecord.boughtTokens,
-        totalsRecord.returnedTokens
+            totalsRecord.totalReceivedETH,
+            totalsRecord.returnedETH,
+            totalsRecord.committedETH,
+            totalsRecord.withdrawnETH,
+            totalsRecord.reservedTokens,
+            totalsRecord.boughtTokens,
+            totalsRecord.returnedTokens
         );
     }
 

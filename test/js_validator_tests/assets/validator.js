@@ -105,7 +105,7 @@ class Validator {
 
     getCurrentUnlockPercentage() {
 
-        const currentBlock = new BN( this.getBlockNumber() );
+        const currentBlock = new BN( this.getCurrentBlockNumber() );
         const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );
         const precision = new BN(20);
@@ -136,7 +136,7 @@ class Validator {
     }
 
     getCurrentStage() {
-        return this.getStageAtBlock(this.getBlockNumber());
+        return this.getStageAtBlock(this.getCurrentBlockNumber());
     }
 
     getStageAtBlock(_blockNumber) {
@@ -162,7 +162,7 @@ class Validator {
     }
 
     getCurrentPrice() {
-        return getPriceAtBlock(this.getBlockNumber());
+        return getPriceAtBlock(this.getCurrentBlockNumber());
     }
 
     getPriceAtBlock(_blockNumber) {
@@ -173,7 +173,7 @@ class Validator {
         return 0;
     }
 
-    getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
+    getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, precision) {
 
         // if participant is not whitelisted, then full amount is locked
 
@@ -200,11 +200,21 @@ class Validator {
 
     getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
         return new BN(_tokenAmount).sub( 
-            this.getLockedTokensForBoughtAmountAtBlock(
+            this.getLockedTokenAmountAtBlock(
                 _tokenAmount,
                 _blockNumber,
                 precision
             ) 
+        );
+    }
+
+    availableEthAtStageForTokenBalance(_contractTokenBalance, _stage) {
+        // Multiply the number of tokens held by the contract with the token price
+        // at the specified stage and perform precision adjustments(div).
+        return _contractTokenBalance.mul(
+            this.stages[_stage].tokenPrice
+        ).div(
+            new BN("10").pow(new BN("18"))
         );
     }
 
@@ -216,11 +226,15 @@ class Validator {
         this.block = block;
     }
 
-    getBlockNumber() {
+    getCurrentBlockNumber() {
         return this.block;
     }
 
     toEth(amount) {
+        return web3util.fromWei(amount, "ether");
+    }
+
+    static toEth(amount) {
         return web3util.fromWei(amount, "ether");
     }
 

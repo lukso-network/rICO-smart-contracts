@@ -13,7 +13,7 @@ const settings = {
     StageDays:          30,
 };
 
-describe("Javascript Validator Tests", function () {
+describe("Javascript Validator - Tests", function () {
     let Validator;
 
     before(function ()  {
@@ -102,16 +102,16 @@ describe("Javascript Validator Tests", function () {
 
         });
 
-        describe("getBlockNumber()", function () {
+        describe("getCurrentBlockNumber()", function () {
             it("returns block correctly", function() {
-                expect(Validator.getBlockNumber()).is.equal(settings.block);
+                expect(Validator.getCurrentBlockNumber()).is.equal(settings.block);
             });
         });
 
         describe("setBlockNumber()", function () {
             it("sets block correctly", function() {
                 Validator.setBlockNumber(2);
-                expect(Validator.getBlockNumber()).is.equal(2);
+                expect(Validator.getCurrentBlockNumber()).is.equal(2);
             });
         });
     });
@@ -665,7 +665,7 @@ describe("Javascript Validator Tests", function () {
             });
         });
         
-        describe("getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) ", function () {
+        describe("getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, precision) ", function () {
             let precision;
             let CustomSettingsValidator;
             
@@ -689,7 +689,7 @@ describe("Javascript Validator Tests", function () {
                     it("should return 75", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.25 );
-                        let locked = CustomSettingsValidator.getLockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precision);
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precision);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "75" );
                     });
                 });
@@ -699,7 +699,7 @@ describe("Javascript Validator Tests", function () {
                     it("should return 50", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.5 );
-                        let locked = CustomSettingsValidator.getLockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precision);
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precision);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "50" );
                     });
                 });
@@ -709,7 +709,7 @@ describe("Javascript Validator Tests", function () {
                     it("should return 25", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.75 );
-                        let locked = CustomSettingsValidator.getLockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precision);
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precision);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "25" );
                     });
                 });
@@ -727,7 +727,7 @@ describe("Javascript Validator Tests", function () {
                     });
 
                     it("should return full amount", function() {
-                        let locked = CustomSettingsValidator.getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision);
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, precision);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( _tokenAmount.toString() );
                     });
                 });
@@ -741,7 +741,7 @@ describe("Javascript Validator Tests", function () {
                     });
 
                     it("should return 0", function() {
-                        let locked = CustomSettingsValidator.getLockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision);
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, precision);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "0" );
                     });
                 });
