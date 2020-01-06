@@ -80,8 +80,8 @@ contract ReversibleICO is IERC777Recipient {
     *   Stage 1-n = buy phase
     */
     struct Stage {
-        uint256 startBlock;
-        uint256 endBlock;
+        uint128 startBlock;
+        uint128 endBlock;
         uint256 tokenPrice;
     }
 
