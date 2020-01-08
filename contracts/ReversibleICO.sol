@@ -160,7 +160,7 @@ contract ReversibleICO is IERC777Recipient {
         COMMITMENT_ACCEPTED, // 4
         WHITELIST_APPROVE, // 5
         WHITELIST_REJECT, // 6
-        PROJECT_WITHDRAW        // 7
+        PROJECT_WITHDRAW // 7
     }
 
     event ApplicationEvent (
@@ -194,6 +194,7 @@ contract ReversibleICO is IERC777Recipient {
         deployerAddress = msg.sender;
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
+
 
     /**
     @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
@@ -286,17 +287,15 @@ contract ReversibleICO is IERC777Recipient {
     function()
     external
     payable
-    isInitialized
-    isNotFrozen
     {
-        // accept contribution for processing
+        // Accept contributions higher than the minimum amount
         if (msg.value >= minContribution) {
-            commit();
+            commit(msg.sender, msg.value);
 
-            // Participant cancels commitment during commit phase (Stage 0),
-            // OR if they've not been whitelisted yet.
+        // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
+        // This also allows for extended wallet compatibility by sending a non-zereo amount
         } else {
-            cancel();
+            cancel(msg.sender, msg.value);
         }
     }
 
@@ -320,7 +319,7 @@ contract ReversibleICO is IERC777Recipient {
         // requireNotEnded
     {
         // rICO should only receive tokens from the rICO Token Tracker.
-        // transactions from any other sender should revert
+        // Transactions from any other sender should revert
         require(msg.sender == tokenContractAddress, "Invalid token sent.");
 
         // 2 cases
@@ -337,58 +336,80 @@ contract ReversibleICO is IERC777Recipient {
 
     }
 
+
     /**
-    @notice Commits a participant's ETH.
+    @notice External wrapper for commit() so that a participant can call it directly.
     */
     function commit()
     public
     payable
+    {
+        // Reject contributions lower than the minimum amount
+        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
+        // Call internal commit() for processing the contribution
+        commit(msg.sender, msg.value);
+    }
+
+
+    /**
+    @notice Commits a participant's ETH.
+    */
+    function commit(address _sender, uint256 _value)
+    internal
     isInitialized
     isNotFrozen
     isRunning
     {
-        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
 
         // Add to received value to totalReceivedETH
-        totalReceivedETH += msg.value;
+        totalReceivedETH = totalReceivedETH.add(_value);
 
         // Participant initial state record
-        Participant storage participantRecord = participantsByAddress[msg.sender];
+        Participant storage participantRecord = participantsByAddress[_sender];
 
         // Check if participant already exists
         if (participantRecord.contributionsCount == 0) {
             // Identify the participants by their Id
-            participantsById[participantCount] = msg.sender;
+            participantsById[participantCount] = _sender;
             // Increase participant count
             participantCount++;
         }
 
         // Record contribution into current stage totals for the participant
-        recordNewContribution(msg.sender, msg.value);
+        recordNewContribution(_sender, _value);
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            acceptContributionsForAddress(msg.sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
+            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
         }
     }
 
 
     /**
-    @notice Cancels non-whitelisted participant's pending ETH commitment. Needs to be called by the participant.
+    @notice External wrapper for cancel() so that a participant can call it directly.
     */
     function cancel()
     public
     payable
+    {
+        // Call internal cancel() for processing the request
+        cancel(msg.sender, msg.value);
+    }
+
+    /**
+    @notice Cancels non-whitelisted participant's pending ETH commitment.
+    */
+    function cancel(address _sender, uint256 _value)
+    internal
     isInitialized
     isNotFrozen
+    isRunning
     {
-        // If there is available pending ETH ...
-        if (hasPendingETH(msg.sender)) {
-            // ... cancel participant's contribution.
-            cancelContributionsForAddress(msg.sender, msg.value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
-            return;
-        }
-        revert("Participant has no contributions.");
+        // Participant must have pending ETH ...
+        require(hasPendingETH(_sender), "Participant has no contributions.");
+
+        // Cancel participant's contribution.
+        cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
     }
 
 
@@ -952,11 +973,11 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update participant's total stats
         participantRecord.contributionsCount++;
-        participantRecord.totalReceivedETH += _receivedValue;
+        participantRecord.totalReceivedETH = participantRecord.totalReceivedETH.add(_receivedValue);
 
         // Update participant's per-stage stats
         ParticipantDetailsByStage storage byStage = participantRecord.byStage[currentStage];
-        byStage.totalReceivedETH += _receivedValue;
+        byStage.totalReceivedETH = byStage.totalReceivedETH.add(_receivedValue);
 
 
         // Get the equivalent amount in tokens
@@ -966,8 +987,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update participant's reserved tokens
         // TODO: what does this mean?: then can change when contribution is accepted if max cap is hit
-        byStage.reservedTokens += newTokenAmount;
-        participantRecord.reservedTokens += newTokenAmount;
+        byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
+        participantRecord.reservedTokens = participantRecord.reservedTokens.add(newTokenAmount);
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
@@ -991,40 +1012,40 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetailsByStage storage byStage = participantRecord.byStage[stageId];
 
-            uint256 processedTotals = participantRecord.committedETH + participantRecord.returnedETH;
+            uint256 processedTotals = participantRecord.committedETH.add(participantRecord.returnedETH);
 
             if (processedTotals < participantRecord.totalReceivedETH) {
 
                 // handle the case when we have reserved more tokens than globally available
-                participantRecord.reservedTokens -= byStage.reservedTokens;
+                participantRecord.reservedTokens = participantRecord.reservedTokens.sub(byStage.reservedTokens);
                 byStage.reservedTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalReceivedETH - committedETH
-                uint256 newAcceptedValue = byStage.totalReceivedETH - byStage.committedETH;
+                uint256 newAcceptedValue = byStage.totalReceivedETH.sub(byStage.committedETH);
                 uint256 returnValue;
 
                 // if incomming value is higher than what we can accept,
                 // just accept the difference and return the rest
                 if (newAcceptedValue > maxAcceptableValue) {
                     newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.totalReceivedETH - byStage.returnedETH - byStage.committedETH -
-                    byStage.withdrawnETH - newAcceptedValue;
+                    returnValue = byStage.totalReceivedETH.sub(byStage.returnedETH).sub(byStage.committedETH)
+                    .sub(byStage.withdrawnETH).sub(newAcceptedValue);
 
                     // update return values
-                    returnedETH += returnValue;
-                    participantRecord.returnedETH += returnValue;
+                    returnedETH = returnedETH.add(returnValue);
+                    participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
                     byStage.returnedETH = returnValue;
                 }
 
                 if (newAcceptedValue > 0) {
 
                     // update values by adding the new accepted amount
-                    committedETH += newAcceptedValue;
-                    participantRecord.committedETH += newAcceptedValue;
-                    byStage.committedETH += newAcceptedValue;
+                    committedETH = committedETH.add(newAcceptedValue);
+                    participantRecord.committedETH = participantRecord.committedETH.add(newAcceptedValue);
+                    byStage.committedETH = byStage.committedETH.add(newAcceptedValue);
 
                     // calculate the equivalent token amount
                     uint256 newTokenAmount = getTokenAmountForEthAtStage(
@@ -1032,8 +1053,8 @@ contract ReversibleICO is IERC777Recipient {
                     );
 
                     // update participant's token amounts
-                    participantRecord.boughtTokens += newTokenAmount;
-                    byStage.boughtTokens += newTokenAmount;
+                    participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
+                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
 
                     // allocate tokens to participant
                     bytes memory data;
@@ -1063,50 +1084,39 @@ contract ReversibleICO is IERC777Recipient {
     function cancelContributionsForAddress(address _from, uint256 _value, uint8 _eventType) internal {
 
         // Participant should only be able to cancel if they haven't been whitelisted yet...
-        // ...but just to make sure take withdrawn and returned into account.
+        // ...but just to make sure take 'withdrawn' and 'returned' into account.
         // This is to handle the case when whitelist controller whitelists someone, then rejects...
         // ...then whitelists them again.
 
         Participant storage participantRecord = participantsByAddress[_from];
 
-        // Calculate participant's available ETH i.e. committed - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = participantRecord.totalReceivedETH -
-        participantRecord.withdrawnETH -
-        participantRecord.returnedETH;
+        // Calculate participant's available ETH i.e. totalReceivedETH - withdrawnETH - returnedETH
+        uint256 participantAvailableETH = participantRecord.totalReceivedETH.sub(participantRecord.withdrawnETH)
+        .sub(participantRecord.returnedETH);
 
-        if (participantAvailableETH > 0) {
-            // update total ETH returned
-            // since this balance was never actually "accepted" it counts as returned...
-            // ...so it does not interfere with project withdraw calculations
-            returnedETH += participantAvailableETH;
+        // Revert if there is no available ETH contribution
+        require(participantAvailableETH > 0, "Participant has not contributed any ETH yet.");
 
-            // update participant's audit values
-            participantRecord.reservedTokens = 0;
-            participantRecord.withdrawnETH += participantAvailableETH;
+        // Update total ETH returned
+        // Since this balance was never actually "accepted" it counts as returned...
+        // ...so it does not interfere with project withdraw calculations
+        returnedETH = returnedETH.add(participantAvailableETH);
 
-            // transfer ETH back to participant including received value
-            address(uint160(_from)).transfer(participantAvailableETH + _value);
+        // update participant's audit values
+        participantRecord.reservedTokens = 0;
+        participantRecord.withdrawnETH = participantRecord.withdrawnETH.add(participantAvailableETH);
 
-            uint8 currentTransferEventType;
+        // transfer ETH back to participant including received value
+        address(uint160(_from)).transfer(participantAvailableETH.add(_value));
 
-            if (_eventType == uint8(ApplicationEventTypes.WHITELIST_REJECT)) {
-                currentTransferEventType = uint8(TransferTypes.WHITELIST_REJECT);
-            } else if (_eventType == uint8(ApplicationEventTypes.PARTICIPANT_CANCEL)) {
-                currentTransferEventType = uint8(TransferTypes.PARTICIPANT_CANCEL);
-            }
-
-            // event emission
-            emit TransferEvent(currentTransferEventType, _from, participantAvailableETH);
-            emit ApplicationEvent(
-                _eventType,
-                uint32(participantRecord.contributionsCount),
-                _from,
-                participantAvailableETH
-            );
-
-        } else {
-            revert("Participant has not contributed any ETH yet.");
-        }
+        // event emission
+        emit TransferEvent(_eventType, _from, participantAvailableETH);
+        emit ApplicationEvent(
+            _eventType,
+            uint32(participantRecord.contributionsCount),
+            _from,
+            participantAvailableETH
+        );
     }
 
 
