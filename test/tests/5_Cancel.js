@@ -271,7 +271,7 @@ describe("Testing canceling", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true
                     ).send({
                         from: whitelistControllerAddress
@@ -340,7 +340,7 @@ describe("Testing canceling", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true
                     ).send({
                         from: whitelistControllerAddress
@@ -449,7 +449,7 @@ describe("Testing canceling", function () {
 
             });
 
-            it("value < rico.minContribution results in cancel(), account has 2 contributions", async function () {
+            it("value < rico.minContribution results in cancel(value), account has 2 contributions", async function () {
 
                 const ParticipantAccountBalanceInitial = await helpers.utils.getBalance(helpers, participant_1);
 
@@ -492,7 +492,7 @@ describe("Testing canceling", function () {
                 }
 
                 expect(
-                    ParticipantByAddress.committedETH.toString()
+                    ParticipantByAddress.totalReceivedETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -599,10 +599,10 @@ describe("Testing canceling", function () {
                         from: participant_1,  // initial token supply holder
                         gas: 1000000,
                         gasPrice: helpers.networkConfig.gasPrice,
-                        value: ContributionAmount.toString(),
+                        value: ContributionAmount.toString(), // amount will be refunded
                     });
 
-                }, "Can not send value to non-payable contract method or constructor");
+                }, "Contract must be initialized.");
 
             });
 

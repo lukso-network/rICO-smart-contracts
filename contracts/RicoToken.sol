@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./zeppelin/token/ERC777/ERC777.sol";
 
 interface ReversibleICO {
-    function getLockedTokenAmount(address) external returns (uint256);
+    function getLockedTokenAmount(address) external view returns (uint256);
 }
 
 contract RicoToken is ERC777 {
@@ -45,12 +45,17 @@ contract RicoToken is ERC777 {
         frozen = _status;
     }
 
-    function getLockedBalance(address _owner) public returns(uint) {
+    function getLockedBalance(address _owner) public view returns(uint) {
         return rICO.getLockedTokenAmount(_owner);
     }
 
-    function getUnlockedBalance(address _owner) public returns(uint) {
-        return balanceOf(_owner).sub(rICO.getLockedTokenAmount(_owner));
+    function getUnlockedBalance(address _owner) public view returns(uint) {
+        uint256 balance = balanceOf(_owner);
+        uint256 Locked = rICO.getLockedTokenAmount(_owner);
+        if(balance > 0 && Locked > 0 && balance >= Locked) {
+            return balance.sub(Locked);
+        }
+        return balance;
     }
 
     // We should override burn as well. So users can't burn locked amounts

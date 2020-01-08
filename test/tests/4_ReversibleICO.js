@@ -102,16 +102,8 @@ describe("ReversibleICO", function () {
             expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(false);
         });
 
-        it("Property running should be false", async function () {
-            expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-        });
-
         it("Property frozen should be false", async function () {
             expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-        });
-
-        it("Property ended should be false", async function () {
-            expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
         });
 
         it("Property TokenContractAddress should be address(0x0)", async function () {
@@ -142,19 +134,18 @@ describe("ReversibleICO", function () {
             StageBlockCount = blocksPerDay * 30;
             StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
-            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
             // for validation
-            BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+            BuyPhaseEndBlock = commitPhaseEndBlock + StageBlockCount * StageCount;
 
-            const StageStartBlock = commitPhaseEndBlock;
-            let lastStageBlockEnd = StageStartBlock;
+            let lastStageBlockEnd = commitPhaseEndBlock;
 
             for(let i = 0; i < StageCount; i++) {
 
                 const start_block = lastStageBlockEnd + 1;
-                const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i +  1) );
+                const end_block = lastStageBlockEnd + StageBlockCount;
+                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i + 1) );
 
                 stageValidation.push( {
                     start_block: start_block,
@@ -162,7 +153,7 @@ describe("ReversibleICO", function () {
                     token_price: token_price
                 });
 
-                lastStageBlockEnd = end_block;
+                    lastStageBlockEnd = end_block;
             }
 
             await this.ReversibleICO.methods.init(
@@ -188,16 +179,8 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.initialized().call()).to.be.equal(true);
             });
 
-            it("Property running should be false", async function () {
-                expect(await this.ReversibleICO.methods.started().call()).to.be.equal(false);
-            });
-
             it("Property frozen should be false", async function () {
                 expect(await this.ReversibleICO.methods.frozen().call()).to.be.equal(false);
-            });
-
-            it("Property ended should be false", async function () {
-                expect(await this.ReversibleICO.methods.ended().call()).to.be.equal(false);
             });
 
             it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
@@ -227,7 +210,7 @@ describe("ReversibleICO", function () {
 
             it("Stage Count is correct", async function () {
                 // account for the commit stage and add 1
-                const stages = (StageCount + 1);
+                const stages = StageCount;
                 expect(await this.ReversibleICO.methods.stageCount().call()).to.be.equal(stages.toString());
             });
 
@@ -236,7 +219,7 @@ describe("ReversibleICO", function () {
             });
 
             it("Allocation duration is commitPhaseBlockCount", async function () {
-                const count = allocationStageData.endBlock - allocationStageData.startBlock;
+                const count = allocationStageData.endBlock - allocationStageData.startBlock + 1;
                 expect(count.toString()).to.be.equal(commitPhaseBlockCount.toString());
             });
 
@@ -379,14 +362,28 @@ describe("ReversibleICO", function () {
                 expect( await this.ReversibleICO.methods.getCurrentStage().call() ).to.be.equal( stageId.toString() );
             });
 
-            it("Returns 255 after last stage end_block", async function () {
+            it("Revert before commit phase start_block", async function () {
+                const stageData = await this.ReversibleICO.methods.stages(0).call();
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.jumpToBlockNumber(
+                        stageData.startBlock - 1
+                    ).send({
+                        from: deployerAddress, gas: 100000
+                    });
+                    await this.ReversibleICO.methods.getCurrentStage().call();
+                }, "Block outside of rICO period.");
+            });
+
+            it("Revert after last stage end_block", async function () {
                 const stageData = await this.ReversibleICO.methods.stages(StageCount).call();
-                await this.ReversibleICO.methods.jumpToBlockNumber(
-                    stageData.endBlock + 1
-                ).send({
-                    from: deployerAddress, gas: 100000
-                });
-                expect( await this.ReversibleICO.methods.getCurrentStage().call() ).to.be.equal( "255" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.jumpToBlockNumber(
+                        stageData.endBlock + 1
+                    ).send({
+                        from: deployerAddress, gas: 100000
+                    });
+                    await this.ReversibleICO.methods.getCurrentStage().call();
+                }, "Block outside of rICO period.");
             });
         });
 
@@ -456,13 +453,14 @@ describe("ReversibleICO", function () {
                 ).to.be.equal( stageId.toString() );
             });
 
-            it("Returns 255 if getStageAtBlock( last_stage.endBlock + 1 )", async function () {
+            it("Reverts if getStageAtBlock( last_stage.endBlock + 1 )", async function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
-                expect(
-                    await this.ReversibleICO.methods.getStageAtBlock(stageData.endBlock + 1).call()
-                ).to.be.equal( "255" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getStageAtBlock(stageData.endBlock + 1).call();
+                }, "Block outside of rICO period.");
             });
+
         });
 
 
@@ -504,15 +502,16 @@ describe("ReversibleICO", function () {
                 );
             });
 
-            it("Returns 0 after last stage ended", async function () {
+            it("Reverts after last stage end block", async function () {
                 const stageData = await this.ReversibleICO.methods.stages(StageCount).call();
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.endBlock + 1
                 ).send({
                     from: deployerAddress, gas: 100000
                 });
-
-                expect( await this.ReversibleICO.methods.getCurrentPrice().call() ).to.be.equal("0");
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getCurrentPrice().call();
+                }, "Block outside of rICO period.");
             });
         });
 
@@ -556,12 +555,12 @@ describe("ReversibleICO", function () {
                 );
             });
 
-            it("Returns 0 after last stage ended", async function () {
+            it("Reverts after last stage end block", async function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
-                expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call()
-                ).to.be.equal( "0" );
+                await helpers.assertInvalidOpcode( async () => {
+                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call();
+                }, "Block outside of rICO period.");
             });
         });
 
@@ -662,7 +661,7 @@ describe("ReversibleICO", function () {
                         ).to.be.equal( true );
 
                         await this.ReversibleICO.methods.whitelist(
-                            accounts[1],
+                            [accounts[1]],
                             true
                         ).send({
                             from: TransactionSender
@@ -697,7 +696,7 @@ describe("ReversibleICO", function () {
                             expect( initialized ).to.be.equal( false );
 
                             await TestReversibleICO.methods.whitelist(
-                                accounts[1],
+                                [accounts[1]],
                                 true
                             ).send({
                                 from: whitelistControllerAddress
@@ -714,7 +713,7 @@ describe("ReversibleICO", function () {
                         it("transaction is accepted and participant address is whitelisted", async function () {
 
                             await this.ReversibleICO.methods.whitelist(
-                                accounts[3],
+                                [accounts[3]],
                                 true
                             ).send({
                                 from: whitelistControllerAddress
@@ -817,7 +816,7 @@ describe("ReversibleICO", function () {
 
                             before(async function () {
                                 whitelistTx = await this.ReversibleICO.methods.whitelist(
-                                    TestAcceptParticipant,
+                                    [TestAcceptParticipant],
                                     true,
                                 ).send({
                                     from: whitelistControllerAddress
@@ -907,7 +906,7 @@ describe("ReversibleICO", function () {
                                     const returned = (parseInt(StageDetails.stageReturnedETH, 10) );
                                     const accepted = (parseInt(StageDetails.stageAcceptedETH, 10) );
                                     const withdrawn = (parseInt(StageDetails.stageWithdrawnETH, 10) );
-                                    
+
                                     const processedTotals = accepted + returned + withdrawn;
                                     expect( processedTotals ).to.be.equal(commited);
 
@@ -934,7 +933,7 @@ describe("ReversibleICO", function () {
                                 ).to.be.equal( false );
 
                                 whitelistTx = await this.ReversibleICO.methods.whitelist(
-                                    TestRejectParticipant,
+                                    [TestRejectParticipant],
                                     false,
                                 ).send({
                                     from: whitelistControllerAddress
@@ -1009,9 +1008,9 @@ describe("ReversibleICO", function () {
 
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
 
-                                    const received = (parseInt(ParticipantByAddress.committedETH, 10) );
+                                    const received = (parseInt(ParticipantByAddress.totalReceivedETH, 10) );
                                     const returned = (parseInt(ParticipantByAddress.returnedETH, 10) );
-                                    const accepted = (parseInt(ParticipantByAddress.acceptedETH, 10) );
+                                    const accepted = (parseInt(ParticipantByAddress.committedETH, 10) );
                                     const withdrawn = (parseInt(ParticipantByAddress.withdrawnETH, 10) );
 
                                     const processedTotals = accepted + returned + withdrawn;
@@ -1120,7 +1119,7 @@ describe("ReversibleICO", function () {
                 });
 
                 let whitelistTx = await this.ReversibleICO.methods.whitelist(
-                    participant_1,
+                    [participant_1],
                     true,
                 ).send({
                     from: whitelistControllerAddress
