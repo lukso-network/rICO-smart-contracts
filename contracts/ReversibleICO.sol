@@ -1007,8 +1007,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
         uint8 currentStage = getCurrentStage();
 
-        for (uint8 i = 0; i <= currentStage; i++) {
-            uint8 stageId = i;
+        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
 
             ParticipantDetailsByStage storage byStage = participantRecord.byStage[stageId];
 
@@ -1056,10 +1055,8 @@ contract ReversibleICO is IERC777Recipient {
                     participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
                     byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
 
-                    // allocate tokens to participant
-                    bytes memory data;
                     // solium-disable-next-line security/no-send
-                    IERC777(tokenContractAddress).send(_from, newTokenAmount, data);
+                    IERC777(tokenContractAddress).send(_from, newTokenAmount, "");
                 }
 
                 // if the incoming amount is too big to accept, then...
