@@ -90,7 +90,7 @@ module.exports = {
             commitPhasePrice,            // uint256 _commitPhasePrice in wei
             StageCount,                  // uint8   _stageCount
             StageBlockCount,             // uint256 _stageBlockCount
-            StagePriceIncrease           // uint256 _stagePriceIncrease in wei
+            0 // StagePriceIncrease           // uint256 _stagePriceIncrease in wei
         ).send({
             from: ContractsDeployer,  // deployer
             gas: 3000000
@@ -133,6 +133,8 @@ module.exports = {
             },
             cache: {
                 commitPhaseStartBlock: await rICO.methods.commitPhaseStartBlock().call(),
+                commitPhaseEndBlock: await rICO.methods.commitPhaseEndBlock().call(),
+                buyPhaseStartBlock: await rICO.methods.buyPhaseStartBlock().call(),
                 buyPhaseEndBlock: await rICO.methods.buyPhaseEndBlock().call()
             }
         }
@@ -330,9 +332,17 @@ module.exports = {
         for(let i = 0; i < wallet.accounts.length; i++) {
             const account = wallet.accounts[i];
 
-            const value = helpers.solidity.etherBN.mul(
-                new BN( Math.floor(Math.random() * 50) + 1 )
-            );
+            let value;
+            if(i == 0) {
+                value = helpers.solidity.etherBN.mul(
+                    new BN( 100 )
+                    // new BN( 100000 )
+                );
+            } else {
+                value = helpers.solidity.etherBN.mul(
+                    new BN( Math.floor(Math.random() * 50) + 1 )
+                );
+            }
             
             const actualValue = value.add(
                 // add extra eth for tx costs

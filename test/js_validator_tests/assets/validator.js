@@ -48,7 +48,7 @@ class Validator {
         // Generate stage data
         this.stages[0] = {
             startBlock: this.commitPhaseStartBlock,
-            endBlock: this.commitPhaseStartBlock + this.commitPhaseBlockCount - 1,
+            endBlock: this.commitPhaseEndBlock,
             tokenPrice: this.commitPhasePrice,
         };
 

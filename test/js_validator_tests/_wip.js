@@ -27,6 +27,7 @@ const {
 
 const {
     shouldHavePendingEth,
+    shouldNotHavePendingEth,
 } = require('./withdraw.behavior');
 
 
@@ -72,24 +73,10 @@ describe("Javascript Contract - Work in progress", function () {
             }, function() {
                 it(genericCallbackTitle, function() {
                     
-                })
+                });
             });
 
-            describe("canWithdraw()", function () {
-
-                it("test", function() {
-                    const canWithdraw = this.JSContract.canWithdraw(address);
-                    console.log("canWithdraw:", canWithdraw.toString());
-                })
-            });
-
-            describe("hasPendingETH()", function () {
-
-                it("test", function() {
-                    const hasPendingETH = this.JSContract.hasPendingETH(address);
-                    console.log("hasPendingETH:", hasPendingETH.toString());
-                })
-            });
+            shouldHavePendingEth(address);
 
         });
 
@@ -103,7 +90,6 @@ describe("Javascript Contract - Work in progress", function () {
                 this.BalanceTestValue = this.value;
                 this.CommitTestValue = this.value;
             });
-
 
             it("Participant token balance is " + contractHelper.toEth(expectedTokenBalance), function () {
                 const balance = this.JSContract.TokenContractInstance.balanceOf(address);
@@ -122,24 +108,7 @@ describe("Javascript Contract - Work in progress", function () {
             });
 
             shouldHaveValidStateAfterWhitelistMode(address, testStage, _accept);
-
-
-            describe("canWithdraw()", function () {
-
-                it("test", function() {
-                    const canWithdraw = this.JSContract.canWithdraw(address);
-                    console.log("canWithdraw:", canWithdraw.toString());
-                })
-            });
-
-            describe("hasPendingETH()", function () {
-
-                it("test", function() {
-                    const hasPendingETH = this.JSContract.hasPendingETH(address);
-                    console.log("hasPendingETH:", hasPendingETH.toString());
-                })
-            });
-            
+            shouldNotHavePendingEth(address);
 
         });
 

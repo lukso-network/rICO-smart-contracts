@@ -6,6 +6,7 @@
 
 const deployer = require("./deployer.js");
 const whitelister = require("./whitelister.js");
+const project = require("./project.js");
 
 module.exports = {
     async run (init) {
@@ -22,9 +23,8 @@ module.exports = {
 
             blocksPerDay:    5,     // 6450;
             commitPhaseDays: 4,     // 22;
-            StageDays:       5,     // 30;
+            StageDays:       2,     // 30;
         };
-
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -40,8 +40,10 @@ module.exports = {
             },
             contracts: {
                 rICOToken: null,
-                rICO: null
-            }
+                rICO: null,
+            },
+            whitelister: null,
+            project: null,
         };
 
         const participants = await deployer.createParticipants(init, numberOfParticipants, participantTxBalance);
@@ -73,13 +75,19 @@ module.exports = {
         console.log("      commitPhaseStartBlock:", commitPhaseStartBlock);
         console.log("      commitPhaseEndBlock:  ", commitPhaseEndBlock);
         console.log("      buyPhaseStartBlock:   ", buyPhaseStartBlock);
+        console.log("      buyPhaseDuration:     ", (buyPhaseEndBlock - buyPhaseStartBlock + 1));
         console.log("      buyPhaseEndBlock:     ", buyPhaseEndBlock);
         console.log("");
         console.log("      rICO block length:", rICOBlockLength);
 
         const Whitelister = new whitelister(init, rICO, rICOSettings.whitelistControllerAddress);
-
+        init.deployment.whitelister = Whitelister;
         console.log("      Whitelister:", Whitelister.address);
+
+        const Project = new project(init, rICO, rICOSettings.projectWalletAddress);
+        init.deployment.project = Project;
+        console.log("      ProjectWallet:", Project.address);
+        
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -92,12 +100,12 @@ module.exports = {
 
         // randomise actions of actors and call `test()` on each actor after each action
 
-        for(let i = 0; i < rICOBlockLength; i++) {
+        for(let i = 0; i < rICOBlockLength + 1; i++) {
             
             // block relative to rICO start.
             const block = commitPhaseStartBlock + i;
+            // middle block
             await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
-
             const currentStage = await rICO.methods.getCurrentStage().call();
             const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
 
@@ -105,19 +113,125 @@ module.exports = {
                 "   ",
                 "block:", block,
                 "stage:", currentStage,
-                "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth"
+                "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth",
             );
-
-
-            if(i == 5) {
+            
+            
+            if(block == buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2) ) {
+            // if(block == buyPhaseStartBlock ) {
+            // if(block == buyPhaseEndBlock ) {
+                
                 const participant = participants[0];
-                const actions = await participant.getCurrentlyAvailableActions();
+                participant.setBlock(block);
+                let actions = await participant.getAvailableActions(block);
                 console.log("getAvailableActions", actions);
 
+                // await participant.executeRandomAction(actions);
+                
+                /*
                 participant.displayBalances();
                 await participant.commit( participant.currentBalances.ETH );
                 await participant.test();
                 participant.displayBalances();
+                await participant.withdrawByETH();
+                await participant.test();
+                participant.displayBalances();
+                */
+
+                /*
+                console.log("commit");
+                // await participant.commit( participant.currentBalances.ETH.div( new helpers.BN(2) )  );
+                await participant.commitEntireBalance();
+                await participant.test();
+                participant.displayBalances();
+                */
+
+                // reject participant
+                /*
+                console.log("whitelist false");
+                await participant.setWhitelist(false);
+                await participant.test();
+                participant.displayBalances();
+                */
+
+                /*
+                // whitelist participant
+                console.log("whitelist true");
+                await participant.setWhitelist(true);
+                await participant.test();
+                participant.displayBalances();
+                
+                console.log("sendHalfTokensBack");
+                await participant.sendHalfTokensBack();
+                await participant.test();
+                participant.displayBalances();
+
+                console.log("sendAllTokensBack");
+                await participant.sendAllTokensBack();
+                await participant.test();
+                participant.displayBalances();
+                */
+
+
+                
+                console.log("commitHalfBalance");
+                await participant.commitHalfBalance();
+                await participant.test();
+                // participant.displayBalances();
+
+                console.log("whitelist true");
+                await participant.setWhitelist(true);
+                await participant.test();
+
+                console.log("commitEntireBalance");
+                await participant.commitEntireBalance();
+                await participant.test();
+                // participant.displayBalances();
+
+                actions = await participant.getAvailableActions(block);
+                console.log("getAvailableActions", actions);
+
+                /*
+                console.log("sendHalfTokensBack");
+                await participant.sendHalfTokensBack();
+                await participant.test();
+
+                console.log("sendAllTokensBack");
+                await participant.sendAllTokensBack();
+                await participant.test();
+                */
+
+                console.log("actionLog", participant.actionLog);
+
+                console.log("");
+                await Project.readBalances();
+                Project.displayBalances();
+                console.log("withdrawHalf");
+                await Project.withdrawHalf();
+                console.log("test");
+                await Project.test();
+                Project.displayBalances();
+
+
+                const p2 = participants[1];
+                p2.setBlock(block);
+
+                console.log("commitEntireBalance");
+                await p2.commitEntireBalance();
+                await p2.test();
+                console.log("whitelist true");
+                await p2.setWhitelist(true);
+                await p2.test();
+                
+                console.log("");
+                console.log("readBalances");
+                await Project.readBalances();
+                console.log("withdrawHalf");
+                await Project.withdrawHalf();
+                console.log("test");
+                await Project.test();
+                Project.displayBalances();
+
 
                 break;
             }

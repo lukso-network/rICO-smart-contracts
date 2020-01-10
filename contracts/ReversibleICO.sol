@@ -64,10 +64,15 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public withdrawnETH; // default: 0
     /// @dev Count of the number the project has withdrawn from the funds raised.
     uint256 public projectWithdrawCount; // default: 0
-    /// @dev Total amount allocated to the contract.
+    /// @dev Total amount allocated to the project.
     uint256 public projectAllocatedETH; // default: 0
     /// @dev Total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH; // default: 0
+    /// @dev Block where last project withdraw happened
+    uint256 public lastProjectWithdrawBlock; // default: 0
+    /// @dev amount of ETH remaining from last withdrawn by the project
+    uint256 public remainingFromLastProjectWithdraw; // default: 0
+
     // @dev Minimum amount of ETH accepted for a contribution.
     // @dev Everything lower than that will trigger a canceling of pending ETH.
     uint256 public minContribution = 0.001 ether;
@@ -197,7 +202,6 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
     @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
-
     @param _tokenContractAddress The address of the ERC777 rICO token contract.
     @param _whitelistControllerAddress The address of the controller handling whitelisting.
     @param _projectWalletAddress The project wallet that can withdraw the contributions.
@@ -224,6 +228,8 @@ contract ReversibleICO is IERC777Recipient {
     isNotInitialized
     {
 
+        require (_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
+
         // Assign address variables
         tokenContractAddress = _tokenContractAddress;
         whitelistControllerAddress = _whitelistControllerAddress;
@@ -232,46 +238,43 @@ contract ReversibleICO is IERC777Recipient {
         // Assign other variables
         commitPhaseStartBlock = _commitPhaseStartBlock;
         commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
         commitPhasePrice = _commitPhasePrice;
 
         stageBlockCount = _stageBlockCount;
-
+        stageCount = _stageCount;
 
         // Setup stage 0: The commit phase.
-        Stage storage stage0 = stages[stageCount];
-        // stageCount = 0
+        Stage storage stage0 = stages[0];
         stage0.startBlock = _commitPhaseStartBlock;
-        stage0.endBlock = _commitPhaseStartBlock + _commitPhaseBlockCount;
+        stage0.endBlock = commitPhaseEndBlock;
         stage0.tokenPrice = _commitPhasePrice;
 
-        stageCount++;
-        // stageCount = 1
-
-
         // Setup stage 1 to n: The buy phase stages
-        uint256 lastStageBlockEnd = stage0.endBlock;
+        // Each new stage starts after the previous phase's endBlock
+        uint256 previousStageEndBlock = stage0.endBlock;
 
+        // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
-
-            Stage storage stageN = stages[stageCount];
-            // stageCount = n
-            // Each new stage starts after the previous phase's endBlock
-            stageN.startBlock = lastStageBlockEnd + 1;
-            stageN.endBlock = lastStageBlockEnd + _stageBlockCount + 1;
+            // Get i-th stage
+            Stage storage stageN = stages[i];
+            // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
+            stageN.startBlock = previousStageEndBlock.add(1);
+            // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
+            stageN.endBlock = previousStageEndBlock.add(_stageBlockCount);
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice + (_stagePriceIncrease * (i));
-            stageCount++;
-
-            lastStageBlockEnd = stageN.endBlock;
+            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            // Store the current stage endBlock in order to update the next one
+            previousStageEndBlock = stageN.endBlock;
         }
 
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-        buyPhaseStartBlock = commitPhaseEndBlock + 1;
-        buyPhaseEndBlock = lastStageBlockEnd;
+        buyPhaseStartBlock = commitPhaseEndBlock.add(1);
+        // The buy phase ends when the lat stage ends
+        buyPhaseEndBlock = previousStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = lastStageBlockEnd - buyPhaseStartBlock;
-
+        buyPhaseBlockCount = previousStageEndBlock.sub(buyPhaseStartBlock).add(1);
+        // The contract is now initialized
         initialized = true;
     }
 
@@ -354,7 +357,7 @@ contract ReversibleICO is IERC777Recipient {
             cancelContributionsForAddress(msg.sender, msg.value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
             return;
         }
-        revert("Participant has no contributions.");
+        revert("cancel: Participant has no pending contributions.");
     }
 
 
@@ -374,7 +377,11 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update stats:  number of project withdrawals, total amount withdrawn by the project
         projectWithdrawCount++;
-        projectWithdrawnETH += _ethAmount;
+        projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
+
+        // set remaining unlocked eth
+        remainingFromLastProjectWithdraw = unlocked.sub(_ethAmount);
+        lastProjectWithdrawBlock = getCurrentBlockNumber();
 
 
         // Transfer ETH to project wallet
@@ -411,17 +418,30 @@ contract ReversibleICO is IERC777Recipient {
         // Calculate ETH that is globally available:
         // Available = accepted - withdrawn - projectWithdrawn - projectNotWithdrawn
         uint256 globalAvailable = committedETH
-        .sub(withdrawnETH)
-        .sub(projectWithdrawnETH)
-        .sub(remainingFromAllocation);
+            .sub(withdrawnETH)
+            .sub(projectWithdrawnETH)
+            .sub(remainingFromAllocation)
+            .sub(remainingFromLastProjectWithdraw);
+
+        uint256 unlockStartBlock;
+        if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
+            unlockStartBlock = buyPhaseStartBlock;
+        } else {
+            unlockStartBlock = lastProjectWithdrawBlock + 1;
+        }
 
         // Multiply the available ETH with the percentage that belongs to the project now
         uint256 unlocked = globalAvailable.mul(
-            getCurrentUnlockPercentage()
+            // unlocked since last project withdraw
+            getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber(),
+                unlockStartBlock,
+                buyPhaseEndBlock
+            )
         ).div(10 ** 20);
 
-        // Available = unlocked + projectNotWithdrawn
-        return unlocked.add(remainingFromAllocation);
+        // Available = unlocked + projectNotWithdrawn + remainingFromLastProjectWithdraw
+        return unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw);
     }
 
 
@@ -670,28 +690,25 @@ contract ReversibleICO is IERC777Recipient {
         //        contract should always display proper data.
         //
 
+        require(_blockNumber >= commitPhaseStartBlock && _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
+
         // Return commit phase, stage 0
         if (_blockNumber <= commitPhaseEndBlock) {
             return 0;
         }
 
-        // Find buy phase stage n
-        // solidity floors division results, thus we get what we're looking for.
-        uint256 num = (_blockNumber - commitPhaseEndBlock) / (stageBlockCount + 1) + 1;
+        // This is the number of blocks starting from the end  of commit phase.
+        uint256 distance = _blockNumber - commitPhaseEndBlock;
+        // Get the stageId, it returns the stageId - 1, commitPhase is stage 0
+        // e.g. distance = 1, stageBlockCount = 5, stageID = 0
+        uint256 stageID = distance / stageBlockCount;
 
-        // Last block of each stage always computes as stage + 1
-        if (stages[uint8(num) - 1].endBlock == _blockNumber) {
-            // save some gas and just return instead of decrementing.
-            return uint8(num - 1);
+        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
+        if (distance % stageBlockCount > 0){
+            stageID++;
         }
 
-        // Return max_uint8 if outside range
-        // @TODO: maybe revert ?!
-        if (num >= stageCount) {
-            return 255;
-        }
-
-        return uint8(num);
+        return uint8(stageID);
     }
 
 
@@ -729,7 +746,7 @@ contract ReversibleICO is IERC777Recipient {
                 // commit phase
                 return _tokenAmount;
 
-            } else if (_blockNumber < buyPhaseEndBlock) {
+            } else if (_blockNumber <= buyPhaseEndBlock) {
 
                 // buy  phase
                 uint8 precision = 20;
@@ -755,23 +772,33 @@ contract ReversibleICO is IERC777Recipient {
     @notice Calculates the percentage of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
     @return Unlock percentage multiplied by 10 to the power of precision. (should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals).
     */
+
     function getCurrentUnlockPercentage() public view returns (uint256) {
+        return getCurrentUnlockPercentageFor(
+            getCurrentBlockNumber(),
+            buyPhaseStartBlock,
+            buyPhaseEndBlock
+        );
+    }
+
+    function getCurrentUnlockPercentageFor(
+        uint256 _currentBlock,
+        uint256 _startBlock,
+        uint256 _endBlock
+    ) public pure returns (uint256) {
         uint8 precision = 20;
         // Get current block
-        uint256 currentBlock = getCurrentBlockNumber();
-
-        if (currentBlock > buyPhaseStartBlock && currentBlock < buyPhaseEndBlock) {
-            // get the number of blocks that have "elapsed" since the buyPhase start
-            uint256 passedBlocks = currentBlock.sub(buyPhaseStartBlock);
+        uint256 totalBlockCount = _endBlock - _startBlock + 1;
+        if (_currentBlock >= _startBlock && _currentBlock <= _endBlock) {
+            // get the number of blocks that have "elapsed" since the start block
+            uint256 passedBlocks = _currentBlock.sub(_startBlock).add(1);    // + 1 since we count current as well.
             return passedBlocks.mul(
                 10 ** uint256(precision)
-            ).div(buyPhaseBlockCount);
-        } else if (currentBlock >= buyPhaseEndBlock) {
-            return 0;
-            // 10 ** uint256(precision);
+            ).div(totalBlockCount);
+        } else if (_currentBlock > _endBlock) {
+            return 10 ** uint256(precision);
         } else {
             return 0;
-            // 10 ** uint256(precision);
         }
     }
 
@@ -824,6 +851,9 @@ contract ReversibleICO is IERC777Recipient {
     */
     function withdraw(address _from, uint256 _returnedTokenAmount) internal {
 
+        uint256 currentBlockNumber = getCurrentBlockNumber();
+        require(currentBlockNumber < buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
+
         // Whitelisted contributor sends tokens back to the rICO contract.
         // - unlinke cancel() method, this allows variable amounts.
         // - latest contributions get returned first.
@@ -833,7 +863,6 @@ contract ReversibleICO is IERC777Recipient {
         // This is needed otherwise participants that can call cancel() and bypass!
         if (participantRecord.whitelisted == true) {
 
-            uint256 currentBlockNumber = getCurrentBlockNumber();
 
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
@@ -992,6 +1021,8 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
         uint8 currentStage = getCurrentStage();
 
+        uint256 allocatedEthAmount;
+
         for (uint8 i = 0; i <= currentStage; i++) {
             uint8 stageId = i;
 
@@ -1041,6 +1072,10 @@ contract ReversibleICO is IERC777Recipient {
                     participantRecord.boughtTokens += newTokenAmount;
                     byStage.boughtTokens += newTokenAmount;
 
+                    allocatedEthAmount = allocatedEthAmount.add(
+                        allocateProjectEthFromNewContribution(_from, stageId, newAcceptedValue)
+                    );
+
                     // allocate tokens to participant
                     bytes memory data;
                     // solium-disable-next-line security/no-send
@@ -1057,6 +1092,24 @@ contract ReversibleICO is IERC777Recipient {
                 emit ApplicationEvent(_eventType, uint32(stageId), _from, newAcceptedValue);
             }
         }
+
+        if(allocatedEthAmount > 0) {
+            // allocate unlocked ETH to project directly
+            participantRecord.allocatedETH = participantRecord.allocatedETH.add(allocatedEthAmount);
+            projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
+        }
+
+    }
+
+    function allocateProjectEthFromNewContribution(address _from, uint8 stageId, uint256 _newAcceptedValue ) internal returns(uint256) {
+        ParticipantDetailsByStage storage byStage = participantsByAddress[_from].byStage[stageId];
+
+        // allocate unlocked ETH to project
+        uint256 unlockedETHAmount = _newAcceptedValue.mul(
+            getCurrentUnlockPercentage()
+        ).div(10 ** uint256(20));
+        byStage.allocatedETH = unlockedETHAmount;
+        return unlockedETHAmount;
     }
 
     /**
@@ -1076,9 +1129,9 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
 
         // Calculate participant's available ETH i.e. committed - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = participantRecord.totalReceivedETH -
-        participantRecord.withdrawnETH -
-        participantRecord.returnedETH;
+        uint256 participantAvailableETH = participantRecord.totalReceivedETH
+            .sub(participantRecord.withdrawnETH)
+            .sub(participantRecord.returnedETH);
 
         if (participantAvailableETH > 0) {
             // update total ETH returned
@@ -1091,7 +1144,9 @@ contract ReversibleICO is IERC777Recipient {
             participantRecord.withdrawnETH += participantAvailableETH;
 
             // transfer ETH back to participant including received value
-            address(uint160(_from)).transfer(participantAvailableETH + _value);
+            address(uint160(_from)).transfer(
+                participantAvailableETH.add(_value)
+            );
 
             uint8 currentTransferEventType;
 

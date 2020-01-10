@@ -43,6 +43,7 @@ module.exports = {
             expectEvent
         } = require("openzeppelin-test-helpers");
 
+        // const BN = require("bignumber.js");
         const { MAX_UINT256 } = constants;
         const web3util = require("web3-utils");
         const Table = require("cli-table");

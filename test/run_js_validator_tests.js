@@ -11,9 +11,9 @@ const setup = require("./init.js");
 async function runTests(init) {
 
   const tests = [
-    "1_js_validator",
-    "commit.test",
-    "whitelist.test",
+    // "1_js_validator",
+    // "commit.test",
+    // "whitelist.test",
     "_wip",
   ];
 

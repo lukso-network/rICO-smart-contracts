@@ -277,21 +277,22 @@ module.exports = {
         currentBlock = new helpers.BN(currentBlock);
         BuyPhaseStartBlock = new helpers.BN(BuyPhaseStartBlock);
         BuyPhaseEndBlock = new helpers.BN(BuyPhaseEndBlock);
+        BuyPhaseBlockCount = BuyPhaseEndBlock.sub(BuyPhaseStartBlock).add(new helpers.BN(1));
+
         precision = new helpers.BN(precision);
 
-        if(
-            currentBlock.toNumber() > BuyPhaseStartBlock.toNumber()
-            && currentBlock.toNumber() < BuyPhaseEndBlock.toNumber())
-        {
-            const passedBlocks = currentBlock.sub(BuyPhaseStartBlock);
-            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock);
+        if(currentBlock.gte(BuyPhaseStartBlock) && currentBlock.lte(BuyPhaseEndBlock)) {
+            
+            // get the number of blocks that have "elapsed" since the buyPhase start
+            const passedBlocks = currentBlock.sub(BuyPhaseStartBlock).add(new helpers.BN(1));    // + 1 since we count current as well.
             return passedBlocks.mul(
                 new helpers.BN("10").pow( new helpers.BN(precision) )
-            ).div(new helpers.BN(BuyPhaseBlockCount));
-        } else if (currentBlock.toNumber() >= BuyPhaseEndBlock.toNumber()) {
-            return 0;
+            ).div(BuyPhaseBlockCount);
+
+        } else if (currentBlock.gt(BuyPhaseEndBlock)) {
+            return new helpers.BN(1).mul(new helpers.BN("10").pow( new helpers.BN(precision)));
         } else {
-            return 0;
+            return new helpers.BN(0);
         }
 
     },
@@ -329,6 +330,13 @@ module.exports = {
             new helpers.BN("10").pow( new helpers.BN("18") )
         ).div(
             new helpers.BN(stageData.tokenPrice)
+        );
+    },
+    getTokenAmountForEtAtValue(helpers, ethValue, tokenPrice) {
+        return new helpers.BN(ethValue.toString()).mul(
+            new helpers.BN("10").pow( new helpers.BN("18") )
+        ).div(
+            new helpers.BN(tokenPrice)
         );
     },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {

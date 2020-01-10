@@ -19,6 +19,10 @@ class Actor {
         this.stage = stage;
         this.tokenPrice = tokenPrice;
     }
+
+    toEth(value) {
+        return this.helpers.utils.toEth(this.helpers, value.toString())
+    }
 }
 
 module.exports = Actor;
