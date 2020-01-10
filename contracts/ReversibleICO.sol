@@ -1007,8 +1007,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
         uint8 currentStage = getCurrentStage();
 
-        for (uint8 i = 0; i <= currentStage; i++) {
-            uint8 stageId = i;
+        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
 
             ParticipantDetailsByStage storage byStage = participantRecord.byStage[stageId];
 
@@ -1027,20 +1026,21 @@ contract ReversibleICO is IERC777Recipient {
                 uint256 newAcceptedValue = byStage.totalReceivedETH.sub(byStage.committedETH);
                 uint256 returnValue;
 
-                // if incomming value is higher than what we can accept,
-                // just accept the difference and return the rest
-                if (newAcceptedValue > maxAcceptableValue) {
-                    newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.totalReceivedETH.sub(byStage.returnedETH).sub(byStage.committedETH)
-                    .sub(byStage.withdrawnETH).sub(newAcceptedValue);
-
-                    // update return values
-                    returnedETH = returnedETH.add(returnValue);
-                    participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
-                    byStage.returnedETH = returnValue;
-                }
 
                 if (newAcceptedValue > 0) {
+
+                    // if incomming value is higher than what we can accept,
+                    // just accept the difference and return the rest
+                    if (newAcceptedValue > maxAcceptableValue) {
+                        newAcceptedValue = maxAcceptableValue;
+                        returnValue = byStage.totalReceivedETH.sub(byStage.returnedETH).sub(byStage.committedETH)
+                        .sub(byStage.withdrawnETH).sub(newAcceptedValue);
+
+                        // update return values
+                        returnedETH = returnedETH.add(returnValue);
+                        participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
+                        byStage.returnedETH = returnValue;
+                    }
 
                     // update values by adding the new accepted amount
                     committedETH = committedETH.add(newAcceptedValue);
@@ -1056,10 +1056,8 @@ contract ReversibleICO is IERC777Recipient {
                     participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
                     byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
 
-                    // allocate tokens to participant
-                    bytes memory data;
                     // solium-disable-next-line security/no-send
-                    IERC777(tokenContractAddress).send(_from, newTokenAmount, data);
+                    IERC777(tokenContractAddress).send(_from, newTokenAmount, "");
                 }
 
                 // if the incoming amount is too big to accept, then...
