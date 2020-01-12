@@ -682,7 +682,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     function hasPendingETH(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
-        if(participantRecord.byStage[0].committedETH > 0 && 
+        if(participantRecord.byStage[0].committedETH > 0 &&
         participantRecord.byStage[0].committedETH > participantRecord.byStage[0].returnedETH ) {
             return true;
         }
@@ -1031,7 +1031,7 @@ contract ReversibleICO is IERC777Recipient {
 
                         // update return values
                         returnedETH = returnedETH.add(returnValue);
-                        participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
+                        participantRecord.byStage[0].returnedETH = participantRecord.byStage[0].returnedETH.add(returnValue);
                         byStage.returnedETH = returnValue;
                     }
 
