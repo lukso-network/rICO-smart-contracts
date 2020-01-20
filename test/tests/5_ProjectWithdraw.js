@@ -367,7 +367,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
 
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -385,7 +385,7 @@ describe("ProjectWithdraw Testing", function () {
                         from: whitelistControllerAddress
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1 + 1, false, 1);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -394,7 +394,7 @@ describe("ProjectWithdraw Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 2, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 2 + 1, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -640,7 +640,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -659,7 +659,7 @@ describe("ProjectWithdraw Testing", function () {
                         from: whitelistControllerAddress
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1 + 1, false, 1);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -668,7 +668,7 @@ describe("ProjectWithdraw Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6 + 1, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,

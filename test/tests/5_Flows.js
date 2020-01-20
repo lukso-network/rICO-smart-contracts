@@ -210,7 +210,7 @@ describe("Flow Testing", function () {
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0 + 1);
             });
 
             describe("token sender is projectWalletAddress", async function () {
@@ -355,7 +355,7 @@ describe("Flow Testing", function () {
                 });
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0 + 1);
             });
 
             describe("using configured token", async function () {
@@ -516,7 +516,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
                 });
 
                 it("getCancelModes() returns (false, false)", async function () {
@@ -575,7 +575,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -644,7 +644,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -802,7 +802,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -821,7 +821,7 @@ describe("Flow Testing", function () {
                         from: whitelistControllerAddress
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1 + 1, false, 1);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -830,7 +830,7 @@ describe("Flow Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6 + 1, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -859,7 +859,7 @@ describe("Flow Testing", function () {
                             helpers,
                             ReversibleICOInstance,
                             ethAmount,
-                            6
+                            6 + 1
                         )
                     );
 
@@ -1343,7 +1343,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -1362,7 +1362,7 @@ describe("Flow Testing", function () {
                         from: whitelistControllerAddress
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1 + 1, false, 1);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -1371,7 +1371,7 @@ describe("Flow Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6 + 1, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -1382,7 +1382,7 @@ describe("Flow Testing", function () {
 
                     helpers.utils.resetAccountNonceCache(helpers);
 
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12 + 1, true, 1);
                 });
 
                 it("getCancelModes() returns (false, false)", async function () {

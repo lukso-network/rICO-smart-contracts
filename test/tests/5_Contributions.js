@@ -207,7 +207,7 @@ describe("Contribution Testing", function () {
                 helpers.utils.resetAccountNonceCache(helpers);
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
             });
 
             it("value >= rico.minContribution results in a new contribution", async function () {

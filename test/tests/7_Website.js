@@ -221,7 +221,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0 + 1);
         });
 
         it("validated", async function () {
@@ -231,7 +231,7 @@ describe("Website States", function () {
             ).to.be.equal( true );
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
-            ).to.be.equal( "0" );
+            ).to.be.equal( "1" );
 
         });
     });
@@ -243,7 +243,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0 + 1);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -261,7 +261,7 @@ describe("Website States", function () {
             ).to.be.equal( true );
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
-            ).to.be.equal( "0" );
+            ).to.be.equal( "1" );
             expect(
                 await Instances.ReversibleICOInstance.methods.participantCount().call()
             ).to.be.equal( "1" );
@@ -282,7 +282,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0 + 1);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -307,7 +307,7 @@ describe("Website States", function () {
             ).to.be.equal( true );
             expect(
                 await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
-            ).to.be.equal( "0" );
+            ).to.be.equal( "1" );
             expect(
                 await Instances.ReversibleICOInstance.methods.participantCount().call()
             ).to.be.equal( "1" );

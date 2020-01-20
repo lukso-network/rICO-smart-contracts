@@ -245,7 +245,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 previousStageEndBlock = stage1.endBlock;
 
         // Update stages: start, end, price
-        for (uint8 i = 2; i <= _stageCount; i++) {
+        for (uint8 i = 2; i <= _stageCount + 1; i++) {
             // Get i-th stage
             Stage storage stageN = stages[i];
             // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
@@ -253,7 +253,7 @@ contract ReversibleICO is IERC777Recipient {
             // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
             stageN.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i-1));
             // Store the current stage endBlock in order to update the next one
             previousStageEndBlock = stageN.endBlock;
         }
@@ -556,7 +556,7 @@ contract ReversibleICO is IERC777Recipient {
     function getPriceAtBlock(uint256 _blockNumber) public view returns (uint256) {
         // first retrieve the stage that the block belongs to
         uint8 stage = getStageAtBlock(_blockNumber);
-        if (stage <= stageCount) {
+        if (stage <= stageCount + 1) {
             return stages[stage].tokenPrice;
         }
         // revert with stage not found?
@@ -682,8 +682,7 @@ contract ReversibleICO is IERC777Recipient {
     */
     function hasPendingETH(address _participantAddress) public view returns (bool) {
         Participant storage participantRecord = participantsByAddress[_participantAddress];
-        if(participantRecord.byStage[0].committedETH > 0 &&
-        participantRecord.byStage[0].committedETH > participantRecord.byStage[0].returnedETH ) {
+        if (!participantRecord.whitelisted && participantRecord.byStage[0].totalReceivedETH > 0 && participantRecord.byStage[0].totalReceivedETH > participantRecord.byStage[0].returnedETH){
             return true;
         }
         return false;
@@ -719,16 +718,17 @@ contract ReversibleICO is IERC777Recipient {
 
         require(_blockNumber >= commitPhaseStartBlock &&  _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
 
-        // Return commit phase (stage 0)
+        // stage 0 now is global stats
+        // Return commit phase (stage 1)
         if (_blockNumber <= commitPhaseEndBlock) {
-            return 0;
+            return 1;
         }
 
         // This is the number of blocks starting from the end  of commit phase.
         uint256 distance = _blockNumber - commitPhaseEndBlock;
         // Get the stageId, it returns the stageId - 1, commitPhase is stage 0
         // e.g. distance = 1, stageBlockCount = 5, stageID = 0
-        uint256 stageID = distance / stageBlockCount;
+        uint256 stageID = distance / stageBlockCount + 1;
 
         // If the block is NOT the stageEndBlock then add 1 to get the correct stage
         if (distance % stageBlockCount > 0){
@@ -875,7 +875,7 @@ contract ReversibleICO is IERC777Recipient {
 
                 uint8 currentStageNumber = getCurrentStage();
 
-                for (uint8 stageId = currentStageNumber; stageId >= 0; stageId--) {
+                for (uint8 stageId = currentStageNumber; stageId >= 1; stageId--) {
 
                     // total participant tokens at the current stage i.e. reserved + bought - returned
                     uint256 totalInStage = participantRecord.byStage[stageId].reservedTokens +
