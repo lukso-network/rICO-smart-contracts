@@ -9,7 +9,7 @@ const setup = require("./init.js");
   } catch (e) {
     throw new Error(e);
   }
-})();
+})().catch(err => console.error(err));
 
 async function runTests(init) {
 

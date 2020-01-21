@@ -1,12 +1,12 @@
 const setup = require("./init.js");
-(async function() { 
+(async function() {
   try {
     const init = await setup.runSetup();
     await runTests(init); 
   } catch (e) {
-    throw new Error(e);
+    console.log("error:", e);
   }
-})();
+})().catch(err => console.error(err));
 
 async function runTests(init) {
 
