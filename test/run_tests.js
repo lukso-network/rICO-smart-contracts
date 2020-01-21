@@ -54,7 +54,7 @@ async function runTests(init) {
     );
 
     runner.on("end", e => {
-      console.log("Done");
+      console.log("Done ", process.exitCode);
       process.exit(process.exitCode);
     });
   }
