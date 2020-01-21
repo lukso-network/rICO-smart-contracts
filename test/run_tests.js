@@ -2,7 +2,7 @@ const setup = require("./init.js");
 (async function() {
     const init = await setup.runSetup();
     await runTests(init);
-})().catch(err => {throw new Error(err)});
+})();
 
 async function runTests(init) {
 
