@@ -7,7 +7,7 @@ const setup = require("./init.js");
     console.log("    Provider: ", init.setup.helpers.networkConfig.provider);
     await runTests(init); 
   } catch (e) {
-    console.log("error:", e);
+    throw new Error(e);
   }
 })();
 

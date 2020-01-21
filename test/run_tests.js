@@ -4,7 +4,7 @@ const setup = require("./init.js");
     const init = await setup.runSetup();
     await runTests(init); 
   } catch (e) {
-    console.log("error:", e);
+    throw new Error(e);
   }
 })();
 
