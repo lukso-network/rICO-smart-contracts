@@ -7,5 +7,19 @@ matrix:
     - node_js: 10
     - node_js: 9
     - node_js: 8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
+      - g++-5
+before_install:
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+    export CC="gcc-5";
+    export CXX="g++-5";
+    export LINK="gcc-5";
+    export LINKXX="g++-5";
+    fi
 script:
   - npm run test #&& exit ${PIPESTATUS[0]}
