@@ -54,12 +54,8 @@ function runTests(init) {
     );
 
     runner.on("end", e => {
-      console.log("Done ", e);
-      if(e) {
-        process.exit(1);
-      } else {
-        process.exit(process.exitCode);
-      }
+      console.log("Done");
+      process.exit(process.exitCode);
     });
   }
 }

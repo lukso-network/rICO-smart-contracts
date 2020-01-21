@@ -13,6 +13,7 @@ async function runTests(init) {
   await tests.run(init);
 
   console.log("Done");
+  // TODO exit with 1 on failure
   process.exit(0);
 
 }

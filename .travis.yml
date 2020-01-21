@@ -21,4 +21,4 @@ before_install:
     export LINKXX="g++-6";
     fi
 script:
-  - set -e && npm run test
+  - npm run test
