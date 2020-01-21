@@ -1,10 +1,23 @@
 const setup = require("./init.js");
 (async function() {
-    const init = await setup.runSetup();
-    await runTests(init);
-})();
+    return new Promise(function (resolve, reject) {
+      const init = await setup.runSetup();
+      let runner = runTests(init);
 
-async function runTests(init) {
+      runner.on("end", e => {
+
+        if(e) {
+          reject(e);
+        } else {
+          resolve();
+        }
+
+        // process.exit(process.exitCode);
+      });
+    });
+})().catch(e => {throw new Error(e)});
+
+function runTests(init) {
 
   const tests = [
     "external/SafeMath",
@@ -46,20 +59,12 @@ async function runTests(init) {
     }
 
     // Run the tests.
-    const runner = mocha.run(
+    return mocha.run(
       function(failures) {
         process.exitCode = failures ? 1 : 0; // exit with non-zero status if there were failures
       },
       true // delay execution of root suite until ready.
     );
-
-    runner.on("end", e => {
-
-      throw new Error(e);
-
-      console.log("Done ");
-      process.exit(process.exitCode);
-    });
   }
 }
 
