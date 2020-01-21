@@ -1,15 +1,11 @@
 const setup = require("./init.js");
 (async function() { 
-  try {
-    const init = await setup.runSetup();
-    // console.log(init.setup);
-    console.log("    Running on", init.setup.helpers.networkName, "network.");
-    console.log("    Provider: ", init.setup.helpers.networkConfig.provider);
-    await runTests(init); 
-  } catch (e) {
-    throw new Error(e);
-  }
-})().catch(err => console.error(err));
+  const init = await setup.runSetup();
+  // console.log(init.setup);
+  console.log("    Running on", init.setup.helpers.networkName, "network.");
+  console.log("    Provider: ", init.setup.helpers.networkConfig.provider);
+  await runTests(init);
+})().catch(err => {throw new Error(err)});
 
 async function runTests(init) {
 
