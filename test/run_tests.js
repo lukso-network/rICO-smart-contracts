@@ -54,7 +54,10 @@ async function runTests(init) {
     );
 
     runner.on("end", e => {
-      console.log("Done ", process.exitCode);
+
+      throw new Error(e);
+
+      console.log("Done ");
       process.exit(process.exitCode);
     });
   }
