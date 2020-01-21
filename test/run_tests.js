@@ -1,6 +1,6 @@
 const setup = require("./init.js");
 (async function() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
       const init = await setup.runSetup();
       let runner = runTests(init);
 
