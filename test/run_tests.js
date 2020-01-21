@@ -15,7 +15,12 @@ const setup = require("./init.js");
         // process.exit(process.exitCode);
       });
     });
-})().catch(e => {throw new Error(e)});
+})().then(() => {
+  process.exit(process.exitCode);
+}).catch(e => {
+  throw new Error(e);
+  process.exit(process.exitCode);
+});
 
 function runTests(init) {
 
