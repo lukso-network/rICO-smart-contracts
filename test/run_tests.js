@@ -1,26 +1,8 @@
 const setup = require("./init.js");
 (async function() {
-    return new Promise(async function (resolve, reject) {
-      const init = await setup.runSetup();
-      let runner = runTests(init);
-
-      runner.on("end", e => {
-
-        if(e) {
-          reject(e);
-        } else {
-          resolve();
-        }
-
-        // process.exit(process.exitCode);
-      });
-    });
-})().then(() => {
-  process.exit(process.exitCode);
-}).catch(e => {
-  throw new Error(e);
-  process.exit(process.exitCode);
-});
+    const init = await setup.runSetup();
+    runTests(init);
+})();
 
 function runTests(init) {
 
@@ -64,12 +46,21 @@ function runTests(init) {
     }
 
     // Run the tests.
-    return mocha.run(
+    const runner = mocha.run(
       function(failures) {
         process.exitCode = failures ? 1 : 0; // exit with non-zero status if there were failures
       },
       true // delay execution of root suite until ready.
     );
+
+    runner.on("end", e => {
+      console.log("Done ", e);
+      if(e) {
+        process.exit(1);
+      } else {
+        process.exit(process.exitCode);
+      }
+    });
   }
 }
 

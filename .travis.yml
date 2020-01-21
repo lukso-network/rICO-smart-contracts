@@ -21,4 +21,4 @@ before_install:
     export LINKXX="g++-6";
     fi
 script:
-  - npm run test && exit ${PIPESTATUS[0]}
+  - set -e && npm run test
