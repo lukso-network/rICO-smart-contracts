@@ -332,7 +332,7 @@ module.exports = {
             new helpers.BN(stageData.tokenPrice)
         );
     },
-    getTokenAmountForEtAtValue(helpers, ethValue, tokenPrice) {
+    getTokenAmountForEthAtValue(helpers, ethValue, tokenPrice) {
         return new helpers.BN(ethValue.toString()).mul(
             new helpers.BN("10").pow( new helpers.BN("18") )
         ).div(

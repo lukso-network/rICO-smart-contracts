@@ -34,15 +34,29 @@ class Project extends Actor {
         };
     }
 
-    async withdrawFullAmount() {
+    async withdrawFullAmount(cb) {
         await this.readBalances();
-        await this.withdraw( this.currentBalances.withdrawableETH );
+        // console.log("withdrawFullAmount before");
+        this.displayBalances();
+        
+        // const ethval = new this.helpers.BN("50000000000000000000"); // this.currentBalances.withdrawableETH
+        const ethval = this.currentBalances.withdrawableETH
+      
+
+        await this.withdraw( ethval );
+        await cb();
+
+        // console.log("withdrawFullAmount after");
+        // this.displayBalances();
         await this.test();
     }
 
-    async withdrawHalf() {
+    async withdrawHalf(cb) {
         await this.readBalances();
         await this.withdraw( this.currentBalances.withdrawableETH.div( new this.helpers.BN(2) ) );
+
+        await cb();
+        
         await this.test();
     }
 
@@ -50,6 +64,10 @@ class Project extends Actor {
         
         console.log("withdraw:", this.toEth(amount) + " eth");
 
+        // await this.readBalances();
+        console.log(" > currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");
+        console.log(" > currentBalances.withdrawableETH:  ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
+        
         const gasPrice = 1000000000; // 1 gwei
 
         const txResult = await this.contract.methods.projectWithdraw(amount.toString()).send({
@@ -67,52 +85,9 @@ class Project extends Actor {
         );
         this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.sub(amount);
 
-        console.log("expectedBalances.ETH:             ", this.toEth(this.expectedBalances.ETH) + " eth");
-        console.log("expectedBalances.withdrawableETH: ", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
-        await this.readBalances();
-        console.log("currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");
-        console.log("currentBalances.withdrawableETH:  ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
-
-
-        let committedETH = new this.helpers.BN( await this.contract.methods.committedETH().call() );
-        let withdrawnETH = new this.helpers.BN( await this.contract.methods.withdrawnETH().call() );
-        let projectWithdrawnETH = new this.helpers.BN( await this.contract.methods.projectWithdrawnETH().call() );
-        let projectAllocatedETH = new this.helpers.BN( await this.contract.methods.projectAllocatedETH().call() );
-
-        console.log("");
-
-        console.log("committedETH:              ", this.toEth(committedETH) + " eth");
-        console.log("withdrawnETH:              ", this.toEth(withdrawnETH) + " eth");
-        console.log("projectWithdrawnETH:       ", this.toEth(projectWithdrawnETH) + " eth");
-        console.log("projectAllocatedETH:       ", this.toEth(projectAllocatedETH) + " eth");
-
-        let remainingFromAllocation = new this.helpers.BN(0);
-        // Calculate the amount of allocated ETH, not withdrawn yet
-        if (projectAllocatedETH.gt( projectWithdrawnETH ) ) {
-            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
-        }
-
-        const globalAvailable = committedETH
-            .sub(withdrawnETH)
-            .sub(projectWithdrawnETH)
-            .sub(remainingFromAllocation);
-
-        console.log("");
-        console.log("remainingFromAllocation:   ", this.toEth(remainingFromAllocation) + " eth");
-        console.log("globalAvailable:           ", this.toEth(globalAvailable) + " eth");
-
-        let unlocked = globalAvailable.mul(
-            new this.helpers.BN(
-                await this.contract.methods.getCurrentUnlockPercentage().call()
-            )
-        ).div( 
-            new this.helpers.BN("10").pow( new this.helpers.BN("20"))
-        );
-
-        let result = unlocked.add(remainingFromAllocation);
-        console.log("withdrawableETH:           ", this.toEth(result) + " eth");
-
-
+        console.log(" > expectedBalances.ETH:             ", this.toEth(this.expectedBalances.ETH) + " eth");
+        console.log(" > expectedBalances.withdrawableETH: ", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
+        
     }
 
     // check if the expected and current balances match
@@ -124,10 +99,11 @@ class Project extends Actor {
 
     // read balances from rICO and Token contract
     async readBalances() {
-        this.currentBalances.ETH = await this.helpers.utils.getBalance(this.helpers, this.address);
-        this.currentBalances.withdrawableETH = new this.helpers.BN( await this.contract.methods.getProjectAvailableEth().call() );
-    }
+        const getProjectAvailableAndUnlockedEth =  await this.contract.methods.getProjectAvailableAndUnlockedEth().call() 
 
+        this.currentBalances.ETH = await this.helpers.utils.getBalance(this.helpers, this.address);
+        this.currentBalances.withdrawableETH = new this.helpers.BN( getProjectAvailableAndUnlockedEth[1] );
+    }
     displayBalances() {
         console.log("    address:                         ", this.address);
         console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");

@@ -333,7 +333,7 @@ module.exports = {
             const account = wallet.accounts[i];
 
             let value;
-            if(i == 0) {
+            if(i == 0 || i == 1) {
                 value = helpers.solidity.etherBN.mul(
                     new BN( 100 )
                     // new BN( 100000 )

@@ -215,11 +215,14 @@ class Participant extends Actor {
            
             // token balance now includes reserved tokens for accepted amount 
             this.expectedBalances.Token = this.currentBalances.Token.add(
-                this.helpers.utils.getTokenAmountForEtAtValue(this.helpers, acceptedValue, price)
+                this.helpers.utils.getTokenAmountForEthAtValue(this.helpers, acceptedValue, price)
             );
 
-            this.expectedBalances.withdrawableETH = false;
             this.expectedBalances.reservedTokens = new this.helpers.BN(0);
+            
+            // const ethUnlockPercentage = await this.getUnlockPercentageAtLastProjectWithdraw();
+            this.expectedBalances.withdrawableETH = false;
+            
 
         } else {
 
@@ -230,9 +233,9 @@ class Participant extends Actor {
             this.expectedBalances.reservedTokens = this.currentBalances.reservedTokens.add(tokenAmount);
         }
 
-        const unlockPercentage = this.getCurrentUnlockPercentage();
-        if(unlockPercentage.gt(new this.helpers.BN("0"))) {
-            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+        const tokenUnlockPercentage = this.getCurrentUnlockPercentage();
+        if(tokenUnlockPercentage.gt(new this.helpers.BN("0"))) {
+            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(tokenUnlockPercentage).div(
                 new this.helpers.BN("10").pow( new this.helpers.BN(20) )
             )
         } else {
@@ -309,26 +312,39 @@ class Participant extends Actor {
            
             // token balance now includes reserved tokens for accepted amount 
             this.expectedBalances.Token = this.currentBalances.Token.add(
-                this.helpers.utils.getTokenAmountForEtAtValue(this.helpers, acceptedValue, price)
+                this.helpers.utils.getTokenAmountForEthAtValue(this.helpers, acceptedValue, price)
             );
 
             this.expectedBalances.reservedTokens = new this.helpers.BN(0);
 
-            const unlockPercentage = this.getCurrentUnlockPercentage();
+            const tokenUnlockPercentage = this.getCurrentUnlockPercentage();
+            const ethUnlockPercentage = this.getCurrentUnlockPercentage(); // await this.getUnlockPercentageAtLastProjectWithdraw();
 
-            if(unlockPercentage.gt(new this.helpers.BN("0"))) {
+            console.log("withdraw: tokenUnlockPercentage:", tokenUnlockPercentage.toString());
+            console.log("withdraw: ethUnlockPercentage  :", ethUnlockPercentage.toString());
+
+            if(tokenUnlockPercentage.gt(new this.helpers.BN("0")) || ethUnlockPercentage.gt(new this.helpers.BN("0"))) {
+
+                console.log("withdraw: withdrawableETH  : yes");
+                console.log("withdraw: currentBalances.withdrawableETH  :", this.currentBalances.withdrawableETH.toString());
+                console.log("withdraw: acceptedValue                    :", acceptedValue.toString());
+                console.log("withdraw: acceptedValue.mul()              :", acceptedValue.mul(ethUnlockPercentage).divRound(
+                    new this.helpers.BN("10").pow( new this.helpers.BN(20) )
+                ).toString());
+
 
                 this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(
                     acceptedValue.sub(
-                        
                         // divRound must be used here otherwise result will not be floored like solidity does.
-                        acceptedValue.mul(unlockPercentage).divRound(
+                        acceptedValue.mul(ethUnlockPercentage).divRound(
                             new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                         )
                     )
                 );
-    
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+
+                console.log("withdraw: withdrawableETH                  :", this.expectedBalances.withdrawableETH.toString());
+
+                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(tokenUnlockPercentage).div(
                     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                 )
                 
@@ -414,7 +430,7 @@ class Participant extends Actor {
             this.properties.account.pwDerivedKey,
             this.wallet.lightwallet.txutils.valueTx({
                 to: to,
-                gasLimit: 500000,     // 500k gas
+                gasLimit: 1000000,     // 1m gas
                 gasPrice: gasPrice,
                 value: value,
                 nonce: nonce,
@@ -522,10 +538,9 @@ class Participant extends Actor {
     // check if the expected and current balances match
     async test() {
 
-        console.log("test");
         await this.readBalances();
-        this.displayBalances();
-        this.displayExpectedBalances();
+        // this.displayBalances();
+        // this.displayExpectedBalances();
 
         this.expect(this.currentBalances.ETH.toString()).to.be.equal(this.expectedBalances.ETH.toString(), 'ETH balance is not as expected.');
         this.expect(this.currentBalances.Token.toString()).to.be.equal(this.expectedBalances.Token.toString(), 'Token balance is not as expected.');
@@ -551,6 +566,28 @@ class Participant extends Actor {
         rec.boughtTokens     = new this.helpers.BN(rec.boughtTokens);
         rec.returnedTokens   = new this.helpers.BN(rec.returnedTokens);
         return rec;
+    }
+
+    async getUnlockPercentageAtLastProjectWithdraw() {
+
+        let atBlock = this.block;
+        const lastProjectWithdrawBlock = await this.rICO.methods.lastProjectWithdrawBlock().call();
+
+        console.log("getUnlock: atBlock             :", atBlock.toString());
+        console.log("getUnlock: lastProjectWithdrawB:", lastProjectWithdrawBlock.toString());
+
+        if(lastProjectWithdrawBlock > 0 && atBlock > lastProjectWithdrawBlock) {
+            atBlock = lastProjectWithdrawBlock;
+        }
+        console.log("getUnlock: c Block             :", atBlock.toString());
+
+        return this.helpers.utils.getCurrentUnlockPercentage(
+            this.helpers,
+            atBlock,
+            this.startAndEndBlocks.buyPhaseStartBlock,
+            this.startAndEndBlocks.buyPhaseEndBlock,
+            20
+        ); 
     }
 
     getCurrentUnlockPercentage() {

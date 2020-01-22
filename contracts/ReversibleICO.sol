@@ -64,14 +64,17 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public withdrawnETH; // default: 0
     /// @dev Count of the number the project has withdrawn from the funds raised.
     uint256 public projectWithdrawCount; // default: 0
-    /// @dev Total amount allocated to the project.
+    /// @dev Total amount allocated to the project by participant withdraws.
     uint256 public projectAllocatedETH; // default: 0
     /// @dev Total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH; // default: 0
     /// @dev Block where last project withdraw happened
     uint256 public lastProjectWithdrawBlock; // default: 0
+
     /// @dev amount of ETH remaining from last withdrawn by the project
     uint256 public remainingFromLastProjectWithdraw; // default: 0
+    /// @dev amount of ETH available at block when last withdrawn by the project happened
+    uint256 public projectAvailableAtLastProjectWithdraw; // default: 0
 
     // @dev Minimum amount of ETH accepted for a contribution.
     // @dev Everything lower than that will trigger a canceling of pending ETH.
@@ -360,6 +363,212 @@ contract ReversibleICO is IERC777Recipient {
         revert("cancel: Participant has no pending contributions.");
     }
 
+    /**
+    @notice Returns project's unlocked (i.e. available for withdrawing) ETH.
+    @return _amount The amount available to the project.
+    */
+    /*
+    function getProjectAvailableEth() public view returns (uint256 _amount) {
+
+        uint256 remainingFromAllocation;
+        // Calculate the amount of allocated ETH, not withdrawn yet
+        if (projectAllocatedETH > projectWithdrawnETH) {
+            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
+        }
+
+        // Calculate ETH that is globally available:
+        // Available = accepted - withdrawn - projectWithdrawn - projectNotWithdrawn
+        uint256 globalAvailable = committedETH
+            .sub(withdrawnETH)
+            .sub(projectWithdrawnETH)
+            .sub(remainingFromLastProjectWithdraw)
+            .sub(remainingFromAllocation);
+
+        uint256 unlockStartBlock;
+        if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
+            unlockStartBlock = buyPhaseStartBlock;
+        } else {
+            unlockStartBlock = lastProjectWithdrawBlock + 1;
+        }
+
+        // Multiply the available ETH with the percentage that belongs to the project now
+        uint256 unlocked = globalAvailable.mul(
+            // unlocked since last project withdraw
+            getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber(),
+                unlockStartBlock,
+                buyPhaseEndBlock
+            )
+        ).div(10 ** 20);
+
+        // Available = unlocked + projectNotWithdrawn + remainingFromLastProjectWithdraw
+        return unlocked.add(remainingFromAllocation); // .add(remainingFromLastProjectWithdraw);
+    }
+*/
+
+   /**
+    @notice Returns project's current available ETH and unlocked ETH amount.
+    @return _available The current amount available in contract.
+    @return _unlocked The unlocked amount available to the project for withdraw.
+    */
+    function getProjectAvailableAndUnlockedEth() public view returns (uint256, uint256) {
+
+        uint256 remainingFromAllocation;
+
+        // Calculate the amount of allocated ETH, not withdrawn yet
+        if (projectAllocatedETH > projectWithdrawnETH) {
+            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
+        }
+
+        // Calculate ETH that is globally available:
+        // Available = committed - withdrawn - allocated - projectWithdrawn - projectNotWithdrawn
+
+        uint256 globalAvailable = committedETH
+            .sub(withdrawnETH)
+            // .sub(projectAllocatedETH)
+            .sub(projectWithdrawnETH)
+            .sub(remainingFromLastProjectWithdraw)
+            .sub(remainingFromAllocation);
+
+        uint256 unlockStartBlock;
+        if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
+            unlockStartBlock = buyPhaseStartBlock;
+        } else {
+            unlockStartBlock = lastProjectWithdrawBlock + 1;
+        }
+
+        // Multiply the available ETH with the percentage that belongs to the project now
+        uint256 unlocked = globalAvailable.mul(
+            // unlocked since last project withdraw
+            getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber(),
+                unlockStartBlock,
+                buyPhaseEndBlock
+            )
+        ).div(10 ** 20);
+
+    /*
+        revert(appendUintToString("unlocked:", unlocked));
+        revert(appendUintToString("remainingFromAllocation:", remainingFromAllocation));
+        revert(appendUintToString("remainingFromLastProjectWithdraw:", remainingFromLastProjectWithdraw));
+    */
+
+        // Available = unlocked + projectNotWithdrawn
+        return (
+            globalAvailable,
+            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw)
+        );
+    }
+
+    function getTests() public view returns (
+        uint256 _committedETH,
+        uint256 _withdrawnETH,
+        uint256 _projectAllocatedETH,
+        uint256 _projectWithdrawnETH,
+        uint256 _globalAvailable,
+        uint256 _unlockStartBlock,
+        uint256 _ratio,
+        uint256 _unlocked,
+        uint256 _return
+    ) {
+
+        uint256 remainingFromAllocation;
+
+        // Calculate the amount of allocated ETH, not withdrawn yet
+        if (projectAllocatedETH > projectWithdrawnETH) {
+            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
+        }
+
+        // Calculate ETH that is globally available:
+        // Available = committed - withdrawn - allocated - projectWithdrawn - projectNotWithdrawn
+
+        uint256 globalAvailable = committedETH
+            .sub(withdrawnETH)
+            // .sub(projectAllocatedETH)
+            .sub(projectWithdrawnETH)
+            .sub(remainingFromLastProjectWithdraw)
+            .sub(remainingFromAllocation);
+
+        uint256 unlockStartBlock;
+        if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
+            unlockStartBlock = buyPhaseStartBlock;
+        } else {
+            unlockStartBlock = lastProjectWithdrawBlock + 1;
+        }
+
+        uint256 ratio = getCurrentUnlockPercentageFor(
+            getCurrentBlockNumber(),
+            unlockStartBlock,
+            buyPhaseEndBlock
+        );
+
+        // Multiply the available ETH with the percentage that belongs to the project now
+        uint256 unlocked = globalAvailable.mul(
+            // unlocked since last project withdraw
+            ratio
+        ).div(10 ** 20);
+
+        // revert(appendUintToString("unlocked:", globalAvailable));
+    /*
+        revert(appendUintToString("remainingFromAllocation:", remainingFromAllocation));
+        revert(appendUintToString("remainingFromLastProjectWithdraw:", remainingFromLastProjectWithdraw));
+    */
+
+        // Available = unlocked + projectNotWithdrawn
+        return (
+            committedETH,
+            withdrawnETH,
+            projectAllocatedETH,
+            projectWithdrawnETH,
+            globalAvailable,
+            unlockStartBlock,
+            ratio,
+            unlocked,
+            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw)
+        );
+    }
+
+
+
+    function uintToString(uint _v) public pure returns (string memory) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        uint v = _v;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = byte(uint8(48 + remainder));
+        }
+        bytes memory s = new bytes(i);
+        for (uint j = 0; j < i; j++) {
+            s[j] = reversed[i - 1 - j];
+        }
+        return string(s);
+    }
+
+    function appendUintToString(string memory inStr, uint _v) public pure returns (string memory) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        uint v = _v;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = byte(uint8(48 + remainder));
+        }
+        bytes memory inStrb = bytes(inStr);
+        bytes memory s = new bytes(inStrb.length + i);
+        uint j;
+        for (j = 0; j < inStrb.length; j++) {
+            s[j] = inStrb[j];
+        }
+        for (j = 0; j < i; j++) {
+            s[j + inStrb.length] = reversed[i - 1 - j];
+        }
+
+        return string(s);
+    }
 
     /**
     @notice Allows for the project to withdraw ETH.
@@ -372,12 +581,15 @@ contract ReversibleICO is IERC777Recipient {
         require(msg.sender == projectWalletAddress, "Only project wallet address.");
 
         // Get project unlocked ETH (available for withdrawing)
-        uint256 unlocked = getProjectAvailableEth();
+        (uint256 available, uint256 unlocked) = getProjectAvailableAndUnlockedEth();
         require(_ethAmount <= unlocked, "Requested amount too big, not enough unlocked ETH available.");
 
-        // Update stats:  number of project withdrawals, total amount withdrawn by the project
+        // Update stats: number of project withdrawals, total amount withdrawn by the project
         projectWithdrawCount++;
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
+
+        // set available eth at last project withdraw
+        projectAvailableAtLastProjectWithdraw = available;
 
         // set remaining unlocked eth
         remainingFromLastProjectWithdraw = unlocked.sub(_ethAmount);
@@ -400,50 +612,6 @@ contract ReversibleICO is IERC777Recipient {
             _ethAmount
         );
     }
-
-
-    /**
-    @notice Returns project's unlocked (i.e. available for withdrawing) ETH.
-    @return _amount The amount available to the project.
-    */
-    function getProjectAvailableEth() public view returns (uint256 _amount) {
-
-        uint256 remainingFromAllocation;
-
-        // Calculate the amount of allocated ETH, not withdrawn yet
-        if (projectAllocatedETH > projectWithdrawnETH) {
-            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
-        }
-
-        // Calculate ETH that is globally available:
-        // Available = accepted - withdrawn - projectWithdrawn - projectNotWithdrawn
-        uint256 globalAvailable = committedETH
-            .sub(withdrawnETH)
-            .sub(projectWithdrawnETH)
-            .sub(remainingFromAllocation)
-            .sub(remainingFromLastProjectWithdraw);
-
-        uint256 unlockStartBlock;
-        if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
-            unlockStartBlock = buyPhaseStartBlock;
-        } else {
-            unlockStartBlock = lastProjectWithdrawBlock + 1;
-        }
-
-        // Multiply the available ETH with the percentage that belongs to the project now
-        uint256 unlocked = globalAvailable.mul(
-            // unlocked since last project withdraw
-            getCurrentUnlockPercentageFor(
-                getCurrentBlockNumber(),
-                unlockStartBlock,
-                buyPhaseEndBlock
-            )
-        ).div(10 ** 20);
-
-        // Available = unlocked + projectNotWithdrawn + remainingFromLastProjectWithdraw
-        return unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw);
-    }
-
 
     /**
     @notice Approves or rejects participants.
@@ -773,14 +941,6 @@ contract ReversibleICO is IERC777Recipient {
     @return Unlock percentage multiplied by 10 to the power of precision. (should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals).
     */
 
-    function getCurrentUnlockPercentage() public view returns (uint256) {
-        return getCurrentUnlockPercentageFor(
-            getCurrentBlockNumber(),
-            buyPhaseStartBlock,
-            buyPhaseEndBlock
-        );
-    }
-
     function getCurrentUnlockPercentageFor(
         uint256 _currentBlock,
         uint256 _startBlock,
@@ -802,6 +962,30 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
+    function getCurrentUnlockPercentage() public view returns (uint256) {
+        return getCurrentUnlockPercentageFor(
+            getCurrentBlockNumber(),
+            buyPhaseStartBlock,
+            buyPhaseEndBlock
+        );
+    }
+
+    function getUnlockPercentageAtLastProjectWithdraw() public view returns (uint256) {
+
+        // if project has not withdrawn yet, we use current block
+        // else block is last project withdraw block
+
+        uint256 atBlock = getCurrentBlockNumber();
+        if(lastProjectWithdrawBlock > 0 && atBlock > lastProjectWithdrawBlock) {
+            atBlock = lastProjectWithdrawBlock;
+        }
+
+        return getCurrentUnlockPercentageFor(
+            atBlock,
+            buyPhaseStartBlock,
+            buyPhaseEndBlock
+        );
+    }
 
     // ------------------------------------------------------------------------------------------------
 
@@ -862,7 +1046,6 @@ contract ReversibleICO is IERC777Recipient {
 
         // This is needed otherwise participants that can call cancel() and bypass!
         if (participantRecord.whitelisted == true) {
-
 
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
@@ -1072,9 +1255,15 @@ contract ReversibleICO is IERC777Recipient {
                     participantRecord.boughtTokens += newTokenAmount;
                     byStage.boughtTokens += newTokenAmount;
 
+                    // allocate eth upto last project withdraw block
+                    /*
                     allocatedEthAmount = allocatedEthAmount.add(
-                        allocateProjectEthFromNewContribution(_from, stageId, newAcceptedValue)
+                        newAcceptedValue.mul(
+                            getUnlockPercentageAtLastProjectWithdraw()
+                            // getCurrentUnlockPercentage()
+                        ).div(10 ** uint256(20))
                     );
+                    */
 
                     // allocate tokens to participant
                     bytes memory data;
@@ -1093,14 +1282,17 @@ contract ReversibleICO is IERC777Recipient {
             }
         }
 
+        /*
         if(allocatedEthAmount > 0) {
             // allocate unlocked ETH to project directly
             participantRecord.allocatedETH = participantRecord.allocatedETH.add(allocatedEthAmount);
             projectAllocatedETH = projectAllocatedETH.add(participantRecord.allocatedETH);
         }
+        */
 
     }
 
+    /*
     function allocateProjectEthFromNewContribution(address _from, uint8 stageId, uint256 _newAcceptedValue ) internal returns(uint256) {
         ParticipantDetailsByStage storage byStage = participantsByAddress[_from].byStage[stageId];
 
@@ -1111,6 +1303,7 @@ contract ReversibleICO is IERC777Recipient {
         byStage.allocatedETH = unlockedETHAmount;
         return unlockedETHAmount;
     }
+    */
 
     /**
     @notice Cancels all of the participant's contributions so far.
