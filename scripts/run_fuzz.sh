@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -e
 
 ./scripts/rpcs/start_all.sh $2
 echo ""
