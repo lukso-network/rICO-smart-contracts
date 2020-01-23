@@ -188,7 +188,7 @@ async function revertToFreshDeployment() {
     // do some validation
     expect(
         await helpers.utils.getBalance(helpers, ReversibleICOAddress)
-    ).to.be.bignumber.equal( new helpers.BN(0) );
+    ).to.be.bignumber.equal( new BN(0) );
 
     expect(
         await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
@@ -229,7 +229,7 @@ describe("ProjectWithdraw Testing", function () {
 
     describe("getProjectAvailableEth()", function () {
 
-        const ContributionAmount = new helpers.BN("100").mul( helpers.solidity.etherBN );
+        const ContributionAmount = new BN("100").mul( helpers.solidity.etherBN );
 
         describe("Scenario: One 100 ETH NOT whitelisted contribution in contract (Participant1)", async function () { 
 
@@ -354,7 +354,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -418,7 +418,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("100").mul( helpers.solidity.etherBN ).toString()
+                        new BN("100").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -438,7 +438,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("200").mul( helpers.solidity.etherBN ).toString()
+                        new BN("200").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -505,7 +505,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new helpers.BN("25").mul( helpers.solidity.etherBN ).toString()
+                        new BN("25").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -525,7 +525,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -581,7 +581,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -596,12 +596,12 @@ describe("ProjectWithdraw Testing", function () {
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
-                it("returns 50 eth)", async function () {
+                it("returns 50 eth", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -678,15 +678,15 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("projectWallet balance increased by 50 ETH", async function () {
 
-                    let projectWithdrawTxGasCost = new helpers.BN(projectWithdrawTx.gasUsed).mul(
-                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    let projectWithdrawTxGasCost = new BN(projectWithdrawTx.gasUsed).mul(
+                        new BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
                     const projectWalletBalanceValidation = projectWalletBalanceBefore
                     // subtract project withdraw tx cost
                     .sub(projectWithdrawTxGasCost)
                     // add how much eth we're expecting to withdraw
-                    .add(new helpers.BN("50").mul( helpers.solidity.etherBN ))
+                    .add(new BN("50").mul( helpers.solidity.etherBN ))
                     
                     expect(
                         projectWalletBalanceAfter.toString()
@@ -718,7 +718,7 @@ describe("ProjectWithdraw Testing", function () {
         });
 
 
-        describe("Scenario: One contribution at stage 0 (Participant1), project withdraw at middle, then new contribution (Participant2)", async function () { 
+        describe("Scenario: One 100 ETH contribution at stage 0 (Participant1), project withdraw at middle, then new 100 ETH contribution (Participant2)", async function () { 
 
             before(async () => {
 
@@ -756,12 +756,34 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                it("returns 100 eth ( half of both contributions )", async function () {
+                it("returns 50 eth ( 0 from first, half of the second contribution )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
+                    );
+                });
+
+            });
+
+
+            describe("- contract at 75% of the buy phase", async function () {
+
+                before(async () => {
+                    const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
+                    await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
+                        from: deployerAddress, gas: 100000
+                    });
+                    helpers.utils.resetAccountNonceCache(helpers);
+                });
+                
+                it("returns 100 eth ( 25 from first, 75 from second )", async function () {
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    expect(
+                        ProjectAvailableEth.toString()
+                    ).to.equal( 
+                        new BN("100").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -776,12 +798,12 @@ describe("ProjectWithdraw Testing", function () {
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
-                it("returns 150 eth)", async function () {
+                it("returns 150 eth ( 50 from first, 100 from second )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal( 
-                        new helpers.BN("150").mul( helpers.solidity.etherBN ).toString()
+                        new BN("150").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -796,7 +818,7 @@ describe("ProjectWithdraw Testing", function () {
             /*
 
             describe("One whitelisted contribution in contract", async function () { 
-                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new BN("1000").mul( helpers.solidity.etherBN );
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -1076,7 +1098,7 @@ describe("ProjectWithdraw Testing", function () {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                    const ContributionAmount = new BN("1000").mul( helpers.solidity.etherBN );
 
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -1131,7 +1153,7 @@ describe("ProjectWithdraw Testing", function () {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                    const ContributionAmount = new BN("1000").mul( helpers.solidity.etherBN );
 
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -1180,7 +1202,7 @@ describe("ProjectWithdraw Testing", function () {
                     const TestParticipantAddress = participant_1;
 
                     // return 1 eth worth of tokens in current stage
-                    const ethAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
+                    const ethAmount = new BN("1").mul( helpers.solidity.etherBN );
                     const ReturnTokenAmount = new BN(
                         await helpers.utils.getTokenAmountForEthAtStage(
                             helpers,
@@ -1254,8 +1276,8 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
-                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    let txGasCost = new BN(withdrawTx.gasUsed).mul(
+                        new BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
 
@@ -1297,7 +1319,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // accounting for price rounding errors
                     if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
-                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new helpers.BN("1") ));
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new BN("1") ));
                     } else {
                         expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount).or(ethAmount);
                     }
@@ -1376,8 +1398,8 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
-                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    let txGasCost = new BN(withdrawTx.gasUsed).mul(
+                        new BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
                     // Validation
@@ -1424,7 +1446,7 @@ describe("ProjectWithdraw Testing", function () {
                 it("participant can contribute again", async function () {
 
                     const TestParticipantAddress = participant_1;
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                    const ContributionAmount = new BN("1000").mul( helpers.solidity.etherBN );
 
                     let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
                     const initialContributionsCount = ParticipantByAddress.contributionsCount;
@@ -1470,8 +1492,8 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    let txGasCost = new helpers.BN(newContributionTx.gasUsed).mul(
-                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    let txGasCost = new BN(newContributionTx.gasUsed).mul(
+                        new BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
                     // Validation
@@ -1577,8 +1599,8 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
-                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
-                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    let txGasCost = new BN(withdrawTx.gasUsed).mul(
+                        new BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
                     // Validation
@@ -1668,7 +1690,7 @@ describe("ProjectWithdraw Testing", function () {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                    const ContributionAmount = new BN("1000").mul( helpers.solidity.etherBN );
 
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -1771,7 +1793,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     console.log("participant: ", participant);
     console.log("gas V:   ", tx1.gasUsed);
-    console.log("amount:  ", helpers.utils.toFullToken(helpers, new helpers.BN(amount1) ));
+    console.log("amount:  ", helpers.utils.toFullToken(helpers, new BN(amount1) ));
     console.log("tokensV3:", helpers.utils.toFullToken(
             helpers, helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
         )
