@@ -404,7 +404,12 @@ contract ReversibleICO is IERC777Recipient {
         // Available = unlocked + projectNotWithdrawn + remainingFromLastProjectWithdraw
         return unlocked.add(remainingFromAllocation); // .add(remainingFromLastProjectWithdraw);
     }
-*/
+    */
+
+    function getProjectAvailableEth() public view returns (uint256) {
+        (uint256 available, uint256 unlocked) = getProjectAvailableAndUnlockedEth();
+        return unlocked;
+    }
 
    /**
     @notice Returns project's current available ETH and unlocked ETH amount.

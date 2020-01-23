@@ -163,6 +163,11 @@ module.exports = {
                 await Project.test();
                 Project.displayBalances();
 
+                console.log("Project should have withdrawn 50 eth and have globalAvailable 0");
+
+                // globalAvailable
+
+                console.log("########################################################################");
 
 
                 let bat75 = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3 + 2;
