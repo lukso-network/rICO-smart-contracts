@@ -224,7 +224,7 @@ describe("Testing canceling", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
                 });
 
                 it("should return (false, false)", async function () {
@@ -238,7 +238,7 @@ describe("Testing canceling", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -259,7 +259,7 @@ describe("Testing canceling", function () {
             describe("participant is whitelisted and has 1 contribution", async function () {
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -293,7 +293,7 @@ describe("Testing canceling", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5);
                 });
 
                 it("should return (false, false)", async function () {
@@ -307,7 +307,7 @@ describe("Testing canceling", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -328,7 +328,7 @@ describe("Testing canceling", function () {
             describe("participant is whitelisted and has 1 contribution", async function () {
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5 + 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 5);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -372,7 +372,7 @@ describe("Testing canceling", function () {
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0 + 1);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
 
             it("0 value transaction reverts \"Contract must be initialized.\"", async function () {
@@ -422,7 +422,7 @@ describe("Testing canceling", function () {
                 helpers.utils.resetAccountNonceCache(helpers);
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0 + 1);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
             });
 
             it("value >= rico.minContribution results in a new contribution", async function () {
@@ -481,10 +481,11 @@ describe("Testing canceling", function () {
 
 
                 // validate contributions
-                ParticipantByAddress = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, 0).call();
+                let ParticipantTotalStats = await ReversibleICOInstance.methods.participantAggregatedStats(participant_1).call();
+
                 let ContributionTotals = new helpers.BN("0");
 
-                for(let i = 1; i <= StageCount + 1; i++) {
+                for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(new helpers.BN(
                         ParticipantStageDetails.stageCommittedETH
@@ -492,7 +493,7 @@ describe("Testing canceling", function () {
                 }
 
                 expect(
-                    ParticipantByAddress.stageCommittedETH.toString()
+                    ParticipantTotalStats.totalReceivedETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -566,7 +567,7 @@ describe("Testing canceling", function () {
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0 + 1);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
 
             it("0 value transaction reverts \"Contract must be initialized.\"", async function () {
