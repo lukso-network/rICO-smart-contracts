@@ -1324,8 +1324,8 @@ describe("ProjectWithdraw Testing", function () {
 async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
     let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployerAddress, stage, end, after );
 
-    let ParticipantsByAddress = await contract.methods.ParticipantsByAddress(participant).call();
-    let totalTokens = ParticipantsByAddress.token_amount;
+    let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant).call();
+    let totalTokens = ParticipantTotalStats.token_amount;
 
     let diffBlock = (currentBlock - start);
 
