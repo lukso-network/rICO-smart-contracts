@@ -74,7 +74,7 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev amount of ETH remaining from last withdrawn by the project
     uint256 public remainingFromLastProjectWithdraw; // default: 0
     /// @dev amount of ETH available at block when last withdrawn by the project happened
-    uint256 public projectAvailableAtLastProjectWithdraw; // default: 0
+    uint256 public globalAvailableAtLastProjectWithdraw; // default: 0
 
     // @dev Minimum amount of ETH accepted for a contribution.
     // @dev Everything lower than that will trigger a canceling of pending ETH.
@@ -411,12 +411,41 @@ contract ReversibleICO is IERC777Recipient {
         return unlocked;
     }
 
+
    /**
     @notice Returns project's current available ETH and unlocked ETH amount.
     @return _available The current amount available in contract.
     @return _unlocked The unlocked amount available to the project for withdraw.
     */
     function getProjectAvailableAndUnlockedEth() public view returns (uint256, uint256) {
+
+        // how much eth has been "approved", minus returned, minus allocated directly
+        uint256 globalAvailable = committedETH
+            .sub(withdrawnETH)
+            .sub(projectAllocatedETH);
+
+        // Multiply by percentage
+        uint256 unlocked = globalAvailable.mul(
+            getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber(),
+                buyPhaseStartBlock,
+                buyPhaseEndBlock
+            )
+        ).div(10 ** 20);
+
+        return (
+            globalAvailable,
+            // add the allocated directly and subtract already withdrawn by project
+            unlocked.add(projectAllocatedETH).sub(projectWithdrawnETH)
+        );
+    }
+
+   /**
+    @notice Returns project's current available ETH and unlocked ETH amount.
+    @return _available The current amount available in contract.
+    @return _unlocked The unlocked amount available to the project for withdraw.
+    */
+    function getProjectAvailableAndUnlockedEthOld() public view returns (uint256, uint256) {
 
         uint256 remainingFromAllocation;
 
@@ -434,6 +463,22 @@ contract ReversibleICO is IERC777Recipient {
             .sub(projectWithdrawnETH)
             .sub(remainingFromLastProjectWithdraw)
             .sub(remainingFromAllocation);
+
+        // is current available ETH higher than when last withdraw happened ?
+        uint256 unlockedDiff;
+        if(globalAvailable > globalAvailableAtLastProjectWithdraw) {
+            uint256 globalDiff = globalAvailable.sub(globalAvailableAtLastProjectWithdraw);
+            unlockedDiff = globalDiff.mul(
+                // unlocked difference upto last project withdraw
+                getCurrentUnlockPercentageFor(
+                    lastProjectWithdrawBlock,
+                    buyPhaseStartBlock,
+                    buyPhaseEndBlock
+                )
+            ).div(10 ** 20);
+            globalAvailable = globalAvailable.sub(unlockedDiff);
+        }
+        // globalAvailable = globalAvailable.sub(unlockedDiff);
 
         uint256 unlockStartBlock;
         if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
@@ -461,7 +506,7 @@ contract ReversibleICO is IERC777Recipient {
         // Available = unlocked + projectNotWithdrawn
         return (
             globalAvailable,
-            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw)
+            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw).add(unlockedDiff)
         );
     }
 
@@ -471,10 +516,9 @@ contract ReversibleICO is IERC777Recipient {
         uint256 _projectAllocatedETH,
         uint256 _projectWithdrawnETH,
         uint256 _globalAvailable,
-        uint256 _unlockStartBlock,
-        uint256 _ratio,
         uint256 _unlocked,
-        uint256 _return
+        uint256 _return,
+        uint256 _unlockedDiff
     ) {
 
         uint256 remainingFromAllocation;
@@ -494,6 +538,23 @@ contract ReversibleICO is IERC777Recipient {
             .sub(remainingFromLastProjectWithdraw)
             .sub(remainingFromAllocation);
 
+        // is current available ETH higher than when last withdraw happened ?
+        // ( we got new contributions that need to allocate funds to project )
+        //
+        uint256 unlockedDiff;
+        if(globalAvailable > globalAvailableAtLastProjectWithdraw) {
+            uint256 globalDiff = globalAvailable.sub(globalAvailableAtLastProjectWithdraw);
+            unlockedDiff = globalDiff.mul(
+                // unlocked difference upto last project withdraw
+                getCurrentUnlockPercentageFor(
+                    lastProjectWithdrawBlock,
+                    buyPhaseStartBlock,
+                    buyPhaseEndBlock
+                )
+            ).div(10 ** 20);
+            globalAvailable = globalAvailable.sub(unlockedDiff);
+        }
+
         uint256 unlockStartBlock;
         if(lastProjectWithdrawBlock < buyPhaseStartBlock) {
             unlockStartBlock = buyPhaseStartBlock;
@@ -501,17 +562,16 @@ contract ReversibleICO is IERC777Recipient {
             unlockStartBlock = lastProjectWithdrawBlock + 1;
         }
 
-        uint256 ratio = getCurrentUnlockPercentageFor(
-            getCurrentBlockNumber(),
-            unlockStartBlock,
-            buyPhaseEndBlock
-        );
-
         // Multiply the available ETH with the percentage that belongs to the project now
         uint256 unlocked = globalAvailable.mul(
             // unlocked since last project withdraw
-            ratio
+            getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber(),
+                unlockStartBlock,
+                buyPhaseEndBlock
+            )
         ).div(10 ** 20);
+
 
         // revert(appendUintToString("unlocked:", globalAvailable));
     /*
@@ -526,10 +586,9 @@ contract ReversibleICO is IERC777Recipient {
             projectAllocatedETH,
             projectWithdrawnETH,
             globalAvailable,
-            unlockStartBlock,
-            ratio,
             unlocked,
-            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw)
+            unlocked.add(remainingFromAllocation).add(remainingFromLastProjectWithdraw).add(unlockedDiff),
+            unlockedDiff
         );
     }
 
@@ -594,7 +653,7 @@ contract ReversibleICO is IERC777Recipient {
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
 
         // set available eth at last project withdraw
-        projectAvailableAtLastProjectWithdraw = available;
+        globalAvailableAtLastProjectWithdraw = available;
 
         // set remaining unlocked eth
         remainingFromLastProjectWithdraw = unlocked.sub(_ethAmount);
