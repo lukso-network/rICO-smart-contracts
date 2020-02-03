@@ -23,6 +23,8 @@ class Project extends Actor {
         this.expect = this.init.helpers.expect;
         this.txCosts = new this.helpers.BN(0);
 
+        this.actionLog = [];
+
         this.currentBalances = {
             ETH: new this.helpers.BN("0"),
             withdrawableETH: new this.helpers.BN("0"),
@@ -65,8 +67,8 @@ class Project extends Actor {
         console.log("withdraw:", this.toEth(amount) + " eth");
 
         // await this.readBalances();
-        console.log(" > currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");
-        console.log(" > currentBalances.withdrawableETH:  ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
+        // console.log(" > currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");
+        // console.log(" > currentBalances.withdrawableETH:  ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
         
         const gasPrice = 1000000000; // 1 gwei
 
@@ -85,9 +87,48 @@ class Project extends Actor {
         );
         this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.sub(amount);
 
-        console.log(" > expectedBalances.ETH:             ", this.toEth(this.expectedBalances.ETH) + " eth");
-        console.log(" > expectedBalances.withdrawableETH: ", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
+        // console.log(" > expectedBalances.ETH:             ", this.toEth(this.expectedBalances.ETH) + " eth");
+        // console.log(" > expectedBalances.withdrawableETH: ", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
         
+    }
+
+    async getAvailableActions() {
+        let actions = [];
+
+        const getProjectAvailableEth = new this.helpers.BN( await this.contract.methods.getProjectAvailableEth().call() );
+        if(getProjectAvailableEth.gt( new this.helpers.BN("0") )) {
+            actions.push("withdrawFullAmount");
+            actions.push("withdrawHalf");
+        }
+
+        return actions;
+    }
+
+    async executeRandomActionOrNone() {
+        const availableActions = ["nothing", ...await this.getAvailableActions()];
+        const rand = Math.floor( Math.random() * availableActions.length );
+        const action = availableActions[rand];
+        console.log("Project Wallet", "Executing:", action, " / Available:", availableActions);
+
+        // action execution
+        switch(action) {
+            case "withdrawFullAmount":
+                await this.withdrawFullAmount();
+                break;
+            case "withdrawHalf":
+                await this.withdrawHalf();
+                break;
+            case "nothing":
+                this.actionLog.push( { type:"nothing", "value": null, valid: null } );
+                break;
+            default:
+                throw("error at executeRandomActionOrNone: action[" + action + "] not found.");
+        }
+
+        if(action !== "nothing") {
+            await this.test();
+        }
+
     }
 
     // check if the expected and current balances match
@@ -95,15 +136,20 @@ class Project extends Actor {
         await this.readBalances();
         expect(this.currentBalances.ETH.toString()).to.be.equal(this.expectedBalances.ETH.toString(), 'ETH balance is not as expected.');
         expect(this.currentBalances.withdrawableETH.toString()).to.be.equal(this.expectedBalances.withdrawableETH.toString(), 'Withdrawable ETH is not as expected.');
+
+        // get last item and set to valid
+        const item = this.actionLog[ this.actionLog.length - 1 ];
+        item.valid = true;
+        
     }
 
     // read balances from rICO and Token contract
     async readBalances() {
-        const getProjectAvailableAndUnlockedEth =  await this.contract.methods.getProjectAvailableAndUnlockedEth().call() 
-
+        const getProjectAvailableEth = await this.contract.methods.getProjectAvailableEth().call() 
         this.currentBalances.ETH = await this.helpers.utils.getBalance(this.helpers, this.address);
-        this.currentBalances.withdrawableETH = new this.helpers.BN( getProjectAvailableAndUnlockedEth[1] );
+        this.currentBalances.withdrawableETH = new this.helpers.BN( getProjectAvailableEth );
     }
+    
     displayBalances() {
         console.log("    address:                         ", this.address);
         console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
