@@ -81,18 +81,18 @@ class Participant extends Actor {
         return [
             { 
                 title: "Participant: Commit ETH + do nothing forever", actions: [
-                    { action: "commit", stage: FirstStage },
+                    { action: "commitEntireBalance", stage: FirstStage },
                 ]
             },
             { 
                 title: "Participant: Commit ETH + send 0 value tx ( cancel )", actions: [
-                    { action: "commit", stage: FirstStage },
+                    { action: "commitEntireBalance", stage: FirstStage },
                     { action: "withdrawByETH", stage: FirstStage + 1 },
                 ]
             },
             { 
                 title: "Participant: Commit ETH + send 0 value tx ( cancel )", actions: [
-                    { action: "commit", stage: FirstStage },
+                    { action: "commitEntireBalance", stage: FirstStage },
                     { action: "withdrawByETH", stage: 0 },
                 ]
             }
@@ -122,8 +122,8 @@ class Participant extends Actor {
         const cancelModes = await this.rICO.methods.getCancelModes(this.address).call();
 
         if(canCommit) {
-            actions.push("commit");
-            actions.push("commit_half");
+            actions.push("commitEntireBalance");
+            actions.push("commitHalfBalance");
         }
 
         if(cancelModes.byEth) {
@@ -132,40 +132,51 @@ class Participant extends Actor {
         }
 
         if(cancelModes.byTokens) {
-            actions.push("withdrawByToken");
-            actions.push("withdrawByToken_half");
+            actions.push("sendAllTokensBack");
+            actions.push("sendHalfTokensBack");
         }
 
         if(this.whitelisted === false) {
             actions.push("whitelistApprove");
         } else {
+            // if()
             actions.push("whitelistDeny");
         }
 
         return actions;
     }
 
+
+    async getAvailableActionsWithNone() {
+        return ["nothing", ...await this.getAvailableActions()];
+    }
+    
     async executeRandomActionOrNone() {
-        const availableActions = ["nothing", ...await this.getAvailableActions()];
+        const availableActions = await this.getAvailableActionsWithNone();
         const rand = Math.floor( Math.random() * availableActions.length );
-        const action = availableActions[rand];
+        await this.executeAction(availableActions[rand]);
+    }
+
+    async executeAction(action) {
+        const availableActions = await this.getAvailableActionsWithNone();
+
         console.log(this.address, "Executing:", action, " / Available:", availableActions);
 
         // action execution
         switch(action) {
-            case "commit":
+            case "commitEntireBalance":
                 await this.commitEntireBalance();
                 break;
-            case "commit_half":
+            case "commitHalfBalance":
                 await this.commitHalfBalance();
                 break;
             case "withdrawByETH":
                 await this.withdrawByETH();
                 break;
-            case "withdrawByToken":
+            case "sendAllTokensBack":
                 await this.sendAllTokensBack();
                 break;
-            case "withdrawByToken_half":
+            case "sendHalfTokensBack":
                 await this.sendHalfTokensBack();
                 break;
             case "whitelistApprove":
@@ -179,7 +190,7 @@ class Participant extends Actor {
                 // do nothing
                 break;
             default:
-                throw("error at executeRandomActionOrNone: action[" + action + "] not found.");
+                throw("error at executeAction: action[" + action + "] not found.");
         }
 
         await this.test();
@@ -264,8 +275,13 @@ class Participant extends Actor {
     async withdrawByETH() {
 
         const participantRecord = await this.getParticipantRecord();
+       
         const pendingEth = participantRecord.totalReceivedETH.sub( 
-            participantRecord.committedETH.add(participantRecord.returnedETH)
+            participantRecord.committedETH.add(
+                participantRecord.returnedETH
+            ).add(
+                participantRecord.withdrawnETH
+            )
         );
         // expected balance includes value stored in contract that has not been procesed.
         this.expectedBalances.ETH = this.currentBalances.ETH.add(pendingEth);
@@ -296,18 +312,17 @@ class Participant extends Actor {
     }
 
     async whitelistApprove() {
-        await this.readBalances();
         this.actionLog.push( { type:"whitelistApprove", "value": null, valid: null } );
         return await this.setWhitelist(true);
     }
 
     async whitelistDeny() {
-        await this.readBalances();
         this.actionLog.push( { type:"whitelistDeny", "value": null, valid: null } );
         return await this.setWhitelist(false);
     }
 
     async setWhitelist(mode) {
+        this.whitelisted = mode;
         await this.readBalances();
 
         this.actionLog.push( { type:"setWhitelist", "value": mode, valid: null } );
@@ -316,69 +331,69 @@ class Participant extends Actor {
         this.expectedBalances.reservedTokens = new this.helpers.BN("0");
 
         const participantRecord = await this.getParticipantRecord();
-        const claimableEth = participantRecord.totalReceivedETH.sub( 
-            participantRecord.committedETH.add(participantRecord.returnedETH)
-        );
 
         if(mode === true) {
             // accept contribution
-            this.whitelister.approve(this.address);
+            await this.whitelister.approve(this.address);
+        } else {
+            // reject contribution
+            await this.whitelister.reject(this.address);
+        }
 
-            const currentStage = await this.rICO.methods.getCurrentStage().call();
-            const maxAcceptableValue = new this.helpers.BN( await this.rICO.methods.availableEthAtStage(currentStage).call() );
 
-            let acceptedValue ;
-            if(claimableEth.gt(maxAcceptableValue)) {
-                acceptedValue = maxAcceptableValue;
-            } else {
-                acceptedValue = claimableEth;
-            }
+        const currentStage = await this.rICO.methods.getCurrentStage().call();
+        const maxAcceptableValue = new this.helpers.BN( await this.rICO.methods.availableEthAtStage(currentStage).call() );
 
-            this.expectedBalances.ETH = this.currentBalances.ETH.add(claimableEth.sub(acceptedValue)); 
+        let acceptedValue ;
 
-            const price = await this.rICO.methods.getCurrentPrice().call();
-           
+        const claimableEth = participantRecord.totalReceivedETH
+            .sub(participantRecord.returnedETH)
+            .sub(participantRecord.committedETH)
+            .sub(participantRecord.withdrawnETH);
+
+        if(claimableEth.gt(maxAcceptableValue)) {
+            acceptedValue = maxAcceptableValue;
+        } else {
+            acceptedValue = claimableEth;
+        }
+
+        this.expectedBalances.ETH = this.currentBalances.ETH.add(claimableEth.sub(acceptedValue)); 
+
+        const price = await this.rICO.methods.getCurrentPrice().call();
+        
+        if(mode === true) {
             // token balance now includes reserved tokens for accepted amount 
             this.expectedBalances.Token = this.currentBalances.Token.add(
                 this.helpers.utils.getTokenAmountForEthAtValue(this.helpers, acceptedValue, price)
             );
-
-            this.expectedBalances.reservedTokens = new this.helpers.BN(0);
-
-            const unlockPercentage = this.getCurrentUnlockPercentage();
-
-            if(unlockPercentage.gt(new this.helpers.BN("0"))) {
-
-                this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(
-                    acceptedValue.sub(
-                        // divRound must be used here otherwise result will not be floored like solidity does.
-                        acceptedValue.mul(unlockPercentage).divRound(
-                            new this.helpers.BN("10").pow( new this.helpers.BN(20) )
-                        )
-                    )
-                );
-
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
-                    new this.helpers.BN("10").pow( new this.helpers.BN(20) )
-                )
-                
-            } else {
-                this.expectedBalances.withdrawableETH = acceptedValue;
-                this.expectedBalances.unlockedToken = new this.helpers.BN("0");
-            }
-
         } else {
-
+            
             // token balance does not change
             this.expectedBalances.Token = this.currentBalances.Token;
+        }
+        
+        this.expectedBalances.reservedTokens = new this.helpers.BN(0);
+
+        const unlockPercentage = this.getCurrentUnlockPercentage();
+
+        if(unlockPercentage.gt(new this.helpers.BN("0"))) {
+
+            this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(
+                acceptedValue.sub(
+                    // divRound must be used here otherwise result will not be floored like solidity does.
+                    acceptedValue.mul(unlockPercentage).divRound(
+                        new this.helpers.BN("10").pow( new this.helpers.BN(20) )
+                    )
+                )
+            );
+
+            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+                new this.helpers.BN("10").pow( new this.helpers.BN(20) )
+            )
             
-            // expected balance includes value stored in contract that has not been procesed.
-            this.expectedBalances.ETH = this.currentBalances.ETH.add(claimableEth);
-
-            this.expectedBalances.withdrawableETH = new this.helpers.BN("0");
-
-            // reject contribution
-            this.whitelister.reject(this.address);
+        } else {
+            this.expectedBalances.withdrawableETH = acceptedValue;
+            this.expectedBalances.unlockedToken = new this.helpers.BN("0");
         }
 
         await this.readBalances();
@@ -399,6 +414,11 @@ class Participant extends Actor {
 
     async updateAfterWhitelisting(tokenAmount) {
         this.expectedBalances.Token = this.expectedBalances.Token.add(tokenAmount);
+    }
+
+    displayBothBalances() {
+        this.displayBalances();
+        this.displayExpectedBalances();
     }
 
     displayBalances() {

@@ -384,7 +384,7 @@ class Contract extends Validator {
             );
 
         } else {
-            throw ("Participant has not contributed any ETH yet.");
+            throw ("Participant has no available ETH to withdraw.");
         }
     }
 

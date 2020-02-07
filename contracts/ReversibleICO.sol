@@ -440,8 +440,10 @@ contract ReversibleICO is IERC777Recipient {
             acceptContributionsForAddress(_address, uint8(ApplicationEventTypes.WHITELIST_APPROVE));
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
-            participantRecord.whitelisted = false;
-            cancelContributionsForAddress(_address, 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
+            if (hasPendingETH(_address)) {
+                cancelContributionsForAddress(_address, 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
+                participantRecord.whitelisted = false;
+            }
         }
     }
 
@@ -630,11 +632,25 @@ contract ReversibleICO is IERC777Recipient {
     @param _participantAddress The participant's address.
     */
     function hasPendingETH(address _participantAddress) public view returns (bool) {
-        Participant storage participantRecord = participantsByAddress[_participantAddress];
+        // Participant storage participantRecord = participantsByAddress[_participantAddress];
+
+        uint256 participantAvailableETH = getParticipantAvailableETH(_participantAddress);
+        if(participantAvailableETH > 0) {
+            return true;
+        }
+        return false;
+
+        /*
+        uint256 availableEth = participantRecord.totalReceivedETH
+            .sub(participantRecord.returnedETH)
+            .sub(participantRecord.committedETH)
+            .sub(participantRecord.withdrawnETH);
+
         if (!participantRecord.whitelisted && participantRecord.totalReceivedETH > 0 && participantRecord.totalReceivedETH > participantRecord.returnedETH) {
             return true;
         }
         return false;
+        */
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -1078,6 +1094,14 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
+    function getParticipantAvailableETH(address _from) public view returns (uint256) {
+        Participant storage participantRecord = participantsByAddress[_from];
+        return participantRecord.totalReceivedETH
+            .sub(participantRecord.returnedETH)
+            .sub(participantRecord.committedETH)
+            .sub(participantRecord.withdrawnETH);
+    }
+
     /**
     @notice Cancels all of the participant's contributions so far.
     @param _from Participant's address
@@ -1095,9 +1119,8 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
 
         // Calculate participant's available ETH i.e. committed - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = participantRecord.totalReceivedETH
-            .sub(participantRecord.withdrawnETH)
-            .sub(participantRecord.returnedETH);
+
+        uint256 participantAvailableETH = getParticipantAvailableETH(_from);
 
         if (participantAvailableETH > 0) {
             // update total ETH returned
@@ -1132,7 +1155,7 @@ contract ReversibleICO is IERC777Recipient {
             );
 
         } else {
-            revert("Participant has not contributed any ETH yet.");
+            revert("Participant has no available ETH to withdraw.");
         }
     }
 

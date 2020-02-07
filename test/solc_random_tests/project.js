@@ -36,7 +36,7 @@ class Project extends Actor {
         };
     }
 
-    async withdrawFullAmount(cb) {
+    async withdrawFullAmount(cb = null) {
         await this.readBalances();
         // console.log("withdrawFullAmount before");
         this.displayBalances();
@@ -46,8 +46,9 @@ class Project extends Actor {
       
 
         await this.withdraw( ethval );
-        await cb();
-
+        if(cb) {
+            await cb();
+        }
         // console.log("withdrawFullAmount after");
         // this.displayBalances();
         await this.test();
@@ -65,6 +66,8 @@ class Project extends Actor {
     async withdraw(amount) {
         
         console.log("withdraw:", this.toEth(amount) + " eth");
+
+        this.actionLog.push( { type:"withdraw", "value": amount, valid: null } );
 
         // await this.readBalances();
         // console.log(" > currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");

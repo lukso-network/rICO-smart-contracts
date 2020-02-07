@@ -100,34 +100,43 @@ module.exports = {
 
         // randomise actions of actors and call `test()` on each actor after each action
 
-        for(let i = 0; i < rICOBlockLength + 1; i++) {
 
-        // for(let i = 78; i < rICOBlockLength + 1; i++) {
-            
-            // block relative to rICO start.
-            let block = commitPhaseStartBlock + i;
-            // middle block
-            await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
-            const currentStage = await rICO.methods.getCurrentStage().call();
-            const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
+        let i = 78; 
 
-            console.log(
-                "   ",
-                "block:", block,
-                "stage:", currentStage,
-                "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth",
-            );
-            
+        // block relative to rICO start.
+        let block = commitPhaseStartBlock + i;
+        // middle block
+        await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
+        const currentStage = await rICO.methods.getCurrentStage().call();
+        const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
 
+        console.log(
+            "   ",
+            "block:", block,
+            "stage:", currentStage,
+            "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth",
+        );
+        
+        const participant = participants[0];
+        participant.setBlock(block);
+        await participant.executeAction("commitEntireBalance");
+        await participant.executeAction("whitelistApprove");
+        // participant.displayBothBalances();
+        await participant.executeAction("whitelistDeny");
+   
+        const participant2 = participants[1];
+        participant.setBlock(block);
+        await participant2.executeAction("commitEntireBalance");
+        await participant2.executeAction("withdrawByETH");
+        participant2.displayBothBalances();
+        console.log("getAvailableActions:", participant.getAvailableActions());
 
-            // Loop participants and execute a random action.
-            for( let j = 0; j < participants.length; j++) {
-                participants[j].setBlock(block);
-                await participants[j].executeRandomActionOrNone();
-            }
-            await Project.executeRandomActionOrNone();
+        let rec = await participant2.getParticipantRecord();
+        console.log(rec);
+        // participantRecord.totalReceivedETH
 
-        }        
+        await participant2.executeAction("withdrawByETH");
+   
 
         console.log("");
         console.log("Project Wallet statistics:");
