@@ -198,7 +198,7 @@ describe("ProjectWithdraw Testing", function () {
     describe("ProjectWithdraw()", function () {
 
         /*
-        describe("0 - contract not initialized with settings", async function () { 
+        describe("0 - contract not initialized with settings", async function () {
 
             let TestReversibleICO;
 
@@ -335,7 +335,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -362,14 +362,13 @@ describe("ProjectWithdraw Testing", function () {
 
         describe("2 - contract in buy phase ( stage 1 - last block )", async function () {
 
-            /*
-            describe("One whitelisted contribution in contract", async function () { 
+            describe("One whitelisted contribution in contract", async function () {
                 const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                 before(async () => {
                     await revertToFreshDeployment();
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-                   
+
 
                     let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -380,7 +379,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -453,7 +452,7 @@ describe("ProjectWithdraw Testing", function () {
                         const ReturnTokenAmount = new BN(
                             await TokenContractInstance.methods.balanceOf(participant_1).call()
                         );
-                        
+
                         // projectWithdraw
                         const projSum = AvailableAfterWithdraw.div( new BN(2) ).toString();
                         let projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
@@ -463,7 +462,7 @@ describe("ProjectWithdraw Testing", function () {
                         ).send({
                             from: projectWalletAddress
                         });
-                        
+
                         console.log("after projectWithdrawTx", helpers.utils.toEth(helpers, projSum) +" eth", "\n");
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
@@ -484,7 +483,7 @@ describe("ProjectWithdraw Testing", function () {
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
                         console.log("");
-                        
+
 
                         // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 4 );
 
@@ -500,7 +499,7 @@ describe("ProjectWithdraw Testing", function () {
                             gasPrice: helpers.networkConfig.gasPrice
                         });
                         console.log("after withdrawTx" );
-                        
+
                         // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 4 );
 
                         AfterWithdrawcommittedETH = new BN( await ReversibleICOInstance.methods.committedETH().call() );
@@ -539,7 +538,7 @@ describe("ProjectWithdraw Testing", function () {
                         console.log("whitelistTx:" );
 
                         whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                            participant_2,
+                            [participant_2],
                             true,
                         ).send({
                             from: whitelistControllerAddress
@@ -609,13 +608,13 @@ describe("ProjectWithdraw Testing", function () {
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-                        
+
 
                         console.log("");
                         console.log("whitelistTx participant_3:" );
 
                         whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                            participant_3,
+                            [participant_3],
                             false,
                         ).send({
                             from: whitelistControllerAddress
@@ -637,7 +636,7 @@ describe("ProjectWithdraw Testing", function () {
             });
             */
 
-            describe("getProjectAvailableEth", async function () { 
+            describe("getProjectAvailableEth", async function () {
 
 
                 before(async () => {
@@ -655,7 +654,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -709,7 +708,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -1246,7 +1245,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -1326,8 +1325,8 @@ describe("ProjectWithdraw Testing", function () {
 async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
     let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployerAddress, stage, end, after );
 
-    let ParticipantsByAddress = await contract.methods.ParticipantsByAddress(participant).call();
-    let totalTokens = ParticipantsByAddress.token_amount;
+    let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant).call();
+    let totalTokens = ParticipantTotalStats.token_amount;
 
     let diffBlock = (currentBlock - start);
 

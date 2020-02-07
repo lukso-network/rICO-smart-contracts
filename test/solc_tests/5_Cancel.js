@@ -271,7 +271,7 @@ describe("Testing canceling", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true
                     ).send({
                         from: whitelistControllerAddress
@@ -340,7 +340,7 @@ describe("Testing canceling", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true
                     ).send({
                         from: whitelistControllerAddress
@@ -481,7 +481,8 @@ describe("Testing canceling", function () {
 
 
                 // validate contributions
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                let ParticipantTotalStats = await ReversibleICOInstance.methods.participantAggregatedStats(participant_1).call();
+
                 let ContributionTotals = new helpers.BN("0");
 
                 for(let i = 0; i < StageCount; i++) {
@@ -492,7 +493,7 @@ describe("Testing canceling", function () {
                 }
 
                 expect(
-                    ParticipantByAddress.totalReceivedETH.toString()
+                    ParticipantTotalStats.totalReceivedETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );

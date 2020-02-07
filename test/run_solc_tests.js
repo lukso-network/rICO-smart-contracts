@@ -1,14 +1,10 @@
 const setup = require("./init.js");
-(async function() { 
-  try {
+(async function() {
     const init = await setup.runSetup();
-    await runTests(init); 
-  } catch (e) {
-    console.log("error:", e);
-  }
+    runTests(init);
 })();
 
-async function runTests(init) {
+function runTests(init) {
 
   const tests = [
     "external/SafeMath",

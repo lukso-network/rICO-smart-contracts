@@ -194,9 +194,9 @@ async function doFreshDeployment(name) {
 
 describe("Website States", function () {
 
-    describe("contract in stage 0 - 1 day before Allocation Start", async function () {
+    describe("1 day before Allocation Start", async function () {
 
-        const name = "stage_0_before_allocation";
+        const name = "before_allocation";
         let Instances;
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
@@ -208,10 +208,9 @@ describe("Website States", function () {
             expect(
                 await Instances.ReversibleICOInstance.methods.initialized().call()
             ).to.be.equal( true );
-            expect(
-                await Instances.ReversibleICOInstance.methods.getCurrentStage().call()
-            ).to.be.equal( "0" );
-
+            await helpers.assertInvalidOpcode( async () => {
+                await Instances.ReversibleICOInstance.methods.getCurrentStage().call();
+            }, "Block outside of rICO period.");
         });
     });
 
@@ -267,7 +266,7 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.participantCount().call()
             ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
             let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
 
             expect(
@@ -294,7 +293,7 @@ describe("Website States", function () {
             });
 
             await Instances.ReversibleICOInstance.methods.whitelist(
-                participant_1,
+                [participant_1],
                 true,
             ).send({
                 from: whitelistControllerAddress
@@ -313,7 +312,7 @@ describe("Website States", function () {
                 await Instances.ReversibleICOInstance.methods.participantCount().call()
             ).to.be.equal( "1" );
 
-            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(1).call();
+            let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
             let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
 
             expect(

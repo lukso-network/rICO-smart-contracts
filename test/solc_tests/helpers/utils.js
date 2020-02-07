@@ -285,6 +285,7 @@ module.exports = {
             
             // get the number of blocks that have "elapsed" since the buyPhase start
             const passedBlocks = currentBlock.sub(BuyPhaseStartBlock).add(new helpers.BN(1));    // + 1 since we count current as well.
+            const BuyPhaseBlockCount = new helpers.BN(BuyPhaseEndBlock).sub(BuyPhaseStartBlock).add(new helpers.BN("1"));
             return passedBlocks.mul(
                 new helpers.BN("10").pow( new helpers.BN(precision) )
             ).div(BuyPhaseBlockCount);
@@ -369,11 +370,12 @@ module.exports = {
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
         let ParticipantByAddress = await contract.methods.participantsByAddress(participant_address).call();
+        let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant_address).call();
 
         let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
         const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
-    
+
         console.log();
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
@@ -386,15 +388,14 @@ module.exports = {
 
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
-        console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.committedETH.toString())   +" eth" );
-        console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantByAddress.returnedETH.toString())    +" eth" );
-        console.log("Total acceptedETH:        ", helpers.utils.toEth(helpers, ParticipantByAddress.acceptedETH.toString())    +" eth" );
-        console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.withdrawnETH.toString())   +" eth" );
-        console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantByAddress.allocatedETH.toString())   +" eth" );
-        console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.reservedTokens.toString()) +" tokens" );
-        console.log("Total cancelledTokens:    ", helpers.utils.toEth(helpers, ParticipantByAddress.cancelledTokens.toString() ) +" tokens" );
-        console.log("Total boughtTokens:       ", helpers.utils.toEth(helpers, ParticipantByAddress.boughtTokens.toString())   +" tokens" );
-        console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantByAddress.returnedTokens.toString()) +" tokens" );
+        console.log("Total totalReceivedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.totalReceivedETH.toString())   +" eth" );
+        console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedETH.toString())    +" eth" );
+        console.log("Total committedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
+        console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.withdrawnETH.toString())   +" eth" );
+        console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedETH.toString())   +" eth" );
+        console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString()) +" tokens" );
+        console.log("Total boughtTokens:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.boughtTokens.toString())   +" tokens" );
+        console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedTokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
 
         if(max > 0) {

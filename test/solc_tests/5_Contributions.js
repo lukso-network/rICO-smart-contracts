@@ -242,7 +242,7 @@ describe("Contribution Testing", function () {
                 contributionCount++;
 
                 let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                    participant_1,
+                    [participant_1],
                     true
                 ).send({
                     from: whitelistControllerAddress
