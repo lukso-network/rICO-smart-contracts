@@ -130,7 +130,7 @@ async function revertToFreshDeployment() {
         StageCount = 12;
         StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
@@ -334,7 +334,7 @@ describe("Flow Testing", function () {
                 StageCount = 12;
                 StageBlockCount = blocksPerDay * 30;
                 StagePriceIncrease = helpers.solidity.ether * 0.0001;
-                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
                 // for validation
                 BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
@@ -1021,6 +1021,14 @@ describe("Flow Testing", function () {
                     const withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
                         helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
                     );
+                    console.log("withdrawCalculatedBefore:           ", withdrawCalculatedBefore);
+                    console.log("returnValues.eth:                   ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.eth));
+                    console.log("returnValues.project_allocated_eth: ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.project_allocated_eth));
+                    console.log("returnValues.withdrawn_tokens:      ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.withdrawn_tokens));
+                    console.log("returnValues.returned_tokens:       ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.returned_tokens));
+
+                    
+                    await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 6 );
 
                     // send full token balance back to rico
                     let withdrawTx = await TokenContractInstance.methods.send(
@@ -1062,6 +1070,7 @@ describe("Flow Testing", function () {
                         .sub(txGasCost)
                         // add withdrawn eth amount
                         .add(withdrawCalculatedBefore.eth);
+
                     expect( ParticipantBalanceAfter ).to.be.bignumber.equal( ParticipantBalanceAfterValidation );
 
                     // ETH: validate contract eth balances
@@ -1391,7 +1400,7 @@ describe("Flow Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Buy phase ended.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -1422,7 +1431,7 @@ describe("Flow Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Buy phase ended.");
 
                 });
             });

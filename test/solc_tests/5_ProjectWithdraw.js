@@ -128,7 +128,7 @@ async function revertToFreshDeployment() {
         StageCount = 12;
         StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
@@ -260,14 +260,14 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () {
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                    it("reverts \"Requested amount too big, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
+                        }, "Requested amount too big, not enough unlocked ETH available.");
 
                     });
                 });
@@ -305,14 +305,14 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () {
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                    it("reverts \"Requested amount too big, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
+                        }, "Requested amount too big, not enough unlocked ETH available.");
 
                     });
                 });
@@ -345,14 +345,14 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () {
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                    it("reverts \"Requested amount too big, not enough unlocked ETH available.\"", async function () {
 
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
+                        }, "Requested amount too big, not enough unlocked ETH available.");
 
                     });
                 });
@@ -425,7 +425,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 describe("caller is projectWalletAddress", async function () {
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                    it("reverts \"Requested amount too big, not enough unlocked ETH available.\"", async function () {
 
                         let Available = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH: ", helpers.utils.toEth(helpers, Available.toString() ) +" eth" );
@@ -595,7 +595,7 @@ describe("ProjectWithdraw Testing", function () {
                         });
 
                         console.log("");
-                        console.log("after withdrawTx" );
+                        console.log("after withdrawTx 2" );
 
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
@@ -608,7 +608,6 @@ describe("ProjectWithdraw Testing", function () {
 
                         AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-
 
                         console.log("");
                         console.log("whitelistTx participant_3:" );
@@ -634,7 +633,8 @@ describe("ProjectWithdraw Testing", function () {
                     });
                 });
             });
-            */
+            
+            /*
 
             describe("getProjectAvailableEth", async function () {
 
@@ -689,6 +689,8 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
             });
+
+            */
 
             /*
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {

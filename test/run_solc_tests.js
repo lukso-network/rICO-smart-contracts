@@ -15,10 +15,9 @@ function runTests(init) {
     "5_Cancel",
     "5_Contributions",
     "5_Flows",
-    // "6_Gnosis-Safe",
+    "5_ProjectWithdraw",
+    // // "6_Gnosis-Safe",
     "7_Website",
-    // "5_ProjectWithdraw",
-    // "5_Contributions",
     "10_ProjectWithdraw",
 
   ];

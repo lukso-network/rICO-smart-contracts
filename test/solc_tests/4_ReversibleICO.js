@@ -1044,7 +1044,7 @@ describe("ReversibleICO", function () {
                 BuyPhaseBlockCount = await this.ReversibleICO.methods.buyPhaseBlockCount().call();
             });
 
-            it("Returns 0 before stage 1 start_block + 1", async function () {
+            it("Returns 0 before stage 1 start_block", async function () {
 
                 let stageId = 0;
                 // jump to stage commit start block - 1
@@ -1057,7 +1057,9 @@ describe("ReversibleICO", function () {
 
                 stageId = 1;
                 // jump to stage start_block - 1
-                currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
+                // currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId );
+                currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
+
                 contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
                 calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
 
@@ -1067,34 +1069,50 @@ describe("ReversibleICO", function () {
             });
 
 
-            it("Returns higher than 0 if at stage 1 start_block + 1", async function () {
+            it("Returns higher than 0 if at stage 1 start_block", async function () {
                 const stageId = 1;
                 // jump to stage 1 start_block exactly
-                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, false, 1 );
+                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, false, 0 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
             });
 
-            it("Returns 0 at BuyPhaseEndBlock", async function () {
+            it("Returns lower than max at BuyPhaseEndBlock - 1", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
-                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true );
+                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, -1 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-                expect( calculatedRatio.toString() ).to.be.equal("0");
+                
+                const maxRatio = new helpers.BN("10").pow( new helpers.BN(precision));
+                // ratio should be lower than 10 ** precision
+                expect(
+                    calculatedRatio.lt(maxRatio)
+                ).to.be.equal( true );
+
             });
 
-            it("Returns 0 at BuyPhaseEndBlock + 1", async function () {
+            it("Returns max at BuyPhaseEndBlock", async function () {
+                const stageId = 12;
+                // jump to stage 1 start_block exactly
+                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 0 );
+                const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+                const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
+                expect( calculatedRatio.toString() ).to.be.equal( new helpers.BN("10").pow( new helpers.BN(precision) ).toString() );
+            });
+
+            it("Returns max at BuyPhaseEndBlock + 1", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 1 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
                 const calculatedRatio = helpers.utils.getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
-                expect( calculatedRatio.toString() ).to.be.equal("0");
+                expect( calculatedRatio.toString() ).to.be.equal( new helpers.BN("10").pow( new helpers.BN(precision) ).toString() );
             });
         });
 

@@ -383,7 +383,6 @@ contract ReversibleICO is IERC777Recipient {
         if (participantRecord.whitelisted == true) {
             acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
         }
-        revert("cancel: Participant has no pending contributions.");
     }
 
     /**
@@ -407,7 +406,7 @@ contract ReversibleICO is IERC777Recipient {
     isRunning
     {
         // Participant must have pending ETH ...
-        require(hasPendingETH(_sender), "Participant has no contributions.");
+        require(hasPendingETH(_sender), "cancel: Participant has no pending contributions.");
 
         // Cancel participant's contribution.
         cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
@@ -433,7 +432,16 @@ contract ReversibleICO is IERC777Recipient {
         ).div(10 ** 20);
 
         // add the allocated directly and subtract already withdrawn by project
-        return unlocked.add(projectAllocatedETH).sub(projectWithdrawnETH);
+        uint256 totalAvailable = unlocked.add(projectAllocatedETH);
+
+        // Due to rounding errors when participants withdraw using tokens
+        // projectWithdrawnETH can be 1 wei higher per participant that withdrew
+        // than actually available after withdraw allocation.
+        if(projectWithdrawnETH >= totalAvailable) {
+            return 0;
+        }
+
+        return totalAvailable.sub(projectWithdrawnETH);
     }
 
     /**
@@ -606,22 +614,23 @@ contract ReversibleICO is IERC777Recipient {
     public
     view
     returns (
-        uint256 stageCommittedETH,
+        uint256 stageTotalReceivedETH,
         uint256 stageReturnedETH,
-        uint256 stageAcceptedETH,
+        uint256 stageCommittedETH,
         uint256 stageWithdrawnETH,
+        uint256 stageAllocatedETH,
         uint256 stageReservedTokens,
         uint256 stageBoughtTokens,
         uint256 stageReturnedTokens
     ) {
 
         ParticipantDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
-
         return (
             totalsRecord.totalReceivedETH,
             totalsRecord.returnedETH,
             totalsRecord.committedETH,
             totalsRecord.withdrawnETH,
+            totalsRecord.allocatedETH,
             totalsRecord.reservedTokens,
             totalsRecord.boughtTokens,
             totalsRecord.returnedTokens
@@ -795,15 +804,11 @@ contract ReversibleICO is IERC777Recipient {
                 ).div(10 ** uint256(precision));
 
                 return bought.sub(unlocked);
-
-            } else {
-
-                // after buyPhase's end
-                return 0;
             }
-        } else {
+            // after buyPhase's end
             return 0;
         }
+        return 0;
     }
 
     /**
@@ -835,23 +840,6 @@ contract ReversibleICO is IERC777Recipient {
     function getCurrentUnlockPercentage() public view returns (uint256) {
         return getCurrentUnlockPercentageFor(
             getCurrentBlockNumber(),
-            buyPhaseStartBlock,
-            buyPhaseEndBlock
-        );
-    }
-
-    function getUnlockPercentageAtLastProjectWithdraw() public view returns (uint256) {
-
-        // if project has not withdrawn yet, we use current block
-        // else block is last project withdraw block
-
-        uint256 atBlock = getCurrentBlockNumber();
-        if(lastProjectWithdrawBlock > 0 && atBlock > lastProjectWithdrawBlock) {
-            atBlock = lastProjectWithdrawBlock;
-        }
-
-        return getCurrentUnlockPercentageFor(
-            atBlock,
             buyPhaseStartBlock,
             buyPhaseEndBlock
         );

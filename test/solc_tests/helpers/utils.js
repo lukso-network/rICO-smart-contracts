@@ -300,30 +300,32 @@ module.exports = {
     calculateLockedTokensAtBlockForBoughtAmount(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, tokenAmount) {
 
         tokenAmount = new helpers.BN(tokenAmount);
-        if(currentBlock < BuyPhaseStartBlock) {
-            // commit phase
-            return tokenAmount;
-        } else if(currentBlock < BuyPhaseEndBlock) {
-            // buy  phase
-            const precision = 20;
-            const unlocked = tokenAmount.mul(
-                new helpers.BN(
-                    helpers.utils.getCurrentUnlockPercentage(
-                        helpers,
-                        currentBlock,
-                        BuyPhaseStartBlock,
-                        BuyPhaseEndBlock,
-                        new helpers.BN(precision)
+        if (tokenAmount.gt( new helpers.BN("0") ) ) {
+            if(currentBlock < BuyPhaseStartBlock) {
+                // commit phase
+                return tokenAmount;
+            } else if(currentBlock < BuyPhaseEndBlock) {
+                // buy phase
+                const precision = new helpers.BN(20);
+                const unlocked = tokenAmount.mul(
+                    new helpers.BN(
+                        helpers.utils.getCurrentUnlockPercentage(
+                            helpers,
+                            currentBlock,
+                            BuyPhaseStartBlock,
+                            BuyPhaseEndBlock,
+                            precision
+                        )
                     )
-                )
-            ).div(
-                new helpers.BN("10").pow( new helpers.BN(precision) )
-            );
-            return tokenAmount.sub(unlocked);
-        } else {
-            // after contract end
+                ).div(
+                    new helpers.BN("10").pow( precision )
+                );
+                return tokenAmount.sub(unlocked);
+            } 
+            // after buyPhase's end
             return new helpers.BN("0");
         }
+        return new helpers.BN("0");
     },
     async getTokenAmountForEthAtStage(helpers, contract, ethValue, stageId) {
         const stageData = await contract.methods.stages(stageId).call();
@@ -361,9 +363,10 @@ module.exports = {
     },
     async displayContributions(helpers, contract, participant_address, max = null) {
 
-        let committedETH = await contract.methods.committedETH().call();
+        
+        let totalReceivedETH = await contract.methods.totalReceivedETH().call();
         let returnedETH = await contract.methods.returnedETH().call();
-        let acceptedETH = await contract.methods.acceptedETH().call();
+        let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
         let allocatedETH = await contract.methods.projectAllocatedETH().call();
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
@@ -379,18 +382,18 @@ module.exports = {
         console.log();
         console.log("Globals");
         console.log("Real Balance:             ", helpers.utils.toEth(helpers, ContractBalance.toString()) +" eth" );
-        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
+        console.log("Total amount Received:    ", helpers.utils.toEth(helpers, totalReceivedETH.toString()) +" eth" );
         console.log("Total amount Returned:    ", helpers.utils.toEth(helpers, returnedETH.toString()) +" eth" );
-        console.log("Total amount Accepted:    ", helpers.utils.toEth(helpers, acceptedETH.toString()) +" eth" );
+        console.log("Total amount Committed:   ", helpers.utils.toEth(helpers, committedETH.toString()) +" eth" );
         console.log("Total amount Withdrawn:   ", helpers.utils.toEth(helpers, withdrawnETH.toString()) +" eth" );
         console.log("Total amount Allocated:   ", helpers.utils.toEth(helpers, allocatedETH.toString()) +" eth" );
         console.log("Project ETH Withdrawn:    ", helpers.utils.toEth(helpers, projectWithdrawnETH.toString()) +" eth" );
 
         console.log("Contributions for address:", participant_address);
         console.log("Count:                    ", contributionsCount.toString());
-        console.log("Total totalReceivedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.totalReceivedETH.toString())   +" eth" );
+        console.log("Total totalReceivedETH:   ", helpers.utils.toEth(helpers, ParticipantTotalStats.totalReceivedETH.toString())   +" eth" );
         console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedETH.toString())    +" eth" );
-        console.log("Total committedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
+        console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
         console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.withdrawnETH.toString())   +" eth" );
         console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedETH.toString())   +" eth" );
         console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString()) +" tokens" );
@@ -405,14 +408,13 @@ module.exports = {
         for(let i = 0; i < StageCount; i++) {
             const ParticipantStageDetails = await contract.methods.getParticipantDetailsByStage(participant_address, i).call();
             console.log("-------------------------------------------");
-            console.log("stageId:          ", i);
-            console.log("committedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )   +" eth" );
+            console.log("stageId:           ", i);
+            console.log("totalReceivedETH:    ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageTotalReceivedETH.toString() )   +" eth" );
             console.log("returnedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedETH.toString() )    +" eth" );
-            console.log("acceptedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAcceptedETH.toString() )    +" eth" );
+            console.log("committedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )    +" eth" );
             console.log("withdrawnETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageWithdrawnETH.toString() )   +" eth" );
             console.log("allocatedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAllocatedETH.toString() )   +" eth" );
             console.log("reservedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReservedTokens.toString() ) +" tokens" );
-            console.log("cancelledTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCancelledTokens.toString() ) +" tokens" );
             console.log("boughtTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageBoughtTokens.toString() )   +" tokens" );
             console.log("returnedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedTokens.toString() ) +" tokens" );
         }
