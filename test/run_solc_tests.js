@@ -21,6 +21,7 @@ async function runTests(init) {
     // next ones need to be reworked
     "5_Cancel",
     "5_Contributions",
+    "5_Withdraw",
     "5_Flows",
     "10_ProjectWithdraw",
 
