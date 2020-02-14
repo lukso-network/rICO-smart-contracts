@@ -488,7 +488,7 @@ describe("Testing canceling", function () {
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(new helpers.BN(
-                        ParticipantStageDetails.stageCommittedETH
+                        ParticipantStageDetails.stageTotalReceivedETH
                     ));
                 }
 
