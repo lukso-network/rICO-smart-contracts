@@ -1046,7 +1046,7 @@ contract ReversibleICO is IERC777Recipient {
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalReceivedETH - committedETH
-                uint256 newAcceptedValue = byStage.totalReceivedETH.sub(byStage.committedETH);
+                uint256 newAcceptedValue = byStage.totalReceivedETH.sub(byStage.committedETH).sub(byStage.returnedETH);
                 uint256 returnValue;
 
                 if (newAcceptedValue > 0) {
@@ -1054,9 +1054,8 @@ contract ReversibleICO is IERC777Recipient {
                     // if incomming value is higher than what we can accept,
                     // just accept the difference and return the rest
                     if (newAcceptedValue > maxAcceptableValue) {
+                        returnValue = newAcceptedValue.sub(maxAcceptableValue);
                         newAcceptedValue = maxAcceptableValue;
-                        returnValue = byStage.totalReceivedETH.sub(byStage.returnedETH).sub(byStage.committedETH)
-                        .sub(byStage.withdrawnETH).sub(newAcceptedValue);
 
                         // update return values
                         returnedETH = returnedETH.add(returnValue);

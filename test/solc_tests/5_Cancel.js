@@ -784,6 +784,66 @@ describe("Testing canceling", function () {
                 .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectAllocatedETH mismatch");
         });
     });
+
+    describe("Cancelling before white-listing should not deliver too many tokens later", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+            helpers.utils.resetAccountNonceCache(helpers);
+            // jump to contract start
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+        });
+
+        it("Participant buys 900 tokens in phase 0", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 900 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("0");
+        });
+
+        it("Participant cancels", async function () {
+            await ReversibleICOInstance.methods.cancel()
+                .send({ from: participant_1, gas: 1000000 });
+        });
+
+        it("Participant gets whitelisted", async function () {
+            let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                [participant_1],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
+
+        it("Participant buying 1 token should not get cancelled tokens", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("1000000000000000000");
+        });
+    });
 });
 
 
