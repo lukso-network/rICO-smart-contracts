@@ -863,7 +863,7 @@ describe("ReversibleICO", function () {
                                 );
                             });
 
-                            describe("new contribution from the TestAcceptParticipant that is now whitelisted, is acceepted automatically.", async function () {
+                            describe("new contribution from the TestAcceptParticipant that is now whitelisted, is accepted automatically.", async function () {
 
                                 let newContributionTx, initialContributionsCount, afterContributionsCount;
 
@@ -898,22 +898,19 @@ describe("ReversibleICO", function () {
                                     let currentStage = await this.ReversibleICO.methods.getCurrentStage().call();
                                     const StageDetails = await this.ReversibleICO.methods.getParticipantDetailsByStage(
                                         TestAcceptParticipant,
-                                        // indexed from 0, thus inital count will match last id
+                                        // indexed from 0, thus initial count will match last id
                                         currentStage
                                     ).call();
 
-                                    const commited = (parseInt(StageDetails.stageCommittedETH, 10) );
+                                    const total = (parseInt(StageDetails.stageTotalReceivedETH, 10) );
+                                    const committed = (parseInt(StageDetails.stageCommittedETH, 10) );
                                     const returned = (parseInt(StageDetails.stageReturnedETH, 10) );
-                                    const accepted = (parseInt(StageDetails.stageAcceptedETH, 10) );
                                     const withdrawn = (parseInt(StageDetails.stageWithdrawnETH, 10) );
 
-                                    const processedTotals = accepted + returned + withdrawn;
-                                    expect( processedTotals ).to.be.equal(commited);
-
+                                    const processedTotals = committed + returned + withdrawn;
+                                    expect( processedTotals ).to.be.equal(total);
                                 });
-
                             });
-
                         });
 
 
