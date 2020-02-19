@@ -76,8 +76,8 @@ async function revertToFreshDeployment() {
     } else {
 
         /*
-        *   Deploy Token Contract
-        */
+         *   Deploy Token Contract
+         */
 
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers, "RicoToken", {
@@ -114,8 +114,8 @@ async function revertToFreshDeployment() {
         });
 
         /*
-        *   Add RICO Settings
-        */
+         *   Add RICO Settings
+         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
         // starts in one day
@@ -128,19 +128,19 @@ async function revertToFreshDeployment() {
         // 10 x 10 day periods for distribution
         StageCount = 10;
         StageBlockCount = blocksPerDay * 10;
-        StagePriceIncrease = 0;
+        StagePriceIncrease = commitPhasePrice;
         commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
 
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,        // address _tokenContractAddress
+            TokenContractAddress,       // address _tokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,          // address _projectWalletAddress
-            commitPhaseStartBlock,                 // uint256 _StartBlock
-            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,            // uint256 _commitPhasePrice in wei
+            projectWalletAddress,       // address _projectWalletAddress
+            commitPhaseStartBlock,      // uint256 _StartBlock
+            commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
+            commitPhasePrice,           // uint256 _commitPhasePrice in wei
             StageCount,                 // uint8   _stageCount
             StageBlockCount,            // uint256 _stageBlockCount
             StagePriceIncrease          // uint256 _stagePriceIncrease in wei
@@ -222,7 +222,7 @@ describe("Withdrawal Testing", function () {
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
 
-            const ContributionAmount = commitPhasePrice;
+            const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -293,7 +293,7 @@ describe("Withdrawal Testing", function () {
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
 
-            const ContributionAmount = commitPhasePrice;
+            const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -311,7 +311,7 @@ describe("Withdrawal Testing", function () {
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
 
-            const ContributionAmount = commitPhasePrice;
+            const ContributionAmount = 1 * (2 * commitPhasePrice);
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -414,7 +414,7 @@ describe("Withdrawal Testing", function () {
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
 
-            const ContributionAmount = commitPhasePrice;
+            const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
@@ -424,6 +424,170 @@ describe("Withdrawal Testing", function () {
 
             let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
             expect(balance).to.be.equal("1000000000000000000");
+        });
+    });
+
+    describe("Multiple withdrawals", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+            helpers.utils.resetAccountNonceCache(helpers);
+            // jump to contract start
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+        });
+
+        it("Whitelist buyer", async function () {
+            let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                [participant_1],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
+
+        it("Buy 2000 tokens in phase 0", async function () {
+            const stage = 0;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("2000000000000000000000");
+        });
+
+        it("Withdraw 500 token in phase 0", async function () {
+            const stage = 0;
+
+            const expectedReturnEth = new BN((500 * (stage + 1) * commitPhasePrice).toString());
+
+            const ethBefore = await helpers.utils.getBalance(helpers, participant_1);
+
+            const tx = await TokenContractInstance.methods.transfer(ReversibleICOInstance.receipt.contractAddress, "500000000000000000000")
+                .send({ from: participant_1, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("1500000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, participant_1);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Buy 2000 tokens in phase 1", async function () {
+            const stage = 1;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("3500000000000000000000");
+        });
+
+        it("Withdraw 500 token in phase 1", async function () {
+            const stage = 1;
+
+            const expectedReturnEth = new BN((500 * (stage + 1) * commitPhasePrice).toString());
+
+            const ethBefore = await helpers.utils.getBalance(helpers, participant_1);
+
+            const tx = await TokenContractInstance.methods.transfer(ReversibleICOInstance.receipt.contractAddress, "500000000000000000000")
+                .send({ from: participant_1, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("3000000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, participant_1);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Buy 2000 tokens in phase 5", async function () {
+            const stage = 5;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("5000000000000000000000");
+        });
+
+        it("Withdraw 500 token in phase 5", async function () {
+            const stage = 5;
+
+            const expectedReturnEth = new BN((500 * (stage + 1) * commitPhasePrice).toString());
+
+            const ethBefore = await helpers.utils.getBalance(helpers, participant_1);
+
+            const tx = await TokenContractInstance.methods.transfer(ReversibleICOInstance.receipt.contractAddress, "500000000000000000000")
+                .send({ from: participant_1, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("4500000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, participant_1);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Jump to end of phase 5 (50 % unlocked)", async function () {
+            // jump to last block of phase 1
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 5, true);
+
+            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("50000000000000000000");
+        });
+
+        it("Withdraw all tokens", async function () {
+            const returnEth0 = 500 * 1 * commitPhasePrice;
+            const returnEth1 = 500 * 2 * commitPhasePrice;
+            const returnEth5 = 500 * 6 * commitPhasePrice;
+            const expectedReturnEth = new BN((returnEth0 + returnEth1 + returnEth5).toString());
+
+            const ethBefore = await helpers.utils.getBalance(helpers, participant_1);
+
+            const tx = await TokenContractInstance.methods.transfer(ReversibleICOInstance.receipt.contractAddress, "4500000000000000000000")
+                .send({ from: participant_1, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("3000000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, participant_1);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
         });
     });
 });
