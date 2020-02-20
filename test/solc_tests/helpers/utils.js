@@ -485,24 +485,22 @@ module.exports = {
                 for( let i = currentStageNumber; i >= 0; i-- ) {
                     let stage_id = i;
 
-                    const ParticipantRecordbyStage = await contract.methods.getParticipantDetailsByStage(_from, stage_id).call();
+                    const ParticipantRecordByStage = await contract.methods.getParticipantDetailsByStage(_from, stage_id).call();
+                    const StageReservedTokens = new helpers.BN(ParticipantRecordByStage.stageReservedTokens);
+                    const StageBoughtTokens = new helpers.BN(ParticipantRecordByStage.stageBoughtTokens);
+                    const StageReturnedTokens = new helpers.BN(ParticipantRecordByStage.stageReturnedTokens);
 
                     // total participant tokens at the current stage i.e. reserved + bought - returned
-                    const totalInStage = new helpers.BN(
-                        new helpers.BN(ParticipantRecordbyStage.stageReservedTokens)
-                    ).add(
-                        new helpers.BN(ParticipantRecordbyStage.stageBoughtTokens)
-                    ).sub(
-                        new helpers.BN(ParticipantRecordbyStage.stageReturnedTokens)
-                    );
+                    const totalInStage = StageReservedTokens.add(StageBoughtTokens).sub(StageReturnedTokens);
 
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
 
                     let tokensInStage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                        helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock, totalInStage
-                    );
+                        helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock,
+                        StageReservedTokens.add(StageBoughtTokens)
+                    ).sub(StageReturnedTokens);
 
                     // only try to process stages that actually have tokens in them.
                     if(tokensInStage.gt( new helpers.BN("0") )) {
