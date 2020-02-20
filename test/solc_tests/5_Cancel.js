@@ -722,6 +722,68 @@ describe("Testing canceling", function () {
             }
         });
     });
+
+    describe("Check global state after cancelled contribution", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+            helpers.utils.resetAccountNonceCache(helpers);
+            // jump to contract start
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+        });
+
+        it("Participant buys 1 tokens in phase 0", async function () {
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 1 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+        });
+
+        it("Participant cancels", async function () {
+            await ReversibleICOInstance.methods.cancel()
+                .send({ from: participant_1, gas: 1000000 });
+        });
+
+        it("Contract global state should match sum over all participants and stages", async function () {
+            let globalTotalReceivedETH = new helpers.BN("0");
+            let globalReturnedETH = new helpers.BN("0");
+            let globalCommittedETH = new helpers.BN("0");
+            let globalWithdrawnETH = new helpers.BN("0");
+            let globalAllocatedETH = new helpers.BN("0");
+
+            let participantCount = await ReversibleICOInstance.methods.participantCount().call();
+            for (let p = 0; p < participantCount; p++) {
+                let participant = await ReversibleICOInstance.methods.participantsById(p).call();
+
+                for (let s = 0; s < StageCount; s++) {
+                    const state = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant, s).call();
+
+                    globalTotalReceivedETH = globalTotalReceivedETH.add(new helpers.BN(state.stageTotalReceivedETH));
+                    globalReturnedETH = globalReturnedETH.add(new helpers.BN(state.stageReturnedETH));
+                    globalCommittedETH = globalCommittedETH.add(new helpers.BN(state.stageCommittedETH));
+                    globalWithdrawnETH = globalWithdrawnETH.add(new helpers.BN(state.stageWithdrawnETH));
+                    globalAllocatedETH = globalAllocatedETH.add(new helpers.BN(state.stageAllocatedETH));
+                }
+            }
+
+            // Compare calculated sums against global contract values
+            expect(new helpers.BN(await ReversibleICOInstance.methods.totalReceivedETH().call()))
+                .to.be.bignumber.equal(globalTotalReceivedETH, "ReversibleICO.totalReceivedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.returnedETH().call()))
+                .to.be.bignumber.equal(globalReturnedETH, "ReversibleICO.returnedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.committedETH().call()))
+                .to.be.bignumber.equal(globalCommittedETH, "ReversibleICO.committedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.withdrawnETH().call()))
+                .to.be.bignumber.equal(globalWithdrawnETH, "ReversibleICO.withdrawnETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.projectAllocatedETH().call()))
+                .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectAllocatedETH mismatch");
+        });
+    });
 });
 
 
