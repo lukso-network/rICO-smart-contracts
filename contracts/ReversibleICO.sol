@@ -245,7 +245,7 @@ contract ReversibleICO is IERC777Recipient {
         Stage storage commitPhase = stages[0];
 
         commitPhase.startBlock = uint128(_commitPhaseStartBlock);
-        commitPhase.endBlock =  uint128(commitPhaseEndBlock);
+        commitPhase.endBlock = uint128(commitPhaseEndBlock);
         commitPhase.tokenPrice = _commitPhasePrice;
 
         // Setup stage 1 to n: The buy phase stages
@@ -292,10 +292,9 @@ contract ReversibleICO is IERC777Recipient {
         // Accept contributions higher than the minimum amount
         if (msg.value >= minContribution) {
             commit(msg.sender, msg.value);
-
-        // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
-        // This also allows for extended wallet compatibility by sending a non-zereo amount
         } else {
+            // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
+            // This also allows for extended wallet compatibility by sending a non-zereo amount
             cancel(msg.sender, msg.value);
         }
     }
