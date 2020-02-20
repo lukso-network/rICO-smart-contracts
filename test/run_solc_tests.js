@@ -1,7 +1,11 @@
 const setup = require("./init.js");
 (async function() {
+  try {
     const init = await setup.runSetup();
-    runTests(init);
+    await runTests(init); 
+  } catch (e) {
+    console.log("error:", e);
+  }
 })();
 
 function runTests(init) {
@@ -9,17 +13,17 @@ function runTests(init) {
   const tests = [
     "external/SafeMath",
     "1_ERC1820",
-    "2_ERC777_Token",
-    "3_ERC20Token",
-    "4_ReversibleICO",
-    "5_Cancel",
-    "5_Contributions",
-    "5_Flows",
-    "5_ProjectWithdraw",
-    // // "6_Gnosis-Safe",
-    "7_Website",
-    "10_ProjectWithdraw",
-
+    // "2_ERC777_Token",
+    // "3_ERC20Token",
+    // "4_ReversibleICO",
+    // "5_Cancel",
+    // "5_Contributions",
+    // "5_Flows",
+    // "5_ProjectWithdraw",
+    // // // "6_Gnosis-Safe",
+    // "7_Website",
+    // "10_ProjectWithdraw",
+    "rework/stages"
   ];
 
   init.helpers.utils.toLog(

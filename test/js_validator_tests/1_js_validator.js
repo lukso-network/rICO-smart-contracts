@@ -9,9 +9,13 @@ const settings = {
     block:              100,
     blocksPerDay:       6450,
     commitPhaseDays:    22,
-    StageCount:         12,
-    StageDays:          30,
+    stageCount:         12,
+    stageDays:          30,
 };
+
+const {
+    expectThrow
+} = require('./test.utils');
 
 describe("Javascript Validator - Tests", function () {
     let Validator;
@@ -46,7 +50,7 @@ describe("Javascript Validator - Tests", function () {
 
             it("commitPhaseEndBlock is correct", function() {
                 expect(Validator.commitPhaseEndBlock, "commitPhaseEndBlock not correct").is.equal(
-                    // commitPhaseStartBlock
+                    // commitPhaseStartBlock ( current block + 1 day )
                     (settings.block + settings.blocksPerDay) + 
                     // commitPhaseBlockCount
                     ( settings.commitPhaseDays * settings.blocksPerDay )
@@ -63,7 +67,7 @@ describe("Javascript Validator - Tests", function () {
 
             it("buyPhaseEndBlock is correct", function() {
                 expect(Validator.buyPhaseEndBlock, "buyPhaseEndBlock not correct").is.equal(
-                    Validator.getStage(Validator.StageCount).endBlock
+                    Validator.getStage(Validator.stageCount).endBlock
                 );
             });
 
@@ -81,8 +85,8 @@ describe("Javascript Validator - Tests", function () {
                 expect(Validator.commitPhaseDays, "commitPhaseDays not correct").is.equal(settings.commitPhaseDays);
             });
 
-            it("StageDays is correct", function() {
-                expect(Validator.StageDays, "StageDays not correct").is.equal(settings.StageDays);
+            it("stageDays is correct", function() {
+                expect(Validator.stageDays, "stageDays not correct").is.equal(settings.stageDays);
             });
 
             it("commitPhasePrice is 0.002", function() {
@@ -92,10 +96,10 @@ describe("Javascript Validator - Tests", function () {
                 ).is.equal("0.002");
             });
 
-            it("StagePriceIncrease is 0.0001", function() {
+            it("stagePriceIncrease is 0.0001", function() {
                 expect(
-                    Validator.toEth(Validator.StagePriceIncrease),
-                    "StagePriceIncrease not correct"
+                    Validator.toEth(Validator.stagePriceIncrease),
+                    "stagePriceIncrease not correct"
                 ).is.equal("0.0001");
             });
 
@@ -120,21 +124,21 @@ describe("Javascript Validator - Tests", function () {
 
         describe("stage generation", function () {
 
-            it("StageCount is correct", function() {
-                expect(Validator.StageCount).is.equal(settings.StageCount);
+            it("stageCount is correct", function() {
+                expect(Validator.stageCount).is.equal(settings.stageCount);
             });
 
             it("pricing increases by 10% for each stage", function() {
 
                 let expectedPrice = Validator.commitPhasePrice;
                 let validCount = 0;
-                for(let i = 0; i < settings.StageCount; i++) {
+                for(let i = 0; i < settings.stageCount; i++) {
                     const stageData = Validator.getStage(i);
                     expect(stageData.tokenPrice.toString(), "Expected stage pricing is wrong.").is.equal(expectedPrice.toString());
-                    expectedPrice = stageData.tokenPrice.add( Validator.StagePriceIncrease );
+                    expectedPrice = stageData.tokenPrice.add( Validator.stagePriceIncrease );
                     validCount++;
                 }
-                expect(validCount, "At least one stage pricing is wrong.").is.equal(settings.StageCount);
+                expect(validCount, "At least one stage pricing is wrong.").is.equal(settings.stageCount);
             });
         });
     });
@@ -194,7 +198,7 @@ describe("Javascript Validator - Tests", function () {
             describe("last stage", function () {
                 let stageId;
                 before(function () {
-                    stageId = Validator.StageCount;
+                    stageId = Validator.stageCount;
                 });
 
                 it("should return correct stageId using startBlock", function() {
@@ -212,27 +216,27 @@ describe("Javascript Validator - Tests", function () {
 
             describe("1 block before 0", function () {
                 let stageId = 0;
-
-                it("should return correct stageId using startBlock", function() {
+                it("should throw \"Block outside of rICO period.\"", function() {
                     const blockInStage = Validator.getStage(stageId).startBlock - 1;
-                    const resultingStageId = Validator.getStageAtBlock(blockInStage);
-                    expect(resultingStageId.toString(), "Incorrect stage id returned").is.equal( stageId.toString() );
+                    expectThrow(() => {
+                        Validator.getStageAtBlock(blockInStage);
+                    }, "Block outside of rICO period.");
                 });
             });
 
             describe("1 block after last stage", function () {
                 let stageId;
                 before(function () {
-                    stageId = Validator.StageCount;
+                    stageId = Validator.stageCount;
                 });
 
-                it("should return 255", function() {
+                it("should throw \"Block outside of rICO period.\"", function() {
                     const blockInStage = Validator.getStage(stageId).endBlock + 1;
-                    const resultingStageId = Validator.getStageAtBlock(blockInStage);
-                    expect(resultingStageId.toString(), "Incorrect stage id returned").is.equal( (255).toString() );
+                    expectThrow(() => {
+                        Validator.getStageAtBlock(blockInStage);
+                    }, "Block outside of rICO period.");
                 });
             });
-
         });
     });
 
@@ -251,11 +255,10 @@ describe("Javascript Validator - Tests", function () {
                         expect(_blockNumber, "Incorrect block").is.equal(Validator.commitPhaseStartBlock - 1);
                     });
 
-                    it("should return commitPhasePrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
-                        expect(price.toString(), "Incorrect price returned").is.equal(
-                            Validator.getStage(0).tokenPrice.toString()
-                        );
+                    it("should throw \"Block outside of rICO period.\"", function() {
+                        expectThrow(() => {
+                            const price = Validator.getPriceAtBlock(_blockNumber);
+                        }, "Block outside of rICO period.");
                     });
                 });
 
@@ -277,14 +280,14 @@ describe("Javascript Validator - Tests", function () {
                 describe("at buyPhaseEndBlock", function () {
 
                     before(function () {
-                        _blockNumber = Validator.getStage(Validator.StageCount).endBlock;
+                        _blockNumber = Validator.getStage(Validator.stageCount).endBlock;
                         expect(_blockNumber, "Incorrect block").is.equal(Validator.buyPhaseEndBlock);
                     });
 
                     it("should return commitPhasePrice", function() {
                         const price = Validator.getPriceAtBlock(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
-                            Validator.getStage(Validator.StageCount).tokenPrice.toString()
+                            Validator.getStage(Validator.stageCount).tokenPrice.toString()
                         );
                     });
                 });
@@ -292,14 +295,16 @@ describe("Javascript Validator - Tests", function () {
                 describe("after buyPhaseEndBlock", function () {
 
                     before(function () {
-                        _blockNumber = Validator.getStage(Validator.StageCount).endBlock + 1;
+                        _blockNumber = Validator.getStage(Validator.stageCount).endBlock + 1;
                         expect(_blockNumber, "Incorrect block").is.equal(Validator.buyPhaseEndBlock + 1);
                     });
 
-                    it("should return 0", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
-                        expect(price.toString(), "Incorrect price returned").is.equal("0");
+                    it("should throw \"Block outside of rICO period.\"", function() {
+                        expectThrow(() => {
+                            const price = Validator.getPriceAtBlock(_blockNumber);
+                        }, "Block outside of rICO period.");
                     });
+
                 });
             });
 
@@ -394,7 +399,7 @@ describe("Javascript Validator - Tests", function () {
                 let stageId;
 
                 before(function () {
-                    stageId = Validator.StageCount;
+                    stageId = Validator.stageCount;
                 });
 
                 describe("startBlock", function () {
@@ -476,7 +481,7 @@ describe("Javascript Validator - Tests", function () {
                 describe("last stage", function () {
                     let stageId;
                     before(function () {
-                        stageId = Validator.StageCount;
+                        stageId = Validator.stageCount;
                     });
 
                     it("should return 312.5 tokens", function() {
@@ -531,7 +536,7 @@ describe("Javascript Validator - Tests", function () {
                 describe("last stage", function () {
                     let stageId;
                     before(function () {
-                        stageId = Validator.StageCount;
+                        stageId = Validator.stageCount;
                     });
 
                     it("should return 1 eth", function() {
@@ -673,8 +678,8 @@ describe("Javascript Validator - Tests", function () {
                 block:              100,
                 blocksPerDay:       10,
                 commitPhaseDays:    10,
-                StageCount:         1,
-                StageDays:          10,
+                stageCount:         1,
+                stageDays:          10,
             };
 
             before(function ()  {
@@ -758,8 +763,8 @@ describe("Javascript Validator - Tests", function () {
                 block:              100,
                 blocksPerDay:       10,
                 commitPhaseDays:    10,
-                StageCount:         1,
-                StageDays:          10,
+                stageCount:         1,
+                stageDays:          10,
             };
 
             before(function ()  {

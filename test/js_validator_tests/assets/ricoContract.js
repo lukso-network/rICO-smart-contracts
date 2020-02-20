@@ -1,5 +1,5 @@
 /*
- * The test participant class.
+ * The rico validator class.
  *
  * @author Micky Socaci <micky@nowlive.ro>, Fabian Vogelsteller <@frozeman>
 */
@@ -310,10 +310,10 @@ class Contract extends Validator {
         
         if (participantRecord.whitelisted == true) {
             // byEth remains false as they need to send tokens back.
-            byTokens = canWithdraw(_address);
+            byTokens = this.canWithdraw(_address);
         } else {
             // byTokens remains false as the participant should have no tokens to send back anyway.
-            byEth = hasPendingETH(_address);
+            byEth = this.hasPendingETH(_address);
         }
 
         return {
@@ -330,15 +330,19 @@ class Contract extends Validator {
     }
 
     hasPendingETH(_address) {
-        const participantRecord = this.getParticipantRecordByAddress(_address);
-        if (
-            participantRecord.whitelisted == false &&
-            participantRecord.totalReceivedETH.gt(new BN("0")) &&
-            participantRecord.totalReceivedETH.gt(participantRecord.returnedETH)
-        ) {
+        const participantAvailableETH = this.getParticipantAvailableETH(_address);
+        if(participantAvailableETH > 0) {
             return true;
         }
         return false;
+    }
+
+    getParticipantAvailableETH(_from) {
+        const participantRecord = this.getParticipantRecordByAddress(_from);
+        return participantRecord.totalReceivedETH
+            .sub(participantRecord.returnedETH)
+            .sub(participantRecord.committedETH)
+            .sub(participantRecord.withdrawnETH);
     }
 
     cancelContributionsForAddress(_from, _value, _eventType) {
@@ -552,7 +556,7 @@ class Contract extends Validator {
 
     setupNewParticipant() {
         const variable = clone(Participant);
-        for (let i = 0; i <= this.StageCount; i++) {
+        for (let i = 0; i <= this.stageCount; i++) {
             variable.byStage[i] = clone(ParticipantDetailsByStage);
         }
         return variable;

@@ -28,6 +28,11 @@ describe("Javascript Validator - Contract - commit()", function () {
 
         before(function () {
 
+            // navigate contract to testStage startBlock
+            this.JSContract.setBlockNumber(
+                this.JSContract.stages[testStage].startBlock
+            );
+
             // set initial balance for address to 10 eth
             this.JSContract.BalanceContractInstance.set(
                 address, this.JSContract.getOneEtherBn().mul(new BN("10"))

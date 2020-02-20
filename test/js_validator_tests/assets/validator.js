@@ -1,5 +1,5 @@
 /*
- * The test participant class.
+ * The contract validator base class.
  *
  * @author Micky Socaci <micky@nowlive.ro>, Fabian Vogelsteller <@frozeman>
 */
@@ -25,8 +25,8 @@ class Validator {
 
         this.blocksPerDay    = settings.blocksPerDay       // 6450;
         this.commitPhaseDays = settings.commitPhaseDays    // 22;
-        this.StageDays       = settings.StageDays          // 30;
-        this.StageCount      = settings.StageCount         // 12;
+        this.stageDays       = settings.stageDays          // 30;
+        this.stageCount      = settings.stageCount         // 12;
         this.stages          = [];
 
         this.init();
@@ -42,8 +42,8 @@ class Validator {
 
         this.commitPhasePrice = solidity.etherBN.div( new BN("1000") ).mul( new BN("2") );  // solidity.ether * 0.002;
 
-        this.StageBlockCount = this.blocksPerDay * this.StageDays;
-        this.StagePriceIncrease = solidity.etherBN.div( new BN("10000") );  // solidity.ether * 0.0001;
+        this.stageBlockCount = this.blocksPerDay * this.stageDays;
+        this.stagePriceIncrease = solidity.etherBN.div( new BN("10000") );  // solidity.ether * 0.0001;
 
         // Generate stage data
         this.stages[0] = {
@@ -54,14 +54,14 @@ class Validator {
 
         let lastStageBlockEnd = this.stages[0].endBlock;
 
-        for (let i = 1; i <= this.StageCount; i++) {
+        for (let i = 1; i <= this.stageCount; i++) {
 
             const startBlock = lastStageBlockEnd + 1;
             this.stages[i] = {
                 startBlock: startBlock,
-                endBlock: startBlock + this.StageBlockCount,
+                endBlock: startBlock + this.stageBlockCount,
                 tokenPrice: this.commitPhasePrice.add( 
-                    this.StagePriceIncrease.mul( 
+                    this.stagePriceIncrease.mul( 
                         new BN(i)
                     )
                 ),
@@ -73,6 +73,7 @@ class Validator {
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         this.buyPhaseStartBlock = this.commitPhaseEndBlock + 1;
         this.buyPhaseEndBlock = lastStageBlockEnd;
+        
         // The duration of buyPhase in blocks
         this.buyPhaseBlockCount = lastStageBlockEnd - this.buyPhaseStartBlock;
     }
@@ -141,23 +142,50 @@ class Validator {
 
     getStageAtBlock(_blockNumber) {
 
+        this.require(
+            _blockNumber >= this.commitPhaseStartBlock && _blockNumber <= this.buyPhaseEndBlock,
+            "Block outside of rICO period."
+        );
+
+        // Return commit phase (stage 0)
         if (_blockNumber <= this.commitPhaseEndBlock) {
             return 0;
         }
 
+        /*
+        const distance = _blockNumber - this.commitPhaseEndBlock;
+        let stageID = Math.floor(distance / this.stageBlockCount);
+
+        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
+        if (distance % this.stageBlockCount > 0){
+            stageID++;
+        }
+        return stageID;
+        */
+
+        /*
+        if (_blockNumber <= this.commitPhaseEndBlock) {
+            return 0;
+        }
+
+        // This is the number of blocks starting from the first sale stage ( 1 ).
+        const distance = _blockNumber - (this.commitPhaseEndBlock + 1);
+        // Get the stageId (1..stageCount), commitPhase is stage 0
+        // e.g. distance = 5, stageBlockCount = 5, stageID = 2
+
+        const stageID = (distance / this.stageBlockCount);
+
+        return Math.floor(stageID);
+        */
+
         // floor division results, so we get what we're looking for.
-        let num = Math.floor((_blockNumber - this.commitPhaseEndBlock) / (this.StageBlockCount + 1)) + 1;
+        let num = Math.floor((_blockNumber - this.commitPhaseEndBlock) / (this.stageBlockCount + 1)) + 1;
 
         // Last block of each stage always computes as stage + 1
         if (this.stages[num - 1].endBlock == _blockNumber) {
             // save some gas and just return instead of decrementing.
             return num - 1;
         }
-
-        if (num > this.StageCount) {
-            return 255;
-        }
-
         return num;
     }
 
@@ -167,7 +195,7 @@ class Validator {
 
     getPriceAtBlock(_blockNumber) {
         const stage = this.getStageAtBlock(_blockNumber);
-        if (stage <= this.StageCount) {
+        if (stage <= this.stageCount) {
             return this.getStage(stage).tokenPrice;
         }
         return 0;
@@ -240,6 +268,12 @@ class Validator {
 
     getOneEtherBn() {
         return etherBN;
+    }
+
+    require(statement, message) {
+        if(!statement) {
+            throw message;
+        }
     }
 }
 

@@ -47,6 +47,11 @@ describe("Javascript Contract - Work in progress", function () {
         before(function () {
             this.JSContract = new contractHelper(settings);
 
+            // navigate contract to testStage startBlock
+            this.JSContract.setBlockNumber(
+                this.JSContract.stages[testStage].startBlock
+            );
+
             // set initial balance for address to 10 eth
             this.JSContract.BalanceContractInstance.set(
                 address, this.JSContract.getOneEtherBn().mul(new BN("10"))

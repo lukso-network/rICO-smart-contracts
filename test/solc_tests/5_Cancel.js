@@ -482,15 +482,15 @@ describe("Testing canceling", function () {
 
                 // validate contributions
                 let ParticipantTotalStats = await ReversibleICOInstance.methods.participantAggregatedStats(participant_1).call();
-
                 let ContributionTotals = new helpers.BN("0");
 
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
-                    ContributionTotals = ContributionTotals.add(new helpers.BN(
-                        ParticipantStageDetails.stageCommittedETH
-                    ));
+                    ContributionTotals = ContributionTotals.add(
+                        new helpers.BN(ParticipantStageDetails.stageTotalReceivedETH)
+                    );
                 }
+
 
                 expect(
                     ParticipantTotalStats.totalReceivedETH.toString()

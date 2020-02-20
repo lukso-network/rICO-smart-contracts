@@ -11,10 +11,11 @@ const setup = require("./init.js");
 async function runTests(init) {
 
   const tests = [
-    // "1_js_validator",
+    "1_js_validator",
+    // "stages.test",
     // "commit.test",
     // "whitelist.test",
-    "_wip",
+    // "_wip",
   ];
 
   init.helpers.utils.toLog(

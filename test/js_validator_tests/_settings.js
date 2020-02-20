@@ -35,8 +35,8 @@ const settings = {
     block: 100,
     blocksPerDay: 6450,
     commitPhaseDays: 22,
-    StageCount: 12,
-    StageDays: 30,
+    stageCount: 12,
+    stageDays: 30,
     tokenSupply: tokenSupply,
     saleSupply: saleSupply
 };

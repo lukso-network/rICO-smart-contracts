@@ -108,8 +108,8 @@ module.exports = {
             {
                 constant: false,
                 inputs: [
-                { name: "_addr", type: "address" },
-                { name: "_newManager", type: "address" }
+                    { name: "_addr", type: "address" },
+                    { name: "_newManager", type: "address" }
                 ],
                 name: "setManager",
                 outputs: [],
@@ -129,8 +129,8 @@ module.exports = {
             {
                 constant: false,
                 inputs: [
-                { name: "_contract", type: "address" },
-                { name: "_interfaceId", type: "bytes4" }
+                    { name: "_contract", type: "address" },
+                    { name: "_interfaceId", type: "bytes4" }
                 ],
                 name: "updateERC165Cache",
                 outputs: [],
@@ -141,8 +141,8 @@ module.exports = {
             {
                 constant: true,
                 inputs: [
-                { name: "_addr", type: "address" },
-                { name: "_interfaceHash", type: "bytes32" }
+                    { name: "_addr", type: "address" },
+                    { name: "_interfaceHash", type: "bytes32" }
                 ],
                 name: "getInterfaceImplementer",
                 outputs: [{ name: "", type: "address" }],
@@ -153,8 +153,8 @@ module.exports = {
             {
                 constant: true,
                 inputs: [
-                { name: "_contract", type: "address" },
-                { name: "_interfaceId", type: "bytes4" }
+                    { name: "_contract", type: "address" },
+                    { name: "_interfaceId", type: "bytes4" }
                 ],
                 name: "implementsERC165InterfaceNoCache",
                 outputs: [{ name: "", type: "bool" }],
@@ -165,8 +165,8 @@ module.exports = {
             {
                 constant: true,
                 inputs: [
-                { name: "_contract", type: "address" },
-                { name: "_interfaceId", type: "bytes4" }
+                    { name: "_contract", type: "address" },
+                    { name: "_interfaceId", type: "bytes4" }
                 ],
                 name: "implementsERC165Interface",
                 outputs: [{ name: "", type: "bool" }],
@@ -177,9 +177,9 @@ module.exports = {
             {
                 anonymous: false,
                 inputs: [
-                { indexed: true, name: "addr", type: "address" },
-                { indexed: true, name: "interfaceHash", type: "bytes32" },
-                { indexed: true, name: "implementer", type: "address" }
+                    { indexed: true, name: "addr", type: "address" },
+                    { indexed: true, name: "interfaceHash", type: "bytes32" },
+                    { indexed: true, name: "implementer", type: "address" }
                 ],
                 name: "InterfaceImplementerSet",
                 type: "event"
@@ -187,8 +187,8 @@ module.exports = {
             {
                 anonymous: false,
                 inputs: [
-                { indexed: true, name: "addr", type: "address" },
-                { indexed: true, name: "newManager", type: "address" }
+                    { indexed: true, name: "addr", type: "address" },
+                    { indexed: true, name: "newManager", type: "address" }
                 ],
                 name: "ManagerChanged",
                 type: "event"
@@ -224,54 +224,54 @@ module.exports = {
             network: network,
             globals: {},
             helpers: {
-            networkName: network,
-            networkConfig: networkConfig,
-            assertInvalidOpcode: assertInvalidOpcode,
-            utils: utils,
-            safeUtils: safeUtils,
-            web3util: web3util,
-            web3: web3,
-            web3Instance: web3Instance,
-            Table: Table,
-            BN: BN,
-            constants: constants,
-            expectRevert: expectRevert,
-            expectEvent: expectEvent,
-            MAX_UINT256: MAX_UINT256,
-            expect: expect,
-            assert: assert,
-            solidity: solidity,
-            ERC1820: ERC1820,
-            addresses: {
-                ERC1820: "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24",
-                Token: null,
-                Rico: null
-            }
+                networkName: network,
+                networkConfig: networkConfig,
+                assertInvalidOpcode: assertInvalidOpcode,
+                utils: utils,
+                safeUtils: safeUtils,
+                web3util: web3util,
+                web3: web3,
+                web3Instance: web3Instance,
+                Table: Table,
+                BN: BN,
+                constants: constants,
+                expectRevert: expectRevert,
+                expectEvent: expectEvent,
+                MAX_UINT256: MAX_UINT256,
+                expect: expect,
+                assert: assert,
+                solidity: solidity,
+                ERC1820: ERC1820,
+                addresses: {
+                    ERC1820: "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24",
+                    Token: null,
+                    Rico: null
+                }
             },
             settings: {
-            token: {
-                name: "LYXeToken",
-                symbol: "LYXe",
-                decimals: 18,
-                supply: new BN(100)
-                .mul(
-                    // 100 milions
-                    new BN("10").pow(new BN("6"))
-                )
-                .mul(
-                    // 10^18 to account for decimals
-                    new BN("10").pow(new BN("18"))
-                ),
-                sale: new BN(15)
-                .mul(
-                    // 15 milions
-                    new BN("10").pow(new BN("6"))
-                )
-                .mul(
-                    // 10^18 to account for decimals
-                    new BN("10").pow(new BN("18"))
-                )
-            }
+                token: {
+                    name: "LYXeToken",
+                    symbol: "LYXe",
+                    decimals: 18,
+                    supply: new BN(100)
+                    .mul(
+                        // 100 milions
+                        new BN("10").pow(new BN("6"))
+                    )
+                    .mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ),
+                    sale: new BN(15)
+                    .mul(
+                        // 15 milions
+                        new BN("10").pow(new BN("6"))
+                    )
+                    .mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    )
+                }
             }
         };
 
