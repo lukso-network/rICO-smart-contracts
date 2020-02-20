@@ -742,16 +742,11 @@ contract ReversibleICO is IERC777Recipient {
             return 0;
         }
 
-        // This is the number of blocks starting from the end  of commit phase.
-        uint256 distance = _blockNumber - commitPhaseEndBlock;
-        // Get the stageId, it returns the stageId - 1, commitPhase is stage 0
-        // e.g. distance = 1, stageBlockCount = 5, stageID = 0
-        uint256 stageID = distance / stageBlockCount;
-
-        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
-        if (distance % stageBlockCount > 0){
-            stageID++;
-        }
+        // This is the number of blocks starting from the first stage.
+        uint256 distance = _blockNumber - (commitPhaseEndBlock + 1);
+        // Get the stageId (1..stageCount), commitPhase is stage 0
+        // e.g. distance = 5, stageBlockCount = 5, stageID = 2
+        uint256 stageID = 1 + (distance / stageBlockCount);
 
         return uint8(stageID);
     }
