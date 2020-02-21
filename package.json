@@ -10,7 +10,7 @@
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "scripts/run_coverage.sh",
     "test": "scripts/run_solc.sh all refresh",
-    "test-validator": "scripts/run_js.sh all refresh",
+    "test-validator": "scripts/run_js.sh all refresh js",
     "test-random": "scripts/run_random.sh all refresh",
     "test-fixed": "scripts/run_fixed.sh all refresh",
     "testToHtml": "scripts/testOutputToHtml.sh",

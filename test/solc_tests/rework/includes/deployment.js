@@ -89,39 +89,33 @@ async function doFreshDeployment(phase = 0, settings = null ) {
             */
             currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
-            // starts in one day
-            commitPhaseStartBlock = parseInt(currentBlock, 10) + settings.blocksPerDay * 1;
+            commitPhaseStartBlock = parseInt(currentBlock, 10) + settings.rico.startBlockDelay;
 
             // 22 days allocation
-            commitPhaseBlockCount = settings.blocksPerDay * settings.commitPhaseDays; // 22
-            commitPhasePrice = settings.salePrice;
+            commitPhaseBlockCount = settings.rico.blocksPerDay * settings.rico.commitPhaseDays;
+            commitPhasePrice = settings.rico.commitPhasePrice;
 
             // 12 x 30 day periods for distribution
-            StageCount = settings.stageCount;
-            StageBlockCount = settings.blocksPerDay * settings.stageDays; // 30
-            StagePriceIncrease = settings.salePriceIncrease;
-            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-            BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+            stageCount = settings.rico.stageCount;
+            stageBlockCount = settings.rico.blocksPerDay * settings.rico.stageDays;
+            stagePriceIncrease = settings.rico.stagePriceIncrease;
 
             await ReversibleICOInstance.methods.init(
                 TokenContractAddress,       // address _TokenContractAddress
                 whitelistControllerAddress, // address _whitelistControllerAddress
                 projectWalletAddress,       // address _projectWalletAddress
-                commitPhaseStartBlock,      // uint256 _StartBlock
+                commitPhaseStartBlock,      // uint256 _commitPhaseStartBlock
                 commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
                 commitPhasePrice,           // uint256 _commitPhasePrice in wei
-                StageCount,                 // uint8   _StageCount
-                StageBlockCount,            // uint256 _StageBlockCount
-                StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+                stageCount,                 // uint8   _StageCount
+                stageBlockCount,            // uint256 _StageBlockCount
+                stagePriceIncrease          // uint256 _StagePriceIncrease in wei
             ).send({
                 from: deployerAddress,  // deployer
                 gas: 3000000
             });
 
                 
-            buyPhaseStartBlock = parseInt(await ReversibleICOInstance.methods.buyPhaseStartBlock().call(), 10);
-            buyPhaseEndBlock = parseInt(await ReversibleICOInstance.methods.buyPhaseEndBlock().call(), 10);
 
         }
 

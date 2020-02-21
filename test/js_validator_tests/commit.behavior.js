@@ -1,12 +1,11 @@
 const {
     conditional,
-    settings,
     clone,
     BN,
     MAX_UINT256,
     expect,
-} = require("./_settings.js");
-
+    expectThrow
+} = require("./_test.utils.js");
 
 function shouldHaveValidStateAfterFirstContributionFromParticipant(_address, _testStage, _whitelisted = false) {
 

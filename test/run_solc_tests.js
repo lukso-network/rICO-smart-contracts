@@ -8,7 +8,7 @@ const setup = require("./init.js");
   }
 })();
 
-function runTests(init) {
+async function runTests(init) {
 
   const tests = [
     "external/SafeMath",

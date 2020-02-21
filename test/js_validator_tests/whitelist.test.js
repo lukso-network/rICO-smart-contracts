@@ -1,12 +1,13 @@
-
 const {
     conditional,
-    settings,
     clone,
     BN,
     MAX_UINT256,
     expect,
-} = require("./_settings.js");
+    expectThrow
+} = require("./_test.utils.js");
+
+const contractHelper = require("./assets/ricoContract.js");
 
 const {
     shouldHaveValidStateAfterFirstContributionFromParticipant,
@@ -22,7 +23,6 @@ const {
 } = require('./whitelist.behavior');
 
 
-const contractHelper = require("./assets/ricoContract.js");
 
 describe("Javascript Validator - Contract - whitelist()", function () {
 
@@ -32,7 +32,7 @@ describe("Javascript Validator - Contract - whitelist()", function () {
         const testStage = 0;
 
         before(function () {
-            this.JSContract = new contractHelper(settings);
+            this.JSContract = new contractHelper(setup.settings);
 
             // navigate contract to testStage startBlock
             this.JSContract.setBlockNumber(
@@ -88,7 +88,7 @@ describe("Javascript Validator - Contract - whitelist()", function () {
         const expectedTokenBalance = "500000000000000000000";
 
         before(function () {
-            this.JSContract = new contractHelper(settings);
+            this.JSContract = new contractHelper(setup.settings);
 
             // navigate contract to testStage startBlock
             this.JSContract.setBlockNumber(
@@ -165,7 +165,7 @@ describe("Javascript Validator - Contract - whitelist()", function () {
         const testStage = 6;
 
         before(function () {
-            this.JSContract = new contractHelper(settings);
+            this.JSContract = new contractHelper(setup.settings);
 
             // navigate contract to testStage startBlock
             this.JSContract.setBlockNumber(

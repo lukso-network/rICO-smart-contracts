@@ -7,7 +7,7 @@ const {
     conditional,
     settings,
     clone,
-} = require("./_settings.js");
+} = require("./_test.utils.js");
 
 const contractHelper = require("./assets/ricoContract.js");
 

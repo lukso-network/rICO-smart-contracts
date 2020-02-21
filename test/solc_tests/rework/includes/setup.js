@@ -39,19 +39,8 @@ global.TransferTypes = {
 
 global.snapshotsEnabled = true;
 
-const RICOSettings = {
-    block:              100,
-    blocksPerDay:       6450,
-    commitPhaseDays:    22,
-    stageCount:         12,
-    stageDays:          30,
-    saleSupply:         setup.settings.token.sale.toString(),
-    salePriceIncrease:  helpers.solidity.ether * 0.002,
-};
-
 const validatorHelper = require("../../../js_validator_tests/assets/validator.js");
 
 module.exports = {
-    RICOSettings,
     validatorHelper
 };

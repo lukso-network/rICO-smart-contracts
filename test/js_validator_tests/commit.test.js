@@ -1,12 +1,13 @@
-
 const {
     conditional,
-    settings,
     clone,
     BN,
     MAX_UINT256,
     expect,
-} = require("./_settings.js");
+    expectThrow
+} = require("./_test.utils.js");
+
+const contractHelper = require("./assets/ricoContract.js");
 
 const {
     shouldHaveValidStateAfterFirstContributionFromParticipant,
@@ -14,12 +15,10 @@ const {
     shouldHaveValidStateAfterOneNewContribution,
 } = require('./commit.behavior');
 
-const contractHelper = require("./assets/ricoContract.js");
-
 describe("Javascript Validator - Contract - commit()", function () {
 
     before(function () {
-        this.JSContract = new contractHelper(settings);
+        this.JSContract = new contractHelper(setup.settings);
     });
 
     describe("Participant - commits 1 eth", function () {

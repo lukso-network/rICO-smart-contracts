@@ -94,7 +94,7 @@ class Contract extends Validator {
         this.deployerAddress = "deployerAddress";
 
         this.TokenContractInstance = new TokenContract(
-            settings.tokenSupply,
+            settings.token.supply,
             this.deployerAddress
         );
 
@@ -103,7 +103,7 @@ class Contract extends Validator {
         this.TokenContractInstance.send(
             this.deployerAddress,
             this.contractAddress,
-            settings.saleSupply,
+            settings.token.sale,
         );
 
     }

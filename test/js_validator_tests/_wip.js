@@ -1,13 +1,11 @@
-const helpers = setup.helpers;
-const BN = helpers.BN;
-const MAX_UINT256 = helpers.MAX_UINT256;
-const expect = helpers.expect
-
 const {
     conditional,
-    settings,
     clone,
-} = require("./_settings.js");
+    BN,
+    MAX_UINT256,
+    expect,
+    expectThrow
+} = require("./_test.utils.js");
 
 const contractHelper = require("./assets/ricoContract.js");
 
@@ -34,7 +32,7 @@ const {
 describe("Javascript Contract - Work in progress", function () {
 
     before(function () {
-        this.JSContract = new contractHelper(settings);
+        this.JSContract = new contractHelper(setup.settings);
     });
 
     describe("Scenario: Stage:0, Participant contributes then gets whitelisted then withdraws full amount", function () {
@@ -45,7 +43,7 @@ describe("Javascript Contract - Work in progress", function () {
         const expectedTokenBalance = "500000000000000000000";
 
         before(function () {
-            this.JSContract = new contractHelper(settings);
+            this.JSContract = new contractHelper(setup.settings);
 
             // navigate contract to testStage startBlock
             this.JSContract.setBlockNumber(

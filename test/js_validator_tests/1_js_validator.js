@@ -1,59 +1,47 @@
-const helpers = setup.helpers;
-const BN = helpers.BN;
-const MAX_UINT256 = helpers.MAX_UINT256;
-const expect = helpers.expect
+const {
+    conditional,
+    clone,
+    BN,
+    MAX_UINT256,
+    expect,
+    expectThrow
+} = require("./_test.utils.js");
 
 const validatorHelper = require("./assets/validator.js");
-
-const settings = {
-    block:              100,
-    blocksPerDay:       6450,
-    commitPhaseDays:    22,
-    stageCount:         12,
-    stageDays:          30,
-};
-
-const {
-    expectThrow
-} = require('./test.utils');
 
 describe("Javascript Validator - Tests", function () {
     let Validator;
 
     before(function ()  {
-        Validator = new validatorHelper(settings);
+        Validator = new validatorHelper(setup.settings);
     });
 
     describe("Integrity checking", function () {
 
         beforeEach(async function () {
-            Validator = new validatorHelper(settings);
+            Validator = new validatorHelper(setup.settings);
         });
 
         describe("Settings are assigned correctly", function () {
-
-            it("block is correct", function() {
-                expect(Validator.block, "block not correct").is.equal(settings.block);
-            });
             
             it("commitPhaseStartBlock is correct", function() {
                 expect(Validator.commitPhaseStartBlock, "commitPhaseStartBlock not correct").is.equal(
-                    settings.block + settings.blocksPerDay
+                    Validator.block + setup.settings.rico.startBlockDelay
                 );
             });
 
             it("commitPhaseBlockCount is correct", function() {
                 expect(Validator.commitPhaseBlockCount, "commitPhaseBlockCount not correct").is.equal(
-                    settings.blocksPerDay * settings.commitPhaseDays
+                    setup.settings.rico.blocksPerDay * setup.settings.rico.commitPhaseDays
                 );
             });
 
             it("commitPhaseEndBlock is correct", function() {
                 expect(Validator.commitPhaseEndBlock, "commitPhaseEndBlock not correct").is.equal(
-                    // commitPhaseStartBlock ( current block + 1 day )
-                    (settings.block + settings.blocksPerDay) + 
+                    // commitPhaseStartBlock ( current block + delay )
+                    (Validator.block + setup.settings.rico.startBlockDelay) + 
                     // commitPhaseBlockCount
-                    ( settings.commitPhaseDays * settings.blocksPerDay )
+                    ( setup.settings.rico.commitPhaseDays * setup.settings.rico.blocksPerDay )
                     // subtract 1 so both start and end blocks are in the block count range
                     - 1
                 );
@@ -78,15 +66,15 @@ describe("Javascript Validator - Tests", function () {
             });
 
             it("blocksPerDay is correct", function() {
-                expect(Validator.blocksPerDay, "blocksPerDay not correct").is.equal(settings.blocksPerDay);
+                expect(Validator.blocksPerDay, "blocksPerDay not correct").is.equal(setup.settings.rico.blocksPerDay);
             });
 
             it("commitPhaseDays is correct", function() {
-                expect(Validator.commitPhaseDays, "commitPhaseDays not correct").is.equal(settings.commitPhaseDays);
+                expect(Validator.commitPhaseDays, "commitPhaseDays not correct").is.equal(setup.settings.rico.commitPhaseDays);
             });
 
             it("stageDays is correct", function() {
-                expect(Validator.stageDays, "stageDays not correct").is.equal(settings.stageDays);
+                expect(Validator.stageDays, "stageDays not correct").is.equal(setup.settings.rico.stageDays);
             });
 
             it("commitPhasePrice is 0.002", function() {
@@ -107,8 +95,8 @@ describe("Javascript Validator - Tests", function () {
         });
 
         describe("getCurrentBlockNumber()", function () {
-            it("returns block correctly", function() {
-                expect(Validator.getCurrentBlockNumber()).is.equal(settings.block);
+            it("returns default block correctly", function() {
+                expect(Validator.getCurrentBlockNumber()).is.equal(0);
             });
         });
 
@@ -125,20 +113,20 @@ describe("Javascript Validator - Tests", function () {
         describe("stage generation", function () {
 
             it("stageCount is correct", function() {
-                expect(Validator.stageCount).is.equal(settings.stageCount);
+                expect(Validator.stageCount).is.equal(setup.settings.rico.stageCount);
             });
 
             it("pricing increases by 10% for each stage", function() {
 
                 let expectedPrice = Validator.commitPhasePrice;
                 let validCount = 0;
-                for(let i = 0; i < settings.stageCount; i++) {
+                for(let i = 0; i < setup.settings.rico.stageCount; i++) {
                     const stageData = Validator.getStage(i);
                     expect(stageData.tokenPrice.toString(), "Expected stage pricing is wrong.").is.equal(expectedPrice.toString());
                     expectedPrice = stageData.tokenPrice.add( Validator.stagePriceIncrease );
                     validCount++;
                 }
-                expect(validCount, "At least one stage pricing is wrong.").is.equal(settings.stageCount);
+                expect(validCount, "At least one stage pricing is wrong.").is.equal(setup.settings.rico.stageCount);
             });
         });
     });
@@ -675,16 +663,21 @@ describe("Javascript Validator - Tests", function () {
             let CustomSettingsValidator;
             
             const CustomSettings = {
-                block:              100,
-                blocksPerDay:       10,
-                commitPhaseDays:    10,
-                stageCount:         1,
-                stageDays:          10,
+                token: setup.settings.token,
+                rico: {
+                    startBlockDelay:    10,
+                    blocksPerDay:       10,
+                    commitPhaseDays:    10,
+                    stageCount:         1,
+                    stageDays:          10,
+                    commitPhasePrice:   setup.settings.rico.commitPhasePrice, 
+                    stagePriceIncrease: setup.settings.rico.stagePriceIncrease
+                }
             };
 
             before(function ()  {
                 precision = new BN("10").pow( new BN("20") );
-                CustomSettingsValidator = new validatorHelper(CustomSettings);
+                CustomSettingsValidator = new validatorHelper(CustomSettings, 100);
             });
             
             describe("_blockNumber in range", function () {
@@ -760,16 +753,21 @@ describe("Javascript Validator - Tests", function () {
             let CustomSettingsValidator;
             
             const CustomSettings = {
-                block:              100,
-                blocksPerDay:       10,
-                commitPhaseDays:    10,
-                stageCount:         1,
-                stageDays:          10,
+                token: setup.settings.token,
+                rico: {
+                    startBlockDelay:    10,
+                    blocksPerDay:       10,
+                    commitPhaseDays:    10,
+                    stageCount:         1,
+                    stageDays:          10,
+                    commitPhasePrice:   setup.settings.rico.commitPhasePrice, 
+                    stagePriceIncrease: setup.settings.rico.stagePriceIncrease
+                }
             };
 
             before(function ()  {
                 precision = new BN("10").pow( new BN("20") );
-                CustomSettingsValidator = new validatorHelper(CustomSettings);
+                CustomSettingsValidator = new validatorHelper(CustomSettings, 100);
             });
             
             describe("_blockNumber in range", function () {

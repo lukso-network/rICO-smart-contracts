@@ -11,36 +11,6 @@ runDoesNotChangeChecks = true;
 // else a generic test that ensures the "before" block is run.
 runAllSubTests = true;
 
-const tokenSupply = new BN(100)
-    .mul(
-        // milion
-        new BN("10").pow(new BN("6"))
-    )
-    .mul(
-        // 10^18 to account for decimals
-        new BN("10").pow(new BN("18"))
-    );
-
-const saleSupply = new BN(15)
-    .mul(
-        // milion
-        new BN("10").pow(new BN("6"))
-    )
-    .mul(
-        // 10^18 to account for decimals
-        new BN("10").pow(new BN("18"))
-    );
-
-const settings = {
-    block: 100,
-    blocksPerDay: 6450,
-    commitPhaseDays: 22,
-    stageCount: 12,
-    stageDays: 30,
-    tokenSupply: tokenSupply,
-    saleSupply: saleSupply
-};
-
 function conditional(typeOrBool, title, callback, elseCallBack = null) {
     if (typeOrBool === "doesNotChange" && runDoesNotChangeChecks) {
         it(title, callback);
@@ -64,11 +34,22 @@ function clone(_what) {
     return _.cloneDeep(_what);
 }
 
+function expectThrow(block, message) {
+    let thrown = false;
+    try {
+        block();
+    } catch (e) {
+        thrown = true;
+        expect(e, "Thrown message did not match").is.equal(message);    
+    }
+    expect(thrown, "Should have thrown.").to.be.equal(true);
+}
+
 module.exports = {
     conditional,
-    settings,
     clone,
     BN,
     MAX_UINT256,
     expect,
+    expectThrow
 };

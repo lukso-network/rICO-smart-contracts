@@ -24,7 +24,7 @@ class Whitelister {
     }
 
     async callWhitelistMethod(address, mode) {
-        return await this.contract.methods.whitelist(address, mode).send({ from: this.address });
+        return await this.contract.methods.whitelist([address], mode).send({ from: this.address });
     }
 }
 

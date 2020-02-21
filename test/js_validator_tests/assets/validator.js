@@ -20,13 +20,17 @@ const solidity = {
 class Validator {
     
     // set the defaults
-    constructor(settings) {
-        this.block           = settings.block;             // 0
+    constructor(settings, currentBlock = 0) {
+        this.block              = currentBlock;
 
-        this.blocksPerDay    = settings.blocksPerDay       // 6450;
-        this.commitPhaseDays = settings.commitPhaseDays    // 22;
-        this.stageDays       = settings.stageDays          // 30;
-        this.stageCount      = settings.stageCount         // 12;
+        this.commitPhaseStartBlock = this.block + settings.rico.startBlockDelay;
+        this.blocksPerDay       = settings.rico.blocksPerDay;       // 6450
+        this.commitPhaseDays    = settings.rico.commitPhaseDays;    // 22
+        this.stageCount         = settings.rico.stageCount;         // 12
+        this.stageDays          = settings.rico.stageDays;          // 30
+        this.commitPhasePrice   = new BN(settings.rico.commitPhasePrice);   // 0.002
+        this.stagePriceIncrease = new BN(settings.rico.stagePriceIncrease); // 0.0001
+
         this.stages          = [];
 
         this.init();
@@ -34,16 +38,9 @@ class Validator {
 
     init() {
 
-        const currentBlock = this.block;
-
-        this.commitPhaseStartBlock = currentBlock + this.blocksPerDay;
         this.commitPhaseBlockCount = this.blocksPerDay * this.commitPhaseDays;
         this.commitPhaseEndBlock = this.commitPhaseStartBlock + this.commitPhaseBlockCount - 1;
-
-        this.commitPhasePrice = solidity.etherBN.div( new BN("1000") ).mul( new BN("2") );  // solidity.ether * 0.002;
-
         this.stageBlockCount = this.blocksPerDay * this.stageDays;
-        this.stagePriceIncrease = solidity.etherBN.div( new BN("10000") );  // solidity.ether * 0.0001;
 
         // Generate stage data
         this.stages[0] = {

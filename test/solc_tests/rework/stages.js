@@ -1,5 +1,4 @@
 const {
-    RICOSettings,
     validatorHelper
 } = require('./includes/setup');
 
@@ -63,69 +62,14 @@ describe("ReversibleICO", function () {
     describe("Stage 2 - Initialisation - init()", function () {
 
         before(async function () {
-            const contracts = await doFreshDeployment(1, RICOSettings);
+            const contracts = await doFreshDeployment(1, setup.settings);
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+
+            currentBlock = parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10);
+            this.jsValidator = new validatorHelper(setup.settings, currentBlock);
         });
-
-        /*
-
-        before(async function () {
-
-            currentBlock = await this.ReversibleICO.methods.getCurrentBlockNumber().call();
-
-            // starts in one day
-            commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-            // 22 days allocation
-            commitPhaseBlockCount = blocksPerDay * 22;
-            commitPhasePrice = helpers.solidity.ether * 0.002;
-
-            // 12 x 30 day periods for distribution
-            StageCount = 12;
-            StageBlockCount = blocksPerDay * 30;
-            StagePriceIncrease = helpers.solidity.ether * 0.0001;
-
-            commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-            // for validation
-            BuyPhaseEndBlock = commitPhaseEndBlock + StageBlockCount * StageCount;
-
-            let lastStageBlockEnd = commitPhaseEndBlock;
-
-            for(let i = 0; i < StageCount; i++) {
-
-                const start_block = lastStageBlockEnd + 1;
-                const end_block = lastStageBlockEnd + StageBlockCount;
-                const token_price = commitPhasePrice + ( StagePriceIncrease * ( i + 1) );
-
-                stageValidation.push( {
-                    start_block: start_block,
-                    end_block: end_block,
-                    token_price: token_price
-                });
-
-                    lastStageBlockEnd = end_block;
-            }
-
-            await this.ReversibleICO.methods.init(
-                TokenContractAddress,        // address _tokenContractAddress
-                whitelistControllerAddress, // address _whitelistControllerAddress
-                projectWalletAddress,       // address _projectWalletAddress
-                commitPhaseStartBlock,                 // uint256 _commitPhaseStartBlock
-                commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-                commitPhasePrice,            // uint256 _commitPhasePrice in wei
-                StageCount,                 // uint8   _stageCount
-                StageBlockCount,            // uint256 _stageBlockCount
-                StagePriceIncrease          // uint256 _stagePriceIncrease in wei
-            ).send({
-                from: deployerAddress,  // deployer
-                gas: 3000000
-            });
-
-        });
-        */
 
         describe("Contract settings", function () {
 
@@ -149,8 +93,20 @@ describe("ReversibleICO", function () {
                 expect(await this.ReversibleICO.methods.projectWalletAddress().call()).to.be.equal(projectWalletAddress);
             });
 
-            it("BuyPhaseEndBlock matches settings", async function () {
-                expect(await this.ReversibleICO.methods.buyPhaseEndBlock().call()).to.be.equal(BuyPhaseEndBlock.toString());
+            it("Property commitPhaseStartBlock matches settings", async function () {
+                expect(await this.ReversibleICO.methods.commitPhaseStartBlock().call()).to.be.equal(this.jsValidator.commitPhaseStartBlock.toString());
+            });
+
+            it("Property commitPhaseEndBlock matches settings", async function () {
+                expect(await this.ReversibleICO.methods.commitPhaseEndBlock().call()).to.be.equal(this.jsValidator.commitPhaseEndBlock.toString());
+            });
+
+            it("Property buyPhaseStartBlock matches settings", async function () {
+                expect(await this.ReversibleICO.methods.buyPhaseStartBlock().call()).to.be.equal(this.jsValidator.buyPhaseStartBlock.toString());
+            });
+
+            it("Property buyPhaseEndBlock matches settings", async function () {
+                expect(await this.ReversibleICO.methods.buyPhaseEndBlock().call()).to.be.equal(this.jsValidator.buyPhaseEndBlock.toString());
             });
 
         });
@@ -158,62 +114,63 @@ describe("ReversibleICO", function () {
         describe("Contract Stages", function () {
 
             let allocationStageData;
+            let validatorAllocationStageData;
+
             before(async function () {
                 allocationStageData = await this.ReversibleICO.methods.stages(0).call();
+                validatorAllocationStageData = this.jsValidator.stages[0];
             });
 
             it("Stage Count is correct", async function () {
-                // account for the commit stage and add 1
-                const stages = StageCount;
+                const stages = this.jsValidator.stageCount;
+                expect(stages).to.be.equal(this.jsValidator.stages.length - 1);
                 expect(await this.ReversibleICO.methods.stageCount().call()).to.be.equal(stages.toString());
             });
 
-            it("Allocation commitPhaseStartBlock matches settings", async function () {
-                expect(allocationStageData.startBlock.toString()).to.be.equal(commitPhaseStartBlock.toString());
+            it("Stage[0].startBlock is commitPhaseStartBlock and matches settings", async function () {
+                expect(allocationStageData.startBlock.toString()).to.be.equal(this.jsValidator.commitPhaseStartBlock.toString());
             });
 
-            it("Allocation duration is commitPhaseBlockCount", async function () {
+            it("Stage[0] duration is commitPhaseBlockCount", async function () {
                 const count = allocationStageData.endBlock - allocationStageData.startBlock + 1;
-                expect(count.toString()).to.be.equal(commitPhaseBlockCount.toString());
+                expect(count.toString()).to.be.equal(this.jsValidator.commitPhaseBlockCount.toString());
             });
 
-            it("Allocation BuyPhaseEndBlock matches settings", async function () {
-                expect(allocationStageData.endBlock).to.be.equal(commitPhaseEndBlock.toString());
+            it("Stage[0].endBlock is commitPhaseEndBlock and matches settings", async function () {
+                expect(allocationStageData.endBlock).to.be.equal(this.jsValidator.commitPhaseEndBlock.toString());
             });
 
-            it("commitPhasePrice matches settings", async function () {
-                expect(allocationStageData.tokenPrice.toString()).to.be.equal(commitPhasePrice.toString());
+            it("Stage[0].tokenPrice is commitPhasePrice and matches settings", async function () {
+                expect(allocationStageData.tokenPrice.toString()).to.be.equal(this.jsValidator.commitPhasePrice.toString());
             });
 
             it("First Distribution Stage settings are correct", async function () {
-                const stageRefId = 0;
-                const stageData = await this.ReversibleICO.methods.stages((stageRefId + 1)).call();
-                const stage_block_start = stageData.startBlock;
-                const stage_end_block = stageData.endBlock;
-                const stage_token_price = stageData.tokenPrice;
+                const stageRefId = 1;
+                const stageData = await this.ReversibleICO.methods.stages((stageRefId)).call();
+                const validatorStageData = this.jsValidator.stages[stageRefId];
 
-                expect(stage_block_start).to.be.equal(stageValidation[stageRefId].start_block.toString());
-                expect(stage_end_block).to.be.equal(stageValidation[stageRefId].end_block.toString());
-                expect(stage_token_price).to.be.equal(stageValidation[stageRefId].token_price.toString());
+                expect(stageData.startBlock).to.be.equal(validatorStageData.startBlock);
+                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
+                expect(stageData.tokenPrice).to.be.equal(validatorStageData.tokenPrice);
             });
 
             it("Last Distribution Stage settings are correct", async function () {
-                const stageRefId = StageCount - 1;
-                const stageData = await this.ReversibleICO.methods.stages((stageRefId + 1)).call();
-                const stage_block_start = stageData.startBlock;
-                const stage_end_block = stageData.endBlock;
-                const stage_token_price = stageData.tokenPrice;
+                const stageRefId = this.jsValidator.stageCount;
+                const stageData = await this.ReversibleICO.methods.stages((stageRefId)).call();
+                const validatorStageData = this.jsValidator.stages[stageRefId];
 
-                expect(stage_block_start).to.be.equal(stageValidation[stageRefId].start_block.toString());
-                expect(stage_end_block).to.be.equal(stageValidation[stageRefId].end_block.toString());
-                expect(stage_token_price).to.be.equal(stageValidation[stageRefId].token_price.toString());
+                expect(stageData.startBlock).to.be.equal(validatorStageData.startBlock);
+                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
+                expect(stageData.tokenPrice).to.be.equal(validatorStageData.tokenPrice);
             });
 
             it("Last Distribution Stage end_block matches contract BuyPhaseEndBlock", async function () {
-                const stageRefId = StageCount;
+                const stageRefId = this.jsValidator.stageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageRefId).call();
-                const stage_end_block = stageData.endBlock;
-                expect(stage_end_block).to.be.equal(BuyPhaseEndBlock.toString());
+                const validatorStageData = this.jsValidator.stages[stageRefId];
+
+                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
+                expect(stageData.endBlock).to.be.equal(this.jsValidator.buyPhaseEndBlock);
             });
 
         });

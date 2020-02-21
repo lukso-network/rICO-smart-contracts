@@ -1,22 +1,13 @@
-const helpers = setup.helpers;
-const BN = helpers.BN;
-const MAX_UINT256 = helpers.MAX_UINT256;
-const expect = helpers.expect
+const {
+    conditional,
+    clone,
+    BN,
+    MAX_UINT256,
+    expect,
+    expectThrow
+} = require("./_test.utils.js");
 
 const validatorHelper = require("./assets/validator.js");
-
-const settings = {
-    block:              100,
-    blocksPerDay:       6450,
-    commitPhaseDays:    22,
-    stageCount:         12,
-    stageDays:          30,
-};
-
-const {
-    expectThrow
-} = require('./test.utils');
-
 
 function shouldReturnTheSameResult(instance1, instance2, stageId, getterName, blockDifference) {
     const result1 = shouldReturnExpectedStageId(instance1, stageId, getterName, blockDifference);
@@ -35,16 +26,21 @@ describe("Javascript Validator - Tests", function () {
     let Validator, CustomSettingsValidator;
     
     const CustomSettings = {
-        block:              100,
-        blocksPerDay:       10,
-        commitPhaseDays:    10,
-        stageCount:         12,
-        stageDays:          10,
+        token: setup.settings.token,
+        rico: {
+            startBlockDelay:    10,
+            blocksPerDay:       10,
+            commitPhaseDays:    10,
+            stageCount:         12,
+            stageDays:          10,
+            commitPhasePrice:   setup.settings.rico.commitPhasePrice, 
+            stagePriceIncrease: setup.settings.rico.stagePriceIncrease
+        }
     };
 
     before(function ()  {
-        Validator = new validatorHelper(settings);
-        CustomSettingsValidator = new validatorHelper(CustomSettings);
+        Validator = new validatorHelper(setup.settings);
+        CustomSettingsValidator = new validatorHelper(CustomSettings, 100);
     });
 
 
@@ -141,17 +137,17 @@ describe("Javascript Validator - Tests", function () {
                 });
             });
 
-            describe("test", function () {
-                let stageId = 0;
-                it("test", function() {
+            // describe("test", function () {
+            //     let stageId = 0;
+            //     it("test", function() {
 
-                    const blockInStage = Validator.getStage(stageId).startBlock;
-                    console.log("blockInStage:     ", blockInStage);
-                    const resultingStageId = Validator.getStageAtBlock(blockInStage);
-                    console.log("resultingStageId: ", resultingStageId);
+            //         const blockInStage = Validator.getStage(stageId).startBlock;
+            //         console.log("blockInStage:     ", blockInStage);
+            //         const resultingStageId = Validator.getStageAtBlock(blockInStage);
+            //         console.log("resultingStageId: ", resultingStageId);
 
-                });
-            });
+            //     });
+            // });
 
         });
     });
