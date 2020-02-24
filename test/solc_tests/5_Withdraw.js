@@ -269,6 +269,56 @@ describe("Withdrawal Testing", function () {
         });
     });
 
+    describe("Check getParticipantPendingETH before and after whitelisting", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+            helpers.utils.resetAccountNonceCache(helpers);
+            // jump to contract start
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+        });
+
+        it("Buy 2 tokens in phase 0", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+
+            const ContributionAmount = 2 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: ReversibleICOInstance.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("0");
+        });
+
+        it("Check participant available ETH", async function () {
+            let result = await ReversibleICOInstance.methods.getParticipantPendingETH(participant_1).call();
+            expect(new BN(result)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
+        });
+
+        it("Whitelist buyer", async function () {
+            let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                [participant_1],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+
+            let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("2000000000000000000");
+        });
+
+        it("Check participant available ETH", async function () {
+            let result = await ReversibleICOInstance.methods.getParticipantPendingETH(participant_1).call();
+            expect(new BN(result)).to.be.bignumber.equal(new BN(0));
+        });
+    });
+
     describe("Withdraw all tokens when 10 % unlocked", async function () {
 
         before(async () => {
