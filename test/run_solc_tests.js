@@ -13,8 +13,12 @@ async function runTests(init) {
   const tests = [
     "external/SafeMath",
     "1_ERC1820",
-    // "2_ERC777_Token",
-    // "3_ERC20Token",
+    "2_ERC777_Token",
+    "3_ERC20Token",
+    "rework/phases",
+    "rework/methods/stages",
+    "rework/methods/tokens",
+
     // "4_ReversibleICO",
     // "5_Cancel",
     // "5_Contributions",
@@ -23,9 +27,6 @@ async function runTests(init) {
     // // // "6_Gnosis-Safe",
     // "7_Website",
     // "10_ProjectWithdraw",
-    "rework/phases",
-    "rework/methods/stages",
-    "rework/methods/tokens",
     // "rework/4_ReversibleICO"
   ];
 

@@ -12,9 +12,9 @@ async function runTests(init) {
 
   const tests = [
     "1_js_validator",
-    // "stages.test",
-    // "commit.test",
-    // "whitelist.test",
+    "stages.test",
+    "commit.test",
+    "whitelist.test",
     // "_wip"
   ];
 

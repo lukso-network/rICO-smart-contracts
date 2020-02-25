@@ -117,10 +117,11 @@ class Validator {
             throw "Precision should be higher than 1 and lower than 20";
         }
 
+        // currentBlock >= startBlock && currentBlock <= endBlock
         if(currentBlock.gte(startBlock) && currentBlock.lte(endBlock))
         {
             const blockCount = endBlock.sub(startBlock).add( new BN(1) );
-            const passedBlocks = currentBlock.sub(startBlock);
+            const passedBlocks = currentBlock.sub(startBlock).add( new BN(1) ); // add 1 since start block needs to return higher than 0
             
             return passedBlocks.mul(
                 new BN(10).pow(precision)
@@ -170,30 +171,42 @@ class Validator {
         return 0;
     }
 
-    getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, precision) {
+    getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
 
-        // if participant is not whitelisted, then full amount is locked
-
+        if(_precision == null) {
+            _precision = 20;
+        }
+        _precision = new BN(_precision);
+        
         const tokenAmount = new BN(_tokenAmount);
-        if(_blockNumber < this.buyPhaseStartBlock) {
-            // before buy phase.. return full amount
-            return tokenAmount;
-        } else if(_blockNumber < this.buyPhaseEndBlock) {
-            // in buy phase
-            const unlocked = tokenAmount.mul(
-                this.getUnlockPercentage(
+
+        if(tokenAmount.gt(new BN(0))) {
+
+            if(_blockNumber < this.buyPhaseStartBlock) {
+                // before buy phase.. return full amount
+                return tokenAmount;
+            } else if(_blockNumber <= this.buyPhaseEndBlock) {
+                // in buy phase
+
+                const percentage = this.getUnlockPercentage(
                     _blockNumber,
                     this.buyPhaseStartBlock,
                     this.buyPhaseEndBlock,
-                    precision
-                )
-            ).div( new BN("10").pow(precision) );
+                    _precision
+                );
 
-            return tokenAmount.sub(unlocked);
-        } else {
-            // after contract end
+                const unlocked = tokenAmount.mul(percentage).div( 
+                    new BN("10").pow(
+                        _precision
+                    )
+                );
+
+                return tokenAmount.sub(unlocked);
+            }
+            // after buyPhase's end
             return new BN("0");
         }
+        return new BN("0");
     }
 
     getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
@@ -221,7 +234,7 @@ class Validator {
     }
 
     setBlockNumber(block) {
-        this.block = block;
+        this.block = parseInt(block, 10);
     }
 
     getCurrentBlockNumber() {

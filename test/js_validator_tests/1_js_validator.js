@@ -556,11 +556,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0", function() {
+                        it("should return 0.01", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
                         });
                     });
 
@@ -569,11 +569,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 101;
                         const _endBlock = 200;
 
-                        it("should return 0", function() {
+                        it("should return 0.01", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
                         });
                     });
 
@@ -582,11 +582,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0.01", function() {
+                        it("should return 0.02", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.02" );
                         });
                     });
 
@@ -595,16 +595,16 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 101;
                         const _endBlock = 200;
 
-                        it("should return 0.01", function() {
+                        it("should return 0.02", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.02" );
                         });
                     });
 
-                    describe("_currentBlock = 51, _startBlock = 1, _endBlock = 100", function () {
-                        const _currentBlock = 51;
+                    describe("_currentBlock = 50, _startBlock = 1, _endBlock = 100", function () {
+                        const _currentBlock = 50;
                         const _startBlock = 1;
                         const _endBlock = 100;
 
@@ -621,11 +621,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0.99", function() {
+                        it("should return 1", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.99" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "1" );
                         });
                     });
                 });
@@ -676,11 +676,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0", function() {
+                        it("should return 0.01", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
                         });
                     });
 
@@ -689,11 +689,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 101;
                         const _endBlock = 200;
 
-                        it("should return 0", function() {
+                        it("should return 0.01", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
                         });
                     });
 
@@ -702,11 +702,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0.01", function() {
+                        it("should return 0.02", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.02" );
                         });
                     });
 
@@ -715,16 +715,16 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 101;
                         const _endBlock = 200;
 
-                        it("should return 0.01", function() {
+                        it("should return 0.02", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.01" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.02" );
                         });
                     });
 
-                    describe("_currentBlock = 51, _startBlock = 1, _endBlock = 100", function () {
-                        const _currentBlock = 51;
+                    describe("_currentBlock = 50, _startBlock = 1, _endBlock = 100", function () {
+                        const _currentBlock = 50;
                         const _startBlock = 1;
                         const _endBlock = 100;
 
@@ -741,11 +741,11 @@ describe("Javascript Validator - Tests", function () {
                         const _startBlock = 1;
                         const _endBlock = 100;
 
-                        it("should return 0.99", function() {
+                        it("should return 1", function() {
                             let percentage = Validator.getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precisionPow);
                             percentage = percentage.mul(new BN(1000)).div(precisionNumber);
                             percentage = percentage.toNumber() / 1000;
-                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "0.99" );
+                            expect( percentage.toString(), "Incorrect percentage returned").is.equal( "1" );
                         });
                     });
                 });
@@ -805,33 +805,51 @@ describe("Javascript Validator - Tests", function () {
             
             describe("_blockNumber in range", function () {
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.25", function () {
+                describe("_tokenAmount = 100, _blockNumber = startBlock", function () {
+                    let _tokenAmount = 100;
+                    it("should return 99", function() {
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        expect( locked.toString(), "Incorrect locked amount returned").is.equal( "99" );
+                    });
+                });
+
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.25) - 1", function () {
                     let _tokenAmount = 100;
                     it("should return 75", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.25 );
                         let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "75" );
                     });
                 });
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )", function () {
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.50) - 1 ( middle of the range )", function () {
                     let _tokenAmount = 100;
                     it("should return 50", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.5 );
                         let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "50" );
                     });
                 });
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.75", function () {
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.75) - 1", function () {
                     let _tokenAmount = 100;
                     it("should return 25", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.75 );
                         let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "25" );
+                    });
+                });
+
+                describe("_tokenAmount = 100, _blockNumber = endBlock", function () {
+                    let _tokenAmount = 100;
+                    it("should return 0", function() {
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).endBlock;
+                        let locked = CustomSettingsValidator.getLockedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        expect( locked.toString(), "Incorrect locked amount returned").is.equal( "0" );
                     });
                 });
 
@@ -894,33 +912,51 @@ describe("Javascript Validator - Tests", function () {
             
             describe("_blockNumber in range", function () {
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.25", function () {
+                describe("_tokenAmount = 100, _blockNumber = startBlock", function () {
+                    let _tokenAmount = 100;
+                    it("should return 1", function() {
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        let locked = CustomSettingsValidator.getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        expect( locked.toString(), "Incorrect locked amount returned").is.equal( "1" );
+                    });
+                });
+
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.25) - 1", function () {
                     let _tokenAmount = 100;
                     it("should return 25", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.25 );
                         let locked = CustomSettingsValidator.getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "25" );
                     });
                 });
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.50 ( middle of the range )", function () {
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.50) - 1 ( middle of the range )", function () {
                     let _tokenAmount = 100;
                     it("should return 50", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.5 );
                         let locked = CustomSettingsValidator.getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "50" );
                     });
                 });
 
-                describe("_tokenAmount = 100, _blockNumber = range * 0.75", function () {
+                describe("_tokenAmount = 100, _blockNumber = (range * 0.75) - 1", function () {
                     let _tokenAmount = 100;
                     it("should return 75", function() {
-                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.75 );
                         let locked = CustomSettingsValidator.getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "75" );
+                    });
+                });
+
+                describe("_tokenAmount = 100, _blockNumber = endBlock", function () {
+                    let _tokenAmount = 100;
+                    it("should return 100", function() {
+                        const rangeStartblock = CustomSettingsValidator.getStage(1).endBlock;
+                        let locked = CustomSettingsValidator.getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        expect( locked.toString(), "Incorrect locked amount returned").is.equal( "100" );
                     });
                 });
 

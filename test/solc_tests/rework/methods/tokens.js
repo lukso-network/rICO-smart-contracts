@@ -14,7 +14,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
     const deployerAddress = accounts[0];
     const whitelistControllerAddress = accounts[1];
-    let TokenContractAddress, RICOContractAddress, currentBlock;
+    let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
     before(async function () {
@@ -26,8 +26,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
-        currentBlock = parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10);
-        this.jsValidator = new validatorHelper(setup.settings, currentBlock);
+        this.jsValidator = new validatorHelper(setup.settings, 
+            parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10)
+        );
     });
 
     describe("Contract Methods", async function () {
@@ -44,12 +45,12 @@ describe("ReversibleICO - Methods - Tokens", function () {
                 BuyPhaseEndBlock = await this.ReversibleICO.methods.buyPhaseEndBlock().call();
 
                 // move to start of the commit phase
-                await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 0 );
+                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 0 );
 
                 // send 1 eth contribution
                 newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
-                    to: helpers.addresses.Rico,
+                    to: RICOContractAddress,
                     value: ContributionAmount.toString(),
                     gasPrice: helpers.networkConfig.gasPrice
                 });
@@ -61,168 +62,210 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     from: whitelistControllerAddress
                 });
 
+                /*
+                 * Validator
+                 */
+
+                this.jsValidator.setBlockNumber(currentBlock);
+                // set participant initial balance to 100 ETH
+                this.jsValidator.BalanceContractInstance.set(
+                    participant_1, this.jsValidator.getOneEtherBn().mul(new BN("100"))
+                );
+                // commit ContributionAmount
+                this.jsValidator.commit(participant_1, ContributionAmount);
+
             });
 
-            it("Returns 0 at any stage if participant has no contributions", async function () {
+            describe("participant has no contributions", async function () {
 
-                // jump to stage commit start block - 1
-                const stageId = 0;
-                let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
-                const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_6).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                it("Returns 0 at any stage", async function () {
+                    const participantAddress = participant_6;
+                    // jump to stage commit start block - 1
+                    const stageId = 0;
+                    let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
+                    const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
 
-                let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
-                // make sure we return full purchased amount.
-                expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
+                    this.jsValidator.setBlockNumber(currentBlock);
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
 
-                // now let's validate the js calculations
-                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
+                    let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
 
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                    // jump to stage 12 end block - 1
+                    currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 1);
+                    this.jsValidator.setBlockNumber(currentBlock);
 
-                currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 1);
-                getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                    validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
 
-                currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12);
-                getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                    // jump to stage 12 start block
+                    currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12);
+                    this.jsValidator.setBlockNumber(currentBlock);
 
-                currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12, false, 1);
-                getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                    validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
+
+                    // jump to stage 12 end block + 1
+                    currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12, false, 1);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                });
+
             });
 
-            it("Returns participant's purchased token amount before stage 1 start_block", async function () {
+            describe("participant has made a contribution", async function () {
 
-                // jump to stage commit start block - 1
-                const stageId = 1;
-                const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
+                const participantAddress = participant_1;
 
-                const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                it("Returns participant's purchased token amount before stage 1 start_block", async function () {
 
-                const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
+                    // jump to stage commit start block - 1
+                    const stageId = 1;
+                    const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
+                    this.jsValidator.setBlockNumber(currentBlock);
 
-                expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
+                    const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
 
-                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
+                    const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+                    expect(getLockedTokenAmount).to.be.equal(ContractContributionTokens);
 
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                });
+
+
+                it("Returns proper amount at stage 1 start_block", async function () {
+
+                    // jump to stage commit start block
+                    const stageId = 1;
+                    const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    const validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                });
+
+                it("Returns proper amount at stage 1 start_block + 1", async function () {
+
+                    // jump to stage commit start block
+                    const stageId = 1;
+                    const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, 1);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    const validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                });
+
+                it("Returns proper amount at stage 6 end_block - 1", async function () {
+
+                    // jump to stage commit start block
+                    const stageId = 6;
+                    const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+
+                });
+
+                it("Returns proper amount at stage 12 end_block - 1", async function () {
+
+                    // jump to stage commit start block
+                    const stageId = 12;
+                    const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+
+                });
+
+                it("Returns 0 locked tokens at stage 12 end_block ( also known as BuyPhaseEndBlock )", async function () {
+
+                    // jump to stage commit start block
+                    let stageId = 12;
+                    let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                });
+
+                it("Returns 0 locked tokens after BuyPhaseEndBlock", async function () {
+
+                    // jump to stage commit start block
+                    let stageId = 12;
+                    let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
+
+                    currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1000);
+                    this.jsValidator.setBlockNumber(currentBlock);
+
+                    ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
+                    ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    expect(parseInt(ContractContributionTokens)).to.be.above(0);
+
+                    getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
+                    validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
+                    expect(getLockedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getLockedTokenAmount.toString()).to.be.equal("0");
+                });
+                
             });
-
-
-            it("Returns proper amount at stage 1 start_block", async function () {
-
-                // jump to stage commit start block
-                const stageId = 1;
-                const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
-
-                const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-            });
-
-            it("Returns proper amount at stage 6 end_block - 1", async function () {
-
-                // jump to stage commit start block
-                const stageId = 6;
-                const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
-
-                const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-            });
-
-            it("Returns proper amount at stage 12 end_block - 1", async function () {
-
-                // jump to stage commit start block
-                const stageId = 12;
-                const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
-
-                const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                const calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-            });
-
-            it("Returns 0 locked tokens at stage 12 end_block ( also known as BuyPhaseEndBlock )", async function () {
-
-                // jump to stage commit start block
-                let stageId = 12;
-                let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true);
-
-                let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
-            });
-
-            it("Returns 0 locked tokens after BuyPhaseEndBlock", async function () {
-
-                // jump to stage commit start block
-                let stageId = 12;
-                let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1);
-
-                let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                let calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
-
-                currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1000);
-
-                ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
-                expect(parseInt(ContractContributionTokens)).to.be.above(0);
-
-                getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
-                calculatedTokenAmount = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
-                    helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
-                );
-
-                expect(getLockedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getLockedTokenAmount.toString()).to.be.equal("0");
-            });
-
+            
         });
+
     });
+
 });

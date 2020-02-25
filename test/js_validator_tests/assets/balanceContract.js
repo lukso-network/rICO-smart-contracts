@@ -33,7 +33,9 @@ class BalanceContract {
             this.balances[_from] = senderBalance.sub(_amount);
             this.balances[_to] = receiverBalance.add(_amount);
         } else {
-            throw ("[" + _from + "] has insufficient balance. \n balance: [" + this.balances[_from].toString() + "]\n amount: [" + _amount.toString() + "]");
+            throw "[" + _from + "] has insufficient balance. \n" +
+                "balance: [" + this.balances[_from].toString() + "]\n" +
+                "amount: [" + _amount.toString() + "]";
         }
     }
 

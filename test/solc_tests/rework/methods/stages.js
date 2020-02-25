@@ -410,7 +410,6 @@ describe("ReversibleICO - Methods - Stages", function () {
 
             });
 
-
             it("Returns higher than 0 if at stage 1 start_block + 1", async function () {
                 const stageId = 1;
                 // jump to stage 1 start_block exactly
@@ -423,10 +422,10 @@ describe("ReversibleICO - Methods - Stages", function () {
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
             });
 
-            it("Returns lower than max (99%) at BuyPhaseEndBlock", async function () {
+            it("Returns lower than max (99%) at BuyPhaseEndBlock - 1", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
-                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 0 );
+                const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, - 1 );
                 const contractRatio = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
 
                 this.jsValidator.setBlockNumber(currentBlock);
@@ -441,7 +440,7 @@ describe("ReversibleICO - Methods - Stages", function () {
 
             });
 
-            it("Returns max ( 10 ** precision ) at BuyPhaseEndBlock + 1", async function () {
+            it("Returns max ( 10 ** precision ) at BuyPhaseEndBlock", async function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, stageId, true, 1 );

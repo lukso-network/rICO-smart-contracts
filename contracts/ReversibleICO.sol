@@ -774,9 +774,9 @@ contract ReversibleICO is IERC777Recipient {
 
         if (_tokenAmount > 0) {
 
-            // if before "development / buy  phase" ( stage 0 )
+            // if before "development / buy  phase" ( in stage 0 )
             //   - return all tokens bought through contributions.
-            // if in development phase ( stage 1 to n )
+            // if in development phase ( in stage 1 to n )
             //   - calculate and return
             // else if after end_block
             //   - return 0
@@ -818,7 +818,9 @@ contract ReversibleICO is IERC777Recipient {
             uint256 totalBlockCount = _endBlock.sub(_startBlock).add(1);
 
             // get the number of blocks that have "elapsed" since the start block
-            uint256 passedBlocks = _currentBlock.sub(_startBlock);
+            // add 1 since start block needs to return higher than 0
+            uint256 passedBlocks = _currentBlock.sub(_startBlock).add(1);
+
             return passedBlocks.mul(
                 10 ** uint256(precision)
             ).div(totalBlockCount);

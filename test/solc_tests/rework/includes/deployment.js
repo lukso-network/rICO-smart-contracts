@@ -46,7 +46,7 @@ async function deployRICOContract() {
 async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null ) {
 
     requiresERC1820Instance();
-    const snapShotKey = testKey+"_"+phase;
+    const snapShotKey = testKey+"_Phase_"+phase;
 
     // TestRPC EVM Snapshots allow us to save and restore snapshots at any block
     // we use them to speed up the test runner.
