@@ -98,50 +98,97 @@ module.exports = {
         // jump to allocation block 
         await helpers.utils.jumpToContractStage ( rICO, deployment.addresses.ContractsDeployer, 0 );
 
+        // record actions so we can reply the full scenario
+        const action_log = [];
+
         // randomise actions of actors and call `test()` on each actor after each action
 
-        for(let i = 0; i < rICOBlockLength + 1; i++) {
+        try {
+            for(let i = 0; i < rICOBlockLength + 1; i++) {
 
-        // for(let i = 78; i < rICOBlockLength + 1; i++) {
-            
-            // block relative to rICO start.
-            let block = commitPhaseStartBlock + i;
-            // middle block
-            await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
-            const currentStage = await rICO.methods.getCurrentStage().call();
-            const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
-
-            console.log(
-                "   ",
-                "block:", block,
-                "stage:", currentStage,
-                "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth",
-            );
-            
-
-
-            // Loop participants and execute a random action.
-            for( let j = 0; j < participants.length; j++) {
-                participants[j].setBlock(block);
-                await participants[j].executeRandomActionOrNone();
+                // block relative to rICO start.
+                let block = commitPhaseStartBlock + i;
+                action_log.push({ "type": "block", "block": block } );
+                await setBlock(block, rICO, deployment, helpers);
+                
+                // Loop participants and execute a random action.
+                for( let j = 0; j < participants.length; j++) {
+                    participants[j].setBlock(block);
+                    await participants[j].executeRandomActionOrNone(function(){
+                        action_log.push({ "type": "participant", "id": j, "address": participants[j].address, "action": participants[j].getLastAction()} );
+                    });
+                }
+                await Project.executeRandomActionOrNone(function(){
+                    action_log.push({ "type": "project", "action": Project.getLastAction()} );    
+                });
             }
-            await Project.executeRandomActionOrNone();
+        } catch(e) {
 
-        }        
+            console.log(`
+    // ----------------------------------------------------------------------------------------
+    // replay code start
+    //
+    let block;
+`);
 
-        console.log("");
-        console.log("Project Wallet statistics:");
+            for(let i  = 0; i < action_log.length; i++) {
+                const currentLog = action_log[i];
 
-        Project.displayBalances();
-        await Project.withdrawFullAmount();
-        Project.displayBalances();
+                // console.log("action_log.type", currentLog.type);
+                if(currentLog.type === "block") {
+                    console.log(`    block = `+currentLog.block+`; 
+    await setBlock(block, rICO, deployment, helpers);
+`);
 
-        console.log("");
-        console.log("Run summary:");
-        console.log("Participants:", participants.length);
+                } else if(currentLog.type === "participant") {
+                    // participants[j].setBlock(block);
+                    console.log(`    participants[` + currentLog.id + `].setBlock(block);
+    await participants[` + currentLog.id + `].executeAction('` + currentLog.action + `');
+                    `);
+
+                } else if(currentLog.type === "project") {
+                    console.log(`    await Project.executeAction('`+currentLog.action+`');
+`);
+
+                }
+                
+            }
+        
+            console.log(`
+    // replay code end    
+    // ----------------------------------------------------------------------------------------
+`);
+            console.log("Error:", e);
+
+            process.exit(1);
+        }
+
+        // console.log("");
+        // console.log("Project Wallet statistics:");
+
+        // Project.displayBalances();
+        // await Project.withdrawFullAmount();
+        // Project.displayBalances();
+
+        // console.log("");
+        // console.log("Run summary:");
+        // console.log("Participants:", participants.length);
 
     }
 } 
+
+async function setBlock(block, rICO, deployment, helpers) {
+    await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
+    const currentStage = await rICO.methods.getCurrentStage().call();
+    const currentAvailableEthForPurchase = await rICO.methods.availableEthAtStage(currentStage).call();
+
+    console.log(
+        "####   ",
+        "block:", block,
+        "stage:", currentStage,
+        "eth:", helpers.utils.toEth(helpers, currentAvailableEthForPurchase) + " eth",
+    );
+}
 
 
 async function display(rICO, helpers, Project) {

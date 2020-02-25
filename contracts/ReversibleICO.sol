@@ -687,7 +687,7 @@ contract ReversibleICO is IERC777Recipient {
     function hasPendingETH(address _participantAddress) public view returns (bool) {
         // Participant storage participantRecord = participantsByAddress[_participantAddress];
 
-        uint256 participantAvailableETH = getParticipantAvailableETH(_participantAddress);
+        uint256 participantAvailableETH = getParticipantPendingETH(_participantAddress);
         if (participantAvailableETH > 0) {
             return true;
         }
@@ -1022,15 +1022,16 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
 
-        uint8 currentStage = getCurrentStage();
+        uint256 processedTotals = aggregatedStats.committedETH.add(aggregatedStats.returnedETH);
 
-        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
+        // whitelisted( commited ) + returned is lower than total received
+        if (processedTotals < aggregatedStats.totalReceivedETH) {
 
-            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+            uint8 currentStage = getCurrentStage();
 
-            uint256 processedTotals = aggregatedStats.committedETH.add(aggregatedStats.returnedETH);
+            for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
 
-            if (processedTotals < aggregatedStats.totalReceivedETH) {
+                ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
                 // handle the case when we have reserved more tokens than globally available
                 aggregatedStats.reservedTokens = aggregatedStats.reservedTokens.sub(byStage.reservedTokens);
@@ -1087,13 +1088,31 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
-    function getParticipantAvailableETH(address _from) public view returns (uint256) {
+    function getParticipantPendingETH(address _from) public view returns (uint256) {
 
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
+
+        // return aggregatedStats.totalReceivedETH
+        //     .sub(aggregatedStats.returnedETH)
+        //     .sub(aggregatedStats.committedETH)
+        //     .sub(aggregatedStats.withdrawnETH);
+
+        // return aggregatedStats.committedETH.sub(
+        //     aggregatedStats.withdrawnETH
+        // );
+
+
         return aggregatedStats.totalReceivedETH
+            // returned when contract cannot accept full received amount
+            // + returned by cancel()
             .sub(aggregatedStats.returnedETH)
-            .sub(aggregatedStats.committedETH)
-            .sub(aggregatedStats.withdrawnETH);
+            .sub(
+                // ETH for which we have tokens ( whitelisted )
+                aggregatedStats.committedETH
+                // .sub(
+                //     aggregatedStats.withdrawnETH
+                // )
+            );
     }
 
     /**
@@ -1113,42 +1132,45 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantRecord = participantsByAddress[_from];
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
 
-        // Get participant's available ETH i.e. committed - withdrawnETH - returnedETH
-        uint256 participantAvailableETH = getParticipantAvailableETH(_from);
+        // Get participant's pending ETH i.e. committed - withdrawnETH - returnedETH
+        uint256 participantPendingETH = getParticipantPendingETH(_from);
 
-        // Revert if there is no available ETH contribution
-        require(participantAvailableETH > 0, "Participant has not contributed any ETH yet.");
+        // Revert if there is no pending ETH contribution
+        require(participantPendingETH > 0, "Participant has not contributed any ETH yet.");
 
         // Update total ETH returned
         // Since this balance was never actually "accepted" it counts as returned...
         // ...so it does not interfere with project withdraw calculations
-        returnedETH = returnedETH.add(participantAvailableETH);
+        returnedETH = returnedETH.add(participantPendingETH);
 
         // update participant's audit values
         aggregatedStats.reservedTokens = 0;
-        aggregatedStats.returnedETH = aggregatedStats.returnedETH.add(participantAvailableETH);
+        aggregatedStats.returnedETH = aggregatedStats.returnedETH.add(participantPendingETH);
 
         uint8 currentStage = getCurrentStage();
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
-            ParticipantDetails storage state = participantRecord.byStage[stageId];
-            uint256 stageAvailableETH = state.totalReceivedETH
-                .sub(state.returnedETH)
-                .sub(state.committedETH)
-                .sub(state.withdrawnETH);
-            state.reservedTokens = 0;
-            state.returnedETH = state.returnedETH.add(stageAvailableETH);
+            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+            byStage.returnedETH = byStage.totalReceivedETH
+                .sub(byStage.returnedETH)
+                .sub(byStage.committedETH)
+                .sub(byStage.withdrawnETH);
+
+            byStage.reservedTokens = 0;
+            // byStage.returnedETH = state.returnedETH.add(
+            //     state.committedETH.sub(state.withdrawnETH)
+            // );
         }
 
         // transfer ETH back to participant including received value
-        address(uint160(_from)).transfer(participantAvailableETH.add(_value));
+        address(uint160(_from)).transfer(participantPendingETH.add(_value));
 
         // event emission
-        emit TransferEvent(_eventType, _from, participantAvailableETH);
+        emit TransferEvent(_eventType, _from, participantPendingETH);
         emit ApplicationEvent(
             _eventType,
             uint32(participantRecord.contributionsCount),
             _from,
-            participantAvailableETH
+            participantPendingETH
         );
     }
 

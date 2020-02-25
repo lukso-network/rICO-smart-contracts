@@ -330,19 +330,16 @@ class Contract extends Validator {
     }
 
     hasPendingETH(_address) {
-        const participantAvailableETH = this.getParticipantAvailableETH(_address);
+        const participantAvailableETH = this.getParticipantPendingETH(_address);
         if(participantAvailableETH > 0) {
             return true;
         }
         return false;
     }
 
-    getParticipantAvailableETH(_from) {
+    getParticipantPendingETH(_from) {
         const participantRecord = this.getParticipantRecordByAddress(_from);
-        return participantRecord.totalReceivedETH
-            .sub(participantRecord.returnedETH)
-            .sub(participantRecord.committedETH)
-            .sub(participantRecord.withdrawnETH);
+        return participantRecord.committedETH.sub(participantRecord.withdrawnETH);
     }
 
     cancelContributionsForAddress(_from, _value, _eventType) {

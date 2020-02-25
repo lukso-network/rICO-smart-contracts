@@ -36,38 +36,23 @@ class Project extends Actor {
         };
     }
 
-    async withdrawFullAmount(cb = null) {
+    async withdrawFullAmount() {
         await this.readBalances();
-        // console.log("withdrawFullAmount before");
-        this.displayBalances();
-        
-        // const ethval = new this.helpers.BN("50000000000000000000"); // this.currentBalances.withdrawableETH
-        const ethval = this.currentBalances.withdrawableETH
-      
-
-        await this.withdraw( ethval );
-        if(cb) {
-            await cb();
-        }
-        // console.log("withdrawFullAmount after");
-        // this.displayBalances();
-        await this.test();
+        const amount = this.currentBalances.withdrawableETH
+        this.actionLog.push( { type:"withdrawHalf", "value": amount, valid: null } );
+        await this.withdraw( amount );
     }
 
-    async withdrawHalf(cb) {
+    async withdrawHalf() {
         await this.readBalances();
-        await this.withdraw( this.currentBalances.withdrawableETH.div( new this.helpers.BN(2) ) );
-
-        await cb();
-        
-        await this.test();
+        const amount = this.currentBalances.withdrawableETH.div( new this.helpers.BN(2) );
+        this.actionLog.push( { type:"withdrawHalf", "value": amount, valid: null } );
+        await this.withdraw( amount );
     }
 
     async withdraw(amount) {
         
         console.log("withdraw:", this.toEth(amount) + " eth");
-
-        this.actionLog.push( { type:"withdraw", "value": amount, valid: null } );
 
         // await this.readBalances();
         // console.log(" > currentBalances.ETH:              ", this.toEth(this.currentBalances.ETH) + " eth");
@@ -107,10 +92,18 @@ class Project extends Actor {
         return actions;
     }
 
-    async executeRandomActionOrNone() {
-        const availableActions = ["nothing", ...await this.getAvailableActions()];
+    async getAvailableActionsWithNone() {
+        return ["nothing", ...await this.getAvailableActions()];
+    }
+
+    async executeRandomActionOrNone(callback = null) {
+        const availableActions = await this.getAvailableActionsWithNone();
         const rand = Math.floor( Math.random() * availableActions.length );
-        const action = availableActions[rand];
+        await this.executeAction(availableActions[rand], callback);
+    }
+
+    async executeAction(action, callback = null) {
+        const availableActions = await this.getAvailableActionsWithNone();
         console.log("Project Wallet", "Executing:", action, " / Available:", availableActions);
 
         // action execution
@@ -128,10 +121,13 @@ class Project extends Actor {
                 throw("error at executeRandomActionOrNone: action[" + action + "] not found.");
         }
 
+        if(callback) {
+            await callback();
+        }
+
         if(action !== "nothing") {
             await this.test();
         }
-
     }
 
     // check if the expected and current balances match
@@ -157,6 +153,10 @@ class Project extends Actor {
         console.log("    address:                         ", this.address);
         console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
         console.log("    currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
+    }
+
+    getLastAction() {
+        return this.actionLog[this.actionLog.length - 1].type;
     }
 
 }
