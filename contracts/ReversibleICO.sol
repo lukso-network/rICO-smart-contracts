@@ -813,12 +813,12 @@ contract ReversibleICO is IERC777Recipient {
         uint256 _endBlock
     ) public pure returns (uint256) {
         uint8 precision = 20;
-        // Get current block
-        uint256 totalBlockCount = _endBlock - _startBlock + 1;
         if (_currentBlock >= _startBlock && _currentBlock <= _endBlock) {
+            // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
+            uint256 totalBlockCount = _endBlock.sub(_startBlock).add(1);
+
             // get the number of blocks that have "elapsed" since the start block
-            // + 1 since we count current as well.
-            uint256 passedBlocks = _currentBlock.sub(_startBlock).add(1);
+            uint256 passedBlocks = _currentBlock.sub(_startBlock);
             return passedBlocks.mul(
                 10 ** uint256(precision)
             ).div(totalBlockCount);

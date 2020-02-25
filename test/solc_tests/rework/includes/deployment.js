@@ -2,7 +2,7 @@
 function requiresERC1820Instance() {
     // test requires ERC1820.instance
     if (helpers.ERC1820.instance == false) {
-        console.log("  Error: ERC1820.instance not found, please make sure to run it first.");
+        console.log(helpers.utils.colors.red, "  Error: ERC1820.instance not found, please make sure to run it first.", helpers.utils.colors.none);
         process.exit();
     }
 }
@@ -43,12 +43,18 @@ async function deployRICOContract() {
     return await deployContract("ReversibleICOMock");
 }
 
-async function doFreshDeployment(phase = 0, settings = null ) {
+async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null ) {
 
     requiresERC1820Instance();
     const snapShotKey = testKey+"_"+phase;
 
+    // TestRPC EVM Snapshots allow us to save and restore snapshots at any block
+    // we use them to speed up the test runner.
+
     if (typeof snapshots[snapShotKey] !== "undefined" && snapshotsEnabled) {
+
+        console.log(helpers.utils.colors.light_cyan, "    * EVM snapshot["+snapShotKey+"] restore", helpers.utils.colors.none);
+
         // restore snapshot
         await helpers.web3.evm.revert(snapshots[snapShotKey]);
 
@@ -59,6 +65,10 @@ async function doFreshDeployment(phase = 0, settings = null ) {
         helpers.utils.resetAccountNonceCache(helpers);
 
     } else {
+
+        if (snapshotsEnabled) {
+            console.log(helpers.utils.colors.light_blue, "    * EVM snapshot["+snapShotKey+"] start", helpers.utils.colors.none);
+        }
 
         const TokenContract = await deployTokenContract();
         TokenContractInstance = TokenContract.instance;
@@ -114,9 +124,6 @@ async function doFreshDeployment(phase = 0, settings = null ) {
                 from: deployerAddress,  // deployer
                 gas: 3000000
             });
-
-                
-
         }
 
         // phase = 2 -> transfer tokens to rico
@@ -125,8 +132,8 @@ async function doFreshDeployment(phase = 0, settings = null ) {
             // transfer tokens to rico
             await TokenContractInstance.methods.send(
                 ReversibleICOInstance.receipt.contractAddress,
-                RicoSaleSupply,
-                ERC777data
+                setup.settings.token.sale.toString(),
+                web3.utils.sha3('777TestData')
             ).send({
                 from: holder,  // initial token supply holder
                 gas: 100000
@@ -134,12 +141,13 @@ async function doFreshDeployment(phase = 0, settings = null ) {
 
             expect(
                 await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
-            ).to.be.equal(RicoSaleSupply.toString());
+            ).to.be.equal(setup.settings.token.sale.toString());
         }
 
         // create snapshot
         if (snapshotsEnabled) {
             snapshots[snapShotKey] = await helpers.web3.evm.snapshot();
+            console.log(helpers.utils.colors.light_blue, "    * EVM snapshot["+snapShotKey+"] end", helpers.utils.colors.none);
         }
     }
 
@@ -156,7 +164,7 @@ async function doFreshDeployment(phase = 0, settings = null ) {
 
     let expectedTokenSupply = "0";
     if(phase >= 2 ) {
-        expectedTokenSupply = RicoSaleSupply.toString();
+        expectedTokenSupply = setup.settings.token.sale.toString();
     }
     expect(await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()).to.be.equal(expectedTokenSupply);
 

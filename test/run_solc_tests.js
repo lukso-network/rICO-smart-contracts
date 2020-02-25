@@ -23,7 +23,10 @@ async function runTests(init) {
     // // // "6_Gnosis-Safe",
     // "7_Website",
     // "10_ProjectWithdraw",
-    "rework/stages"
+    "rework/phases",
+    "rework/methods/stages",
+    "rework/methods/tokens",
+    // "rework/4_ReversibleICO"
   ];
 
   init.helpers.utils.toLog(

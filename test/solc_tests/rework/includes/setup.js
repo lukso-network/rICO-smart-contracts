@@ -39,7 +39,7 @@ global.TransferTypes = {
 
 global.snapshotsEnabled = true;
 
-const validatorHelper = require("../../../js_validator_tests/assets/validator.js");
+const validatorHelper = require("../../../js_validator_tests/assets/ricoContract.js");
 
 module.exports = {
     validatorHelper

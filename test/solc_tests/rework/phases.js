@@ -7,29 +7,28 @@ const {
     doFreshDeployment
 } = require('./includes/deployment');
 
-global.snapshots = [];
-global.testKey = "StageTests";
+const snapshots = [];
+const testKey = "PhaseTests";
 
-describe("ReversibleICO", function () {
+describe("ReversibleICO - Phases", function () {
 
     const deployerAddress = accounts[0];
     const whitelistControllerAddress = accounts[1];
-    let TokenContractAddress, stageValidation = [], currentBlock, commitPhaseStartBlock,
-        commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
-        StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock;
+    let TokenContractAddress, RICOContractAddress, currentBlock;
     let TokenContractInstance;
 
     before(async function () {
         requiresERC1820Instance();
     });
 
-    describe("Stage 1 - Deployment", async function () {
+    describe("Phase 1 - Deployment", async function () {
 
         before(async function () {
-            const contracts = await doFreshDeployment(0);
+            const contracts = await doFreshDeployment(snapshots, testKey, 0);
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+            RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
         });
 
         it("Gas usage should be lower than network configuration gas.", async function () {
@@ -59,13 +58,14 @@ describe("ReversibleICO", function () {
     });
 
 
-    describe("Stage 2 - Initialisation - init()", function () {
+    describe("Phase 2 - Initialisation - init()", function () {
 
         before(async function () {
-            const contracts = await doFreshDeployment(1, setup.settings);
+            const contracts = await doFreshDeployment(snapshots, testKey, 1, setup.settings);
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+            RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
             currentBlock = parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10);
             this.jsValidator = new validatorHelper(setup.settings, currentBlock);
@@ -149,9 +149,9 @@ describe("ReversibleICO", function () {
                 const stageData = await this.ReversibleICO.methods.stages((stageRefId)).call();
                 const validatorStageData = this.jsValidator.stages[stageRefId];
 
-                expect(stageData.startBlock).to.be.equal(validatorStageData.startBlock);
-                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
-                expect(stageData.tokenPrice).to.be.equal(validatorStageData.tokenPrice);
+                expect(stageData.startBlock.toString()).to.be.equal(validatorStageData.startBlock.toString());
+                expect(stageData.endBlock.toString()).to.be.equal(validatorStageData.endBlock.toString());
+                expect(stageData.tokenPrice.toString()).to.be.equal(validatorStageData.tokenPrice.toString());
             });
 
             it("Last Distribution Stage settings are correct", async function () {
@@ -159,9 +159,9 @@ describe("ReversibleICO", function () {
                 const stageData = await this.ReversibleICO.methods.stages((stageRefId)).call();
                 const validatorStageData = this.jsValidator.stages[stageRefId];
 
-                expect(stageData.startBlock).to.be.equal(validatorStageData.startBlock);
-                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
-                expect(stageData.tokenPrice).to.be.equal(validatorStageData.tokenPrice);
+                expect(stageData.startBlock.toString()).to.be.equal(validatorStageData.startBlock.toString());
+                expect(stageData.endBlock.toString()).to.be.equal(validatorStageData.endBlock.toString());
+                expect(stageData.tokenPrice.toString()).to.be.equal(validatorStageData.tokenPrice.toString());
             });
 
             it("Last Distribution Stage end_block matches contract BuyPhaseEndBlock", async function () {
@@ -169,13 +169,75 @@ describe("ReversibleICO", function () {
                 const stageData = await this.ReversibleICO.methods.stages(stageRefId).call();
                 const validatorStageData = this.jsValidator.stages[stageRefId];
 
-                expect(stageData.endBlock).to.be.equal(validatorStageData.endBlock);
-                expect(stageData.endBlock).to.be.equal(this.jsValidator.buyPhaseEndBlock);
+                expect(stageData.endBlock.toString()).to.be.equal(validatorStageData.endBlock.toString());
+                expect(stageData.endBlock.toString()).to.be.equal(this.jsValidator.buyPhaseEndBlock.toString());
             });
 
         });
 
     });
 
+
+    describe("Phase 3 - Transfer tokens to RICO contract address", function () {
+
+        const ERC777data = web3.utils.sha3('777TestData');
+        const RicoSaleSupply = setup.settings.token.sale.toString();
+
+        before(async function () {
+            const contracts = await doFreshDeployment(snapshots, testKey, 1, setup.settings);
+            this.ReversibleICO = contracts.ReversibleICOInstance;
+            TokenContractInstance = contracts.TokenContractInstance;
+            TokenContractAddress = TokenContractInstance.receipt.contractAddress;
+            RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
+
+            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+            await TokenContractInstance.methods.send(
+                RICOContractAddress,
+                RicoSaleSupply,
+                ERC777data
+            ).send({
+                from: holder,  // initial token supply holder
+                gas: 100000
+            });
+        });
+
+        describe("Contract Assets", function () {
+
+            before(async function () {
+            });
+
+            it("RICO Contract should have 0 eth", async function () {
+                const ContractBalance = await helpers.utils.getBalance(helpers, RICOContractAddress);
+                expect( ContractBalance ).to.be.bignumber.equal( new helpers.BN(0) );
+            });
+
+            it("RICO Contract should have the correct token balance ("+RicoSaleSupply+")", async function () {
+                expect(
+                    await TokenContractInstance.methods.balanceOf(RICOContractAddress).call()
+                ).to.be.equal(RicoSaleSupply.toString());
+            });
+
+            it("TokenSupply property should match Contract token balance ("+RicoSaleSupply+")", async function () {
+                expect(
+                    await this.ReversibleICO.methods.tokenSupply().call()
+                ).to.be.equal(
+                    await TokenContractInstance.methods.balanceOf(RICOContractAddress).call()
+                );
+            });
+
+        });
+
+    });
+
+
+    describe("Phase 4 - Funding Start", function () {
+        /*
+        before(async function () {
+            // jump to commit start
+            // await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 0 );
+            await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 1 );
+        });
+        */
+    });
 
 });

@@ -37,7 +37,6 @@ class Validator {
     }
 
     init() {
-
         this.commitPhaseBlockCount = this.blocksPerDay * this.commitPhaseDays;
         this.commitPhaseEndBlock = this.commitPhaseStartBlock + this.commitPhaseBlockCount - 1;
         this.stageBlockCount = this.blocksPerDay * this.stageDays;
@@ -56,7 +55,7 @@ class Validator {
             const startBlock = lastStageBlockEnd + 1;
             this.stages[i] = {
                 startBlock: startBlock,
-                endBlock: startBlock + this.stageBlockCount,
+                endBlock: lastStageBlockEnd + this.stageBlockCount,
                 tokenPrice: this.commitPhasePrice.add( 
                     this.stagePriceIncrease.mul( 
                         new BN(i)
@@ -72,11 +71,10 @@ class Validator {
         this.buyPhaseEndBlock = lastStageBlockEnd;
         
         // The duration of buyPhase in blocks
-        this.buyPhaseBlockCount = lastStageBlockEnd - this.buyPhaseStartBlock;
+        this.buyPhaseBlockCount = lastStageBlockEnd - this.buyPhaseStartBlock + 1;
     }
 
     getTokenAmountForEthAtStage(ethValue, stageId) {
-
         if(typeof this.stages[stageId] === "undefined") {
             throw "Stage " + stageId + " not found.";
         }
@@ -89,7 +87,6 @@ class Validator {
     }
 
     getEthAmountForTokensAtStage(tokenAmount, stageId) {
-
         if(typeof this.stages[stageId] === "undefined") {
             throw "Stage " + stageId + " not found.";
         }
@@ -102,7 +99,6 @@ class Validator {
     }
 
     getCurrentUnlockPercentage() {
-
         const currentBlock = new BN( this.getCurrentBlockNumber() );
         const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );
@@ -110,27 +106,32 @@ class Validator {
         return this.getUnlockPercentage(currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
     }
 
-    getUnlockPercentage(_currentBlock, _startBlock, _endBlock, precision) {
+    getUnlockPercentage(_currentBlock, _startBlock, _endBlock, _precision) {
 
         const currentBlock = new BN( _currentBlock );
         const startBlock = new BN( _startBlock );
         const endBlock   = new BN( _endBlock );
+        const precision   = new BN( _precision );
 
-        if(
-            currentBlock.toNumber() > startBlock.toNumber()
-            && currentBlock.toNumber() < endBlock.toNumber())
-        {
-            const passedBlocks = currentBlock.sub(startBlock);
-            const blockCount = new BN(endBlock).sub(startBlock);
-            return passedBlocks.mul(
-                precision
-            ).div(new BN(blockCount));
-            
-        } else if (currentBlock.toNumber() >= endBlock.toNumber()) {
-            return new BN(1).mul(precision);
-        } else {
-            return new BN(0);
+        if(precision.lt(new BN("2")) && precision.gt(new BN("20"))) {
+            throw "Precision should be higher than 1 and lower than 20";
         }
+
+        if(currentBlock.gte(startBlock) && currentBlock.lte(endBlock))
+        {
+            const blockCount = endBlock.sub(startBlock).add( new BN(1) );
+            const passedBlocks = currentBlock.sub(startBlock);
+            
+            return passedBlocks.mul(
+                new BN(10).pow(precision)
+            ).div(blockCount);
+            
+        } else if (currentBlock.gt(endBlock)) {
+            return new BN(10).pow(precision);
+        } else {
+            // lower than or equal to start block
+            return new BN(0);
+        }s
     }
 
     getCurrentStage() {
@@ -138,7 +139,6 @@ class Validator {
     }
 
     getStageAtBlock(_blockNumber) {
-
         this.require(
             _blockNumber >= this.commitPhaseStartBlock && _blockNumber <= this.buyPhaseEndBlock,
             "Block outside of rICO period."
@@ -149,45 +149,17 @@ class Validator {
             return 0;
         }
 
-        /*
-        const distance = _blockNumber - this.commitPhaseEndBlock;
-        let stageID = Math.floor(distance / this.stageBlockCount);
-
-        // If the block is NOT the stageEndBlock then add 1 to get the correct stage
-        if (distance % this.stageBlockCount > 0){
-            stageID++;
-        }
-        return stageID;
-        */
-
-        /*
-        if (_blockNumber <= this.commitPhaseEndBlock) {
-            return 0;
-        }
-
-        // This is the number of blocks starting from the first sale stage ( 1 ).
+        // This is the number of blocks starting from the first stage.
         const distance = _blockNumber - (this.commitPhaseEndBlock + 1);
         // Get the stageId (1..stageCount), commitPhase is stage 0
         // e.g. distance = 5, stageBlockCount = 5, stageID = 2
-
-        const stageID = (distance / this.stageBlockCount);
+        const stageID = 1 + (distance / this.stageBlockCount);
 
         return Math.floor(stageID);
-        */
-
-        // floor division results, so we get what we're looking for.
-        let num = Math.floor((_blockNumber - this.commitPhaseEndBlock) / (this.stageBlockCount + 1)) + 1;
-
-        // Last block of each stage always computes as stage + 1
-        if (this.stages[num - 1].endBlock == _blockNumber) {
-            // save some gas and just return instead of decrementing.
-            return num - 1;
-        }
-        return num;
     }
 
     getCurrentPrice() {
-        return getPriceAtBlock(this.getCurrentBlockNumber());
+        return this.getPriceAtBlock(this.getCurrentBlockNumber());
     }
 
     getPriceAtBlock(_blockNumber) {
@@ -215,7 +187,8 @@ class Validator {
                     this.buyPhaseEndBlock,
                     precision
                 )
-            ).div( precision );
+            ).div( new BN("10").pow(precision) );
+
             return tokenAmount.sub(unlocked);
         } else {
             // after contract end

@@ -56,8 +56,8 @@ const BalanceContract = require("./balanceContract.js");
 class Contract extends Validator {
 
     // set the defaults
-    constructor(settings) {
-        super(settings);
+    constructor(settings, currentBlock = 0) {
+        super(settings, currentBlock);
 
         this.participantsByAddress = {};
         this.participantsById = [];

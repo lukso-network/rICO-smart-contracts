@@ -1,42 +1,14 @@
-const helpers = setup.helpers;
-const BN = helpers.BN;
-const MAX_UINT256 = helpers.MAX_UINT256;
-const expect = helpers.expect
+const {
+    validatorHelper
+} = require('./includes/setup');
 
-const holder = accounts[10];
-const projectWalletAddress = holder;
-const participant_1 = accounts[4];
-const participant_2 = accounts[5];
-const participant_3 = accounts[6];
-const participant_4 = accounts[7];
-const participant_5 = accounts[8];
-const participant_6 = accounts[9];
+const {
+    requiresERC1820Instance,
+    doFreshDeployment
+} = require('./includes/deployment');
 
-const RicoSaleSupply = setup.settings.token.sale.toString();
-const blocksPerDay = 6450;
-
-const ApplicationEventTypes = {
-    NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_NEW:1,
-    CONTRIBUTION_CANCEL:2,
-    PARTICIPANT_CANCEL:3,
-    COMMITMENT_ACCEPTED:4,
-    WHITELIST_APPROVE:5,
-    WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW:7
-}
-
-const TransferTypes = {
-    NOT_SET:0,
-    AUTOMATIC_REFUND:1,
-    WHITELIST_REJECT:2,
-    PARTICIPANT_CANCEL:3,
-    PARTICIPANT_WITHDRAW:4,
-    PROJECT_WITHDRAW:5
-}
-
-
-let errorMessage;
+global.snapshots = [];
+global.testKey = "ReversibleICOTests";
 
 describe("ReversibleICO", function () {
 
@@ -48,41 +20,14 @@ describe("ReversibleICO", function () {
     let TokenContractInstance;
 
     before(async function () {
-        // test requires ERC1820.instance
-        if (helpers.ERC1820.instance == false) {
-            console.log("  Error: ERC1820.instance not found, please make sure to run it first.");
-            process.exit();
-        }
+        requiresERC1820Instance();
 
-        // deploy mock contract so we can set block times. ( ReversibleICOMock )
-        this.ReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
-
-        console.log("      Gas used for deployment:", this.ReversibleICO.receipt.gasUsed);
-        console.log("      Contract Address:", this.ReversibleICO.receipt.contractAddress);
-        console.log("");
-
-        helpers.addresses.Rico = this.ReversibleICO.receipt.contractAddress;
-
-        TokenContractInstance = await helpers.utils.deployNewContractInstance(
-            helpers,
-            "RicoToken",
-            {
-                from: holder,
-                arguments: [setup.settings.token.supply.toString(), []],
-                gas: 6500000,
-                gasPrice: helpers.solidity.gwei * 10
-            }
-        );
-
+        const contracts = await doFreshDeployment(0);
+        this.ReversibleICO = contracts.ReversibleICOInstance;
+        TokenContractInstance = contracts.TokenContractInstance;
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
-
-        await TokenContractInstance.methods.setup(
-            helpers.addresses.Rico
-        ).send({
-            from: holder,  // initial token supply holder
-        });
-
     });
+
 
     describe("Stage 1 - Deployment", function () {
 

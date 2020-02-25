@@ -12,10 +12,10 @@ async function runTests(init) {
 
   const tests = [
     "1_js_validator",
-    "stages.test",
-    "commit.test",
-    "whitelist.test",
-    "_wip"
+    // "stages.test",
+    // "commit.test",
+    // "whitelist.test",
+    // "_wip"
   ];
 
   init.helpers.utils.toLog(

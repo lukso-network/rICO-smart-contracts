@@ -23,7 +23,7 @@ function shouldReturnExpectedStageId(instance, stageId, getterName, blockDiffere
 }
 
 describe("Javascript Validator - Tests", function () {
-    let Validator, CustomSettingsValidator;
+    let Validator, CustomSettingsValidator, startBlock = 100;
     
     const CustomSettings = {
         token: setup.settings.token,
@@ -40,14 +40,116 @@ describe("Javascript Validator - Tests", function () {
 
     before(function ()  {
         Validator = new validatorHelper(setup.settings);
-        CustomSettingsValidator = new validatorHelper(CustomSettings, 100);
+        CustomSettingsValidator = new validatorHelper(CustomSettings, startBlock);
     });
 
+    describe("Stage initialisation", function () {
+
+        before(function ()  {
+            console.log("      Settings:");
+            console.log("       startBlock:      ", startBlock);
+            console.log("       startBlockDelay: ", CustomSettings.rico.startBlockDelay);
+            console.log("       blocksPerDay:    ", CustomSettings.rico.blocksPerDay);
+            console.log("       commitPhaseDays: ", CustomSettings.rico.commitPhaseDays);
+            console.log("       stageCount:      ", CustomSettings.rico.stageCount);
+            console.log("       stageDays:       ", CustomSettings.rico.stageDays);
+        });
+
+        describe("Stage[0]", function () {
+            let currentStageData;
+            let currentStageId = 0;
+
+            before(function ()  {
+                currentStageData = CustomSettingsValidator.stages[currentStageId];
+            });
+
+            it("stage[0] startBlock is 110", function () {
+                expect(currentStageData.startBlock, "startBlock incorrect").is.equal( 110 );
+                expect(currentStageData.startBlock, "startBlock incorrect").is.equal( startBlock + CustomSettings.rico.startBlockDelay );
+            });
+
+            it("stage[0] duration is 99 ( endBlock - startBlock )", function () {
+                const duration = currentStageData.endBlock - currentStageData.startBlock;
+                expect(duration, "duration incorrect").is.equal( 99 );
+                expect(duration, "duration incorrect").is.equal( CustomSettings.rico.stageDays * CustomSettings.rico.commitPhaseDays - 1 );
+            });
+        
+            it("stage[0] endBlock is 209 ( startBlock=110 + duration ) => 209", function () {
+                expect(currentStageData.endBlock, "endBlock incorrect").is.equal( 209 );
+                const duration = currentStageData.endBlock - currentStageData.startBlock;
+                expect(currentStageData.endBlock, "endBlock incorrect").is.equal( startBlock + CustomSettings.rico.startBlockDelay + duration );
+            }); 
+
+            it("stage[0] stagePriceIncrease is correct", function () {
+                const price = CustomSettings.rico.commitPhasePrice + ( currentStageId * CustomSettings.rico.stagePriceIncrease );
+                expect(currentStageData.tokenPrice.toString(), "tokenPrice incorrect").is.equal( price.toString() );
+            }); 
+        });
+
+
+        describe("Stage[1]", function () {
+            let currentStageData;
+            let currentStageId = 1;
+
+            before(function ()  {
+                currentStageData = CustomSettingsValidator.stages[currentStageId];
+            });
+
+            it("stage[1] startBlock is 210", function () {
+                expect(currentStageData.startBlock, "startBlock incorrect").is.equal( 210 );
+            });
+
+            it("stage[1] duration is 99 ( endBlock - startBlock )", function () {
+                const duration = currentStageData.endBlock - currentStageData.startBlock;
+                expect(duration, "duration incorrect").is.equal( 99 );
+                expect(duration, "duration incorrect").is.equal( CustomSettings.rico.stageDays * CustomSettings.rico.blocksPerDay - 1 );
+            });
+        
+            it("stage[1] endBlock is 309 ( startBlock=110 + duration ) => 309", function () {
+                expect(currentStageData.endBlock, "endBlock incorrect").is.equal( 309 );
+            }); 
+
+            it("stage[1] stagePriceIncrease is correct", function () {
+                const price = CustomSettings.rico.commitPhasePrice + ( currentStageId * CustomSettings.rico.stagePriceIncrease );
+                expect(currentStageData.tokenPrice.toString(), "tokenPrice incorrect").is.equal( price.toString() );
+            }); 
+        });
+
+        describe("Stage[12]", function () {
+            let currentStageData;
+            let currentStageId = 12;
+
+            before(function ()  {
+                currentStageData = CustomSettingsValidator.stages[currentStageId];
+            });
+
+            it("stage[12] startBlock is 1310", function () {
+                expect(currentStageData.startBlock, "startBlock incorrect").is.equal( 1310 );
+            });
+
+            it("stage[12] duration is 99 ( endBlock - startBlock )", function () {
+                const duration = currentStageData.endBlock - currentStageData.startBlock;
+                expect(duration, "duration incorrect").is.equal( 99 );
+                expect(duration, "duration incorrect").is.equal( CustomSettings.rico.stageDays * CustomSettings.rico.blocksPerDay - 1 );
+            });
+        
+            it("stage[12] endBlock is 1409 ( startBlock=110 + duration ) => 1409", function () {
+                expect(currentStageData.endBlock, "endBlock incorrect").is.equal( 1409 );
+            }); 
+
+            it("stage[12] stagePriceIncrease is correct", function () {
+                const price = CustomSettings.rico.commitPhasePrice + ( currentStageId * CustomSettings.rico.stagePriceIncrease );
+                expect(currentStageData.tokenPrice.toString(), "tokenPrice incorrect").is.equal( price.toString() );
+            }); 
+        });
+
+    });
 
     describe("Stage Methods", function () {
 
         it("stage count matches for both test instances", function() {
             expect(Validator.stageCount, "stageCount does not match").is.equal( CustomSettingsValidator.stageCount );
+            expect(Validator.stageCount, "stageCount does not match").is.equal( CustomSettings.rico.stageCount );
         });
 
         describe("getStageAtBlock(_blockNumber)", function () {
