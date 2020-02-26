@@ -1021,14 +1021,13 @@ describe("Flow Testing", function () {
                     const withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
                         helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
                     );
-                    console.log("withdrawCalculatedBefore:           ", withdrawCalculatedBefore);
-                    console.log("returnValues.eth:                   ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.eth));
-                    console.log("returnValues.project_allocated_eth: ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.project_allocated_eth));
-                    console.log("returnValues.withdrawn_tokens:      ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.withdrawn_tokens));
-                    console.log("returnValues.returned_tokens:       ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.returned_tokens));
 
-                    
-                    await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 6 );
+                    // console.log("withdrawCalculatedBefore:           ", withdrawCalculatedBefore);
+                    // console.log("returnValues.eth:                   ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.eth));
+                    // console.log("returnValues.project_allocated_eth: ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.project_allocated_eth));
+                    // console.log("returnValues.withdrawn_tokens:      ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.withdrawn_tokens));
+                    // console.log("returnValues.returned_tokens:       ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.returned_tokens));
+                    // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 6 );
 
                     // send full token balance back to rico
                     let withdrawTx = await TokenContractInstance.methods.send(

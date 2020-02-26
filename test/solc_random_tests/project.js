@@ -45,7 +45,7 @@ class Project extends Actor {
 
     async withdrawHalf() {
         await this.readBalances();
-        const amount = this.currentBalances.withdrawableETH.div( new this.helpers.BN(2) );
+        const amount = this.currentBalances.withdrawableETH.divRound( new this.helpers.BN(2) );
         this.actionLog.push( { type:"withdrawHalf", "value": amount, valid: null } );
         await this.withdraw( amount );
     }

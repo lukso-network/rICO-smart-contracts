@@ -18,5 +18,5 @@ node test/run_solc_fixed_tests.js $1 $2 $3 $4
 
 echo "--------------------------------------------------------------------"
 echo ""
-#sh scripts/rpcs/stop_all.sh $2
+sh scripts/rpcs/stop_all.sh $2
 echo ""

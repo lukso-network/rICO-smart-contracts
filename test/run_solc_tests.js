@@ -18,16 +18,16 @@ async function runTests(init) {
     "rework/phases",
     "rework/methods/stages",
     "rework/methods/tokens",
+    // next ones need to be reworked
+    "5_Cancel",
+    "5_Contributions",
+    "5_Flows",
+    "10_ProjectWithdraw",
 
-    // "4_ReversibleICO",
-    // "5_Cancel",
-    // "5_Contributions",
-    // "5_Flows",
-    // "5_ProjectWithdraw",
-    // // // "6_Gnosis-Safe",
-    // "7_Website",
-    // "10_ProjectWithdraw",
-    // "rework/4_ReversibleICO"
+    // // "5_ProjectWithdraw",
+    // // "6_Gnosis-Safe",
+    // // "7_Website",
+
   ];
 
   init.helpers.utils.toLog(

@@ -102,6 +102,8 @@ module.exports = {
         const action_log = [];
 
         // randomise actions of actors and call `test()` on each actor after each action
+        
+        let lastAction;
 
         try {
             for(let i = 0; i < rICOBlockLength + 1; i++) {
@@ -114,16 +116,21 @@ module.exports = {
                 // Loop participants and execute a random action.
                 for( let j = 0; j < participants.length; j++) {
                     participants[j].setBlock(block);
-                    await participants[j].executeRandomActionOrNone(function(){
+                    lastAction = function(){
                         action_log.push({ "type": "participant", "id": j, "address": participants[j].address, "action": participants[j].getLastAction()} );
-                    });
+                    }
+                    await participants[j].executeRandomActionOrNone(lastAction);
                 }
-                await Project.executeRandomActionOrNone(function(){
+                lastAction = function(){
                     action_log.push({ "type": "project", "action": Project.getLastAction()} );    
-                });
+                }
+                await Project.executeRandomActionOrNone(lastAction);
             }
         } catch(e) {
 
+            lastAction();
+
+            console.log("Error:", e);
             console.log(`
     // ----------------------------------------------------------------------------------------
     // replay code start
@@ -154,11 +161,15 @@ module.exports = {
                 
             }
         
+            console.log(`    /*
+    ` + e + `
+    */
+            `);
+
             console.log(`
     // replay code end    
     // ----------------------------------------------------------------------------------------
 `);
-            console.log("Error:", e);
 
             process.exit(1);
         }

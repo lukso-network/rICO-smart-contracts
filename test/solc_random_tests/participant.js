@@ -208,7 +208,7 @@ class Participant extends Actor {
 
     async commitHalfBalance() {
         await this.readBalances();
-        const amount = this.currentBalances.ETH.div( new this.helpers.BN(2) );
+        const amount = this.currentBalances.ETH.divRound( new this.helpers.BN(2) );
         this.actionLog.push( { type:"commitHalfBalance", "value": amount, valid: null } );
         await this.commit( amount );
     }
@@ -259,7 +259,7 @@ class Participant extends Actor {
             // contract accepts full sent value
             this.expectedBalances.ETH = this.currentBalances.ETH.sub(ETH);
 
-            this.expectedBalances.withdrawableETH = new this.helpers.BN("0");
+            this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH;
             this.expectedBalances.reservedTokens = this.currentBalances.reservedTokens.add(tokenAmount);
         }
 
@@ -267,12 +267,14 @@ class Participant extends Actor {
 
         const unlockPercentage = this.getCurrentUnlockPercentage();
         if(unlockPercentage.gt(new this.helpers.BN("0"))) {
-            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                 new this.helpers.BN("10").pow( new this.helpers.BN(20) )
             )
         } else {
             this.expectedBalances.unlockedToken = new this.helpers.BN("0");
         }
+
+        console.log("this.expectedBalances.unlockedToken", this.expectedBalances.unlockedToken);
 
     }
 
@@ -316,7 +318,7 @@ class Participant extends Actor {
     async sendHalfTokensBack() {
         await this.readBalances();
         // send half the locked token balance back
-        const value = this.currentBalances.Token.sub(this.currentBalances.unlockedToken).div( new this.helpers.BN(2) );
+        const value = this.currentBalances.Token.sub(this.currentBalances.unlockedToken).divRound( new this.helpers.BN(2) );
         this.actionLog.push( { type:"sendHalfTokensBack", "value": value, valid: null } );
         return await this.withdrawByToken(value);
     }
@@ -344,27 +346,7 @@ class Participant extends Actor {
             // accept contribution
             await this.whitelister.approve(this.address);
         } else {
-
-            // let hasPendingETH = await this.rICO.methods.hasPendingETH(this.address).call();
-            // console.log("hasPendingETH", hasPendingETH);
-
-            // let getParticipantPendingETH = await this.rICO.methods.getParticipantPendingETH(this.address).call();
-            // console.log("getParticipantPendingETH", this.toEth(getParticipantPendingETH));
-            
-            // await this.displayAllBalances();
-
-            // // reject contribution
-            // console.log("whitelist reject before");
             await this.whitelister.reject(this.address);
-            // console.log("whitelist reject after");
-
-            // hasPendingETH = await this.rICO.methods.hasPendingETH(this.address).call();
-            // console.log("hasPendingETH", hasPendingETH);
-            // getParticipantPendingETH = await this.rICO.methods.getParticipantPendingETH(this.address).call();
-            // console.log("getParticipantPendingETH", this.toEth(getParticipantPendingETH));
-            
-            // await this.displayAllBalances();
-
         }
 
 
@@ -406,7 +388,7 @@ class Participant extends Actor {
                     )
                 );
     
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                 )
                 
@@ -430,7 +412,7 @@ class Participant extends Actor {
 
             if(unlockPercentage.gt(new this.helpers.BN("0"))) {
     
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).div(
+                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                 )
 
@@ -501,9 +483,7 @@ class Participant extends Actor {
     displayExpectedBalances() {
         console.log("    address:                           ", this.address);
         console.log("      expectedBalances.ETH:            ", this.toEth(this.expectedBalances.ETH) + " eth");
-        if(this.expectedBalances.withdrawableETH.toString() !== "false") {
-            console.log("      expectedBalances.withdrawableETH:", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
-        }
+        console.log("      expectedBalances.withdrawableETH:", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
         console.log("      expectedBalances.Token:          ", this.toEth(this.expectedBalances.Token) + " tokens");
         console.log("      expectedBalances.unlockedToken:  ", this.toEth(this.expectedBalances.unlockedToken) + " tokens");
         console.log("      expectedBalances.reservedTokens: ", this.toEth(this.expectedBalances.reservedTokens) + " tokens");
