@@ -884,7 +884,7 @@ contract ReversibleICO is IERC777Recipient {
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
             // total participant tokens at the current stage i.e. bought - returned
-            // uint256 totalInStage = byStage.boughtTokens.sub(byStage.returnedTokens);
+            uint256 totalInStage = byStage.boughtTokens.sub(byStage.returnedTokens);
 
             // calculate how many tokens are actually locked at this stage...
             // ...(at the current block number) and use only those for returning.
@@ -911,12 +911,12 @@ contract ReversibleICO is IERC777Recipient {
 
                 // allocate the difference in total - locked to project
                 uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
-                    // totalInStage.sub(lockedTokensInStage),
+                    totalInStage.sub(lockedTokensInStage),
 
                     // TODO:
                     // we need to allocate eth to project for the global unlocked token count
                     //
-                    remainingTokenAmount.sub(lockedTokensInStage),
+                    // remainingTokenAmount.sub(lockedTokensInStage),
                     stageId
                 );
 

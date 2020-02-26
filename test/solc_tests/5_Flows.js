@@ -972,7 +972,7 @@ describe("Flow Testing", function () {
                     if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
                         expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new helpers.BN("1") ));
                     } else {
-                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount).or(ethAmount);
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount); // .or(ethAmount);
                     }
                 });
 

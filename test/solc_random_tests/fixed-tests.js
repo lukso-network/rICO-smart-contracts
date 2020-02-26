@@ -190,21 +190,19 @@ module.exports = {
             participants[0].setBlock(block);
             await participants[0].executeAction('commitHalfBalance');
             
-            block = 65;
+            block = 24;
             await setBlock(block, rICO, deployment, helpers);
 
             participants[0].setBlock(block);
             await participants[0].executeAction('whitelistApprove');
 
-            block = 76;
+            block = 26;
             await setBlock(block, rICO, deployment, helpers);
 
             participants[0].setBlock(block);
             await displayValues();
-            await participants[0].executeAction('sendHalfTokensBack', async () => {
-                console.log("after");
-                await displayValues();
-            });
+            await participants[0].executeAction('sendHalfTokensBack');
+            await displayValues();
 
             /*
             block = 27;
@@ -228,13 +226,13 @@ module.exports = {
             await participants[0].executeAction('commitHalfBalance');
             */
 
-            block = 81;
+            block = 31;
             await setBlock(block, rICO, deployment, helpers);
 
             participants[0].setBlock(block);
             await participants[0].executeAction('whitelistDeny');
 
-            block = 82;
+            block = 32;
             await setBlock(block, rICO, deployment, helpers);
 
             participants[0].setBlock(block);

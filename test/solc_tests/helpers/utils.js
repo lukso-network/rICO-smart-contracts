@@ -315,7 +315,7 @@ module.exports = {
                         BuyPhaseEndBlock,
                         precision
                     )
-                ).divRound(
+                ).div(
                     new helpers.BN("10").pow( precision )
                 );
                 return tokenAmount.sub(unlocked);
@@ -329,14 +329,14 @@ module.exports = {
         const stageData = await contract.methods.stages(stageId).call();
         return new helpers.BN(ethValue.toString()).mul(
             new helpers.BN("10").pow( new helpers.BN("18") )
-        ).divRound(
+        ).div(
             new helpers.BN(stageData.tokenPrice)
         );
     },
     getTokenAmountForEthAtValue(helpers, ethValue, tokenPrice) {
         return new helpers.BN(ethValue.toString()).mul(
             new helpers.BN("10").pow( new helpers.BN("18") )
-        ).divRound(
+        ).div(
             new helpers.BN(tokenPrice)
         );
     },
@@ -424,7 +424,7 @@ module.exports = {
         let stageData = await contract.methods.stages(stage_id).call();
         return token_amount.mul(
             new helpers.BN(stageData.tokenPrice)
-        ).divRound(
+        ).div(
             new helpers.BN("10").pow(
                 new helpers.BN("18")
             )
@@ -523,9 +523,9 @@ module.exports = {
                             RemainingTokenAmount.sub(tokensInStage), // unlocked token amount
                             stage_id
                         );
-                        console.log("["+i+"]CurrentETHAmount:  ", CurrentETHAmount.toString());
-                        console.log("["+i+"]ReturnETHAmount:   ", ReturnETHAmount.toString());
-                        console.log("["+i+"]unlockedETHAmount: ", unlockedETHAmount.toString());
+                        // console.log("["+i+"]CurrentETHAmount:  ", CurrentETHAmount.toString());
+                        // console.log("["+i+"]ReturnETHAmount:   ", ReturnETHAmount.toString());
+                        // console.log("["+i+"]unlockedETHAmount: ", unlockedETHAmount.toString());
                         
                         allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
                         // participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
