@@ -312,7 +312,7 @@ describe("Gnosis Safe Integration", function () {
                 StageBlockCount = blocksPerDay * 30;
                 StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
-                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
                 // for validation
                 BuyPhaseEndBlock = commitPhaseEndBlock + (StageBlockCount + 1) * StageCount;

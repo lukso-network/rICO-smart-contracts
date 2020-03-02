@@ -23,7 +23,9 @@ const ApplicationEventTypes = {
     COMMITMENT_ACCEPTED:4,
     WHITELIST_APPROVE:5,
     WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW:7
+    ACCEPT:7,
+    REJECT:8,
+    CANCEL:9
 }
 
 const TransferTypes = {
@@ -128,17 +130,17 @@ async function revertToFreshDeployment() {
         StageCount = 12;
         StageBlockCount = blocksPerDay * 30;
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount;
+        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
         BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,       // address _TokenContractAddress
+            TokenContractAddress,        // address _TokenContractAddress
             whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,       // address _projectWalletAddress
-            commitPhaseStartBlock,      // uint256 _StartBlock
-            commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,           // uint256 _commitPhasePrice in wei
+            projectWalletAddress,          // address _projectWalletAddress
+            commitPhaseStartBlock,                 // uint256 _StartBlock
+            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+            commitPhasePrice,            // uint256 _commitPhasePrice in wei
             StageCount,                 // uint8   _StageCount
             StageBlockCount,            // uint256 _StageBlockCount
             StagePriceIncrease          // uint256 _StagePriceIncrease in wei
@@ -189,16 +191,15 @@ async function revertToFreshDeployment() {
     );
 };
 
-describe("ProjectWithdraw Testing", function () {
+describe("Flow Testing", function () {
 
     before(async function () {
         await revertToFreshDeployment();
     });
 
-    describe("ProjectWithdraw()", function () {
+    describe("tokensReceived() - sending ERC777 tokens to rico contract", async function () {
 
-        /*
-        describe("0 - contract not initialized with settings", async function () { 
+        describe("0 - contract not initialized with settings", async function () {
 
             let TestReversibleICO;
 
@@ -212,24 +213,35 @@ describe("ProjectWithdraw Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
             });
 
-            describe("caller is projectWalletAddress", async function () {
+            describe("token sender is projectWalletAddress", async function () {
 
                 it("transaction reverts \"Contract must be initialized.\"", async function () {
 
                     const initialized = await TestReversibleICO.methods.initialized().call();
                     expect( initialized ).to.be.equal( false );
 
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
                     await helpers.assertInvalidOpcode( async function () {
-                        await TestReversibleICO.methods.projectWithdraw( 1 ).send({
+
+                        await TokenContractInstance.methods.send(
+                            TestReversibleICO.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
                             from: projectWalletAddress,
                             gas: 100000
                         });
+
                     }, "Contract must be initialized.");
 
                 });
             });
 
-            describe("caller is deployerAddress", async function () {
+            describe("token sender is deployerAddress", async function () {
 
                 it("transaction reverts \"Contract must be initialized.\"", async function () {
 
@@ -238,405 +250,397 @@ describe("ProjectWithdraw Testing", function () {
                     const initialized = await TestReversibleICO.methods.initialized().call();
                     expect( initialized ).to.be.equal( false );
 
-                    await helpers.assertInvalidOpcode( async function () {
-                        await TestReversibleICO.methods.projectWithdraw( 1 ).send({
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    // transfer 100 tokens to deployerAddress
+                    await TokenContractInstance.methods.send(
+                        deployerAddress,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
+
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // deployerAddress transfers 100 tokens to rico before it is initialised.
+                        await TokenContractInstance.methods.send(
+                            TestReversibleICO.receipt.contractAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
                             from: deployerAddress,
                             gas: 100000
                         });
+
                     }, "Contract must be initialized.");
 
                 });
             });
         });
 
-        describe("1 - contract in commit phase", async function () {
+        describe("1 - contract initialized with settings", async function () {
 
-            describe("no contributions", async function () {
+            let TestReversibleICO, TestReversibleICOAddress, TestTokenContract, TestTokenContractAddress;
 
-                before(async () => {
-                    await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+            before(async function () {
+                helpers.utils.resetAccountNonceCache(helpers);
+
+                // deploy everything except sending tokens to rico
+
+                TestTokenContract = await helpers.utils.deployNewContractInstance(
+                    helpers, "RicoToken", {
+                        from: holder,
+                        arguments: [
+                            setup.settings.token.supply.toString(),
+                            defaultOperators
+                        ],
+                        gas: 6500000,
+                        gasPrice: helpers.solidity.gwei * 10
+                    }
+                );
+                TestTokenContractAddress = TestTokenContract.receipt.contractAddress;
+
+                /*
+                *   Deploy RICO Contract
+                */
+                TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
+                TestReversibleICOReceipt = TestReversibleICO.receipt;
+                TestReversibleICOAddress = TestReversibleICO.receipt.contractAddress;
+
+                await TestTokenContract.methods.setup(
+                    TestReversibleICOAddress
+                ).send({
+                    from: holder,  // initial token supply holder
                 });
 
-                describe("caller is projectWalletAddress", async function () {
+                /*
+                *   Add RICO Settings
+                */
+                currentBlock = await TestReversibleICO.methods.getCurrentBlockNumber().call();
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                // starts in one day
+                commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
 
-                        await helpers.assertInvalidOpcode( async function () {
-                            await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
-                                from: projectWalletAddress,
-                                gas: 100000
-                            });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
+                // 22 days allocation
+                commitPhaseBlockCount = blocksPerDay * 22;
+                commitPhasePrice = helpers.solidity.ether * 0.002;
+
+                // 12 x 30 day periods for distribution
+                StageCount = 12;
+                StageBlockCount = blocksPerDay * 30;
+                StagePriceIncrease = helpers.solidity.ether * 0.0001;
+                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
+
+                // for validation
+                BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+
+                await TestReversibleICO.methods.init(
+                    TestTokenContractAddress,    // address _TokenContractAddress
+                    whitelistControllerAddress, // address _whitelistControllerAddress
+                    projectWalletAddress,       // address _projectWalletAddress
+                    commitPhaseStartBlock,                 // uint256 _StartBlock
+                    commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
+                    commitPhasePrice,            // uint256 _commitPhasePrice in wei
+                    StageCount,                 // uint8   _StageCount
+                    StageBlockCount,            // uint256 _StageBlockCount
+                    StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+                ).send({
+                    from: deployerAddress,  // deployer
+                    gas: 3000000
+                });
+
+                // jump to contract start
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+            });
+
+            describe("using configured token", async function () {
+
+                describe("token sender is projectWalletAddress", async function () {
+
+                    it("token amount is accepted and TokenSupply is correct", async function () {
+
+                        helpers.utils.resetAccountNonceCache(helpers);
+
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        await TestTokenContract.methods.send(
+                            TestReversibleICOAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: projectWalletAddress,
+                            gas: 100000
+                        });
+
+                        expect(
+                            await TestReversibleICO.methods.tokenSupply().call()
+                        ).to.be.equal(
+                            testAmount
+                        );
 
                     });
                 });
 
-                describe("caller not projectWalletAddress", async function () {
+                describe("token sender is deployerAddress ", async function () {
 
-                    it("reverts \"Only project wallet address.\"", async function () {
+                    it("transaction reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
-                        await helpers.assertInvalidOpcode( async function () {
-                            await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
+
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
+
+                        // transfer 100 tokens to deployerAddress
+                        await TestTokenContract.methods.send(
+                            deployerAddress,
+                            testAmount,
+                            ERC777data
+                        ).send({
+                            from: holder,
+                            gas: 100000
+                        });
+
+                        await helpers.assertInvalidOpcode( async () => {
+
+                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            await TestTokenContract.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
                                 from: deployerAddress,
                                 gas: 100000
                             });
-                        }, "Only project wallet address.");
+
+                        }, "Withdraw not possible. Participant has no locked tokens.");
 
                     });
+
                 });
+
             });
 
-            describe("One non whitelisted contribution in contract", async function () {
+            describe("using different token", async function () {
 
-                before(async () => {
-                    await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                describe("token sender is projectWalletAddress", async function () {
 
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-                    const newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
+                    it("transaction reverts \"Invalid token sent.\"", async function () {
 
-                });
+                        helpers.utils.resetAccountNonceCache(helpers);
 
-                describe("caller is projectWalletAddress", async function () {
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
 
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
 
-                        await helpers.assertInvalidOpcode( async function () {
-                            await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
+                        await helpers.assertInvalidOpcode( async () => {
+
+                            await TokenContractInstance.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
                                 from: projectWalletAddress,
                                 gas: 100000
                             });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
+
+                        }, "Invalid token sent.");
 
                     });
                 });
 
-            });
+                describe("token sender is deployerAddress ", async function () {
 
-            describe("One whitelisted contribution in contract", async function () {
+                    it("transaction reverts \"Invalid token sent.\"", async function () {
 
-                before(async () => {
-                    await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                        const initialized = await TestReversibleICO.methods.initialized().call();
+                        expect( initialized ).to.be.equal( true );
 
-                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-                    const newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
+                        const testAmount = new BN(100).mul(
+                            // 10^18 to account for decimals
+                            new BN("10").pow(new BN("18"))
+                        ).toString();
 
-                    // whitelist and accept contribution
-                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
-                        true,
-                    ).send({
-                        from: whitelistControllerAddress
-                    });
-
-                });
-
-                describe("caller is projectWalletAddress", async function () {
-
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
-
-                        await helpers.assertInvalidOpcode( async function () {
-                            await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
-                                from: projectWalletAddress,
-                                gas: 100000
-                            });
-                        }, "Requested amount to large, not enough unlocked ETH available.");
-
-                    });
-                });
-            });
-        });
-        */
-
-        describe("2 - contract in buy phase ( stage 1 - last block )", async function () {
-
-            describe("One whitelisted contribution in contract", async function () { 
-                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
-
-                before(async () => {
-                    await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-                   
-
-                    let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    // whitelist and accept contribution
-                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
-                        true,
-                    ).send({
-                        from: whitelistControllerAddress
-                    });
-
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
-
-                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 2, true, 0);
-
-                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_2,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_3,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    helpers.utils.resetAccountNonceCache(helpers);
-
-                    // currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
-                    // currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, true);
-                });
-
-                describe("caller is projectWalletAddress", async function () {
-
-                    it("reverts \"Requested amount to large, not enough unlocked ETH available.\"", async function () {
-
-                        let Available = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH: ", helpers.utils.toEth(helpers, Available.toString() ) +" eth" );
-
-                        // expect( Available ).to.be.bignumber.above( new BN("0") );
-
-
-
-                        let AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        let AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
-                        let AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        let AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        let AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-
-                        console.log("");
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-                        console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
-                        console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
-                        console.log("");
-                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 2 );
-
-                        const ReturnTokenAmount = new BN(
-                            await TokenContractInstance.methods.balanceOf(participant_1).call()
-                        );
-                        
-                        // projectWithdraw
-                        const projSum = AvailableAfterWithdraw.div( new BN(2) ).toString();
-                        let projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
-                            // AvailableAfterWithdraw.toString()
-                            projSum
-                            // helpers.solidity.etherBN.mul( new BN(83) ).toString()
+                        // transfer 100 tokens to deployerAddress
+                        await TokenContractInstance.methods.send(
+                            deployerAddress,
+                            testAmount,
+                            ERC777data
                         ).send({
-                            from: projectWalletAddress
+                            from: holder,
+                            gas: 100000
                         });
-                        
-                        console.log("after projectWithdrawTx", helpers.utils.toEth(helpers, projSum) +" eth", "\n");
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
-                        AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        AfterWithdrawETHWithdrawn = new BN( await ReversibleICOInstance.methods.returnedETH().call() );
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+                        await helpers.assertInvalidOpcode( async () => {
 
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-                        console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
-                        console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-                        console.log("returnedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawETHWithdrawn.toString() ) +" eth" );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            await TokenContractInstance.methods.send(
+                                TestReversibleICOAddress,
+                                testAmount,
+                                ERC777data
+                            ).send({
+                                from: deployerAddress,
+                                gas: 100000
+                            });
 
-                        let ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
+                        }, "Invalid token sent.");
 
-                        console.log("");
-                        
+                    });
 
-                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 4 );
+                });
 
-                        // send full token balance back to rico
-                        let withdrawTx = await TokenContractInstance.methods.send(
+            });
+
+        });
+
+        describe("2 - contract in commit phase", async function () {
+
+            describe("participant is not whitelisted and has no contributions", async function () {
+
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                });
+
+                it("getCancelModes() returns (false, false)", async function () {
+                    let CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
+                    expect(CancelStates[0]).to.be.equal(false);
+                    expect(CancelStates[1]).to.be.equal(false);
+                });
+
+                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+
+                    // our participant somehow got some tokens that they then attempt to send for withdraw
+
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
+
+                    // transfer 100 tokens to participant_1
+                    await TokenContractInstance.methods.send(
+                        participant_1,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
+
+                    const ParticipantTokenBalance = new BN(
+                        await TokenContractInstance.methods.balanceOf(participant_1).call()
+                    );
+
+                    expect(
+                        ParticipantTokenBalance
+                    ).to.be.bignumber.equal(
+                        testAmount
+                    );
+
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // transfer tokens to Rico for withdraw
+                        await TokenContractInstance.methods.send(
                             ReversibleICOInstance.receipt.contractAddress,
-                            // ReturnTokenAmount.div( new BN(5) ).toString(),
-                            ReturnTokenAmount.toString(),
+                            testAmount,
                             ERC777data
                         ).send({
                             from: participant_1,
-                            gas: 1000000,
-                            gasPrice: helpers.networkConfig.gasPrice
-                        });
-                        console.log("after withdrawTx" );
-                        
-                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 4 );
-
-                        AfterWithdrawacceptedETH = new BN( await ReversibleICOInstance.methods.acceptedETH().call() );
-                        console.log("acceptedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawacceptedETH.toString() ) +" eth" );
-
-                        AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
-                        console.log("withdrawnETH ETH:    ", helpers.utils.toEth(helpers, AfterWithdrawwithdrawnETH.toString() ) +" eth" );
-
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-
-                        AfterWithdrawETHWithdrawn = new BN( await ReversibleICOInstance.methods.returnedETH().call() );
-                        console.log("returnedETH:         ", helpers.utils.toEth(helpers, AfterWithdrawETHWithdrawn.toString() ) +" eth" );
-
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
-
-                        ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
-
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-
-
-                        // expect( Available ).to.be.bignumber.equal( AvailableAfterWithdraw );
-                        // expect( Available ).to.be.bignumber.equal( ContractBalance );
-
-                        // let BalanceValidation = ContractBalance.add(withdrawnETH);
-                        // console.log("BalanceValidation:  ", helpers.utils.toEth(helpers, BalanceValidation.toString() ) +" eth" );
-
-                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, participant_1, 2 );
-
-
-                        console.log("");
-
-                        console.log("whitelistTx:" );
-
-                        whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                            participant_2,
-                            true,
-                        ).send({
-                            from: whitelistControllerAddress
+                            gas: 500000
                         });
 
-                        ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                });
+            });
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+            describe("participant is not whitelisted and has 1 contribution", async function () {
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
-                        console.log("");
-                        console.log("before projectWithdrawTx", helpers.utils.toEth(helpers, AvailableAfterWithdraw) +" eth", "\n");
+                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-                        projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
-                            AvailableAfterWithdraw.toString()
-                        ).send({
-                            from: projectWalletAddress
-                        });
-                        console.log("after projectWithdrawTx" );
+                    const newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: participant_1,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+                });
 
+                it("getCancelModes() returns (true, false)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
+                    expect(CancelStates[0]).to.be.equal(true);
+                    expect(CancelStates[1]).to.be.equal(false);
+                });
 
-                        ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
+                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
+                    // our participant somehow got some tokens that they then attempt to send for withdraw
 
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
+                    const testAmount = new BN(100).mul(
+                        // 10^18 to account for decimals
+                        new BN("10").pow(new BN("18"))
+                    ).toString();
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
+                    // transfer 100 tokens to participant_1
+                    await TokenContractInstance.methods.send(
+                        participant_1,
+                        testAmount,
+                        ERC777data
+                    ).send({
+                        from: holder,
+                        gas: 100000
+                    });
 
+                    const ParticipantTokenBalance = new BN(
+                        await TokenContractInstance.methods.balanceOf(participant_1).call()
+                    );
 
-                        const ReturnTokenAmount2 = new BN(
-                            await TokenContractInstance.methods.balanceOf(participant_2).call()
-                        );
+                    expect(
+                        ParticipantTokenBalance
+                    ).to.be.bignumber.equal(
+                        testAmount
+                    );
 
-                        withdrawTx = await TokenContractInstance.methods.send(
+                    await helpers.assertInvalidOpcode( async () => {
+
+                        // transfer tokens to Rico for withdraw
+                        await TokenContractInstance.methods.send(
                             ReversibleICOInstance.receipt.contractAddress,
-                            ReturnTokenAmount2.toString(),
+                            testAmount,
                             ERC777data
                         ).send({
-                            from: participant_2,
-                            gas: 1000000,
-                            gasPrice: helpers.networkConfig.gasPrice
+                            from: participant_1,
+                            gas: 500000
                         });
 
-                        console.log("");
-                        console.log("after withdrawTx" );
+                    }, "Withdraw not possible. Participant has no locked tokens.");
 
-                        ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
-
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
-
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-                        
-
-                        console.log("");
-                        console.log("whitelistTx participant_3:" );
-
-                        whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                            participant_3,
-                            false,
-                        ).send({
-                            from: whitelistControllerAddress
-                        });
-                        ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
-                        console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
-
-                        AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
-                        console.log("projectAllocatedETH: ", helpers.utils.toEth(helpers, AfterWithdrawAllocatedETH.toString() ) +" eth" );
-
-                        AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
-                        console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
-
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
-                        console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
-
-                    });
                 });
             });
 
 
-            describe("getProjectAvailableEth", async function () { 
+            describe("participant is whitelisted and has 2 contributions", async function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
@@ -653,22 +657,11 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
                     });
-
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
-
-                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                        from: participant_1,
-                        to: ReversibleICOInstance.receipt.contractAddress,
-                        value: ContributionAmount.toString(),
-                        gasPrice: helpers.networkConfig.gasPrice
-                    });
-
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: participant_1,
@@ -679,17 +672,132 @@ describe("ProjectWithdraw Testing", function () {
 
                 });
 
-                it("getProjectAvailableEth()", async function () {
-                    // getProjectAvailableEth
-
+                it("getCancelModes() returns (false, true)", async function () {
                     const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
                     expect(CancelStates[0]).to.be.equal(false);
                     expect(CancelStates[1]).to.be.equal(true);
                 });
 
-            });
 
-            /*
+                it("participant can withdraw by sending tokens back to contract", async function () {
+
+                    const TestParticipantAddress = participant_1;
+                    const ShouldHaveLockedAmount = new BN("0");
+                    const ReturnTokenAmount = new BN(
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+
+                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                    );
+
+                    // if in commit stage (0) then unlocked need to be 0
+                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
+
+                    const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
+
+                    const ContractTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
+
+                    const ParticipantTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+                    // Must have a token balance
+                    expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+
+                    const ParticipantLockedTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                    );
+
+                    // locked + unlocked = balance
+                    expect(
+                        ParticipantLockedTokenBalanceBefore.add(
+                            ParticipantUnlockedTokenBalanceBefore
+                        )
+                    ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
+
+                    // calculate how much eth we should be receiving for the tokens we're sending
+                    const withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
+                        helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
+                    );
+
+                    // send full token balance back to rico
+                    let withdrawTx = await TokenContractInstance.methods.send(
+                        ReversibleICOInstance.receipt.contractAddress,
+                        ReturnTokenAmount.toString(),
+                        ERC777data
+                    ).send({
+                        from: TestParticipantAddress,
+                        gas: 1000000,
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+
+                    const ContractBalanceAfter = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
+                    const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipantAddress);
+
+                    const ContractTokenBalanceAfter = new BN(
+                        await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()
+                    );
+                    const ParticipantTokenBalanceAfter = new BN(
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
+                    const ParticipantLockedTokenBalanceAfter = new BN(
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                    );
+                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                    );
+
+                    let txGasCost = new helpers.BN(withdrawTx.gasUsed).mul(
+                        new helpers.BN( helpers.networkConfig.gasPrice.toString() )
+                    );
+
+                    /*
+                    * Validation
+                    */
+                    // ETH: validate participant eth balances
+                    let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
+                        // subtract transaction cost
+                        .sub(txGasCost)
+                        // add withdrawn eth amount
+                        .add(withdrawCalculatedBefore.eth);
+                    expect( ParticipantBalanceAfter ).to.be.bignumber.equal( ParticipantBalanceAfterValidation );
+
+                    // ETH: validate contract eth balances
+                    let ContractBalanceAfterValidation = ContractBalanceBefore
+                        // subtract withdrawn eth amount
+                        .sub(withdrawCalculatedBefore.eth);
+                    expect( ContractBalanceAfter ).to.be.bignumber.equal( ContractBalanceAfterValidation );
+
+                    // Tokens: validate participant token balances
+                    let ParticipantTokenBalanceAfterValidation = ParticipantTokenBalanceBefore
+                        // subtract tokens that were accepted for return
+                        .sub( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ParticipantTokenBalanceAfter ).to.be.bignumber.equal( ParticipantTokenBalanceAfterValidation );
+
+                    // Tokens: validate contract token balances
+                    let ContractTokenBalanceAfterValidation = ContractTokenBalanceBefore
+                        // add tokens that were accepted for return
+                        .add( withdrawCalculatedBefore.withdrawn_tokens );
+                    expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
+
+                    // Tokens: locked validation
+                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                        .sub(withdrawCalculatedBefore.withdrawn_tokens)
+                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+
+                    // Tokens: unlocked validation - the same
+                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+
+                    expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfter );
+                });
+            });
+        });
+
+        describe("3 - contract in buy phase ( stage 6 - last block )", async function () {
+
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
                 before(async () => {
@@ -707,7 +815,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -823,9 +931,9 @@ describe("ProjectWithdraw Testing", function () {
                         new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
-
-                    // Validation
-
+                    /*
+                    * Validation
+                    */
                     // ETH: validate participant eth balances
                     let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                         // subtract transaction cost
@@ -864,7 +972,7 @@ describe("ProjectWithdraw Testing", function () {
                     if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
                         expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount.sub( new helpers.BN("1") ));
                     } else {
-                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount).or(ethAmount);
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(ethAmount); // .or(ethAmount);
                     }
                 });
 
@@ -914,6 +1022,13 @@ describe("ProjectWithdraw Testing", function () {
                         helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
                     );
 
+                    // console.log("withdrawCalculatedBefore:           ", withdrawCalculatedBefore);
+                    // console.log("returnValues.eth:                   ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.eth));
+                    // console.log("returnValues.project_allocated_eth: ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.project_allocated_eth));
+                    // console.log("returnValues.withdrawn_tokens:      ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.withdrawn_tokens));
+                    // console.log("returnValues.returned_tokens:       ", helpers.utils.toEth(helpers, withdrawCalculatedBefore.returned_tokens));
+                    // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 6 );
+
                     // send full token balance back to rico
                     let withdrawTx = await TokenContractInstance.methods.send(
                         ReversibleICOInstance.receipt.contractAddress,
@@ -945,13 +1060,16 @@ describe("ProjectWithdraw Testing", function () {
                         new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
-                    // Validation
+                    /*
+                    * Validation
+                    */
                     // ETH: validate participant eth balances
                     let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                         // subtract transaction cost
                         .sub(txGasCost)
                         // add withdrawn eth amount
                         .add(withdrawCalculatedBefore.eth);
+
                     expect( ParticipantBalanceAfter ).to.be.bignumber.equal( ParticipantBalanceAfterValidation );
 
                     // ETH: validate contract eth balances
@@ -991,7 +1109,7 @@ describe("ProjectWithdraw Testing", function () {
                     const TestParticipantAddress = participant_1;
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-                    let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
+                    let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
                     const initialContributionsCount = ParticipantByAddress.contributionsCount;
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -1016,7 +1134,7 @@ describe("ProjectWithdraw Testing", function () {
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
-                    ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(TestParticipantAddress).call();
+                    ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(TestParticipantAddress).call();
                     const afterContributionsCount = ParticipantByAddress.contributionsCount;
 
                     expect(
@@ -1039,7 +1157,9 @@ describe("ProjectWithdraw Testing", function () {
                         new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
-                    // Validation
+                    /*
+                    * Validation
+                    */
                     // ETH: validate participant eth balances
                     let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                         // subtract transaction cost
@@ -1146,7 +1266,9 @@ describe("ProjectWithdraw Testing", function () {
                         new helpers.BN( helpers.networkConfig.gasPrice.toString() )
                     );
 
-                    // Validation
+                    /*
+                    * Validation
+                    */
                     // ETH: validate participant eth balances
                     let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                         // subtract transaction cost
@@ -1221,11 +1343,9 @@ describe("ProjectWithdraw Testing", function () {
 
                 });
             });
-            */
         });
 
-        /*
-        describe("3 - contract after buy phase", async function () {
+        describe("4 - contract after buy phase", async function () {
 
             describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
 
@@ -1244,7 +1364,7 @@ describe("ProjectWithdraw Testing", function () {
 
                     // whitelist and accept contribution
                     let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-                        participant_1,
+                        [participant_1],
                         true,
                     ).send({
                         from: whitelistControllerAddress
@@ -1279,7 +1399,7 @@ describe("ProjectWithdraw Testing", function () {
                     expect(CancelStates[1]).to.be.equal(false);
                 });
 
-                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Buy phase ended.\"", async function () {
 
                     const TestParticipantAddress = participant_1;
                     const ReturnTokenAmount = new BN(
@@ -1310,12 +1430,11 @@ describe("ProjectWithdraw Testing", function () {
                             gas: 1000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
-                    }, "Withdraw not possible. Participant has no locked tokens.");
+                    }, "Withdraw not possible. Buy phase ended.");
 
                 });
             });
         });
-        */
     });
 
 
@@ -1352,9 +1471,9 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEthAtStage().call();
-    let committedETH = await contract.methods.committedETH().call();
+    let totalReceivedETH = await contract.methods.totalReceivedETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
-    let acceptedETH = await contract.methods.acceptedETH().call();
+    let committedETH = await contract.methods.committedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
     let projectETH = await contract.methods.projectETH().call();
     let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
@@ -1362,9 +1481,9 @@ async function displayContractStats(contract, TokenContractInstance) {
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
-    console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
+    console.log("totalReceivedETH:        ", helpers.utils.toEth(helpers,totalReceivedETH) + " eth");
     console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
-    console.log("acceptedETH:        ", helpers.utils.toEth(helpers,acceptedETH) + " eth");
+    console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");
     console.log("projectETH:         ", helpers.utils.toEth(helpers,projectETH) + " eth");
     console.log("projectWithdrawnETH:", helpers.utils.toEth(helpers,projectWithdrawnETH) + " eth");

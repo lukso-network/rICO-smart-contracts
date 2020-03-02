@@ -9,13 +9,15 @@
   "scripts": {
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "scripts/run_coverage.sh",
-    "test": "scripts/run_tests.sh all refresh",
-    "test-reuse": "scripts/run_tests.sh all use-existing",
-    "test-single": "scripts/run_tests.sh single",
-    "test-single-reuse": "scripts/run_tests.sh single use-existing",
+    "test": "npm run test-validator && npm run test-solc",
+    "test-solc": "scripts/run_solc.sh all refresh",
+    "test-validator": "scripts/run_js.sh all refresh js",
+    "test-random": "scripts/run_random.sh all refresh",
+    "test-fixed": "scripts/run_fixed.sh all refresh",
     "testToHtml": "scripts/testOutputToHtml.sh",
     "start-all-rpcs": "scripts/rpcs/start_all.sh",
-    "stop-all-rpcs": "scripts/rpcs/stop_all.sh"
+    "stop-all-rpcs": "scripts/rpcs/stop_all.sh",
+    "merge-contracts": "sol-merger './contracts/*.sol' ./contracts-merged"
   },
   "preinstall": "rm -rf node_modules/*/.git/",
   "bin": {
@@ -45,14 +47,17 @@
     "dateformat": "^3.0.3",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
-    "ganache-cli": "6.4.4",
+    "ganache-cli": "git://github.com/mickys/ganache-cli.git#8e64c2e8f782d8c7e5f855d819001e74bdf48732",
+    "lodash": "^4.17.15",
     "openzeppelin-test-helpers": "^0.4.0",
+    "sol-merger": "^1.1.1",
     "solc": "0.5.10",
     "solidity-coverage": "^0.6.4",
     "truffle": "^5.0.26",
     "truffle-hdwallet-provider": "^1.0.14",
     "ts-mocha": "^6.0.0",
-    "web3": "1.0.0-beta.37"
+    "web3": "1.0.0-beta.37",
+    "websocket": "git://github.com/frozeman/WebSocket-Node.git#6c72925e3f8aaaea8dc8450f97627e85263999f2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
