@@ -4,10 +4,11 @@ const {
 
 const {
     requiresERC1820Instance,
-    doFreshDeployment
+    doFreshDeployment,
+    saveSnapshot,
+    restoreFromSnapshot,
 } = require('./includes/deployment');
 
-const snapshots = [];
 const testKey = "PhaseTests";
 
 describe("ReversibleICO - Phases", function () {
@@ -24,7 +25,9 @@ describe("ReversibleICO - Phases", function () {
     describe("Phase 1 - Deployment", async function () {
 
         before(async function () {
-            const contracts = await doFreshDeployment(snapshots, testKey, 0);
+            await restoreFromSnapshot("ERC1820_ready");
+
+            const contracts = await doFreshDeployment(testKey, 0, setup.settings);
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
@@ -61,7 +64,10 @@ describe("ReversibleICO - Phases", function () {
     describe("Phase 2 - Initialisation - init()", function () {
 
         before(async function () {
-            const contracts = await doFreshDeployment(snapshots, testKey, 1, setup.settings);
+
+            await restoreFromSnapshot("ERC1820_ready");
+
+            const contracts = await doFreshDeployment(testKey, 1, setup.settings);
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
@@ -184,7 +190,11 @@ describe("ReversibleICO - Phases", function () {
         const RicoSaleSupply = setup.settings.token.sale.toString();
 
         before(async function () {
-            const contracts = await doFreshDeployment(snapshots, testKey, 1, setup.settings);
+            // don't restore to ready, instead doFreshDeployment will restore to previous state, thus saving some processing.
+            // await restoreFromSnapshot("ERC1820_ready");
+
+            const contracts = await doFreshDeployment(testKey, 1, setup.settings);
+            
             this.ReversibleICO = contracts.ReversibleICOInstance;
             TokenContractInstance = contracts.TokenContractInstance;
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;

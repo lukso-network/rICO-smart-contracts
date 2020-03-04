@@ -12,15 +12,15 @@ const newManager = accounts[9];
 
 let _ricoAddress;
 
+const {
+    requiresERC1820Instance,
+    restoreFromSnapshot
+} = require('./rework/includes/deployment');
+
 describe("ERC777 - RICO Token", async function () {
     before(async function () {
-        // test requires ERC1820.instance
-        if (helpers.ERC1820.instance == false) {
-            console.log(
-                "  Error: ERC1820.instance not found, please make sure to run it first."
-            );
-            process.exit();
-        }
+        requiresERC1820Instance();
+        await restoreFromSnapshot("ERC1820_ready");
     });
 
     describe("Deployment", async function () {

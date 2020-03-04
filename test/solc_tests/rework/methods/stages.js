@@ -4,10 +4,11 @@ const {
 
 const {
     requiresERC1820Instance,
-    doFreshDeployment
+    doFreshDeployment,
+    saveSnapshot,
+    restoreFromSnapshot,
 } = require('../includes/deployment');
 
-const snapshots = [];
 const testKey = "StageTests";
 
 describe("ReversibleICO - Methods - Stages", function () {
@@ -19,8 +20,9 @@ describe("ReversibleICO - Methods - Stages", function () {
 
     before(async function () {
         requiresERC1820Instance();
+        await restoreFromSnapshot("ERC1820_ready");
 
-        const contracts = await doFreshDeployment(snapshots, testKey, 2, setup.settings);
+        const contracts = await doFreshDeployment(testKey, 2, setup.settings);
         this.ReversibleICO = contracts.ReversibleICOInstance;
         TokenContractInstance = contracts.TokenContractInstance;
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;

@@ -1,13 +1,14 @@
 const {
     validatorHelper
-} = require('../includes/setup');
+} = require('../../includes/setup');
 
 const {
     requiresERC1820Instance,
-    doFreshDeployment
-} = require('../includes/deployment');
+    doFreshDeployment,
+    saveSnapshot,
+    restoreFromSnapshot,
+} = require('../../includes/deployment');
 
-const snapshots = [];
 const testKey = "TokensTests";
 
 describe("ReversibleICO - Methods - Tokens", function () {
@@ -19,8 +20,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
     before(async function () {
         requiresERC1820Instance();
+        await restoreFromSnapshot("ERC1820_ready");
 
-        const contracts = await doFreshDeployment(snapshots, testKey, 2, setup.settings);
+        const contracts = await doFreshDeployment(testKey, 2, setup.settings);
         this.ReversibleICO = contracts.ReversibleICOInstance;
         TokenContractInstance = contracts.TokenContractInstance;
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;

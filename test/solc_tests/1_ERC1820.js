@@ -3,7 +3,15 @@ const BN = helpers.BN;
 const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
+const {
+    saveSnapshot,
+} = require('./rework/includes/deployment');
+
 describe("ERC1820 - Token Registry", function () {
+
+    after(async function () {
+        await saveSnapshot("ERC1820_ready");
+    });
 
     describe("Step 1 - Before deployment state", function () {
 

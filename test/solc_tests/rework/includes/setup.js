@@ -38,9 +38,17 @@ global.TransferTypes = {
 }
 
 global.snapshotsEnabled = true;
+global.snapshots = {};
+global.dropped = {};
+
+const _ = require('lodash');
+function clone(_what) {
+    return _.cloneDeep(_what);
+}
 
 const validatorHelper = require("../../../js_validator_tests/assets/ricoContract.js");
 
 module.exports = {
-    validatorHelper
+    validatorHelper,
+    clone
 };

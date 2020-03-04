@@ -189,13 +189,11 @@ contract ReversibleICO is IERC777Recipient {
 
     // ------------------------------------------------------------------------------------------------
 
-
     /// @notice Constructor sets the deployer and defines ERC777TokensRecipient interface support.
     constructor() public {
         deployerAddress = msg.sender;
         _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
-
 
     /**
      * @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
@@ -298,7 +296,6 @@ contract ReversibleICO is IERC777Recipient {
             cancel(msg.sender, msg.value);
         }
     }
-
 
     /**
      * @notice ERC777TokensRecipient implementation for receiving ERC777 tokens.
@@ -979,7 +976,6 @@ contract ReversibleICO is IERC777Recipient {
         ParticipantDetails storage byStage = participantRecord.byStage[currentStage];
         byStage.totalReceivedETH = byStage.totalReceivedETH.add(_receivedValue);
 
-
         // Get the equivalent amount in tokens
         uint256 newTokenAmount = getTokenAmountForEthAtStage(
             _receivedValue, currentStage
@@ -1009,7 +1005,7 @@ contract ReversibleICO is IERC777Recipient {
 
         uint256 processedTotals = aggregatedStats.committedETH.add(aggregatedStats.returnedETH);
 
-        // whitelisted( commited ) + returned is lower than total received
+        // whitelisted( committed ) + returned is lower than total received
         if (processedTotals < aggregatedStats.totalReceivedETH) {
 
             uint8 currentStage = getCurrentStage();
@@ -1135,10 +1131,14 @@ contract ReversibleICO is IERC777Recipient {
         uint8 currentStage = getCurrentStage();
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
-            byStage.returnedETH = byStage.totalReceivedETH
-                .sub(byStage.returnedETH)
-                .sub(byStage.committedETH)
-                .sub(byStage.withdrawnETH);
+
+            // byStage.returnedETH = byStage.totalReceivedETH
+            //     .sub(byStage.returnedETH)
+            //     .sub(byStage.committedETH)
+            //     .sub(byStage.withdrawnETH);
+
+            byStage.returnedETH = byStage.totalReceivedETH.sub(byStage.committedETH);
+
 
             byStage.reservedTokens = 0;
         }

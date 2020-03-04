@@ -7,7 +7,6 @@ const {
     doFreshDeployment
 } = require('./includes/deployment');
 
-global.snapshots = [];
 global.testKey = "ReversibleICOTests";
 
 describe("ReversibleICO", function () {

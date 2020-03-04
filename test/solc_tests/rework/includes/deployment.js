@@ -43,7 +43,7 @@ async function deployRICOContract() {
     return await deployContract("ReversibleICOMock");
 }
 
-async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null ) {
+async function doFreshDeployment(testKey, phase = 0, settings = null ) {
 
     requiresERC1820Instance();
     const snapShotKey = testKey+"_Phase_"+phase;
@@ -52,21 +52,13 @@ async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null 
     // we use them to speed up the test runner.
 
     if (typeof snapshots[snapShotKey] !== "undefined" && snapshotsEnabled) {
-
-        console.log(helpers.utils.colors.light_cyan, "    * EVM snapshot["+snapShotKey+"] restore", helpers.utils.colors.none);
-
-        // restore snapshot
-        await helpers.web3.evm.revert(snapshots[snapShotKey]);
-
-        // save again because whomever wrote test rpc had the impression no one would ever restore twice.. dafuq
-        snapshots[snapShotKey+"_"+phase] = await helpers.web3.evm.snapshot();
-
-        // reset account nonces..
-        helpers.utils.resetAccountNonceCache(helpers);
-
+        await restoreFromSnapshot(snapShotKey);
     } else {
 
         if (snapshotsEnabled) {
+            if( snapShotKey in dropped ) {
+                console.log(helpers.utils.colors.purple, "    * EVM snapshot key ["+snapShotKey+"] was previously used, you may want restore to it instead of a previous one.", helpers.utils.colors.none);
+            }
             console.log(helpers.utils.colors.light_blue, "    * EVM snapshot["+snapShotKey+"] start", helpers.utils.colors.none);
         }
 
@@ -146,8 +138,7 @@ async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null 
 
         // create snapshot
         if (snapshotsEnabled) {
-            snapshots[snapShotKey] = await helpers.web3.evm.snapshot();
-            console.log(helpers.utils.colors.light_blue, "    * EVM snapshot["+snapShotKey+"] end", helpers.utils.colors.none);
+            await saveSnapshot(snapShotKey);
         }
     }
 
@@ -156,7 +147,7 @@ async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null 
     TokenContractInstance.receipt = TokenContractReceipt;
     ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
-
+    
     // do some validation
     expect(
         await helpers.utils.getBalance(helpers, ReversibleICOAddress)
@@ -166,8 +157,8 @@ async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null 
     if(phase >= 2 ) {
         expectedTokenSupply = setup.settings.token.sale.toString();
     }
-    expect(await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()).to.be.equal(expectedTokenSupply);
 
+    expect(await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call()).to.be.equal(expectedTokenSupply);
     expect(
         await ReversibleICOInstance.methods.tokenSupply().call()
     ).to.be.equal(
@@ -180,7 +171,41 @@ async function doFreshDeployment(snapshots, testKey, phase = 0, settings = null 
     }
 };
 
+async function saveSnapshot(_key, log = true) {
+    snapshots[_key] = await helpers.web3.evm.snapshot();
+    if(log) {
+        console.log(helpers.utils.colors.light_blue, "    * EVM snapshot["+_key+"] saved", helpers.utils.colors.none);
+    }
+}
+
+async function restoreFromSnapshot(_key, log = true) {
+    if(_key == "") {
+        throw "Restore key cannot be null";
+    }
+
+    // restoring from a snapshot purges all later snapshots in testrpc, we do the same
+    for (const [key, value] of Object.entries(snapshots)) {
+        if(value > snapshots[_key]) {
+            dropped[key] = value;
+            delete(snapshots[key]);
+        }
+    }
+
+    if(log) {
+        console.log(helpers.utils.colors.light_cyan, "    * EVM snapshot["+_key+"] restored", helpers.utils.colors.none);
+    }
+    // restore snapshot
+    await helpers.web3.evm.revert(snapshots[_key]);
+    // save again because whomever wrote test rpc had the impression no one would ever restore twice.. WHY?!
+    // @TODO: not having to do this would speed up testing.. so a PR for this to ganache would be nice.
+    snapshots[_key] = await helpers.web3.evm.snapshot();
+    // reset account nonces..
+    helpers.utils.resetAccountNonceCache(helpers);
+}
+
 module.exports = {
     requiresERC1820Instance,
-    doFreshDeployment
+    doFreshDeployment,
+    saveSnapshot,
+    restoreFromSnapshot
 }

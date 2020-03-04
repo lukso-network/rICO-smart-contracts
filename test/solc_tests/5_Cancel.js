@@ -49,7 +49,6 @@ let errorMessage;
 
 let SnapShotKey = "CancelTestInit";
 let snapshotsEnabled = true;
-let snapshots = [];
 
 const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];

@@ -128,8 +128,7 @@ module.exports = {
             }
         } catch(e) {
 
-            lastAction();
-
+            // lastAction();
             console.log("Error:", e);
             console.log(`
     // ----------------------------------------------------------------------------------------
