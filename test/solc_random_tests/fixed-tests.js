@@ -24,6 +24,7 @@ module.exports = {
             blocksPerDay:    5,     // 6450;
             commitPhaseDays: 4,     // 22;
             StageDays:       2,     // 30;
+            StageCount:     10,     // 12;
         };
 
         helpers.utils.toLog(
@@ -137,146 +138,78 @@ module.exports = {
         
             participants[0].setBlock(block);
             await participants[0].executeAction('commitEntireBalance');
+            await Project.displayBalances();
 
-            block = 15;
+            block = 16;
             await setBlock(block, rICO, deployment, helpers);
         
             participants[0].setBlock(block);
             await participants[0].executeAction('whitelistApprove');
-                
-            block = 17;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('whitelistDeny');
+            await Project.displayBalances();
 
-        
-            // await Project.executeAction('withdrawHalf');
-        
             block = 18;
             await setBlock(block, rICO, deployment, helpers);
         
             participants[0].setBlock(block);
-            await participants[0].executeAction('whitelistApprove');
-        
+            await participants[0].executeAction('whitelistDeny');
+            await Project.displayBalances();
+
+            // await Project.executeAction('withdrawHalf');
         
             block = 19;
             await setBlock(block, rICO, deployment, helpers);
         
             participants[0].setBlock(block);
-            await participants[0].executeAction('sendAllTokensBack');
-
-        
-            block = 20;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitEntireBalance');
-        
-        
-            // await Project.executeAction('nothing');
-        
-            block = 21;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
             await participants[0].executeAction('sendHalfTokensBack');
+            participants[0].setBlock(block);
+            await participants[0].displayAllBalances();
+            // await participants[0].executeAction('sendHalfTokensBack');
         
-        
+            await Project.displayBalances();
             // await Project.executeAction('withdrawHalf');
+            block = 33;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 34;
+            await setBlock(block, rICO, deployment, helpers);
+            await Project.displayBalances();
+            block = 35;
+            await setBlock(block, rICO, deployment, helpers);
+            await Project.displayBalances();
+            block = 36;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 37;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 38;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 39;
+            await setBlock(block, rICO, deployment, helpers);
+            
+            block = 40;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 41;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 42;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 43;
+            await setBlock(block, rICO, deployment, helpers);
+            block = 44;
+            await setBlock(block, rICO, deployment, helpers);
+
+            await Project.displayBalances();
+        
+            return ;
+        
+            participants[0].setBlock(block);
+            await participants[0].executeAction('whitelistApprove');
+        
+            Project.displayBalances();
+            await Project.executeAction('withdrawHalf');
         
             block = 22;
             await setBlock(block, rICO, deployment, helpers);
         
             participants[0].setBlock(block);
-            await participants[0].executeAction('whitelistDeny');
-
-            // await Project.executeAction('withdrawHalf');
-        
-            block = 23;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitHalfBalance');
-        
-       
-            block = 24;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
             await participants[0].executeAction('sendHalfTokensBack');
-        
-        
-            block = 25;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitHalfBalance');
-        
-        
-            block = 26;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('nothing');
-        
-        
-            // await Project.executeAction('withdrawHalf');
-        
-            block = 27;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitEntireBalance');
-        
-        
-            block = 28;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('sendAllTokensBack');
-
-        
-            block = 29;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('nothing');
-        
-        
-            block = 30;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitHalfBalance');
-
-        
-            block = 31;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('commitEntireBalance');
-        
-        
-            block = 32;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('whitelistApprove');
-        
-       
-            block = 33;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('whitelistDeny');
-
-        
-            block = 34;
-            await setBlock(block, rICO, deployment, helpers);
-        
-            participants[0].setBlock(block);
-            await participants[0].executeAction('sendAllTokensBack');
         
             /*
             AssertionError: Unlocked Token balance is not as expected.: expected '1249999999999999999500' to equal '0'

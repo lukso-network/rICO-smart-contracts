@@ -444,6 +444,10 @@ class Participant extends Actor {
         this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.sub(calculation.eth);  
         this.expectedBalances.Token = this.currentBalances.Token.sub(calculation.withdrawn_tokens);
 
+        const maxcalculation = await this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, this.currentBalances.Token);
+        // this.expectedBalances.unlockedToken = false;
+        this.expectedBalances.unlockedToken = this.currentBalances.Token.sub(maxcalculation.withdrawn_tokens);
+
         await this.sendTokenTx(TokenAmount, this.helpers.addresses.Rico);
     }
 
@@ -629,7 +633,10 @@ class Participant extends Actor {
         if(this.expectedBalances.withdrawableETH.toString() !== "false") {
             this.expect(this.currentBalances.withdrawableETH.toString()).to.be.equal(this.expectedBalances.withdrawableETH.toString(), 'Withdrawable ETH balance is not as expected.');
         }
-        this.expect(this.currentBalances.unlockedToken.toString()).to.be.equal(this.expectedBalances.unlockedToken.toString(), 'Unlocked Token balance is not as expected.');
+
+        if(this.expectedBalances.withdrawableETH.toString() !== "false") {
+            this.expect(this.currentBalances.unlockedToken.toString()).to.be.equal(this.expectedBalances.unlockedToken.toString(), 'Unlocked Token balance is not as expected.');
+        }
         this.expect(this.currentBalances.reservedTokens.toString()).to.be.equal(this.expectedBalances.reservedTokens.toString(), 'Reserved Token balance is not as expected.');
 
         // get last item and set to valid

@@ -77,7 +77,7 @@ module.exports = {
         const commitPhasePrice = helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
-        const StageCount = 12;
+        const StageCount = settings.StageCount;
         const StageBlockCount = blocksPerDay * StageDays;
         const StagePriceIncrease = helpers.solidity.ether * 0.0001;
 

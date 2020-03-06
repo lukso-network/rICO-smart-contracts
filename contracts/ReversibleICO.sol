@@ -880,19 +880,37 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
-            // total participant tokens at the current stage i.e. bought - returned
-            uint256 totalInStage = byStage.boughtTokens.sub(byStage.returnedTokens);
-
             // calculate how many tokens are actually locked at this stage...
             // ...(at the current block number) and use only those for returning.
             // bought - returned (at currentStage & currentBlock)
             uint256 lockedTokensInStage = getLockedTokenAmountAtBlock(
-                byStage.boughtTokens,
-                currentBlockNumber
+                byStage.boughtTokens, currentBlockNumber
             ).sub( byStage.returnedTokens );
 
             // only try to process stages that the participant has actually bought tokens in.
             if (lockedTokensInStage > 0) {
+
+                // since we're returning tokens, we need to allocate project ETH for the "unlocked" amount.
+                // ... and we only want to allocate for the difference since last allocation
+                // ... otherwise we end up allocating multiple times, which is not ok.
+
+                // so we first determine how much should be unlocked in current stage
+                // then we subtract how much was already allocated, and just allocate the difference.
+
+
+                // since we don't actually transfer eth here, there's no need to calculate
+                // differences between last allocation and this one.
+
+                // stage 0 - bought 100, at stage 6, can return 50, returns 25
+
+                // allocate the difference in total - locked to project
+                uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
+                    // unlocked amount
+                    (byStage.boughtTokens.sub(byStage.returnedTokens))
+                    // locked amount
+                    .sub(lockedTokensInStage),
+                    stageId
+                );
 
                 // if the remaining amount is less than the amount available in the current stage
                 if (remainingTokenAmount < lockedTokensInStage) {
@@ -906,16 +924,6 @@ contract ReversibleICO is IERC777Recipient {
                 // get the equivalent amount of ETH for the locked tokens in stage
                 uint256 currentETHAmount = getEthAmountForTokensAtStage(lockedTokensInStage, stageId);
 
-                // allocate the difference in total - locked to project
-                uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
-                    totalInStage.sub(lockedTokensInStage),
-
-                    // TODO:
-                    // we need to allocate eth to project for the global unlocked token count
-                    //
-                    // remainingTokenAmount.sub(lockedTokensInStage),
-                    stageId
-                );
 
                 // increase the corresponding ETH counters for returned amount
                 returnETHAmount = returnETHAmount.add(currentETHAmount);

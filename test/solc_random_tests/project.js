@@ -149,7 +149,8 @@ class Project extends Actor {
         this.currentBalances.withdrawableETH = new this.helpers.BN( getProjectAvailableEth );
     }
     
-    displayBalances() {
+    async displayBalances() {
+        await this.readBalances();
         console.log("    address:                         ", this.address);
         console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
         console.log("    currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");

@@ -1,5 +1,6 @@
 const {
-    validatorHelper
+    validatorHelper,
+    clone
 } = require('../includes/setup');
 
 const {
@@ -18,6 +19,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
+    const customTestSettings = clone(setup.settings);
+
     before(async function () {
         requiresERC1820Instance();
         await restoreFromSnapshot("ERC1820_ready");
@@ -35,18 +38,28 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
     describe("Blacklist participant after whitelisting and whitelist again", async function () {
 
-        let tokenToEth = function(token, price) {
-            return new BN(token).mul(new BN(price));
+        const tokenToEth = function(token, _stageId) {
+            return new BN(token).mul( priceInStage(_stageId) );
         };
+
+        const priceInStage = (_stageId) => {
+            // commitPhasePrice + stage * stagePriceIncrease
+            return new BN(customTestSettings.rico.commitPhasePrice).add(
+                new BN(_stageId).mul(
+                    new BN(customTestSettings.rico.stagePriceIncrease)
+                )
+            );
+        }
 
         it("Buy 1 token before whitelisting", async function () {
             const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const stageId = 0;
 
-            const ContributionAmount = 1 * commitPhasePrice;
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
-                value: ContributionAmount,
+                value: ContributionAmount.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -61,12 +74,13 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Buy 1 token before whitelisting", async function () {
             const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const stageId = 0;
 
-            const ContributionAmount = 1 * commitPhasePrice;
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
-                value: ContributionAmount,
+                value: ContributionAmount.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -85,12 +99,13 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Buy 1 token after getting whitelisted", async function () {
             const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const stageId = 0;
 
-            const ContributionAmount = 1 * commitPhasePrice;
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
-                value: ContributionAmount,
+                value: ContributionAmount.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -107,26 +122,30 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+            const stageId = 0;
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(3, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(3, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
+
         });
 
-        it("Blacklist buyer", async function () {
+        it("Un-whitelist buyer", async function () {
             const whitelistTx = await this.ReversibleICO.methods.whitelist(
                 [participant_1],
                 false
@@ -141,33 +160,37 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state (should not change)", async function () {
+            const stageId = 0;
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(3, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(3, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
         });
 
-        it("Buy 1 token while being blacklisted", async function () {
+        it("Buy 1 token while being un-whitelisted", async function () {
             const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const stageId = 0;
 
-            const ContributionAmount = 1 * commitPhasePrice;
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
-                value: ContributionAmount,
+                value: ContributionAmount.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -176,23 +199,27 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+            const stageId = 0;
+
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(4, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(4, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
         });
 
         it("Participant cancels", async function () {
@@ -201,33 +228,38 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+            const stageId = 0;
+
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(4, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(4, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.allocatedETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
         });
 
-        it("Buy 1 token while being blacklisted", async function () {
+        it("Buy 1 token while being un-whitelisted", async function () {
             const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const stageId = 0;
 
-            const ContributionAmount = 1 * commitPhasePrice;
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
-                value: ContributionAmount,
+                value: ContributionAmount.toString(),
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -236,23 +268,26 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+            const stageId = 0;
+
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(5, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(5, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
         });
 
         it("Whitelist buyer (again)", async function () {
@@ -270,23 +305,78 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+            const stageId = 0;
+
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))
-                .to.be.bignumber.equal(tokenToEth(5, commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(5, stageId), "aggregated.totalReceivedETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
-                .to.be.bignumber.equal(tokenToEth(2, commitPhasePrice), "aggregated.returnedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(2, stageId), "aggregated.returnedETH mismatch");
             expect(new BN(aggregated["committedETH"]))
-                .to.be.bignumber.equal(tokenToEth(3, commitPhasePrice), "aggregated.committedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(3, stageId), "aggregated.committedETH mismatch");
             expect(new BN(aggregated["withdrawnETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.withdrawnETH mismatch");
-            expect(new BN(aggregated["allocatedETH"]))
-                .to.be.bignumber.equal(tokenToEth(1, commitPhasePrice), "aggregated.allocatedETH mismatch");
+                .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["reservedTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["boughtTokens"]))
                 .to.be.bignumber.equal(new BN("3000000000000000000"), "aggregated.boughtTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
+            // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
+            expect(new BN(aggregated["allocatedETH"]))
+            .to.be.bignumber.equal(new BN("0"), "aggregated.allocatedETH mismatch");
         });
+
+
+        it("Jump to stage 1 and buy 1 token", async function () {
+            const stageId = 1;
+
+            const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 1);
+
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: participant_1,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
+            expect(balance).to.be.equal("3000000000000000000");
+        });
+
+
+        it("Check aggregated state", async function () {
+            const stageId = 1;
+
+            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+
+            // 5 in stage 0, 1 in stage 1
+            const receivedEth = tokenToEth(5, 0).add(tokenToEth(1, 1));
+            // 2 in stage 0
+            const returnedETH = tokenToEth(2, 0);
+            // 3 in stage 0, 1 in stage 1
+            const committedETH = tokenToEth(3, 0).add(tokenToEth(1, stageId));
+            // 1 in stage 0
+            const withdrawnETH = tokenToEth(1, 0)
+            const reservedTokens = new BN("0");
+            const boughtTokens = new BN("4000000000000000000");
+            const returnedTokens = new BN("1000000000000000000");
+
+            const allocatedETH = new BN("0");
+
+            expect(new BN(aggregated.totalReceivedETH)).to.be.bignumber.equal(receivedEth);
+            expect(new BN(aggregated.returnedETH)).to.be.bignumber.equal(returnedETH);
+            expect(new BN(aggregated.committedETH)).to.be.bignumber.equal(committedETH);
+            expect(new BN(aggregated.withdrawnETH)).to.be.bignumber.equal(withdrawnETH);
+            expect(new BN(aggregated.reservedTokens)).to.be.bignumber.equal(reservedTokens);
+            expect(new BN(aggregated.boughtTokens)).to.be.bignumber.equal(boughtTokens);
+            expect(new BN(aggregated.returnedTokens)).to.be.bignumber.equal(returnedTokens);
+
+            // allocated needs to be 0 since we haven't used withdrawn in this stage yet
+            expect(new BN(aggregated.allocatedETH)).to.be.bignumber.equal(allocatedETH);
+
+        });
+
     });
 });
