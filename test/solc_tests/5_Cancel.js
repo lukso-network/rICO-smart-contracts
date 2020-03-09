@@ -672,6 +672,26 @@ describe("Testing canceling", function () {
                 .send({ from: participant_1, gas: 1000000 });
         });
 
+        it("Check aggregated state", async function () {
+                let aggregated = await ReversibleICOInstance.methods.participantAggregatedStats(participant_1).call();
+                expect(new helpers.BN(aggregated["totalReceivedETH"]))
+                    .to.be.bignumber.equal(new helpers.BN(1 * commitPhasePrice), "aggregated.totalReceivedETH mismatch");
+                expect(new helpers.BN(aggregated["returnedETH"]))
+                    .to.be.bignumber.equal(new helpers.BN(1 * commitPhasePrice), "aggregated.returnedETH mismatch");
+                expect(new helpers.BN(aggregated["committedETH"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.committedETH mismatch");
+                expect(new helpers.BN(aggregated["withdrawnETH"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.withdrawnETH mismatch");
+                expect(new helpers.BN(aggregated["allocatedETH"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.allocatedETH mismatch");
+                expect(new helpers.BN(aggregated["reservedTokens"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.reservedTokens mismatch");
+                expect(new helpers.BN(aggregated["boughtTokens"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.boughtTokens mismatch");
+                expect(new helpers.BN(aggregated["returnedTokens"]))
+                    .to.be.bignumber.equal(new helpers.BN("0"), "aggregated.returnedTokens mismatch");
+        });
+
         it("Participant aggregated state should match sum over all stages", async function () {
             let participantCount = await ReversibleICOInstance.methods.participantCount().call();
             for (let p = 0; p < participantCount; p++) {
@@ -702,21 +722,21 @@ describe("Testing canceling", function () {
 
                 // Compare calculated sums against participantAggregatedStats
                 let aggregated = await ReversibleICOInstance.methods.participantAggregatedStats(participant).call();
-                expect(new helpers.BN(aggregated[0]))
+                expect(new helpers.BN(aggregated["totalReceivedETH"]))
                     .to.be.bignumber.equal(participantTotalReceivedETH, "aggregated.totalReceivedETH mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[1]))
+                expect(new helpers.BN(aggregated["returnedETH"]))
                     .to.be.bignumber.equal(participantReturnedETH, "aggregated.returnedETH mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[2]))
+                expect(new helpers.BN(aggregated["committedETH"]))
                     .to.be.bignumber.equal(participantCommittedETH, "aggregated.committedETH mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[3]))
+                expect(new helpers.BN(aggregated["withdrawnETH"]))
                     .to.be.bignumber.equal(participantWithdrawnETH, "aggregated.withdrawnETH mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[4]))
+                expect(new helpers.BN(aggregated["allocatedETH"]))
                     .to.be.bignumber.equal(participantAllocatedETH, "aggregated.allocatedETH mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[5]))
+                expect(new helpers.BN(aggregated["reservedTokens"]))
                     .to.be.bignumber.equal(participantReservedTokens, "aggregated.reservedTokens mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[6]))
+                expect(new helpers.BN(aggregated["boughtTokens"]))
                     .to.be.bignumber.equal(participantBoughtTokens, "aggregated.boughtTokens mismatch for participant " + p);
-                expect(new helpers.BN(aggregated[7]))
+                expect(new helpers.BN(aggregated["returnedTokens"]))
                     .to.be.bignumber.equal(participantReturnedTokens, "aggregated.returnedTokens mismatch for participant " + p);
             }
         });
@@ -746,6 +766,19 @@ describe("Testing canceling", function () {
         it("Participant cancels", async function () {
             await ReversibleICOInstance.methods.cancel()
                 .send({ from: participant_1, gas: 1000000 });
+        });
+
+        it("Check global state", async function () {
+            expect(new helpers.BN(await ReversibleICOInstance.methods.totalReceivedETH().call()))
+                .to.be.bignumber.equal(new helpers.BN(1 * commitPhasePrice), "ReversibleICO.totalReceivedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.returnedETH().call()))
+                .to.be.bignumber.equal(new helpers.BN(1 * commitPhasePrice), "ReversibleICO.returnedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.committedETH().call()))
+                .to.be.bignumber.equal(new helpers.BN("0"), "ReversibleICO.committedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.withdrawnETH().call()))
+                .to.be.bignumber.equal(new helpers.BN("0"), "ReversibleICO.withdrawnETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.projectAllocatedETH().call()))
+                .to.be.bignumber.equal(new helpers.BN("0"), "ReversibleICO.projectAllocatedETH mismatch");
         });
 
         it("Contract global state should match sum over all participants and stages", async function () {
