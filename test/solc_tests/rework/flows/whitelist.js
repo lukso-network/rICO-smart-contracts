@@ -122,6 +122,9 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Check aggregated state", async function () {
+
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, participant_1, 2 );
+
             const stageId = 0;
             const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
             expect(new BN(aggregated["totalReceivedETH"]))

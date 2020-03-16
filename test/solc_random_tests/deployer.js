@@ -79,7 +79,7 @@ module.exports = {
         // 12 x 30 day periods for distribution
         const StageCount = settings.StageCount;
         const StageBlockCount = blocksPerDay * StageDays;
-        const StagePriceIncrease = helpers.solidity.ether * 0.0001;
+        const StagePriceIncrease = 0; // helpers.solidity.ether * 0.0001;
 
         await rICO.methods.init(
             helpers.addresses.Token,     // address _tokenContractAddress
@@ -90,7 +90,7 @@ module.exports = {
             commitPhasePrice,            // uint256 _commitPhasePrice in wei
             StageCount,                  // uint8   _stageCount
             StageBlockCount,             // uint256 _stageBlockCount
-            0 // StagePriceIncrease           // uint256 _stagePriceIncrease in wei
+            StagePriceIncrease           // uint256 _stagePriceIncrease in wei
         ).send({
             from: ContractsDeployer,  // deployer
             gas: 3000000
@@ -332,17 +332,14 @@ module.exports = {
         for(let i = 0; i < wallet.accounts.length; i++) {
             const account = wallet.accounts[i];
 
-            let value;
-            if(i == 0 || i == 1) {
-                value = helpers.solidity.etherBN.mul(
-                    new BN( 100 )
-                    // new BN( 100000 )
-                );
-            } else {
-                value = helpers.solidity.etherBN.mul(
-                    new BN( Math.floor(Math.random() * 50) + 1 )
-                );
-            }
+            const value = helpers.solidity.etherBN.mul(
+                new BN( 100 )
+            );
+            
+            // random values disabled.
+            // value = helpers.solidity.etherBN.mul(
+            //     new BN( Math.floor(Math.random() * 50) + 1 )
+            // );
             
             const actualValue = value.add(
                 // add extra eth for tx costs

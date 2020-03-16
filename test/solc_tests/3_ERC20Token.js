@@ -238,6 +238,8 @@ describe("ERC777 - ERC20 Token compatibility", function () {
         );
 
         // FIRST tx done.
+        helpers.utils.resetAccountNonceCache(helpers);
+
         // onto next.
         helpers.assertInvalidOpcode(async () => {
             await HST.methods
@@ -247,6 +249,8 @@ describe("ERC777 - ERC20 Token compatibility", function () {
     });
 
     it("approvals: attempt withdrawal from account with no allowance (should fail)", function () {
+        helpers.utils.resetAccountNonceCache(helpers);
+
         return helpers.assertInvalidOpcode(async () => {
             await HST.methods
                 .transferFrom(creator, accounts[2], 60)
@@ -260,6 +264,8 @@ describe("ERC777 - ERC20 Token compatibility", function () {
             .transferFrom(creator, accounts[2], 60)
             .send({ from: accounts[1] });
         await HST.methods.approve(accounts[1], 0).send({ from: creator });
+
+        helpers.utils.resetAccountNonceCache(helpers);
 
         return helpers.assertInvalidOpcode(async () => {
             await HST.methods

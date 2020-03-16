@@ -186,7 +186,11 @@ class Participant extends Actor {
                 break;
             case "nothing":
                 this.actionLog.push( { type:"nothing", "value": null, valid: null } );
+                if(callback) {
+                    await callback();
+                }
                 // do nothing
+                return;
                 break;
             default:
                 throw("error at executeAction: action[" + action + "] not found.");
@@ -237,6 +241,8 @@ class Participant extends Actor {
             acceptedValue = ETH;
         }
 
+        const unlockPercentage = this.getCurrentUnlockPercentage();
+
         const isWhitelisted = await this.rICO.methods.isWhitelisted(this.address).call();
         if(isWhitelisted) {
 
@@ -251,8 +257,17 @@ class Participant extends Actor {
 
             this.expectedBalances.reservedTokens = new this.helpers.BN(0);
 
-            // @TODO: calculate expected withdrawable ETH.
-            this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(acceptedValue);
+
+            let withdrawableETHCalc = acceptedValue;
+            if(unlockPercentage.gt(new this.helpers.BN("0"))) {
+                // adjust by unlockPercentage
+                withdrawableETHCalc = withdrawableETHCalc.sub(
+                    withdrawableETHCalc.mul(unlockPercentage).divRound(
+                        new this.helpers.BN("10").pow( new this.helpers.BN(20) )
+                    )
+                )
+            }
+            this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(withdrawableETHCalc);
 
         } else {
 
@@ -263,9 +278,6 @@ class Participant extends Actor {
             this.expectedBalances.reservedTokens = this.currentBalances.reservedTokens.add(tokenAmount);
         }
 
-
-
-        const unlockPercentage = this.getCurrentUnlockPercentage();
         if(unlockPercentage.gt(new this.helpers.BN("0"))) {
             this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                 new this.helpers.BN("10").pow( new this.helpers.BN(20) )
@@ -274,7 +286,50 @@ class Participant extends Actor {
             this.expectedBalances.unlockedToken = new this.helpers.BN("0");
         }
 
-        console.log("this.expectedBalances.unlockedToken", this.expectedBalances.unlockedToken);
+        console.log("this.expectedBalances.unlockedToken", this.toEth(this.expectedBalances.unlockedToken), "tokens");
+        console.log("unlockPercentage                   ", this.toEth(unlockPercentage), "%");
+        
+        const unlockedTokenBalance = await this.rICOToken.methods.getUnlockedBalance(this.address).call();
+        console.log("unlockedTokenBalance               ", this.toEth(unlockedTokenBalance), "tokens");
+        
+        const balanceOf = await this.rICOToken.methods.balanceOf(this.address).call();
+        console.log("balanceOf                          ", this.toEth(balanceOf), "tokens");
+
+        const getLockedBalance = await this.rICOToken.methods.getLockedBalance(this.address).call();
+        console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
+
+
+        const getLockedTokenAmount = await this.rICO.methods.getLockedTokenAmount(this.address, false).call();
+        console.log("getLockedTokenAmount               ", this.toEth(getLockedTokenAmount), "tokens");
+        
+
+        const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
+
+        console.log("aggregatedStats.boughtTokens       ", this.toEth(aggregatedStats.boughtTokens), "tokens");
+        console.log("aggregatedStats.returnedTokens     ", this.toEth(aggregatedStats.returnedTokens), "tokens");
+        console.log("aggregatedStats.reservedTokens     ", this.toEth(aggregatedStats.reservedTokens), "tokens");
+
+        const byStage0 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 0).call();
+        const byStage1 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 1).call();
+
+        console.log("byStage0.boughtTokens              ", this.toEth(byStage0.stageBoughtTokens), "tokens");
+        console.log("byStage0.returnedTokens            ", this.toEth(byStage0.stageReturnedTokens), "tokens");
+        console.log("byStage0.reservedTokens            ", this.toEth(byStage0.stageReservedTokens), "tokens");
+
+        console.log("byStage1.boughtTokens              ", this.toEth(byStage1.stageBoughtTokens), "tokens");
+        console.log("byStage1.returnedTokens            ", this.toEth(byStage1.stageReturnedTokens), "tokens");
+        console.log("byStage1.reservedTokens            ", this.toEth(byStage1.stageReservedTokens), "tokens");
+
+
+        const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
+
+        const getLockedTokenAmountAtBlock = await this.rICO.methods.getLockedTokenAmountAtBlock(
+            aggregatedStats.boughtTokens.toString(),
+            blockNumber
+        ).call();
+        console.log("getLockedTokenAmountAtBlock        ", this.toEth(getLockedTokenAmountAtBlock), "tokens");
+
+        
 
     }
 
@@ -379,6 +434,10 @@ class Participant extends Actor {
 
             if(unlockPercentage.gt(new this.helpers.BN("0"))) {
     
+                // console.log("accept > unlockPercentage: ", unlockPercentage.toString() );
+                // const RicoUnlockPercentage = await this.rICO.methods.getCurrentUnlockPercentage().call(); 
+                // console.log("rico   > unlockPercentage: ", RicoUnlockPercentage.toString() );
+
                 this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(
                     acceptedValue.sub(
                         // divRound must be used here otherwise result will not be floored like solidity does.
@@ -388,10 +447,13 @@ class Participant extends Actor {
                     )
                 );
     
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
-                    new this.helpers.BN("10").pow( new this.helpers.BN(20) )
-                )
+                // this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
+                //     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
+                // )
                 
+                this.expectedBalances.unlockedToken = false;
+                
+                // console.log("accept > unlockedToken:    ", this.expectedBalances.unlockedToken.toString() );
             } else {
                 this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(acceptedValue);
                 this.expectedBalances.unlockedToken = new this.helpers.BN("0");
@@ -456,6 +518,7 @@ class Participant extends Actor {
     }
 
     async displayAllBalances() {
+        await this.readBalances();
         await this.displayAggregatedStats();
         this.displayBalances();
         this.displayExpectedBalances();
@@ -489,7 +552,9 @@ class Participant extends Actor {
         console.log("      expectedBalances.ETH:            ", this.toEth(this.expectedBalances.ETH) + " eth");
         console.log("      expectedBalances.withdrawableETH:", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
         console.log("      expectedBalances.Token:          ", this.toEth(this.expectedBalances.Token) + " tokens");
-        console.log("      expectedBalances.unlockedToken:  ", this.toEth(this.expectedBalances.unlockedToken) + " tokens");
+        if(this.expectedBalances.unlockedToken.toString()!== "false") {
+            console.log("      expectedBalances.unlockedToken:  ", this.toEth(this.expectedBalances.unlockedToken) + " tokens");
+        }
         console.log("      expectedBalances.reservedTokens: ", this.toEth(this.expectedBalances.reservedTokens) + " tokens");
     }
 
@@ -634,7 +699,7 @@ class Participant extends Actor {
             this.expect(this.currentBalances.withdrawableETH.toString()).to.be.equal(this.expectedBalances.withdrawableETH.toString(), 'Withdrawable ETH balance is not as expected.');
         }
 
-        if(this.expectedBalances.withdrawableETH.toString() !== "false") {
+        if(this.expectedBalances.unlockedToken.toString() !== "false") {
             this.expect(this.currentBalances.unlockedToken.toString()).to.be.equal(this.expectedBalances.unlockedToken.toString(), 'Unlocked Token balance is not as expected.');
         }
         this.expect(this.currentBalances.reservedTokens.toString()).to.be.equal(this.expectedBalances.reservedTokens.toString(), 'Reserved Token balance is not as expected.');
@@ -661,6 +726,10 @@ class Participant extends Actor {
         return this.helpers.utils.getCurrentUnlockPercentage(
             this.helpers, this.block, this.startAndEndBlocks.buyPhaseStartBlock, this.startAndEndBlocks.buyPhaseEndBlock, 20
         ); 
+    }
+
+    async getContractUnlockPercentage() {
+        return await this.rICO.methods.getCurrentUnlockPercentage().call();
     }
 
     getLastAction() {

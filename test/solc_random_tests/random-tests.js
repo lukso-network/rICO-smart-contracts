@@ -22,7 +22,7 @@ module.exports = {
             projectWalletAddress: init.accounts[4],
 
             blocksPerDay:    5,     // 6450;
-            commitPhaseDays: 4,     // 22;
+            commitPhaseDays: 1,     // 22;
             StageDays:       2,     // 30;
             StageCount:     10,     // 12;
         };
