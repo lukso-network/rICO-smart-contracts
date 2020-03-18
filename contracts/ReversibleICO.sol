@@ -966,49 +966,26 @@ contract ReversibleICO is IERC777Recipient {
 
             // TODO: break this up into a separate method
 
-            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
-
-            uint256 lockedTokensInStage = getLockedTokenAmountAtBlock(
-                byStage.activeTokens, currentBlockNumber
+            // var =
+            stageStuff(
+                participantRecord,
+                stageId,
+                currentBlockNumber,
+                remainingTokenAmount,
+                aggregatedStats
             );
-
-            uint256 unlockedTokensInStage = byStage.activeTokens.sub(lockedTokensInStage);
-            uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
-                // total amount - locked amount
-                // unlockedTokensInStage,
-                byStage.boughtTokens.sub(byStage.returnedTokens).sub(lockedTokensInStage),
-                stageId
-            );
-
-            // again, we don't calculate differences, just update the number.
-            byStage.allocatedTokens = unlockedTokensInStage;
-            allocatedTokens = allocatedTokens.add(byStage.allocatedTokens);
-
-            // if the remaining amount is less than the amount available in the current stage
-            if (remainingTokenAmount < lockedTokensInStage) {
-                lockedTokensInStage = remainingTokenAmount;
-            }
-
-            // increase the returned token counters accordingly
-            aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(lockedTokensInStage);
-            byStage.returnedTokens = byStage.returnedTokens.add(lockedTokensInStage);
-
-            // get the equivalent amount of ETH for the locked tokens in stage
-            uint256 currentETHAmount = getEthAmountForTokensAtStage(lockedTokensInStage, stageId);
 
             // increase the corresponding ETH counters for returned amount
-            returnETHAmount = returnETHAmount.add(currentETHAmount);
+            uint256 returnETHAmount = returnETHAmount.add(currentETHAmount);
             byStage.withdrawnETH = byStage.withdrawnETH.add(currentETHAmount);
 
             // increase the corresponding ETH counters for allocated amount
-            allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
+            uint256 allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
             byStage.allocatedETH = unlockedETHAmount;
 
-            byStage.activeTokens = byStage.activeTokens.sub(lockedTokensInStage).sub(unlockedTokensInStage);
             activeTokens = activeTokens.add(byStage.activeTokens);
-
-            // remove processed token amount from requested amount
-            remainingTokenAmount = remainingTokenAmount.sub(lockedTokensInStage);
+    
+            remainingTokenAmount = remainingTokenAmount.sub(returnTokens);
 
             if(stageId == 0) {
                 // Reverse iteration with an unsigned loop variable
@@ -1044,6 +1021,69 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(_from)).transfer(returnETHAmount);
         emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
         return;
+    }
+
+
+    function stageStuff(
+        Participant memory participantRecord,
+        uint8 stageId,
+        uint256 currentBlockNumber,
+        uint256 remainingTokenAmount,
+        ParticipantDetails storage aggregatedStats
+    ) internal returns (
+        uint256,
+        uint256,
+        uint256,
+        uint256
+    ) {
+
+        ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+
+        uint256 lockedTokensInStage = getLockedTokenAmountAtBlock(
+            byStage.activeTokens, currentBlockNumber
+        );
+
+        uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
+            // total amount - locked amount
+            // unlockedTokensInStage,
+            byStage.boughtTokens.sub(byStage.returnedTokens).sub(lockedTokensInStage),
+            stageId
+        );
+
+        uint256 returnTokens = lockedTokensInStage;
+
+        // if the remaining amount is less than the amount available in the current stage
+        if (remainingTokenAmount < lockedTokensInStage) {
+            // lockedTokensInStage = remainingTokenAmount;
+            returnTokens = remainingTokenAmount;
+        }
+
+        // increase the returned token counters accordingly
+        aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnTokens);
+        byStage.returnedTokens = byStage.returnedTokens.add(returnTokens);
+
+        // get the equivalent amount of ETH for the locked tokens in stage
+        uint256 currentETHAmount = getEthAmountForTokensAtStage(returnTokens, stageId);
+
+        uint256 allocatedTokens;
+        uint256 activeTokens;
+
+        if( byStage.activeTokens > 0 ) {
+
+            byStage.allocatedTokens = byStage.activeTokens.sub(
+                    getLockedTokenAmountAtBlock(
+                    returnTokens, currentBlockNumber
+                )
+            );
+
+            allocatedTokens = allocatedTokens.add(byStage.allocatedTokens);
+            byStage.activeTokens = byStage.activeTokens.sub(returnTokens).sub(byStage.allocatedTokens);
+        }
+
+        // remove processed token amount from requested amount
+    // }
+
+        return (currentETHAmount, unlockedETHAmount, allocatedTokens, activeTokens);
     }
 
     /**

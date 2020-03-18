@@ -570,6 +570,16 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 .add(ethAllocationPartTwo)
 
             expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
+
+
+            // const returnedValue = ParticipantBalanceBefore.sub(returnTxGasUsed).sub(ParticipantBalanceAfter);
+            // console.log("returnedValue            ", helpers.utils.toEth(helpers, returnedValue), "eth");
+            // console.log("returnTxGasUsed          ", helpers.utils.toEth(helpers, returnTxGasUsed), "eth");
+            // console.log("ParticipantBalanceBefore ", helpers.utils.toEth(helpers, ParticipantBalanceBefore), "eth");
+            // console.log("ParticipantBalanceAfter  ", helpers.utils.toEth(helpers, ParticipantBalanceAfter), "eth");
+            // console.log("ParticipantBalanceAV     ", helpers.utils.toEth(helpers, ParticipantBalanceAfterValidation), "eth");
+           
+
         });
 
 
@@ -620,114 +630,137 @@ describe("ReversibleICO - Withdraw Testing", function () {
     });
 
 
-    // describe("Withdraw token tests - branch 2 - return partial tokens", async function () {
+    describe("Withdraw token tests - branch 2 - return partial tokens", async function () {
         
-    //     let aggregatedStatsBefore, aggregatedStatsAfter, ContributionAllocationAmounts, ethAllocationPartOne, ethAllocationPartTwo, ethAllocationPartTwoFull;
+        let aggregatedStatsBefore,
+            aggregatedStatsAfter,
+            ContributionAllocationAmounts,
+            ethAllocationPartOne,
+            ethAllocationPartTwo,
+            ethAllocationPartTwoFull,
+            ParticipantBalanceBefore,
+            returnTx;
 
-    //     before(async () => {
-    //         await restoreFromSnapshot("WithdrawTests_Phase_2_withdraw_end");
-    //         helpers.utils.resetAccountNonceCache(helpers);
+        before(async () => {
+            await restoreFromSnapshot("WithdrawTests_Phase_2_withdraw_end");
+            helpers.utils.resetAccountNonceCache(helpers);
 
-    //         const cAStage0 = priceInStage(0).mul(new BN(1));
-    //         const cAStage1 = priceInStage(1).mul(new BN(1));
-    //         const cAStage2 = priceInStage(2).mul(new BN(1));
-    //         const cAStage4 = priceInStage(4).mul(new BN(1));
-    //         const cAStage5 = priceInStage(5).mul(new BN(1));
+            const cAStage0 = priceInStage(0).mul(new BN(1));
+            const cAStage1 = priceInStage(1).mul(new BN(1));
+            const cAStage2 = priceInStage(2).mul(new BN(1));
+            const cAStage4 = priceInStage(4).mul(new BN(1));
+            const cAStage5 = priceInStage(5).mul(new BN(1));
 
-    //         // 10% of stage 0 and 1, since we returned the rest
-    //         ethAllocationPartOne = new BN(cAStage0.add(cAStage1)).div(new BN(100)).mul(new BN(10));
+            // 10% of stage 0 and 1, since we returned the rest
+            ethAllocationPartOne = new BN(cAStage0.add(cAStage1)).div(new BN(100)).mul(new BN(10));
 
-    //         // 50% of stage 2,4,5
-    //         ethAllocationPartTwoFull = new BN(cAStage2.add(cAStage4).add(cAStage5));
-    //         ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) )
+            // 50% of stage 2,4,5
+            ethAllocationPartTwoFull = new BN(cAStage2.add(cAStage4).add(cAStage5));
+            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) )
 
-    //         ContributionAllocationAmounts = ethAllocationPartOne.add( ethAllocationPartTwo );
+            ContributionAllocationAmounts = ethAllocationPartOne.add( ethAllocationPartTwo );
 
-    //     });
+        });
 
-    //     it("Expect Participant's aggregatedStats.allocatedTokens to be 0.2 tokens ( 10% of first return )", async function () {
-    //         aggregatedStatsBefore = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
-    //         expect(aggregatedStatsBefore.allocatedTokens).to.be.equal("200000000000000000");
-    //     });
+        it("Expect Participant's aggregatedStats.allocatedTokens to be 0.2 tokens ( 10% of first return )", async function () {
+            aggregatedStatsBefore = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
+            expect(aggregatedStatsBefore.allocatedTokens).to.be.equal("200000000000000000");
+        });
 
-    //     it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions", async function () {
-    //         expect(aggregatedStatsBefore.allocatedETH).to.be.equal(
-    //             // committedETH - withdrawnETH
-    //             new BN(aggregatedStatsBefore.committedETH).sub(
-    //                 new BN(aggregatedStatsBefore.withdrawnETH)
-    //             )
-    //             // subtract phase two committedETH
-    //             .sub(ethAllocationPartTwoFull)
-    //             .toString()
-    //         );
-    //         expect(aggregatedStatsBefore.allocatedETH).to.be.equal(ethAllocationPartOne.toString());
-    //     });
+        it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions", async function () {
+            expect(aggregatedStatsBefore.allocatedETH).to.be.equal(
+                // committedETH - withdrawnETH
+                new BN(aggregatedStatsBefore.committedETH).sub(
+                    new BN(aggregatedStatsBefore.withdrawnETH)
+                )
+                // subtract phase two committedETH
+                .sub(ethAllocationPartTwoFull)
+                .toString()
+            );
+            expect(aggregatedStatsBefore.allocatedETH).to.be.equal(ethAllocationPartOne.toString());
+        });
 
-    //     it("8 - A - Return 0.5 tokens bought at stage 5 end (50%)", async function () {
-    //         const stageId = 5;
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+        it("8 - A - Return 0.25 tokens bought at stage 5 end (50%)", async function () {
+            const stageId = 5;
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-    //         await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
-    //         console.log("after");
+            ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
-    //         await TokenContractInstance.methods.transfer(RICOContractAddress, "500000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000 });
+            await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
+            // console.log("after");
 
-    //         aggregatedStatsAfter = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
+            returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "250000000000000000")
+                .send({ from: TestParticipant, gas: 1000000 });
 
-    //         await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
+            aggregatedStatsAfter = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
 
-    //     });
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
-    //     it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions + 50% of the second wave", async function () {
-    //         expect(aggregatedStatsAfter.allocatedETH).to.be.equal(ContributionAllocationAmounts.toString());
-    //     });
+        });
 
-    //     it("Expect full token balance to be 2.7 tokens", async function () {
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("2700000000000000000");
-    //     });
+        it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions + 50% of the second wave", async function () {
+            expect(aggregatedStatsAfter.allocatedETH).to.be.equal(ContributionAllocationAmounts.toString());
+        });
 
-    //     it("Expect locked tokens to be 1 tokens", async function () {
-    //         const locked = await this.ReversibleICO.methods.getLockedTokenAmount(TestParticipant, false).call();
-    //         expect(locked).to.be.equal("1000000000000000000");
-    //     });
+        it("Expect full token balance to be 2.95 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("2950000000000000000");
+        });
 
-    //     it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
-    //         const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-    //         expect(unlocked).to.be.equal("1700000000000000000");
-    //     });
+        it("Expect locked tokens to be 1.25 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getLockedTokenAmount(TestParticipant, false).call();
+            expect(locked).to.be.equal("1250000000000000000");
+        });
 
-    //     it("Expect eth balance to increase by ", async function () {
+        it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
+            const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(unlocked).to.be.equal("1700000000000000000");
+        });
 
-    //         const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+        it("Expect Participant ETH balance to increase by 0.000625 ETH", async function () {
 
-    //         const cAStage5 = priceInStage(5).mul(new BN(1)).div(2);
+            const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const returnTxGasUsed = new BN(returnTx.gasUsed).mul(
+                new BN(helpers.networkConfig.gasPrice)
+            );
 
-    //         const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-    //         expect(unlocked).to.be.equal("1700000000000000000");
-    //     });
+            // half of a token in eth at stage 5
+            const cAStage5 = priceInStage(5).mul(
+                new BN(1)
+            ).div( new BN(4) );
+
+            const ParticipantBalanceAfterValidation = ParticipantBalanceBefore
+                .sub(returnTxGasUsed)
+                .add(cAStage5);
+
+            const returnedValue = ParticipantBalanceBefore.sub(returnTxGasUsed).sub(ParticipantBalanceAfter);
 
 
-    //     it("Expect Participant ETH balance to increase by 0.00355 ETH ( 0.00125 + 0.0012 + 0.0011 ) ", async function () {
+            console.log("returnedValue            ", helpers.utils.toEth(helpers, returnedValue), "eth");
+            console.log("returnTxGasUsed          ", helpers.utils.toEth(helpers, returnTxGasUsed), "eth");
+            console.log("cAStage5                 ", helpers.utils.toEth(helpers, cAStage5), "eth");
 
-    //         const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-    //         const returnTxGasUsed = new BN(returnTx.gasUsed).mul(
-    //             new BN(helpers.networkConfig.gasPrice)
-    //         );
+            console.log("ParticipantBalanceBefore ", helpers.utils.toEth(helpers, ParticipantBalanceBefore), "eth");
+            console.log("ParticipantBalanceAfter  ", helpers.utils.toEth(helpers, ParticipantBalanceAfter), "eth");
+            console.log("ParticipantBalanceAV     ", helpers.utils.toEth(helpers, ParticipantBalanceAfterValidation), "eth");
+            
 
-    //         const ParticipantBalanceAfterValidation = ParticipantBalanceBefore
-    //             .sub(returnTxGasUsed)
-    //             .add(ethAllocationPartTwo)
+            await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
-    //         expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
-    //     });
+            // const diff = 
 
-    //     // it("Expect Participant's aggregatedStats.allocatedTokens to be 1.7 tokens", async function () {
-    //     //     expect(aggregatedStatsAfter.allocatedTokens).to.be.equal("1700000000000000000");
-    //     // }); 
+        //    expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
 
-    // });
+            expect(ParticipantBalanceAfter.sub(ParticipantBalanceAfterValidation).toString()).to.be.equal("0");
+
+
+        });
+
+        // it("Expect Participant's aggregatedStats.allocatedTokens to be 1.7 tokens", async function () {
+        //     expect(aggregatedStatsAfter.allocatedTokens).to.be.equal("1700000000000000000");
+        // }); 
+
+    });
 
 
     
