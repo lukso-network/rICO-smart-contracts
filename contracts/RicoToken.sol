@@ -37,6 +37,9 @@ contract RicoToken is ERC777 {
         initialized = true;
     }
 
+    // new method for updating the rico address in case of rICO address update
+
+
     function changeManager(address _newManager) public onlyManager {
         manager = _newManager;
     }
@@ -108,6 +111,7 @@ contract RicoToken is ERC777 {
         require(initialized == true, "Contract must be initialized.");
         _;
     }
+
     modifier requireNotInitialized() {
         require(initialized == false, "Contract is already initialized.");
         _;

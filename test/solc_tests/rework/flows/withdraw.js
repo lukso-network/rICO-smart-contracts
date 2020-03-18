@@ -321,6 +321,9 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect unlocked tokens to be 0.2 tokens", async function () {
+
+            await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6, TokenContractInstance );
+
             const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
             expect(unlocked).to.be.equal("200000000000000000");
         });

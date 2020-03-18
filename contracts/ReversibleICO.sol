@@ -631,19 +631,16 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function getLockedTokenAmount2(address _participantAddress, bool includeReserved) public view returns (uint256) {
+    function getLockedTokenAmount(address _participantAddress, bool includeReserved) public view returns (uint256) {
 
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-
         uint256 availableTokens = aggregatedStats.boughtTokens
-            .sub(aggregatedStats.returnedTokens);
-            // .sub(aggregatedStats.allocatedTokens);
+            .sub(aggregatedStats.returnedTokens)
+            .sub(aggregatedStats.allocatedTokens);
 
-        if(availableTokens == 0) {
-            return 0;
-        }
+        // calculate since last withdraw block
 
-        // Multiply by percentage
+       // Multiply by percentage
         uint256 unlocked = availableTokens.mul(
             getCurrentUnlockPercentageFor(
                 getCurrentBlockNumber(),
@@ -652,15 +649,11 @@ contract ReversibleICO is IERC777Recipient {
             )
         ).div(10 ** 20);
 
-        uint256 locked = availableTokens.sub(unlocked).sub(aggregatedStats.allocatedTokens);
 
-        if(includeReserved) {
-            // When want to display token amounts even when they are not already
-            // transferred to their accounts, we add reserved to the totals
-            locked = locked.add(aggregatedStats.reservedTokens);
-        }
+        // uint256 totalAvailable = unlocked.add(aggregatedStats.allocatedTokens);
+        // return availableTokens.sub(totalAvailable);
 
-        return locked;
+        return availableTokens.sub(unlocked); // .add(aggregatedStats.allocatedTokens);
     }
 
 
@@ -668,7 +661,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function getLockedTokenAmount(address _participantAddress, bool includeReserved) public view returns (uint256) {
+    function getLockedTokenAmountOK(address _participantAddress, bool includeReserved) public view returns (uint256) {
 
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
 
