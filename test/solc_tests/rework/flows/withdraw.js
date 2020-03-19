@@ -494,7 +494,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             // 50% of stage 2,4,5
             ethAllocationPartTwoFull = new BN(cAStage2.add(cAStage4).add(cAStage5));
-            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) )
+            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) );
 
             ContributionAllocationAmounts = ethAllocationPartOne.add( ethAllocationPartTwo );
 
@@ -588,6 +588,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+
             expect(ParticipantByAddress.contributionsCount).to.be.equal("5");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));

@@ -868,45 +868,49 @@ contract ReversibleICO is IERC777Recipient {
         projectAllocatedETH = projectAllocatedETH.sub(aggregatedStats.allocatedETH);
 
         // reset aggregated stats
-        aggregatedStats.activeTokens = 0;
-        aggregatedStats.allocatedTokens = 0;
+        aggregatedStats.returnedTokens = 0;
+        aggregatedStats.withdrawnETH = 0;
         aggregatedStats.allocatedETH = 0;
+        aggregatedStats.allocatedTokens = 0;
+        aggregatedStats.activeTokens = 0;
 
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
 
-            if(remainingTokenAmount <= 0) {
-                break;
-            }
-
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
-            // reduce amount first to currently locked
-            uint256 newCalcLockedTokensInStage = getLockedTokenAmountAtBlock( // works
-                byStage.activeTokens, currentBlockNumber
-            );
-            uint256 newCalcUnlockedTokensInStage = byStage.activeTokens.sub(newCalcLockedTokensInStage);
+//            uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
+//                // total amount - locked amount
+//                // unlockedTokensInStage,
+//                byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcLockedTokensInStage),
+//                stageId
+//            );
 
-            uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
-                // total amount - locked amount
-                // unlockedTokensInStage,
-                byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcLockedTokensInStage),
-                stageId
-            );
+            if( byStage.activeTokens > 0 && remainingTokenAmount > 0) {
 
-            if( byStage.activeTokens > 0 ) {
+                // reduce amount first to currently locked
+                uint256 newCalcLockedTokensInStage = getLockedTokenAmountAtBlock( // works
+                    byStage.activeTokens, currentBlockNumber
+                );
+                uint256 newCalcUnlockedTokensInStage = byStage.activeTokens.sub(newCalcLockedTokensInStage);
 
                 // reset returnedTokensForStage
                 if (remainingTokenAmount < newCalcLockedTokensInStage) {
-                    returnedTokensForStage = remainingTokenAmount;
+                    // remove difference of newCalcLockedTokensInStage and remainingTokenAmount from unlocked tokens
                     newCalcUnlockedTokensInStage = newCalcUnlockedTokensInStage.sub(newCalcLockedTokensInStage.sub(remainingTokenAmount));
+                    returnedTokensForStage = remainingTokenAmount;
                 } else {
                     returnedTokensForStage = newCalcLockedTokensInStage;
                 }
 
-
+                uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
+                    // total amount - locked amount
+                    newCalcUnlockedTokensInStage,
+//                    byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcLockedTokensInStage),
+                    stageId
+                );
 
                 // get the equivalent amount of ETH for the locked tokens in stage
-                uint256 currentETHAmount = getEthAmountForTokensAtStage(returnedTokensForStage, stageId);
+                uint256 returnETHAmount = getEthAmountForTokensAtStage(returnedTokensForStage, stageId);
 
 
                 // UPDATE stats
@@ -915,22 +919,30 @@ contract ReversibleICO is IERC777Recipient {
 //                byStage.allocatedTokens = byStage.activeTokens.sub(returnedTokensForStage); // works
                 byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(newCalcUnlockedTokensInStage);
 //                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(byStage.allocatedTokens); //
-                byStage.withdrawnETH = byStage.withdrawnETH.add(currentETHAmount);
-                byStage.allocatedETH = unlockedETHAmount;
+                byStage.withdrawnETH = byStage.withdrawnETH.add(returnETHAmount);
+                byStage.allocatedETH = projectUnlockedETHAmount;
 
-                aggregatedStats.allocatedTokens = aggregatedStats.allocatedTokens.add(byStage.allocatedTokens);
                 aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokensForStage);
+                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
+                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(projectUnlockedETHAmount);
+                aggregatedStats.allocatedTokens = aggregatedStats.allocatedTokens.add(byStage.allocatedTokens);
                 aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
-                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(unlockedETHAmount);
-                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(currentETHAmount);
 
-                returnETHAmount = returnETHAmount.add(currentETHAmount);
-                withdrawnETH = withdrawnETH.add(currentETHAmount);
-                projectAllocatedETH = projectAllocatedETH.add(unlockedETHAmount);
+                returnETHAmount = returnETHAmount.add(returnETHAmount);
+                withdrawnETH = withdrawnETH.add(returnETHAmount);
+                projectAllocatedETH = projectAllocatedETH.add(projectUnlockedETHAmount);
 
 
                 // remove processed token amount from requested amount
                 remainingTokenAmount = remainingTokenAmount.sub(returnedTokensForStage);
+
+            // Otherwise just update the stats
+            } else {
+                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokensForStage);
+                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
+                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(byStage.allocatedETH);
+                aggregatedStats.allocatedTokens = aggregatedStats.allocatedTokens.add(byStage.allocatedTokens);
+                aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
             }
 
             if(stageId == 0) {
