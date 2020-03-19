@@ -634,7 +634,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function getReservedTokenAmount(address _participantAddress, bool includeReserved) public view returns (uint256) {
+    function getReservedTokenAmount(address _participantAddress) public view returns (uint256) {
 
         return getReservedTokenAmountAtBlock(
             participantAggregatedStats[_participantAddress].activeTokens,
@@ -679,7 +679,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _participantAddress The participant's address.
      */
     function canWithdraw(address _participantAddress) public view returns (bool) {
-        if (getReservedTokenAmount(_participantAddress, false) > 0) {
+        if (getReservedTokenAmount(_participantAddress) > 0) {
             return true;
         }
         return false;
@@ -848,7 +848,7 @@ contract ReversibleICO is IERC777Recipient {
 
         uint256 currentBlockNumber = getCurrentBlockNumber();
         uint256 remainingTokenAmount = _returnedTokenAmount;
-        uint256 maxLocked = getReservedTokenAmount(_from, false); // get locked, but exclude reserved
+        uint256 maxLocked = getReservedTokenAmount(_from); // get locked, but exclude reserved
         uint256 overflowingTokenAmount;
         uint256 returnedTokensForStage;
         uint256 returnETHAmount;

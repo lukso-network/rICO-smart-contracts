@@ -91,7 +91,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
                     let validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
 
-                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     expect(getReservedTokenAmount).to.be.equal(ContractContributionTokens);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
@@ -101,7 +101,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
-                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
 
@@ -110,7 +110,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
-                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
 
@@ -119,7 +119,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
-                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
                 });
@@ -140,7 +140,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
                     const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
 
-                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
                     expect(getReservedTokenAmount).to.be.equal(ContractContributionTokens);
 
@@ -161,7 +161,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     const validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
 
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
@@ -179,7 +179,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     const validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                 });
@@ -195,7 +195,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     let validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
 
@@ -212,7 +212,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     let validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
 
@@ -229,7 +229,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     let validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
@@ -246,7 +246,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     let validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");
@@ -258,7 +258,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress, false).call();
+                    getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participantAddress).call();
                     validatorTokenAmount = this.jsValidator.getReservedTokenAmount(participantAddress);
                     expect(getReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
                     expect(getReservedTokenAmount.toString()).to.be.equal("0");

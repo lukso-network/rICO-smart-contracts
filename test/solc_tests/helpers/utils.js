@@ -375,7 +375,7 @@ module.exports = {
 
         let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
-        const LockedBalance = await contract.methods.getReservedTokenAmount(participant_address, false).call();
+        const LockedBalance = await contract.methods.getReservedTokenAmount(participant_address).call();
         const UnlockedBalance = await contract.methods.getBoughtTokenAmount(participant_address).call();
 
         let BalanceOf;
@@ -461,7 +461,7 @@ module.exports = {
 
         const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
         const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
-        const maxLocked = new helpers.BN( await contract.methods.getReservedTokenAmount(_from, false).call() );
+        const maxLocked = new helpers.BN( await contract.methods.getReservedTokenAmount(_from).call() );
         const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
 
         if(maxLocked > 0) {

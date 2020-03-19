@@ -299,7 +299,7 @@ class Participant extends Actor {
         console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
-        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address, false).call();
+        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address).call();
         console.log("getReservedTokenAmount               ", this.toEth(getReservedTokenAmount), "tokens");
         
 
