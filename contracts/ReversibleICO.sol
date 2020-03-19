@@ -917,11 +917,9 @@ contract ReversibleICO is IERC777Recipient {
                 // UPDATE stats
                 byStage.returnedTokens = byStage.returnedTokens.add(returnedTokensForStage);
                 byStage.allocatedTokens = byStage.allocatedTokens.add(calculatedBoughtTokensInStage); // substract the new locked amount from the initial full amount
-//                byStage.allocatedTokens = byStage.activeTokens.sub(returnedTokensForStage); // works
                 byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(calculatedBoughtTokensInStage);
-//                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(byStage.allocatedTokens); //
                 byStage.withdrawnETH = byStage.withdrawnETH.add(returnETHAmount);
-                byStage.committedETH = byStage.committedETH.sub(returnETHAmount);
+//                byStage.committedETH = byStage.committedETH.sub(returnETHAmount);
                 byStage.allocatedETH = projectUnlockedETHAmount;
 
                 aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokensForStage);
