@@ -640,101 +640,20 @@ contract ReversibleICO is IERC777Recipient {
             participantAggregatedStats[_participantAddress].activeTokens,
             getCurrentBlockNumber()
         );
-
-        // ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-        // uint256 availableTokens = aggregatedStats.activeTokens;
-
-        // uint256 unlocked = availableTokens.mul(
-        //     getCurrentUnlockPercentageFor(
-        //         getCurrentBlockNumber(),
-        //         buyPhaseStartBlock,
-        //         buyPhaseEndBlock
-        //     )
-        // ).div(10 ** 20);
-
-        // // uint256 totalAvailable = unlocked.add(aggregatedStats.allocatedTokens);
-        // // return availableTokens.sub(totalAvailable);
-
-        // return availableTokens.sub(unlocked); // .add(aggregatedStats.allocatedTokens);
-    }
-
-
-    /**
-     * @notice Returns the participant's amount of locked tokens at the current block.
-     * @param _participantAddress The participant's address.
-     */
-    function getLockedTokenAmountOK(address _participantAddress, bool includeReserved) public view returns (uint256) {
-
-        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-
-        uint256 availableTokens = aggregatedStats.boughtTokens
-            .sub(aggregatedStats.returnedTokens)
-            .sub(aggregatedStats.allocatedTokens);
-
-        if(availableTokens == 0) {
-            return 0;
-        }
-
-        // Multiply by percentage
-        // uint256 unlocked = availableTokens.mul(
-        //     getCurrentUnlockPercentageFor(
-        //         getCurrentBlockNumber(),
-        //         buyPhaseStartBlock,
-        //         buyPhaseEndBlock
-        //     )
-        // ).div(10 ** 20);
-
-        uint256 locked = getLockedTokenAmountAtBlock(
-            availableTokens,
-            getCurrentBlockNumber()
-        );
-
-        // aggregatedStats.allocatedTokens;
-        // uint256 locked = getLockedTokenAmountAtBlock(
-        //     aggregatedStats.boughtTokens.sub(aggregatedStats.returnedTokens),
-        //     getCurrentBlockNumber()
-        // );
-
-        if(includeReserved) {
-            // When want to display token amounts even when they are not already
-            // transferred to their accounts, we add reserved to the totals
-            locked = locked.add(aggregatedStats.reservedTokens);
-        }
-
-        return locked;
     }
 
     /**
-     * @notice Returns the participant's amount of locked tokens at the current block.
+     * @notice Returns the participant's amount of unlocked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function getLockedTokenAmountOld(address _participantAddress, bool includeReserved) public view returns (uint256) {
+    function getUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
 
-        // active = boughtTokens - returnedTokens
-        // locked = active - ( active * unlock ratio )
-        // unlocked = active - locked
-        // and we're missing the "allocated on withdraw"
-
-        // Since the number of unlocked tokens should never
-        // go down, we always calculate locked tokens from
-        // the total the participant has ever bought ( boughtTokens )
-        // and then subtract the amount they returned
-
-        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-
-        uint256 locked = getLockedTokenAmountAtBlock(
-            aggregatedStats.boughtTokens,
+        return participantAggregatedStats[_participantAddress].activeTokens.sub(getLockedTokenAmountAtBlock(
+            participantAggregatedStats[_participantAddress].activeTokens,
             getCurrentBlockNumber()
-        );
-
-        if(includeReserved) {
-            // When want to display token amounts even when they are not already
-            // transferred to their accounts, we add reserved to the totals
-            locked = locked.add(aggregatedStats.reservedTokens);
-        }
-
-        return locked.sub(aggregatedStats.returnedTokens);
+        ));
     }
+
 
     /**
      * @notice Returns the cancel modes for a participant.
@@ -961,31 +880,29 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
-            // reduce amount first to currently active
-            uint256 newCalcActiveTokensInStage = getLockedTokenAmountAtBlock( // works
+            // reduce amount first to currently locked
+            uint256 newCalcLockedTokensInStage = getLockedTokenAmountAtBlock( // works
                 byStage.activeTokens, currentBlockNumber
             );
+            uint256 newCalcUnlockedTokensInStage = byStage.activeTokens.sub(newCalcLockedTokensInStage);
 
             uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
                 // total amount - locked amount
                 // unlockedTokensInStage,
-                byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcActiveTokensInStage),
+                byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcLockedTokensInStage),
                 stageId
             );
 
             if( byStage.activeTokens > 0 ) {
 
                 // reset returnedTokensForStage
-                if (remainingTokenAmount < newCalcActiveTokensInStage) {
+                if (remainingTokenAmount < newCalcLockedTokensInStage) {
                     returnedTokensForStage = remainingTokenAmount;
+                    newCalcUnlockedTokensInStage = newCalcUnlockedTokensInStage.sub(newCalcLockedTokensInStage.sub(remainingTokenAmount));
                 } else {
-                    returnedTokensForStage = newCalcActiveTokensInStage;
+                    returnedTokensForStage = newCalcLockedTokensInStage;
                 }
 
-//                uint256 allocatedByNow = getLockedTokenAmountAtBlock(
-//                    returnedTokensForStage, currentBlockNumber
-//                );
-//                allocatedByNow = returnedTokensForStage.sub(allocatedByNow);
 
 
                 // get the equivalent amount of ETH for the locked tokens in stage
@@ -994,9 +911,9 @@ contract ReversibleICO is IERC777Recipient {
 
                 // UPDATE stats
                 byStage.returnedTokens = byStage.returnedTokens.add(returnedTokensForStage);
-                byStage.allocatedTokens = byStage.activeTokens.sub(newCalcActiveTokensInStage); // substract the new locked amount from the initial full amount
+                byStage.allocatedTokens = byStage.allocatedTokens.add(newCalcUnlockedTokensInStage); // substract the new locked amount from the initial full amount
 //                byStage.allocatedTokens = byStage.activeTokens.sub(returnedTokensForStage); // works
-                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(newCalcActiveTokensInStage);
+                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(newCalcUnlockedTokensInStage);
 //                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(byStage.allocatedTokens); //
                 byStage.withdrawnETH = byStage.withdrawnETH.add(currentETHAmount);
                 byStage.allocatedETH = unlockedETHAmount;

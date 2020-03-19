@@ -376,8 +376,9 @@ module.exports = {
         let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
         const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address, false).call();
+        const UnlockedBalance = await contract.methods.getUnlockedTokenAmount(participant_address).call();
 
-        let UnlockedBalance, BalanceOf;
+        let BalanceOf;
         if(tokenContract !== null) {
             UnlockedBalance = await tokenContract.methods.getUnlockedBalance(participant_address).call();
             BalanceOf = await tokenContract.methods.balanceOf(participant_address).call();
@@ -406,7 +407,8 @@ module.exports = {
         console.log("Total allocatedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedTokens.toString()) +" tokens" );
         console.log("Total activeTokens:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.activeTokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
-        
+        console.log("Unlocked Token Balance:   ", helpers.utils.toEth(helpers, UnlockedBalance.toString()) +" tokens" );
+
         if(tokenContract !== null) {
             console.log("Unlocked Token Balance:   ", helpers.utils.toEth(helpers, UnlockedBalance.toString()) +" tokens" );
             console.log("Total Token Balance:      ", helpers.utils.toEth(helpers, BalanceOf.toString()) +" tokens" );
