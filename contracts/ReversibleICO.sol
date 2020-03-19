@@ -961,33 +961,26 @@ contract ReversibleICO is IERC777Recipient {
 
             ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
-
-//            uint256 lockedTokensForStage = getLockedTokenAmountAtBlock( // works
-//                byStage.activeTokens, currentBlockNumber
-//            );
-            uint256 lockedTokensForStage = byStage.activeTokens;
+            // reduce amount first to currently active
+            uint256 newCalcActiveTokensInStage = getLockedTokenAmountAtBlock( // works
+                byStage.activeTokens, currentBlockNumber
+            );
 
             uint256 unlockedETHAmount = getEthAmountForTokensAtStage(
                 // total amount - locked amount
                 // unlockedTokensInStage,
-                byStage.boughtTokens.sub(byStage.returnedTokens).sub(lockedTokensForStage),
+                byStage.boughtTokens.sub(byStage.returnedTokens).sub(newCalcActiveTokensInStage),
                 stageId
             );
 
             if( byStage.activeTokens > 0 ) {
 
                 // reset returnedTokensForStage
-                if (remainingTokenAmount < lockedTokensForStage) {
+                if (remainingTokenAmount < newCalcActiveTokensInStage) {
                     returnedTokensForStage = remainingTokenAmount;
                 } else {
-                    returnedTokensForStage = lockedTokensForStage;
+                    returnedTokensForStage = newCalcActiveTokensInStage;
                 }
-
-                // calculate locked token amount from the partial stage tokens
-                returnedTokensForStage = getLockedTokenAmountAtBlock(
-                    returnedTokensForStage, currentBlockNumber
-                );
-
 
 //                uint256 allocatedByNow = getLockedTokenAmountAtBlock(
 //                    returnedTokensForStage, currentBlockNumber
@@ -1001,9 +994,9 @@ contract ReversibleICO is IERC777Recipient {
 
                 // UPDATE stats
                 byStage.returnedTokens = byStage.returnedTokens.add(returnedTokensForStage);
-//                byStage.allocatedTokens = byStage.allocatedTokens.add(allocatedByNow);
-                byStage.allocatedTokens = byStage.activeTokens.sub(returnedTokensForStage); // works
-                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage);
+                byStage.allocatedTokens = byStage.activeTokens.sub(newCalcActiveTokensInStage); // substract the new locked amount from the initial full amount
+//                byStage.allocatedTokens = byStage.activeTokens.sub(returnedTokensForStage); // works
+                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(newCalcActiveTokensInStage);
 //                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(byStage.allocatedTokens); //
                 byStage.withdrawnETH = byStage.withdrawnETH.add(currentETHAmount);
                 byStage.allocatedETH = unlockedETHAmount;
