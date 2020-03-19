@@ -108,19 +108,19 @@ module.exports = {
                 // const byStage = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
                 // console.log(byStage);
 
-                const unlockedToken = new helpers.BN( await rICOToken.methods.getUnlockedBalance(participants[0].address).call() );
-                const lockedToken = new helpers.BN( await rICOToken.methods.getLockedBalance(participants[0].address).call() );
+                const boughtToken = new helpers.BN( await rICOToken.methods.getUnlockedBalance(participants[0].address).call() );
+                const reservedToken = new helpers.BN( await rICOToken.methods.getLockedBalance(participants[0].address).call() );
                 const balanceOf = new helpers.BN( await rICOToken.methods.balanceOf(participants[0].address).call() );
                 
-                console.log("unlockedTokens:        ", participants[0].toEth(unlockedToken));
-                console.log("lockedTokens:          ", participants[0].toEth(lockedToken));
+                console.log("boughtTokens:        ", participants[0].toEth(boughtToken));
+                console.log("reservedTokens:          ", participants[0].toEth(reservedToken));
                 console.log("balanceOf:             ", participants[0].toEth(balanceOf));
 
-                const getLockedTokenAmount = new helpers.BN( await rICO.methods.getLockedTokenAmount(participants[0].address, false).call() );
-                console.log("getLockedTokenAmount:  ", participants[0].toEth(getLockedTokenAmount));
+                const getReservedTokenAmount = new helpers.BN( await rICO.methods.getReservedTokenAmount(participants[0].address, false).call() );
+                console.log("getReservedTokenAmount:  ", participants[0].toEth(getReservedTokenAmount));
 
-                const getLockedTokenAmount2 = new helpers.BN( await rICO.methods.getLockedTokenAmount(participants[0].address, true).call() );
-                console.log("getLockedTokenAmount2: ", participants[0].toEth(getLockedTokenAmount2));
+                const getReservedTokenAmount2 = new helpers.BN( await rICO.methods.getReservedTokenAmount(participants[0].address, true).call() );
+                console.log("getReservedTokenAmount2: ", participants[0].toEth(getReservedTokenAmount2));
 
                 const getCurrentUnlockPercentage = new helpers.BN( await rICO.methods.getCurrentUnlockPercentage().call() );
                 console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentUnlockPercentage));

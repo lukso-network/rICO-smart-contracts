@@ -758,12 +758,12 @@ describe("ProjectWithdraw Testing", function () {
                         )
                     );
 
-                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                    const ParticipantboughtTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0
-                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    expect( ParticipantboughtTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -779,14 +779,14 @@ describe("ProjectWithdraw Testing", function () {
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
-                    const ParticipantLockedTokenBalanceBefore = new BN(
+                    const ParticipantreservedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // locked + unlocked = balance
                     expect(
-                        ParticipantLockedTokenBalanceBefore.add(
-                            ParticipantUnlockedTokenBalanceBefore
+                        ParticipantreservedTokenBalanceBefore.add(
+                            ParticipantboughtTokenBalanceBefore
                         )
                     ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
 
@@ -815,10 +815,10 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
-                    const ParticipantLockedTokenBalanceAfter = new BN(
+                    const ParticipantreservedTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                    const ParticipantboughtTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
@@ -856,12 +856,12 @@ describe("ProjectWithdraw Testing", function () {
                     expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
 
                     // Tokens: locked validation
-                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                    let ParticipantreservedTokenBalanceAfterValidation = ParticipantreservedTokenBalanceBefore
                         .sub(withdrawCalculatedBefore.withdrawn_tokens)
-                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+                    expect( ParticipantreservedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantreservedTokenBalanceAfterValidation );
 
                     // Tokens: unlocked validation - the same
-                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+                    expect( ParticipantboughtTokenBalanceAfter ).to.be.bignumber.equal( ParticipantboughtTokenBalanceBefore );
 
                     // accounting for price rounding errors
                     if( withdrawCalculatedBefore.eth.lt(ethAmount) ) {
@@ -880,12 +880,12 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                    const ParticipantboughtTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0
-                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    expect( ParticipantboughtTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -901,14 +901,14 @@ describe("ProjectWithdraw Testing", function () {
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
-                    const ParticipantLockedTokenBalanceBefore = new BN(
+                    const ParticipantreservedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // locked + unlocked = balance
                     expect(
-                        ParticipantLockedTokenBalanceBefore.add(
-                            ParticipantUnlockedTokenBalanceBefore
+                        ParticipantreservedTokenBalanceBefore.add(
+                            ParticipantboughtTokenBalanceBefore
                         )
                     ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
 
@@ -937,10 +937,10 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
-                    const ParticipantLockedTokenBalanceAfter = new BN(
+                    const ParticipantreservedTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                    const ParticipantboughtTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
@@ -976,14 +976,14 @@ describe("ProjectWithdraw Testing", function () {
                     expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
 
                     // Tokens: locked validation
-                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                    let ParticipantreservedTokenBalanceAfterValidation = ParticipantreservedTokenBalanceBefore
                         .sub(withdrawCalculatedBefore.withdrawn_tokens)
-                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+                    expect( ParticipantreservedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantreservedTokenBalanceAfterValidation );
 
                     // Tokens: unlocked validation - the same
-                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+                    expect( ParticipantboughtTokenBalanceAfter ).to.be.bignumber.equal( ParticipantboughtTokenBalanceBefore );
 
-                    expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfter );
+                    expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantreservedTokenBalanceAfter );
 
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
                 });
@@ -1081,12 +1081,12 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                    const ParticipantboughtTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0
-                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    expect( ParticipantboughtTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -1102,14 +1102,14 @@ describe("ProjectWithdraw Testing", function () {
                     // Must have a token balance
                     expect( ParticipantTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
-                    const ParticipantLockedTokenBalanceBefore = new BN(
+                    const ParticipantreservedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // locked + unlocked = balance
                     expect(
-                        ParticipantLockedTokenBalanceBefore.add(
-                            ParticipantUnlockedTokenBalanceBefore
+                        ParticipantreservedTokenBalanceBefore.add(
+                            ParticipantboughtTokenBalanceBefore
                         )
                     ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
 
@@ -1138,10 +1138,10 @@ describe("ProjectWithdraw Testing", function () {
                     const ParticipantTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
-                    const ParticipantLockedTokenBalanceAfter = new BN(
+                    const ParticipantreservedTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
-                    const ParticipantUnlockedTokenBalanceAfter = new BN(
+                    const ParticipantboughtTokenBalanceAfter = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
 
@@ -1177,14 +1177,14 @@ describe("ProjectWithdraw Testing", function () {
                     expect( ContractTokenBalanceAfter ).to.be.bignumber.equal( ContractTokenBalanceAfterValidation );
 
                     // Tokens: locked validation
-                    let ParticipantLockedTokenBalanceAfterValidation = ParticipantLockedTokenBalanceBefore
+                    let ParticipantreservedTokenBalanceAfterValidation = ParticipantreservedTokenBalanceBefore
                         .sub(withdrawCalculatedBefore.withdrawn_tokens)
-                    expect( ParticipantLockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfterValidation );
+                    expect( ParticipantreservedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantreservedTokenBalanceAfterValidation );
 
                     // Tokens: unlocked validation - the same
-                    expect( ParticipantUnlockedTokenBalanceAfter ).to.be.bignumber.equal( ParticipantUnlockedTokenBalanceBefore );
+                    expect( ParticipantboughtTokenBalanceAfter ).to.be.bignumber.equal( ParticipantboughtTokenBalanceBefore );
 
-                    expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantLockedTokenBalanceAfter );
+                    expect( ShouldHaveLockedAmount ).to.be.bignumber.equal( ParticipantreservedTokenBalanceAfter );
 
                     // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
                 });
@@ -1196,18 +1196,18 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                    const ParticipantboughtTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
-                    const ParticipantLockedTokenBalanceBefore = new BN(
+                    const ParticipantreservedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0
-                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    expect( ParticipantboughtTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     // since we already sent back all our tokens.. we should have 0 locked remaining
-                    expect( ParticipantLockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
+                    expect( ParticipantreservedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
 
                     await helpers.assertInvalidOpcode( async () => {
                         // attempt to send full token balance back to rico
@@ -1289,18 +1289,18 @@ describe("ProjectWithdraw Testing", function () {
                         await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
                     );
 
-                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                    const ParticipantboughtTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
                     );
-                    const ParticipantLockedTokenBalanceBefore = new BN(
+                    const ParticipantreservedTokenBalanceBefore = new BN(
                         await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
                     );
 
                     // since we're in a later stage, unlocked need to be above 0
-                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    expect( ParticipantboughtTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
                     // since we already sent back all our tokens.. we should have 0 locked remaining
-                    expect( ParticipantLockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
+                    expect( ParticipantreservedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
 
                     await helpers.assertInvalidOpcode( async () => {
                         // attempt to send full token balance back to rico
@@ -1332,8 +1332,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.getLockedTokenAmount(participant).send({from: deployerAddress });
-    let amount1 = await contract.methods.getLockedTokenAmount(participant).call();
+    let tx1 = await contract.methods.getReservedTokenAmount(participant).send({from: deployerAddress });
+    let amount1 = await contract.methods.getReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
 
@@ -1341,7 +1341,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     console.log("gas V:   ", tx1.gasUsed);
     console.log("amount:  ", helpers.utils.toFullToken(helpers, new helpers.BN(amount1) ));
     console.log("tokensV3:", helpers.utils.toFullToken(
-            helpers, helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
+            helpers, helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
         )
     );
 
@@ -1355,7 +1355,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEthAtStage().call();
-    let totalReceivedETH = await contract.methods.totalReceivedETH().call();
+    let totalSentETH = await contract.methods.totalSentETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let committedETH = await contract.methods.committedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
@@ -1365,7 +1365,7 @@ async function displayContractStats(contract, TokenContractInstance) {
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
-    console.log("totalReceivedETH:        ", helpers.utils.toEth(helpers,totalReceivedETH) + " eth");
+    console.log("totalSentETH:        ", helpers.utils.toEth(helpers,totalSentETH) + " eth");
     console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
     console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");

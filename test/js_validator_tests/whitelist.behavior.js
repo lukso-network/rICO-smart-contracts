@@ -72,11 +72,11 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
             oldParticipantRecord = this.oldState.participantsByAddress[_address];
             newParticipantRecord = this.JSContract.participantsByAddress[_address];
 
-            oldStateParticipantAvailableETH = oldParticipantRecord.totalReceivedETH
+            oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                 .sub(oldParticipantRecord.withdrawnETH)
                 .sub(oldParticipantRecord.returnedETH);
 
-            newStateParticipantAvailableETH = newParticipantRecord.totalReceivedETH
+            newStateParticipantAvailableETH = newParticipantRecord.totalSentETH
                 .sub(newParticipantRecord.withdrawnETH)
                 .sub(newParticipantRecord.returnedETH);
         });
@@ -122,8 +122,8 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
 
         describe("Tokens:", function () {
 
-            it("Participant token balance is oldState.ParticipantRecord.reservedTokens", function () {
-                const expectedBalance = this.oldState.participantsByAddress[_address].reservedTokens;
+            it("Participant token balance is oldState.ParticipantRecord.pendingTokens", function () {
+                const expectedBalance = this.oldState.participantsByAddress[_address].pendingTokens;
                 const balance = this.JSContract.TokenContractInstance.balanceOf(_address);
                 expect(
                     balance.toString()
@@ -132,8 +132,8 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
                 );
             });
 
-            it("ParticipantRecord.reservedTokens is 0", function () {
-                expect(newParticipantRecord.reservedTokens.toString()).is.equal("0");
+            it("ParticipantRecord.pendingTokens is 0", function () {
+                expect(newParticipantRecord.pendingTokens.toString()).is.equal("0");
             });
 
         });
@@ -154,11 +154,11 @@ function shouldHaveValidStateAfterCancelContributionsForAddress(_address, _accep
             oldParticipantRecord = this.oldState.participantsByAddress[_address];
             newParticipantRecord = this.JSContract.participantsByAddress[_address];
 
-            oldStateParticipantAvailableETH = oldParticipantRecord.totalReceivedETH
+            oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                 .sub(oldParticipantRecord.withdrawnETH)
                 .sub(oldParticipantRecord.returnedETH);
 
-            newStateParticipantAvailableETH = newParticipantRecord.totalReceivedETH
+            newStateParticipantAvailableETH = newParticipantRecord.totalSentETH
                 .sub(newParticipantRecord.withdrawnETH)
                 .sub(newParticipantRecord.returnedETH);
         });
@@ -187,8 +187,8 @@ function shouldHaveValidStateAfterCancelContributionsForAddress(_address, _accep
                 expect(newParticipantRecord.whitelisted).is.equal(false);
             });
 
-            it("reservedTokens is 0", function () {
-                expect(newParticipantRecord.reservedTokens.toString()).is.equal("0");
+            it("pendingTokens is 0", function () {
+                expect(newParticipantRecord.pendingTokens.toString()).is.equal("0");
             });
 
             it("withdrawnETH increases by oldState.ParticipantAvailableETH", function () {
@@ -211,8 +211,8 @@ function shouldHaveValidStateAfterCancelContributionsForAddress(_address, _accep
                 );
             });
 
-            it("ParticipantRecord.reservedTokens is 0", function () {
-                expect(newParticipantRecord.reservedTokens.toString()).is.equal("0");
+            it("ParticipantRecord.pendingTokens is 0", function () {
+                expect(newParticipantRecord.pendingTokens.toString()).is.equal("0");
             });
 
         });

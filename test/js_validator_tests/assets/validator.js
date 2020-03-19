@@ -171,7 +171,7 @@ class Validator {
         return 0;
     }
 
-    getLockedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
+    getReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
 
         if(_precision == null) {
             _precision = 20;
@@ -211,7 +211,7 @@ class Validator {
 
     getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
         return new BN(_tokenAmount).sub( 
-            this.getLockedTokenAmountAtBlock(
+            this.getReservedTokenAmountAtBlock(
                 _tokenAmount,
                 _blockNumber,
                 precision

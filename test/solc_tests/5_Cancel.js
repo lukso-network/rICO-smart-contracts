@@ -486,13 +486,13 @@ describe("Testing canceling", function () {
                 for(let i = 0; i < StageCount; i++) {
                     const ParticipantStageDetails = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, i).call();
                     ContributionTotals = ContributionTotals.add(
-                        new helpers.BN(ParticipantStageDetails.stageTotalReceivedETH)
+                        new helpers.BN(ParticipantStageDetails.stagetotalSentETH)
                     );
                 }
 
 
                 expect(
-                    ParticipantTotalStats.totalReceivedETH.toString()
+                    ParticipantTotalStats.totalSentETH.toString()
                 ).to.be.equal(
                     ContributionTotals.toString(),
                 );
@@ -677,12 +677,12 @@ describe("Testing canceling", function () {
             for (let p = 0; p < participantCount; p++) {
                 let participant = await ReversibleICOInstance.methods.participantsById(p).call();
 
-                let participantTotalReceivedETH = new helpers.BN("0");
+                let participanttotalSentETH = new helpers.BN("0");
                 let participantReturnedETH = new helpers.BN("0");
                 let participantCommittedETH = new helpers.BN("0");
                 let participantWithdrawnETH = new helpers.BN("0");
                 let participantAllocatedETH = new helpers.BN("0");
-                let participantReservedTokens = new helpers.BN("0");
+                let participantpendingTokens = new helpers.BN("0");
                 let participantBoughtTokens = new helpers.BN("0");
                 let participantReturnedTokens = new helpers.BN("0");
 
@@ -690,12 +690,12 @@ describe("Testing canceling", function () {
                 for (let s = 0; s < StageCount; s++) {
                     const state = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant, s).call();
 
-                    participantTotalReceivedETH = participantTotalReceivedETH.add(new helpers.BN(state.stageTotalReceivedETH));
+                    participanttotalSentETH = participanttotalSentETH.add(new helpers.BN(state.stagetotalSentETH));
                     participantReturnedETH = participantReturnedETH.add(new helpers.BN(state.stageReturnedETH));
                     participantCommittedETH = participantCommittedETH.add(new helpers.BN(state.stageCommittedETH));
                     participantWithdrawnETH = participantWithdrawnETH.add(new helpers.BN(state.stageWithdrawnETH));
                     participantAllocatedETH = participantAllocatedETH.add(new helpers.BN(state.stageAllocatedETH));
-                    participantReservedTokens = participantReservedTokens.add(new helpers.BN(state.stageReservedTokens));
+                    participantpendingTokens = participantpendingTokens.add(new helpers.BN(state.stagePendingTokens));
                     participantBoughtTokens = participantBoughtTokens.add(new helpers.BN(state.stageBoughtTokens));
                     participantReturnedTokens = participantReturnedTokens.add(new helpers.BN(state.stageReturnedTokens));
                 }
@@ -703,7 +703,7 @@ describe("Testing canceling", function () {
                 // Compare calculated sums against participantAggregatedStats
                 let aggregated = await ReversibleICOInstance.methods.participantAggregatedStats(participant).call();
                 expect(new helpers.BN(aggregated[0]))
-                    .to.be.bignumber.equal(participantTotalReceivedETH, "aggregated.totalReceivedETH mismatch for participant " + p);
+                    .to.be.bignumber.equal(participanttotalSentETH, "aggregated.totalSentETH mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[1]))
                     .to.be.bignumber.equal(participantReturnedETH, "aggregated.returnedETH mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[2]))
@@ -713,7 +713,7 @@ describe("Testing canceling", function () {
                 expect(new helpers.BN(aggregated[4]))
                     .to.be.bignumber.equal(participantAllocatedETH, "aggregated.allocatedETH mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[5]))
-                    .to.be.bignumber.equal(participantReservedTokens, "aggregated.reservedTokens mismatch for participant " + p);
+                    .to.be.bignumber.equal(participantpendingTokens, "aggregated.pendingTokens mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[6]))
                     .to.be.bignumber.equal(participantBoughtTokens, "aggregated.boughtTokens mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[7]))
@@ -749,7 +749,7 @@ describe("Testing canceling", function () {
         });
 
         it("Contract global state should match sum over all participants and stages", async function () {
-            let globalTotalReceivedETH = new helpers.BN("0");
+            let globaltotalSentETH = new helpers.BN("0");
             let globalReturnedETH = new helpers.BN("0");
             let globalCommittedETH = new helpers.BN("0");
             let globalWithdrawnETH = new helpers.BN("0");
@@ -762,7 +762,7 @@ describe("Testing canceling", function () {
                 for (let s = 0; s < StageCount; s++) {
                     const state = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant, s).call();
 
-                    globalTotalReceivedETH = globalTotalReceivedETH.add(new helpers.BN(state.stageTotalReceivedETH));
+                    globaltotalSentETH = globaltotalSentETH.add(new helpers.BN(state.stagetotalSentETH));
                     globalReturnedETH = globalReturnedETH.add(new helpers.BN(state.stageReturnedETH));
                     globalCommittedETH = globalCommittedETH.add(new helpers.BN(state.stageCommittedETH));
                     globalWithdrawnETH = globalWithdrawnETH.add(new helpers.BN(state.stageWithdrawnETH));
@@ -771,8 +771,8 @@ describe("Testing canceling", function () {
             }
 
             // Compare calculated sums against global contract values
-            expect(new helpers.BN(await ReversibleICOInstance.methods.totalReceivedETH().call()))
-                .to.be.bignumber.equal(globalTotalReceivedETH, "ReversibleICO.totalReceivedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.totalSentETH().call()))
+                .to.be.bignumber.equal(globaltotalSentETH, "ReversibleICO.totalSentETH mismatch");
             expect(new helpers.BN(await ReversibleICOInstance.methods.returnedETH().call()))
                 .to.be.bignumber.equal(globalReturnedETH, "ReversibleICO.returnedETH mismatch");
             expect(new helpers.BN(await ReversibleICOInstance.methods.committedETH().call()))

@@ -197,7 +197,7 @@ describe("ERC777 - RICO Token", async function () {
 
                 it("returns their locked balance when calling `getLockedBalance` ", async function () {
                     await this.ReversibleICOMock777.methods
-                        .setLockedTokenAmount(holder, lockedAmount)
+                        .setreservedTokenAmount(holder, lockedAmount)
                         .send({ from: holder, gas: 100000 });
                     expect(
                         await this.RicoToken.methods.getLockedBalance(holder).call()
@@ -205,7 +205,7 @@ describe("ERC777 - RICO Token", async function () {
                 });
                 it("returns their unlocked balance when calling `getUnlockedBalance` ", async function () {
                     await this.ReversibleICOMock777.methods
-                        .setLockedTokenAmount(holder, lockedAmount)
+                        .setreservedTokenAmount(holder, lockedAmount)
                         .send({ from: accounts[0], gas: 100000 });
                     expect(
                         await this.RicoToken.methods.getUnlockedBalance(holder).call()
@@ -293,7 +293,7 @@ describe("ERC777 - RICO Token", async function () {
                     const lockedAmount = "100000000";
                     it("should transfer if amount is unlocked", async function () {
                         await this.ReversibleICOMock777.methods
-                            .setLockedTokenAmount(holder, lockedAmount)
+                            .setreservedTokenAmount(holder, lockedAmount)
                             .send({ from: accounts[0], gas: 100000 });
 
                         await this.RicoToken.methods
@@ -313,7 +313,7 @@ describe("ERC777 - RICO Token", async function () {
                         const amt = balance.add(new helpers.BN("1"));
 
                         await this.ReversibleICOMock777.methods
-                            .setLockedTokenAmount(holder, amt.toString())
+                            .setreservedTokenAmount(holder, amt.toString())
                             .send({ from: accounts[0], gas: 100000 });
 
                         await helpers.assertInvalidOpcode(async () => {
@@ -332,7 +332,7 @@ describe("ERC777 - RICO Token", async function () {
 
                         // lock half
                         await this.ReversibleICOMock777.methods
-                            .setLockedTokenAmount(
+                            .setreservedTokenAmount(
                                 accounts[0],
                                 locked.div(new BN("2")).toString()
                             )
@@ -358,7 +358,7 @@ describe("ERC777 - RICO Token", async function () {
                         let locked = new BN("10000");
 
                         await this.ReversibleICOMock777.methods
-                            .setLockedTokenAmount(holder, 0)
+                            .setreservedTokenAmount(holder, 0)
                             .send({ from: accounts[0] });
 
                         await this.RicoToken.methods
@@ -366,7 +366,7 @@ describe("ERC777 - RICO Token", async function () {
                             .send({ from: holder, gas: 100000 });
 
                         await this.ReversibleICOMock777.methods
-                            .setLockedTokenAmount(holder, locked.toString())
+                            .setreservedTokenAmount(holder, locked.toString())
                             .send({ from: accounts[0] });
 
                         let balance = new helpers.BN(await this.RicoToken.methods.balanceOf(accounts[0]).call());
@@ -443,7 +443,7 @@ describe("ERC777 - RICO Token", async function () {
                     .send({ from: holder, gas: 100000 });
 
                 await this.ReversibleICOMock777.methods
-                    .setLockedTokenAmount(accounts[3], locked.toString())
+                    .setreservedTokenAmount(accounts[3], locked.toString())
                     .send({ from: holder, gas: 100000 });
 
                 await this.RicoToken.methods

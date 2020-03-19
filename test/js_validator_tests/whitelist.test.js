@@ -203,7 +203,7 @@ describe("Javascript Validator - Contract - whitelist()", function () {
                 this.JSContract.whitelist(address, _accept);
 
                 const oldParticipantRecord = this.oldState.participantsByAddress[address];
-                const oldStateParticipantAvailableETH = oldParticipantRecord.totalReceivedETH
+                const oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                     .sub(oldParticipantRecord.withdrawnETH)
                     .sub(oldParticipantRecord.returnedETH);
 

@@ -37,8 +37,8 @@ class Participant extends Actor {
             ETH: ETH,
             Token: new this.helpers.BN("0"),
             withdrawableETH: new this.helpers.BN("0"),
-            unlockedToken: new this.helpers.BN("0"),
-            reservedTokens: new this.helpers.BN("0"),
+            boughtToken: new this.helpers.BN("0"),
+            pendingTokens: new this.helpers.BN("0"),
             allocatedETH: new this.helpers.BN("0"),
         };
 
@@ -46,8 +46,8 @@ class Participant extends Actor {
             ETH: ETH,
             Token: new this.helpers.BN("0"),
             withdrawableETH: new this.helpers.BN("0"),
-            unlockedToken: new this.helpers.BN("0"),
-            reservedTokens: new this.helpers.BN("0"),
+            boughtToken: new this.helpers.BN("0"),
+            pendingTokens: new this.helpers.BN("0"),
         };
 
         this.whitelisted = false;
@@ -255,7 +255,7 @@ class Participant extends Actor {
                 this.helpers.utils.getTokenAmountForEthAtValue(this.helpers, acceptedValue, price)
             );
 
-            this.expectedBalances.reservedTokens = new this.helpers.BN(0);
+            this.expectedBalances.pendingTokens = new this.helpers.BN(0);
 
 
             let withdrawableETHCalc = acceptedValue;
@@ -275,22 +275,22 @@ class Participant extends Actor {
             this.expectedBalances.ETH = this.currentBalances.ETH.sub(ETH);
 
             this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH;
-            this.expectedBalances.reservedTokens = this.currentBalances.reservedTokens.add(tokenAmount);
+            this.expectedBalances.pendingTokens = this.currentBalances.pendingTokens.add(tokenAmount);
         }
 
         if(unlockPercentage.gt(new this.helpers.BN("0"))) {
-            this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
+            this.expectedBalances.boughtToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                 new this.helpers.BN("10").pow( new this.helpers.BN(20) )
             )
         } else {
-            this.expectedBalances.unlockedToken = new this.helpers.BN("0");
+            this.expectedBalances.boughtToken = new this.helpers.BN("0");
         }
 
-        console.log("this.expectedBalances.unlockedToken", this.toEth(this.expectedBalances.unlockedToken), "tokens");
+        console.log("this.expectedBalances.boughtToken", this.toEth(this.expectedBalances.boughtToken), "tokens");
         console.log("unlockPercentage                   ", this.toEth(unlockPercentage), "%");
         
-        const unlockedTokenBalance = await this.rICOToken.methods.getUnlockedBalance(this.address).call();
-        console.log("unlockedTokenBalance               ", this.toEth(unlockedTokenBalance), "tokens");
+        const boughtTokenBalance = await this.rICOToken.methods.getUnlockedBalance(this.address).call();
+        console.log("boughtTokenBalance               ", this.toEth(boughtTokenBalance), "tokens");
         
         const balanceOf = await this.rICOToken.methods.balanceOf(this.address).call();
         console.log("balanceOf                          ", this.toEth(balanceOf), "tokens");
@@ -299,35 +299,35 @@ class Participant extends Actor {
         console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
-        const getLockedTokenAmount = await this.rICO.methods.getLockedTokenAmount(this.address, false).call();
-        console.log("getLockedTokenAmount               ", this.toEth(getLockedTokenAmount), "tokens");
+        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address, false).call();
+        console.log("getReservedTokenAmount               ", this.toEth(getReservedTokenAmount), "tokens");
         
 
         const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
 
         console.log("aggregatedStats.boughtTokens       ", this.toEth(aggregatedStats.boughtTokens), "tokens");
         console.log("aggregatedStats.returnedTokens     ", this.toEth(aggregatedStats.returnedTokens), "tokens");
-        console.log("aggregatedStats.reservedTokens     ", this.toEth(aggregatedStats.reservedTokens), "tokens");
+        console.log("aggregatedStats.pendingTokens     ", this.toEth(aggregatedStats.pendingTokens), "tokens");
 
         const byStage0 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 0).call();
         const byStage1 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 1).call();
 
         console.log("byStage0.boughtTokens              ", this.toEth(byStage0.stageBoughtTokens), "tokens");
         console.log("byStage0.returnedTokens            ", this.toEth(byStage0.stageReturnedTokens), "tokens");
-        console.log("byStage0.reservedTokens            ", this.toEth(byStage0.stageReservedTokens), "tokens");
+        console.log("byStage0.pendingTokens            ", this.toEth(byStage0.stagePendingTokens), "tokens");
 
         console.log("byStage1.boughtTokens              ", this.toEth(byStage1.stageBoughtTokens), "tokens");
         console.log("byStage1.returnedTokens            ", this.toEth(byStage1.stageReturnedTokens), "tokens");
-        console.log("byStage1.reservedTokens            ", this.toEth(byStage1.stageReservedTokens), "tokens");
+        console.log("byStage1.pendingTokens            ", this.toEth(byStage1.stagePendingTokens), "tokens");
 
 
         const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
 
-        const getLockedTokenAmountAtBlock = await this.rICO.methods.getLockedTokenAmountAtBlock(
+        const getReservedTokenAmountAtBlock = await this.rICO.methods.getReservedTokenAmountAtBlock(
             aggregatedStats.boughtTokens.toString(),
             blockNumber
         ).call();
-        console.log("getLockedTokenAmountAtBlock        ", this.toEth(getLockedTokenAmountAtBlock), "tokens");
+        console.log("getReservedTokenAmountAtBlock        ", this.toEth(getReservedTokenAmountAtBlock), "tokens");
 
         
 
@@ -338,7 +338,7 @@ class Participant extends Actor {
 
         const participantRecord = await this.getParticipantRecord();
        
-        // const pendingEth = participantRecord.totalReceivedETH.sub( 
+        // const pendingEth = participantRecord.totalSentETH.sub(
         //     participantRecord.committedETH.add(
         //         participantRecord.returnedETH
         //     ).add(
@@ -346,14 +346,14 @@ class Participant extends Actor {
         //     )
         // );
 
-        const pendingEth = participantRecord.totalReceivedETH
+        const pendingEth = participantRecord.totalSentETH
             .sub(participantRecord.returnedETH)
             .sub(participantRecord.committedETH);
         
         // expected balance includes value stored in contract that has not been procesed.
         this.expectedBalances.ETH = this.currentBalances.ETH.add(pendingEth);
         // reserved tokens are set to 0
-        this.expectedBalances.reservedTokens = new this.helpers.BN("0");
+        this.expectedBalances.pendingTokens = new this.helpers.BN("0");
         // token balance does not change
         this.expectedBalances.Token = this.currentBalances.Token;
 
@@ -373,7 +373,7 @@ class Participant extends Actor {
     async sendHalfTokensBack() {
         await this.readBalances();
         // send half the locked token balance back
-        const value = this.currentBalances.Token.sub(this.currentBalances.unlockedToken).divRound( new this.helpers.BN(2) );
+        const value = this.currentBalances.Token.sub(this.currentBalances.boughtToken).divRound( new this.helpers.BN(2) );
         this.actionLog.push( { type:"sendHalfTokensBack", "value": value, valid: null } );
         return await this.withdrawByToken(value);
     }
@@ -393,7 +393,7 @@ class Participant extends Actor {
         await this.readBalances();
 
         // reserved tokens are set to 0
-        this.expectedBalances.reservedTokens = new this.helpers.BN("0");
+        this.expectedBalances.pendingTokens = new this.helpers.BN("0");
 
         const participantRecord = await this.getParticipantRecord();
 
@@ -410,7 +410,7 @@ class Participant extends Actor {
 
         let acceptedValue ;
 
-        const claimableEth = participantRecord.totalReceivedETH
+        const claimableEth = participantRecord.totalSentETH
             .sub(participantRecord.returnedETH)
             .sub(participantRecord.committedETH);
 
@@ -447,16 +447,16 @@ class Participant extends Actor {
                     )
                 );
     
-                // this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
+                // this.expectedBalances.boughtToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                 //     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                 // )
                 
-                this.expectedBalances.unlockedToken = false;
+                this.expectedBalances.boughtToken = false;
                 
-                // console.log("accept > unlockedToken:    ", this.expectedBalances.unlockedToken.toString() );
+                // console.log("accept > boughtToken:    ", this.expectedBalances.boughtToken.toString() );
             } else {
                 this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(acceptedValue);
-                this.expectedBalances.unlockedToken = new this.helpers.BN("0");
+                this.expectedBalances.boughtToken = new this.helpers.BN("0");
             }
 
 
@@ -474,17 +474,17 @@ class Participant extends Actor {
 
             if(unlockPercentage.gt(new this.helpers.BN("0"))) {
     
-                this.expectedBalances.unlockedToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
+                this.expectedBalances.boughtToken = this.expectedBalances.Token.mul(unlockPercentage).divRound(
                     new this.helpers.BN("10").pow( new this.helpers.BN(20) )
                 )
 
-                const lockedTokens = this.expectedBalances.Token.sub(this.expectedBalances.unlockedToken);
-                const calculation = await this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, lockedTokens);
+                const reservedTokens = this.expectedBalances.Token.sub(this.expectedBalances.boughtToken);
+                const calculation = await this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, reservedTokens);
                 this.expectedBalances.withdrawableETH = calculation.eth; // this.currentBalances.withdrawableETH.add(calculation.eth);
 
 
             } else {
-                this.expectedBalances.unlockedToken = new this.helpers.BN("0");
+                this.expectedBalances.boughtToken = new this.helpers.BN("0");
 
                 const calculation = await this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, this.expectedBalances.Token);
                 this.expectedBalances.withdrawableETH = calculation.eth; // this.currentBalances.withdrawableETH.add(calculation.eth);
@@ -492,7 +492,7 @@ class Participant extends Actor {
         }
         
         // console.log("this.expectedBalances.withdrawableETH", this.toEth(this.expectedBalances.withdrawableETH));
-        this.expectedBalances.reservedTokens = new this.helpers.BN(0);
+        this.expectedBalances.pendingTokens = new this.helpers.BN(0);
         await this.readBalances();
     }
     
@@ -507,8 +507,8 @@ class Participant extends Actor {
         this.expectedBalances.Token = this.currentBalances.Token.sub(calculation.withdrawn_tokens);
 
         const maxcalculation = await this.helpers.utils.getAvailableEthAndTokensForWithdraw(this.helpers, this.rICO, this.address, this.currentBalances.Token);
-        // this.expectedBalances.unlockedToken = false;
-        this.expectedBalances.unlockedToken = this.currentBalances.Token.sub(maxcalculation.withdrawn_tokens);
+        // this.expectedBalances.boughtToken = false;
+        this.expectedBalances.boughtToken = this.currentBalances.Token.sub(maxcalculation.withdrawn_tokens);
 
         await this.sendTokenTx(TokenAmount, this.helpers.addresses.Rico);
     }
@@ -527,12 +527,12 @@ class Participant extends Actor {
     async displayAggregatedStats() {
         const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
         console.log("    address:                         ", this.address);
-        console.log("      totalReceivedETH: ", this.toEth(aggregatedStats.totalReceivedETH) + " eth");
+        console.log("      totalSentETH: ", this.toEth(aggregatedStats.totalSentETH) + " eth");
         console.log("      returnedETH:      ", this.toEth(aggregatedStats.returnedETH) + " eth");
         console.log("      committedETH:     ", this.toEth(aggregatedStats.committedETH) + " eth");
         console.log("      withdrawnETH:     ", this.toEth(aggregatedStats.withdrawnETH) + " eth");
         console.log("      allocatedETH:     ", this.toEth(aggregatedStats.allocatedETH) + " eth");
-        console.log("      reservedTokens:   ", this.toEth(aggregatedStats.reservedTokens) + " tokens");
+        console.log("      pendingTokens:   ", this.toEth(aggregatedStats.pendingTokens) + " tokens");
         console.log("      boughtTokens:     ", this.toEth(aggregatedStats.boughtTokens) + " tokens");
         console.log("      returnedTokens:   ", this.toEth(aggregatedStats.returnedTokens) + " tokens");
     }
@@ -543,8 +543,8 @@ class Participant extends Actor {
         console.log("      currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
         console.log("      currentBalances.allocatedETH:    ", this.toEth(this.currentBalances.allocatedETH) + " eth");
         console.log("      currentBalances.Token:           ", this.toEth(this.currentBalances.Token) + " tokens");
-        console.log("      currentBalances.unlockedToken:   ", this.toEth(this.currentBalances.unlockedToken) + " tokens");
-        console.log("      currentBalances.reservedTokens:  ", this.toEth(this.currentBalances.reservedTokens) + " tokens");
+        console.log("      currentBalances.boughtToken:   ", this.toEth(this.currentBalances.boughtToken) + " tokens");
+        console.log("      currentBalances.pendingTokens:  ", this.toEth(this.currentBalances.pendingTokens) + " tokens");
     }
 
     displayExpectedBalances() {
@@ -552,10 +552,10 @@ class Participant extends Actor {
         console.log("      expectedBalances.ETH:            ", this.toEth(this.expectedBalances.ETH) + " eth");
         console.log("      expectedBalances.withdrawableETH:", this.toEth(this.expectedBalances.withdrawableETH) + " eth");
         console.log("      expectedBalances.Token:          ", this.toEth(this.expectedBalances.Token) + " tokens");
-        if(this.expectedBalances.unlockedToken.toString()!== "false") {
-            console.log("      expectedBalances.unlockedToken:  ", this.toEth(this.expectedBalances.unlockedToken) + " tokens");
+        if(this.expectedBalances.boughtToken.toString()!== "false") {
+            console.log("      expectedBalances.boughtToken:  ", this.toEth(this.expectedBalances.boughtToken) + " tokens");
         }
-        console.log("      expectedBalances.reservedTokens: ", this.toEth(this.expectedBalances.reservedTokens) + " tokens");
+        console.log("      expectedBalances.pendingTokens: ", this.toEth(this.expectedBalances.pendingTokens) + " tokens");
     }
 
     /* Internal */
@@ -670,7 +670,7 @@ class Participant extends Actor {
         );
 
         this.currentBalances.Token = new this.helpers.BN( await this.rICOToken.methods.balanceOf(this.address).call() );
-        this.currentBalances.unlockedToken = new this.helpers.BN( await this.rICOToken.methods.getUnlockedBalance(this.address).call() );
+        this.currentBalances.boughtToken = new this.helpers.BN( await this.rICOToken.methods.getUnlockedBalance(this.address).call() );
 
         const AvailableForWithdraw = await helpers.utils.getAvailableEthAndTokensForWithdraw(
             this.helpers,
@@ -681,7 +681,7 @@ class Participant extends Actor {
 
         this.currentBalances.withdrawableETH = AvailableForWithdraw.eth;
         const record = await this.getParticipantRecord();
-        this.currentBalances.reservedTokens = record.reservedTokens;
+        this.currentBalances.pendingTokens = record.pendingTokens;
         this.currentBalances.allocatedETH = record.allocatedETH;
        
     }
@@ -699,10 +699,10 @@ class Participant extends Actor {
             this.expect(this.currentBalances.withdrawableETH.toString()).to.be.equal(this.expectedBalances.withdrawableETH.toString(), 'Withdrawable ETH balance is not as expected.');
         }
 
-        if(this.expectedBalances.unlockedToken.toString() !== "false") {
-            this.expect(this.currentBalances.unlockedToken.toString()).to.be.equal(this.expectedBalances.unlockedToken.toString(), 'Unlocked Token balance is not as expected.');
+        if(this.expectedBalances.boughtToken.toString() !== "false") {
+            this.expect(this.currentBalances.boughtToken.toString()).to.be.equal(this.expectedBalances.boughtToken.toString(), 'Unlocked Token balance is not as expected.');
         }
-        this.expect(this.currentBalances.reservedTokens.toString()).to.be.equal(this.expectedBalances.reservedTokens.toString(), 'Reserved Token balance is not as expected.');
+        this.expect(this.currentBalances.pendingTokens.toString()).to.be.equal(this.expectedBalances.pendingTokens.toString(), 'Reserved Token balance is not as expected.');
 
         // get last item and set to valid
         const item = this.actionLog[ this.actionLog.length - 1 ];
@@ -711,12 +711,12 @@ class Participant extends Actor {
 
     async getParticipantRecord() {
         const rec = await this.rICO.methods.participantAggregatedStats(this.address).call();
-        rec.totalReceivedETH = new this.helpers.BN(rec.totalReceivedETH);
+        rec.totalSentETH = new this.helpers.BN(rec.totalSentETH);
         rec.returnedETH      = new this.helpers.BN(rec.returnedETH);
         rec.committedETH     = new this.helpers.BN(rec.committedETH);
         rec.withdrawnETH     = new this.helpers.BN(rec.withdrawnETH);
         rec.allocatedETH     = new this.helpers.BN(rec.allocatedETH);
-        rec.reservedTokens   = new this.helpers.BN(rec.reservedTokens);
+        rec.pendingTokens   = new this.helpers.BN(rec.pendingTokens);
         rec.boughtTokens     = new this.helpers.BN(rec.boughtTokens);
         rec.returnedTokens   = new this.helpers.BN(rec.returnedTokens);
         return rec;

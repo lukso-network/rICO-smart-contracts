@@ -917,8 +917,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.getLockedTokenAmount(participant).send({from: deployerAddress });
-    let amount1 = await contract.methods.getLockedTokenAmount(participant).call();
+    let tx1 = await contract.methods.getReservedTokenAmount(participant).send({from: deployerAddress });
+    let amount1 = await contract.methods.getReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
 
@@ -926,7 +926,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     console.log("gas V:   ", tx1.gasUsed);
     console.log("amount:  ", helpers.utils.toFullToken(helpers, new BN(amount1) ));
     console.log("tokensV3:", helpers.utils.toFullToken(
-            helpers, helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
+            helpers, helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
         )
     );
 
@@ -940,7 +940,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 async function displayContractStats(contract, TokenContractInstance) {
 
     let maxEth = await contract.methods.availableEthAtStage().call();
-    let totalReceivedETH = await contract.methods.totalReceivedETH().call();
+    let totalSentETH = await contract.methods.totalSentETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let committedETH = await contract.methods.committedETH().call();
     let contributorsETH = await contract.methods.contributorsETH().call();
@@ -950,7 +950,7 @@ async function displayContractStats(contract, TokenContractInstance) {
 
     console.log("ricoTokenBalance:   ", helpers.utils.toEth(helpers, ricoTokenBalance) + " tokens");
     console.log("maxEth:             ", helpers.utils.toEth(helpers, maxEth) + " eth");
-    console.log("totalReceivedETH:        ", helpers.utils.toEth(helpers,totalReceivedETH) + " eth");
+    console.log("totalSentETH:        ", helpers.utils.toEth(helpers,totalSentETH) + " eth");
     console.log("returnedETH:        ", helpers.utils.toEth(helpers,returnedETH) + " eth");
     console.log("committedETH:        ", helpers.utils.toEth(helpers,committedETH) + " eth");
     console.log("contributorsETH:    ", helpers.utils.toEth(helpers,contributorsETH) + " eth");

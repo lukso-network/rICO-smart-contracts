@@ -235,7 +235,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getLockedTokenAmount(participant_1, false).call();
+            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1, false).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -255,12 +255,12 @@ describe("Withdrawal Testing", function () {
 
         it("Check participant details", async function () {
             let result = await ReversibleICOInstance.methods.getParticipantDetailsByStage(participant_1, 0).call();
-            let totalReceivedETH = result["stageTotalReceivedETH"];
+            let totalSentETH = result["stagetotalSentETH"];
             let returnedETH = result["stageReturnedETH"];
             let committedETH = result["stageCommittedETH"];
             let withdrawnETH = result["stageWithdrawnETH"];
             let allocatedETH = result["stageAllocatedETH"];
-            let reservedTokens = result["stageReservedTokens"];
+            let pendingTokens = result["stagePendingTokens"];
             let boughtTokens = result["stageBoughtTokens"];
             let returnedTokens = result["stageReturnedTokens"];
 
@@ -395,7 +395,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 1.8 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getLockedTokenAmount(participant_1, false).call();
+            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1, false).call();
             expect(locked).to.be.equal("1800000000000000000");
         });
 
@@ -410,7 +410,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getLockedTokenAmount(participant_1, false).call();
+            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1, false).call();
             expect(locked).to.be.equal("0");
         });
 

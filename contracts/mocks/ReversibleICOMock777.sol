@@ -14,11 +14,11 @@ contract ReversibleICOMock777 is ReversibleICOMock {
 
     mapping( address => uint256 ) public balances;
 
-    function setLockedTokenAmount(address wallet, uint256 _balance) external {
+    function setreservedTokenAmount(address wallet, uint256 _balance) external {
         balances[wallet] = _balance;
     }
 
-    function getLockedTokenAmount(address wallet, bool includeReserved) public view returns (uint256) {
+    function getReservedTokenAmount(address wallet, bool includeReserved) public view returns (uint256) {
         return balances[wallet];
     }
 
