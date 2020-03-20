@@ -131,7 +131,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 pendingTokens;          // tokens that are pending, because the participant is not whitelisted yet
         uint256 boughtTokens;           // tokens already bought by the participant
         uint256 returnedTokens;         // tokens returned by participant to contract
-        uint256 allocatedTokens;        // tokens allocated to the project when contributing or withdrawing
+        uint256 processedTokens;        // tokens allocated to the project when contributing or withdrawing
         uint256 activeTokens;           // tokens that are untouched, those are the basis for reserved/bought calculations
     }
 
@@ -611,7 +611,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 stagePendingTokens,
         uint256 stageBoughtTokens,
         uint256 stageReturnedTokens,
-        uint256 stageAllocatedTokens,
+        uint256 stageProcessedTokens,
         uint256 stageActiveTokens
     ) {
 
@@ -625,7 +625,7 @@ contract ReversibleICO is IERC777Recipient {
             totalsRecord.pendingTokens,
             totalsRecord.boughtTokens,
             totalsRecord.returnedTokens,
-            totalsRecord.allocatedTokens,
+            totalsRecord.processedTokens,
             totalsRecord.activeTokens
         );
     }
@@ -636,10 +636,20 @@ contract ReversibleICO is IERC777Recipient {
      */
     function getReservedTokenAmount(address _participantAddress) public view returns (uint256) {
 
-        return getReservedTokenAmountAtBlock(
-            participantAggregatedStats[_participantAddress].activeTokens,
-            getCurrentBlockNumber()
-        );
+//        return getReservedTokenAmountAtBlock(
+//            participantAggregatedStats[_participantAddress].activeTokens,
+//            getCurrentBlockNumber()
+//        );
+
+        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
+        uint256 availableTokens = aggregatedStats.boughtTokens
+        .sub(aggregatedStats.returnedTokens)
+        .sub(aggregatedStats.processedTokens);
+
+        // Multiply by percentage
+        uint256 unlocked = availableTokens.mul(getCurrentUnlockPercentage()).div(10 ** 20);
+
+        return availableTokens.sub(unlocked);
     }
 
     /**
@@ -832,6 +842,142 @@ contract ReversibleICO is IERC777Recipient {
      * Internal functions
      */
 
+//    /**
+//     * @notice Allow a participant to withdraw by sending tokens back to rICO contract.
+//     * @param _from Sender's (participant's) address.
+//     * @param _returnedTokenAmount The amount of tokens returned.
+//     */
+//    function withdraw(address _from, uint256 _returnedTokenAmount) internal {
+//
+//        // Contributor sends tokens back to the rICO contract.
+//        // - unlike cancel() method, this allows variable amounts.
+//        // - latest contributions get returned first.
+//
+//        Participant storage participantRecord = participantsByAddress[_from];
+//        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
+//
+//        uint256 currentBlockNumber = getCurrentBlockNumber();
+//        uint256 remainingTokenAmount = _returnedTokenAmount;
+//        uint256 maxLocked = getReservedTokenAmount(_from); // get locked, but exclude reserved
+//        uint256 overflowingTokenAmount;
+//        uint256 returnedTokensForStage;
+//        uint256 returnETHAmount;
+//
+//
+//        // if returned amount is greater than the locked amount...
+//        // set it equal to locked, keep track of the overflow tokens (remainingTokenAmount)
+//        if (remainingTokenAmount > maxLocked) {
+//            overflowingTokenAmount = remainingTokenAmount.sub(maxLocked);
+//            remainingTokenAmount = maxLocked;
+//        }
+//
+//        require(currentBlockNumber < buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
+//        require(remainingTokenAmount > 0, "Withdraw not possible. Participant has no locked tokens.");
+//
+//        // decrease the total allocated ETH by the equivalent participant's allocated amount
+//        projectAllocatedETH = projectAllocatedETH.sub(aggregatedStats.allocatedETH);
+//
+//        // reset aggregated stats
+//        aggregatedStats.returnedTokens = 0;
+//        aggregatedStats.withdrawnETH = 0;
+////        aggregatedStats.committedETH = 0;
+//        aggregatedStats.allocatedETH = 0;
+//        aggregatedStats.processedTokens = 0;
+//        aggregatedStats.activeTokens = 0;
+//
+//        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
+//
+//            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+//
+////            uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
+////                // total amount - locked amount
+////                // boughtTokensInStage,
+////                byStage.boughtTokens.sub(byStage.returnedTokens).sub(calculatedReservedTokensInStage),
+////                stageId
+////            );
+//
+//            if( byStage.activeTokens > 0 && remainingTokenAmount > 0) {
+//
+//                // reduce amount first to currently locked
+//                uint256 calculatedReservedTokensInStage = getReservedTokenAmountAtBlock( // works
+//                    byStage.activeTokens, currentBlockNumber
+//                );
+//                uint256 calculatedBoughtTokensInStage = byStage.activeTokens.sub(calculatedReservedTokensInStage);
+//
+//                // reset returnedTokensForStage
+//                if (remainingTokenAmount < calculatedReservedTokensInStage) {
+//                    // remove difference of calculatedReservedTokensInStage and remainingTokenAmount from unlocked tokens
+//                    calculatedBoughtTokensInStage = calculatedBoughtTokensInStage.sub(calculatedReservedTokensInStage.sub(remainingTokenAmount));
+//                    returnedTokensForStage = remainingTokenAmount;
+//                } else {
+//                    returnedTokensForStage = calculatedReservedTokensInStage;
+//                }
+//
+//                uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
+//                    // total amount - locked amount
+//                    calculatedBoughtTokensInStage,
+////                    byStage.boughtTokens.sub(byStage.returnedTokens).sub(calculatedReservedTokensInStage),
+//                    stageId
+//                );
+//
+//                // get the equivalent amount of ETH for the locked tokens in stage
+//                uint256 returnETHAmount = getEthAmountForTokensAtStage(returnedTokensForStage, stageId);
+//
+//
+//                // UPDATE stats
+//                byStage.returnedTokens = byStage.returnedTokens.add(returnedTokensForStage);
+//                byStage.processedTokens = byStage.processedTokens.add(calculatedBoughtTokensInStage); // substract the new locked amount from the initial full amount
+//                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(calculatedBoughtTokensInStage);
+//                byStage.withdrawnETH = byStage.withdrawnETH.add(returnETHAmount);
+////                byStage.committedETH = byStage.committedETH.sub(returnETHAmount);
+//                byStage.allocatedETH = projectUnlockedETHAmount;
+//
+//                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokensForStage);
+//                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
+////                aggregatedStats.committedETH = aggregatedStats.committedETH.sub(returnETHAmount);
+//                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(projectUnlockedETHAmount);
+//                aggregatedStats.processedTokens = aggregatedStats.processedTokens.add(byStage.processedTokens);
+//                aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
+//
+//                returnETHAmount = returnETHAmount.add(returnETHAmount);
+//                withdrawnETH = withdrawnETH.add(returnETHAmount);
+//                projectAllocatedETH = projectAllocatedETH.add(projectUnlockedETHAmount);
+//
+//
+//                // remove processed token amount from requested amount
+//                remainingTokenAmount = remainingTokenAmount.sub(returnedTokensForStage);
+//
+//            // Otherwise just update the stats
+//            } else {
+//                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(byStage.returnedTokens);
+//                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(byStage.withdrawnETH);
+////                aggregatedStats.committedETH = aggregatedStats.withdrawnETH.add(byStage.committedETH);
+//                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(byStage.allocatedETH);
+//                aggregatedStats.processedTokens = aggregatedStats.processedTokens.add(byStage.processedTokens);
+//                aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
+//            }
+//
+//            if(stageId == 0) {
+//                // Reverse iteration with an unsigned loop variable
+//                // thus we need to break the loop here
+//                break;
+//            }
+//        }
+//
+//        // return overflow tokens received
+//        if (overflowingTokenAmount > 0) {
+//            // send tokens back to participant
+//            bytes memory data;
+//            // solium-disable-next-line security/no-send
+//            IERC777(tokenContractAddress).send(_from, overflowingTokenAmount, data);
+//        }
+//
+//        // transfer ETH back to participant
+//        address(uint160(_from)).transfer(returnETHAmount);
+//        emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
+//        return;
+//    }
+
     /**
      * @notice Allow a participant to withdraw by sending tokens back to rICO contract.
      * @param _from Sender's (participant's) address.
@@ -843,109 +989,90 @@ contract ReversibleICO is IERC777Recipient {
         // - unlike cancel() method, this allows variable amounts.
         // - latest contributions get returned first.
 
-        Participant storage participantRecord = participantsByAddress[_from];
-        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
+        require(getCurrentBlockNumber() < buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
 
-        uint256 currentBlockNumber = getCurrentBlockNumber();
-        uint256 remainingTokenAmount = _returnedTokenAmount;
+        // Contributors can send more tokens than they have locked,
+        // thus make sure we only try to return for said amount
+        // Store return amount in a new variable we will later manipulate.
+        uint256 returnedTokenAmount = _returnedTokenAmount;
         uint256 maxLocked = getReservedTokenAmount(_from); // get locked, but exclude reserved
         uint256 overflowingTokenAmount;
-        uint256 returnedTokensForStage;
-        uint256 returnETHAmount;
-
 
         // if returned amount is greater than the locked amount...
-        // set it equal to locked, keep track of the overflow tokens (remainingTokenAmount)
-        if (remainingTokenAmount > maxLocked) {
-            overflowingTokenAmount = remainingTokenAmount.sub(maxLocked);
-            remainingTokenAmount = maxLocked;
+        // set it equal to locked, keep track of the overflow tokens (returnedTokenAmount)
+        if (returnedTokenAmount > maxLocked) {
+            overflowingTokenAmount = returnedTokenAmount - maxLocked;
+            returnedTokenAmount = maxLocked;
         }
 
-        require(currentBlockNumber < buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
-        require(remainingTokenAmount > 0, "Withdraw not possible. Participant has no locked tokens.");
+        require(returnedTokenAmount > 0, "Withdraw not possible. Participant has no locked tokens.");
+
+        doWithdraw(_from, returnedTokenAmount, overflowingTokenAmount);
+    }
+
+    function doWithdraw(address _from, uint256 _returnedTokenAmount, uint256 overflowingTokenAmount) internal {
+
+        uint256 returnedTokenAmount = _returnedTokenAmount;
+
+        ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
+
+        uint256 allocatedEthAmount;
+        uint256 processedTokens;
 
         // decrease the total allocated ETH by the equivalent participant's allocated amount
         projectAllocatedETH = projectAllocatedETH.sub(aggregatedStats.allocatedETH);
 
-        // reset aggregated stats
-        aggregatedStats.returnedTokens = 0;
-        aggregatedStats.withdrawnETH = 0;
-//        aggregatedStats.committedETH = 0;
-        aggregatedStats.allocatedETH = 0;
-        aggregatedStats.allocatedTokens = 0;
-        aggregatedStats.activeTokens = 0;
+        uint256 returnETHAmount;
+        uint256 currentUnlockPercentage = getCurrentUnlockPercentage();
 
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
 
-            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+            // PART 1: calculate tokens
+            ParticipantDetails storage byStage = participantsByAddress[_from].byStage[stageId];
 
-//            uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
-//                // total amount - locked amount
-//                // boughtTokensInStage,
-//                byStage.boughtTokens.sub(byStage.returnedTokens).sub(calculatedReservedTokensInStage),
-//                stageId
-//            );
+            // allocation is updated based on these.
+            // uint256 userTokens = byStage.boughtTokens.sub(byStage.returnedTokens);
 
-            if( byStage.activeTokens > 0 && remainingTokenAmount > 0) {
+            // locked are based on these
+            uint256 activeTokens = byStage.boughtTokens.sub(byStage.returnedTokens); // .sub(byStage.processedTokens);
 
-                // reduce amount first to currently locked
-                uint256 calculatedReservedTokensInStage = getReservedTokenAmountAtBlock( // works
-                    byStage.activeTokens, currentBlockNumber
-                );
-                uint256 calculatedBoughtTokensInStage = byStage.activeTokens.sub(calculatedReservedTokensInStage);
+            uint256 boughtTokens = (activeTokens.sub(byStage.processedTokens))
+            .mul(currentUnlockPercentage).div(10 ** 20)
+            .add(byStage.processedTokens);
 
-                // reset returnedTokensForStage
-                if (remainingTokenAmount < calculatedReservedTokensInStage) {
-                    // remove difference of calculatedReservedTokensInStage and remainingTokenAmount from unlocked tokens
-                    calculatedBoughtTokensInStage = calculatedBoughtTokensInStage.sub(calculatedReservedTokensInStage.sub(remainingTokenAmount));
-                    returnedTokensForStage = remainingTokenAmount;
-                } else {
-                    returnedTokensForStage = calculatedReservedTokensInStage;
+            // PART 2: update project eth allocations
+            uint256 unlockedETHAmount = getEthAmountForTokensAtStage(boughtTokens, stageId);
+            // increase the corresponding ETH counters for allocated amount
+            allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
+            byStage.allocatedETH = unlockedETHAmount;
+
+            // PART 3: returned token operations
+            if(returnedTokenAmount > 0) {
+
+                byStage.processedTokens = boughtTokens;
+                uint256 reservedTokens = activeTokens.sub(boughtTokens);
+
+                // if the remaining amount is less than the amount available in the current stage
+                if (returnedTokenAmount < reservedTokens) {
+                    reservedTokens = returnedTokenAmount;
+                    byStage.processedTokens = returnedTokenAmount;
                 }
 
-                uint256 projectUnlockedETHAmount = getEthAmountForTokensAtStage(
-                    // total amount - locked amount
-                    calculatedBoughtTokensInStage,
-//                    byStage.boughtTokens.sub(byStage.returnedTokens).sub(calculatedReservedTokensInStage),
-                    stageId
-                );
+                // increase the returned token counters accordingly
+                byStage.returnedTokens = byStage.returnedTokens.add(reservedTokens);
+                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(reservedTokens);
 
-                // get the equivalent amount of ETH for the locked tokens in stage
-                uint256 returnETHAmount = getEthAmountForTokensAtStage(returnedTokensForStage, stageId);
+                // get the equivalent amount of ETH for this amount of locked tokens in this stage
+                uint256 currentETHAmount = getEthAmountForTokensAtStage(reservedTokens, stageId);
 
-
-                // UPDATE stats
-                byStage.returnedTokens = byStage.returnedTokens.add(returnedTokensForStage);
-                byStage.allocatedTokens = byStage.allocatedTokens.add(calculatedBoughtTokensInStage); // substract the new locked amount from the initial full amount
-                byStage.activeTokens = byStage.activeTokens.sub(returnedTokensForStage).sub(calculatedBoughtTokensInStage);
-                byStage.withdrawnETH = byStage.withdrawnETH.add(returnETHAmount);
-//                byStage.committedETH = byStage.committedETH.sub(returnETHAmount);
-                byStage.allocatedETH = projectUnlockedETHAmount;
-
-                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokensForStage);
-                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
-//                aggregatedStats.committedETH = aggregatedStats.committedETH.sub(returnETHAmount);
-                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(projectUnlockedETHAmount);
-                aggregatedStats.allocatedTokens = aggregatedStats.allocatedTokens.add(byStage.allocatedTokens);
-                aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
-
-                returnETHAmount = returnETHAmount.add(returnETHAmount);
-                withdrawnETH = withdrawnETH.add(returnETHAmount);
-                projectAllocatedETH = projectAllocatedETH.add(projectUnlockedETHAmount);
-
+                // increase the corresponding ETH counters for returned amount
+                returnETHAmount = returnETHAmount.add(currentETHAmount);
+                byStage.withdrawnETH = byStage.withdrawnETH.add(currentETHAmount);
 
                 // remove processed token amount from requested amount
-                remainingTokenAmount = remainingTokenAmount.sub(returnedTokensForStage);
-
-            // Otherwise just update the stats
-            } else {
-                aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(byStage.returnedTokens);
-                aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(byStage.withdrawnETH);
-//                aggregatedStats.committedETH = aggregatedStats.withdrawnETH.add(byStage.committedETH);
-                aggregatedStats.allocatedETH = aggregatedStats.allocatedETH.add(byStage.allocatedETH);
-                aggregatedStats.allocatedTokens = aggregatedStats.allocatedTokens.add(byStage.allocatedTokens);
-                aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(byStage.activeTokens);
+                returnedTokenAmount = returnedTokenAmount.sub(reservedTokens);
             }
+            processedTokens = processedTokens.add(byStage.processedTokens);
 
             if(stageId == 0) {
                 // Reverse iteration with an unsigned loop variable
@@ -961,6 +1088,19 @@ contract ReversibleICO is IERC777Recipient {
             // solium-disable-next-line security/no-send
             IERC777(tokenContractAddress).send(_from, overflowingTokenAmount, data);
         }
+
+        // increase participant's withdrawnETH counter
+        aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
+
+        // Update total ETH withdrawn
+        withdrawnETH = withdrawnETH.add(returnETHAmount);
+
+        // allocate remaining ETH to project directly
+        aggregatedStats.allocatedETH = allocatedEthAmount;
+        projectAllocatedETH = projectAllocatedETH.add(aggregatedStats.allocatedETH);
+
+        // update stats with allocated token amounts
+        aggregatedStats.processedTokens = processedTokens;
 
         // transfer ETH back to participant
         address(uint160(_from)).transfer(returnETHAmount);

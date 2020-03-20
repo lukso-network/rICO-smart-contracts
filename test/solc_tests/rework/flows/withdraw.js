@@ -21,7 +21,8 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
-    customTestSettings.rico.blocksPerDay = 1000;
+    customTestSettings.rico.startBlockDelay = 10;
+    customTestSettings.rico.blocksPerDay = 10;
     customTestSettings.rico.stageDays = 10;
     customTestSettings.rico.stageCount = 10;
 
@@ -65,88 +66,88 @@ describe("ReversibleICO - Withdraw Testing", function () {
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     });
 
-    // describe("Precision Testing", async function () {
+    describe("Precision Testing", async function () {
  
-    //     before(async () => {
-    //         await revertToFreshDeployment();
-    //     });
+        before(async () => {
+            await revertToFreshDeployment();
+        });
 
-    //     it("Whitelist buyer", async function () {
-    //         whitelistTx = await this.ReversibleICO.methods.whitelist(
-    //             [TestParticipant],
-    //             true
-    //         ).send({
-    //             from: whitelistControllerAddress
-    //         });
-    //     });
+        it("Whitelist buyer", async function () {
+            whitelistTx = await this.ReversibleICO.methods.whitelist(
+                [TestParticipant],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
 
-    //     it("Buy 1 tokens in phase 0", async function () {
-    //         // jump to phase 0
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+        it("Buy 1 tokens in phase 0", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
 
-    //         let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
-    //         expect(ParticipantByAddress.contributionsCount).to.be.equal("0");
+            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("0");
 
-    //         const ContributionAmount = 1 * commitPhasePrice;
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount,
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
+            const ContributionAmount = 1 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
 
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("1000000000000000000");
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("1000000000000000000");
 
-    //         ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
-    //         expect(ParticipantByAddress.contributionsCount).to.be.equal("1");
-    //     });
+            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("1");
+        });
         
-    //     it("Expect locked tokens to be 1 tokens", async function () {
-    //         const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         expect(locked).to.be.equal("1000000000000000000");
-    //     });
+        it("Expect locked tokens to be 1 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("1000000000000000000");
+        });
 
-    //     it("Withdraw almost all tokens", async function () {
-    //         await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "999999999999999999")
-    //             .send({ from: TestParticipant, gas: 1000000 });
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("1");
-    //     });
+        it("Withdraw almost all tokens", async function () {
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "999999999999999999")
+                .send({ from: TestParticipant, gas: 1000000 });
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("1");
+        });
 
-    //     it("Withdraw last token", async function () {
-    //         await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1")
-    //             .send({ from: TestParticipant, gas: 1000000 });
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("0");
-    //     });
+        it("Withdraw last token", async function () {
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1")
+                .send({ from: TestParticipant, gas: 1000000 });
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("0");
+        });
 
-    //     it("boughtTokens equals returnedTokens ( since we returned everything )", async function () {
-    //         const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-    //         const boughtTokens = result.stageBoughtTokens;
-    //         const returnedTokens = result.stageReturnedTokens;
-    //         expect(boughtTokens).to.be.equal(returnedTokens, "boughtTokens does not match returnedTokens");
-    //     });
+        it("boughtTokens equals returnedTokens ( since we returned everything )", async function () {
+            const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
+            const boughtTokens = result.stageBoughtTokens;
+            const returnedTokens = result.stageReturnedTokens;
+            expect(boughtTokens).to.be.equal(returnedTokens, "boughtTokens does not match returnedTokens");
+        });
 
-    //     it.skip("committedETH equals withdrawnETH ( since we returned everything )", async function () {
-    //         const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-    //         const committedETH = result.stageCommittedETH;
-    //         const withdrawnETH = result.stageWithdrawnETH;
-    //         expect(committedETH).to.be.equal(withdrawnETH, "committedETH does not match withdrawnETH");
-    //     });
+        it.skip("committedETH equals withdrawnETH ( since we returned everything )", async function () {
+            const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
+            const committedETH = result.stageCommittedETH;
+            const withdrawnETH = result.stageWithdrawnETH;
+            expect(committedETH).to.be.equal(withdrawnETH, "committedETH does not match withdrawnETH");
+        });
 
-    //     // it("Check participant details", async function () {
-    //     //     const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-    //     //     const totalSentETH = result["stagetotalSentETH"];
-    //     //     const returnedETH = result["stageReturnedETH"];
-    //     //     const committedETH = result["stageCommittedETH"];
-    //     //     const withdrawnETH = result["stageWithdrawnETH"];
-    //     //     const allocatedETH = result["stageAllocatedETH"];
-    //     //     const pendingTokens = result["stagePendingTokens"];
+        // it("Check participant details", async function () {
+        //     const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
+        //     const totalReceivedETH = result["stageTotalReceivedETH"];
+        //     const returnedETH = result["stageReturnedETH"];
+        //     const committedETH = result["stageCommittedETH"];
+        //     const withdrawnETH = result["stageWithdrawnETH"];
+        //     const allocatedETH = result["stageAllocatedETH"];
+        //     const reservedTokens = result["stageReservedTokens"];
 
-    //     //     expect(committedETH).to.be.equal(withdrawnETH, "committedETH does not match withdrawnETH");
-    //     // });
-    // });
+        //     expect(committedETH).to.be.equal(withdrawnETH, "committedETH does not match withdrawnETH");
+        // });
+    });
 
     // describe("Check getParticipantPendingETH before and after whitelisting", async function () {
 
@@ -286,6 +287,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("4 - Return all tokens", async function () {
+
             await TokenContractInstance.methods.transfer(RICOContractAddress, "2000000000000000000")
                 .send({ from: TestParticipant, gas: 1000000 });
         });
@@ -293,8 +295,6 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("Expect balance to be 0.2 tokens (10 %)", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("200000000000000000");
-
-            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
         });
 
         it("Load Participant's aggregatedStats", async function () {
@@ -316,13 +316,11 @@ describe("ReversibleICO - Withdraw Testing", function () {
             )
         });
 
-        it("Expect Participant's aggregatedStats.allocatedTokens to be 0.2 tokens (10 %)", async function () {
-            expect(aggregatedStats.allocatedTokens).to.be.equal("200000000000000000");
+        it("Expect Participant's aggregatedStats.processedTokens to be 0.2 tokens (10 %)", async function () {
+            expect(aggregatedStats.processedTokens).to.be.equal("200000000000000000");
         });
 
         it("Expect unlocked tokens to be 0.2 tokens", async function () {
-
-            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6, TokenContractInstance );
 
             const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
             expect(unlocked).to.be.equal("200000000000000000");
@@ -350,6 +348,9 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("5 - Buy 1 tokens in stage 2 end (20%)", async function () {
             const stageId = 2;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("20000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributionsCount).to.be.equal("2");
@@ -387,9 +388,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(unlocked).to.be.equal("400000000000000000");
         });
 
+        
         it("6 - Buy 1 tokens in stage 4 end (40%)", async function () {
             const stageId = 4;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("40000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributionsCount).to.be.equal("3");
@@ -430,6 +435,9 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("7 - Buy 1 tokens in stage 5 end (50%)", async function () {
             const stageId = 5;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("50000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributionsCount).to.be.equal("4");
@@ -494,15 +502,15 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             // 50% of stage 2,4,5
             ethAllocationPartTwoFull = new BN(cAStage2.add(cAStage4).add(cAStage5));
-            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) );
+            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) )
 
             ContributionAllocationAmounts = ethAllocationPartOne.add( ethAllocationPartTwo );
 
         });
 
-        it("Expect Participant's aggregatedStats.allocatedTokens to be 0.2 tokens ( 10% of first return )", async function () {
+        it("Expect Participant's aggregatedStats.processedTokens to be 0.2 tokens ( 10% of first return )", async function () {
             aggregatedStatsBefore = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
-            expect(aggregatedStatsBefore.allocatedTokens).to.be.equal("200000000000000000");
+            expect(aggregatedStatsBefore.processedTokens).to.be.equal("200000000000000000");
         });
 
         it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions", async function () {
@@ -518,7 +526,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(aggregatedStatsBefore.allocatedETH).to.be.equal(ethAllocationPartOne.toString());
         });
 
-        it("8 - A - Return half of the 3 tokens bought at stage 5 end (50%)", async function () {
+        it("8 - A - Return full locked balance of 1.5", async function () {
             const stageId = 5;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
@@ -554,8 +562,8 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(unlocked).to.be.equal("1700000000000000000");
         });
 
-        // it("Expect Participant's aggregatedStats.allocatedTokens to be 1.7 tokens", async function () {
-        //     expect(aggregatedStatsAfter.allocatedTokens).to.be.equal("1700000000000000000");
+        // it("Expect Participant's aggregatedStats.processedTokens to be 1.7 tokens", async function () {
+        //     expect(aggregatedStatsAfter.processedTokens).to.be.equal("1700000000000000000");
         // }); 
 
         it("Expect Participant ETH balance to increase by 0.00355 ETH ( 0.00125 + 0.0012 + 0.0011 ) ", async function () {
@@ -587,8 +595,10 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 8;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("80000000000000000000");
 
+            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributionsCount).to.be.equal("5");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -630,8 +640,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
     });
 
-
-    describe("Withdraw token tests - branch 2 - return partial tokens", async function () {
+    describe("Withdraw token tests - branch 2 - return all tokens of last stage", async function () {
         
         let aggregatedStatsBefore,
             aggregatedStatsAfter,
@@ -663,9 +672,9 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         });
 
-        it("Expect Participant's aggregatedStats.allocatedTokens to be 0.2 tokens ( 10% of first return )", async function () {
+        it("Expect Participant's aggregatedStats.processedTokens to be 0.2 tokens ( 10% of first return )", async function () {
             aggregatedStatsBefore = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
-            expect(aggregatedStatsBefore.allocatedTokens).to.be.equal("200000000000000000");
+            expect(aggregatedStatsBefore.processedTokens).to.be.equal("200000000000000000");
         });
 
         it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions", async function () {
@@ -681,36 +690,39 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(aggregatedStatsBefore.allocatedETH).to.be.equal(ethAllocationPartOne.toString());
         });
 
-        it("8 - A - Return 0.25 tokens bought at stage 5 end (50%)", async function () {
+        it("8 - B - Return full locked balance of last stage - 0.5", async function () {
             const stageId = 5;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
             ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
-            await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
-            // console.log("after");
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
-            returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "250000000000000000")
-                .send({ from: TestParticipant, gas: 1000000 });
-
-            aggregatedStatsAfter = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
+            // send 0.5.. stage 5 full locked amount
+            returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "500000000000000000")
+                .send({ 
+                    from: TestParticipant, 
+                    gas: 1000000,
+                    gasPrice: helpers.networkConfig.gasPrice
+                 });
 
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
+            aggregatedStatsAfter = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
         });
 
         it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions + 50% of the second wave", async function () {
             expect(aggregatedStatsAfter.allocatedETH).to.be.equal(ContributionAllocationAmounts.toString());
         });
 
-        it("Expect full token balance to be 2.95 tokens", async function () {
+        it("Expect full token balance to be 2.7 tokens", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-            expect(balance).to.be.equal("2950000000000000000");
+            expect(balance).to.be.equal("2700000000000000000");
         });
 
-        it("Expect locked tokens to be 1.25 tokens", async function () {
+        it("Expect locked tokens to be 1 tokens", async function () {
             const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-            expect(locked).to.be.equal("1250000000000000000");
+            expect(locked).to.be.equal("1000000000000000000");
         });
 
         it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
@@ -718,398 +730,388 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(unlocked).to.be.equal("1700000000000000000");
         });
 
-        it("Expect Participant ETH balance to increase by 0.000625 ETH", async function () {
 
+        it("Expect Participant ETH balance to increase by 0.00125 ETH", async function () {
             const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
             const returnTxGasUsed = new BN(returnTx.gasUsed).mul(
                 new BN(helpers.networkConfig.gasPrice)
             );
 
-            // half of a token in eth at stage 5
-            const cAStage5 = priceInStage(5).mul(
-                new BN(1)
-            ).div( new BN(4) );
+            // half of 1 token price in stage 5
+            const priceDiff = priceInStage(5).mul(new BN(1)).div(new BN(2))
 
             const ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                 .sub(returnTxGasUsed)
-                .add(cAStage5);
+                .add(priceDiff);
 
-            const returnedValue = ParticipantBalanceBefore.sub(returnTxGasUsed).sub(ParticipantBalanceAfter);
-
-
-            console.log("returnedValue            ", helpers.utils.toEth(helpers, returnedValue), "eth");
-            console.log("returnTxGasUsed          ", helpers.utils.toEth(helpers, returnTxGasUsed), "eth");
-            console.log("cAStage5                 ", helpers.utils.toEth(helpers, cAStage5), "eth");
-
-            console.log("ParticipantBalanceBefore ", helpers.utils.toEth(helpers, ParticipantBalanceBefore), "eth");
-            console.log("ParticipantBalanceAfter  ", helpers.utils.toEth(helpers, ParticipantBalanceAfter), "eth");
-            console.log("ParticipantBalanceAV     ", helpers.utils.toEth(helpers, ParticipantBalanceAfterValidation), "eth");
-            
-
-            await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
-
-            // const diff = 
-
-        //    expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
-
-            expect(ParticipantBalanceAfter.sub(ParticipantBalanceAfterValidation).toString()).to.be.equal("0");
-
-
+            expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
         });
 
-        // it("Expect Participant's aggregatedStats.allocatedTokens to be 1.7 tokens", async function () {
-        //     expect(aggregatedStatsAfter.allocatedTokens).to.be.equal("1700000000000000000");
-        // }); 
+
 
     });
 
 
-    
-    // describe("Withdraw token tests - branch 2 - return half tokens", async function () {
-       
-    //     let aggregatedStats;
+    describe("Withdraw token tests - branch 3 - return partial tokens", async function () {
+        
+        let aggregatedStatsBefore,
+            aggregatedStatsAfter,
+            ContributionAllocationAmounts,
+            ethAllocationPartOne,
+            ethAllocationPartTwo,
+            ethAllocationPartTwoFull,
+            ParticipantBalanceBefore,
+            returnTx;
 
-    //     before(async () => {
-    //         await restoreFromSnapshot("WithdrawTests_Phase_2_withdraw_end");
-    //         helpers.utils.resetAccountNonceCache(helpers);
-    //     });
+        before(async () => {
+            await restoreFromSnapshot("WithdrawTests_Phase_2_withdraw_end");
+            helpers.utils.resetAccountNonceCache(helpers);
 
-    //     it("8 - B - Return half tokens at stage 5 end (50%)", async function () {
-    //         const stageId = 5;
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            const cAStage0 = priceInStage(0).mul(new BN(1));
+            const cAStage1 = priceInStage(1).mul(new BN(1));
+            const cAStage2 = priceInStage(2).mul(new BN(1));
+            const cAStage4 = priceInStage(4).mul(new BN(1));
+            const cAStage5 = priceInStage(5).mul(new BN(1));
 
-    //         let balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         let locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         let unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            // 10% of stage 0 and 1, since we returned the rest
+            ethAllocationPartOne = new BN(cAStage0.add(cAStage1)).div(new BN(100)).mul(new BN(10));
 
-    //         console.log("balance: ", balance.toString());
-    //         console.log("locked:  ", locked.toString());
-    //         console.log("unlocked:", unlocked.toString());
+            // 50% of stage 2,4,5
+            ethAllocationPartTwoFull = new BN(cAStage2.add(cAStage4).add(cAStage5));
+            ethAllocationPartTwo = ethAllocationPartTwoFull.div(new BN(2) )
 
-    //         await TokenContractInstance.methods.transfer(RICOContractAddress, "1600000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000 });
+            ContributionAllocationAmounts = ethAllocationPartOne.add( ethAllocationPartTwo );
 
-    //         balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+        });
+
+        it("Expect Participant's aggregatedStats.processedTokens to be 0.2 tokens ( 10% of first return )", async function () {
+            aggregatedStatsBefore = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
+            expect(aggregatedStatsBefore.processedTokens).to.be.equal("200000000000000000");
+        });
+
+        it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions", async function () {
+            expect(aggregatedStatsBefore.allocatedETH).to.be.equal(
+                // committedETH - withdrawnETH
+                new BN(aggregatedStatsBefore.committedETH).sub(
+                    new BN(aggregatedStatsBefore.withdrawnETH)
+                )
+                // subtract phase two committedETH
+                .sub(ethAllocationPartTwoFull)
+                .toString()
+            );
+            expect(aggregatedStatsBefore.allocatedETH).to.be.equal(ethAllocationPartOne.toString());
+        });
+
+        it("8 - B - Return 0.1 tokens bought at stage 5 end (50%)", async function () {
+            const stageId = 5;
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+
+            ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "100000000000000000")
+                .send({ 
+                    from: TestParticipant, 
+                    gas: 1000000,
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+
+            aggregatedStatsAfter = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
+        });
+
+        it("Expect Participant's aggregatedStats.allocatedETH to be 10% of the first 2 contributions + 50% of the second wave", async function () {
+            expect(aggregatedStatsAfter.allocatedETH).to.be.equal(ContributionAllocationAmounts.toString());
+        });
+
+        it("Expect full token balance to be 3.1 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("3100000000000000000");
+        });
+
+        it("Expect locked tokens to be 1.4 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("1400000000000000000");
+        });
+
+        it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
+            const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(unlocked).to.be.equal("1700000000000000000");
+        });
+
+        it("Expect Participant ETH balance to increase by 0.00125 ETH", async function () {
+            const ParticipantBalanceAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const returnTxGasUsed = new BN(returnTx.gasUsed).mul(
+                new BN(helpers.networkConfig.gasPrice)
+            );
+
+            // 10% of 1 token price in stage 5
+            const priceDiff = priceInStage(5).mul(new BN(1)).div(new BN(10))
+
+            const ParticipantBalanceAfterValidation = ParticipantBalanceBefore
+                .sub(returnTxGasUsed)
+                .add(priceDiff);
+
+            /*
+            const returnedValue = ParticipantBalanceBefore.sub(returnTxGasUsed).sub(ParticipantBalanceAfter);
+            console.log("returnedValue            ", helpers.utils.toEth(helpers, returnedValue), "eth");
+            console.log("returnTxGasUsed          ", helpers.utils.toEth(helpers, returnTxGasUsed), "eth");
+            console.log("ParticipantBalanceBefore ", helpers.utils.toEth(helpers, ParticipantBalanceBefore), "eth");
+            console.log("ParticipantBalanceAfter  ", helpers.utils.toEth(helpers, ParticipantBalanceAfter), "eth");
+            console.log("ParticipantBalanceAV     ", helpers.utils.toEth(helpers, ParticipantBalanceAfterValidation), "eth");
+            */
             
-    //         console.log("balance: ", balance.toString());
-    //         console.log("locked:  ", locked.toString());
-    //         console.log("unlocked:", unlocked.toString());
-
-    //         // set results globally
-    //         aggregatedStats = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
-    
-    //     });
-
-    //     it("Expect full token balance to be 1.7 tokens ( 0.2 + 1.5 )", async function () {
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("1700000000000000000");
-    //     });
-
-    //     it("Expect locked tokens to be 0 tokens", async function () {
-    //         const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         expect(locked).to.be.equal("0");
-    //     });
-
-    //     it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
-    //         const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-    //         expect(unlocked).to.be.equal("1700000000000000000");
-    //     });
-
-    // });
-
-
-    
-    // describe("Withdraw token tests - branch 3 - return half locked tokens", async function () {
-       
-    //     let aggregatedStats;
-
-    //     before(async () => {
-    //         await restoreFromSnapshot("WithdrawTests_Phase_2_withdraw_end");
-    //         helpers.utils.resetAccountNonceCache(helpers);
-    //     });
-
-    //     it("8 - C - Return half locked tokens at stage 5 end (50%)", async function () {
-    //         const stageId = 5;
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
-
-    //         let balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         let locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         let unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-
-    //         console.log("balance: ", balance.toString());
-    //         console.log("locked:  ", locked.toString());
-    //         console.log("unlocked:", unlocked.toString());
-
-    //         await TokenContractInstance.methods.transfer(RICOContractAddress, "750000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000 });
-
-    //         balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-            
-    //         console.log("balance: ", balance.toString());
-    //         console.log("locked:  ", locked.toString());
-    //         console.log("unlocked:", unlocked.toString());
-
-    //         // set results globally
-    //         aggregatedStats = await this.ReversibleICO.methods.participantAggregatedStats(TestParticipant).call();
-    //     });
-
-    //     it("Expect full token balance to be 2.45 tokens ( 0.20 + 2.25 )", async function () {
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("2450000000000000000");
-    //     });
-
-    //     it("Expect locked tokens to be 0 tokens", async function () {
-    //         const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-    //         expect(locked).to.be.equal("0");
-    //     });
-
-    //     it("Expect unlocked tokens to to remain the same ( 1.7 tokens )", async function () {
-    //         const unlocked = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-    //         expect(unlocked).to.be.equal("1700000000000000000");
-    //     });
-
-    // });
-
-    // describe("Withdrawing should not deliver too many tokens with next buy", async function () {
-
-    //     before(async () => {
-    //         await revertToFreshDeployment();
-    //     });
-
-    //     it("Whitelist buyer", async function () {
-    //         whitelistTx = await this.ReversibleICO.methods.whitelist(
-    //             [TestParticipant],
-    //             true
-    //         ).send({
-    //             from: whitelistControllerAddress
-    //         });
-    //     });
-
-    //     it("Buy 900 tokens in stage 0", async function () {
-    //         const stageId = 0;
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
-
-    //         const ContributionAmount = priceInStage(stageId).mul(new BN(900));
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount.toString(),
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("900000000000000000000");
-    //     });
-
-    //     it("Withdraw all tokens", async function () {
-    //         await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "900000000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000 });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("0");
-    //     });
-
-    //     it("Buy 1 tokens in stage 0", async function () {
-    //         const stageId = 0;
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
-
-    //         const ContributionAmount = priceInStage(stageId).mul(new BN(1));
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount.toString(),
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("1000000000000000000");
-    //     });
-    // });
+            expect(ParticipantBalanceAfter.toString()).to.be.equal(ParticipantBalanceAfterValidation.toString());
+        });
+
+        it("move to stage 8 end", async function () {
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 8, true);
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
+
+        }); 
+
+    });
+
+
+    describe("Withdrawing should not deliver too many tokens with next buy", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+        });
+
+        it("Whitelist buyer", async function () {
+            whitelistTx = await this.ReversibleICO.methods.whitelist(
+                [TestParticipant],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
 
-    // describe("Multiple withdrawals", async function () {
-
-    //     before(async () => {
-    //         await revertToFreshDeployment();
-    //     });
-
-    //     it("Whitelist buyer", async function () {
-    //         whitelistTx = await this.ReversibleICO.methods.whitelist(
-    //             [TestParticipant],
-    //             true
-    //         ).send({
-    //             from: whitelistControllerAddress
-    //         });
-    //     });
-
-    //     it("Buy 2000 tokens in stage 0", async function () {
-    //         const stageId = 0;
-
-    //         // jump to stage
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
-
-    //         const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount.toString(),
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("2000000000000000000000");
-    //     });
-
-    //     it("Withdraw 500 token in stage 0", async function () {
-    //         const stageId = 0;
+        it("Buy 900 tokens in stage 0", async function () {
+            const stageId = 0;
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
 
-    //         const expectedReturnEth = new BN((500 * (stageId + 1) * commitPhasePrice).toString());
+            const ContributionAmount = priceInStage(stageId).mul(new BN(900));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
 
-    //         const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("900000000000000000000");
+        });
 
-    //         const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+        it("Withdraw all tokens", async function () {
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "900000000000000000000")
+                .send({ from: TestParticipant, gas: 1000000 });
 
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("1500000000000000000000");
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("0");
+        });
 
-    //         const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-    //         const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+        it("Buy 1 tokens in stage 0", async function () {
+            const stageId = 0;
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
 
-    //         expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
-    //     });
+            const ContributionAmount = priceInStage(stageId).mul(new BN(1));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
 
-    //     it("Buy 2000 tokens in stage 1", async function () {
-    //         const stageId = 1;
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("1000000000000000000");
+        });
+    });
 
-    //         // jump to stage
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
-
-    //         const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
-
-    //         const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount.toString(),
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("3500000000000000000000");
-    //     });
-
-    //     it("Withdraw 500 token in stage 1", async function () {
-    //         const stageId = 1;
-
-    //         // since we already bought 2000 tokens in this stage,
-    //         // and the locked amount is higher than what we want
-    //         // to return we'll get full price for them
-    //         const expectedReturnEth = priceInStage(stageId).mul(new BN(500));
-
-    //         const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
-
-    //         const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("3000000000000000000000");
-
-    //         const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-    //         const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
-
-    //         expect(ethAfter).to.be.bignumber.equal(
-    //             ethBefore.sub(txCost).add(expectedReturnEth)
-    //         );
-    //     });
-
-    //     it("Buy 2000 tokens in stage 5", async function () {
-    //         const stageId = 5;
-
-    //         // jump to stage
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
-
-    //         const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
-    //         await helpers.web3Instance.eth.sendTransaction({
-    //             from: TestParticipant,
-    //             to: this.ReversibleICO.receipt.contractAddress,
-    //             value: ContributionAmount.toString(),
-    //             gasPrice: helpers.networkConfig.gasPrice
-    //         });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("5000000000000000000000");
-    //     });
-
-    //     it("Withdraw 500 token in stage 5", async function () {
-    //         const stageId = 5;
-
-    //         // since we already bought 2000 tokens in this stage,
-    //         // and the locked amount is higher than what we want
-    //         // to return we'll get full price for them
-    //         const expectedReturnEth = priceInStage(stageId).mul(new BN(500));
-
-    //         const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
-
-    //         const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
-
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("4500000000000000000000");
-
-    //         const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-    //         const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
-
-    //         expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
-    //     });
-
-    //     it("Jump to end of phase 5 (50 % unlocked)", async function () {
-    //         // jump to last block of phase 1
-    //         currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 5, true);
-
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
-    //         expect(unlockPercentage).to.be.equal("50000000000000000000");
-    //     });
-
-    //     it("Withdraw all tokens", async function () {
-    //         this.ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
-
-    //         // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
-    //         this.withdrawTx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "4500000000000000000000")
-    //             .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
-    //         // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
-    //     });
-
-    //     it("ETH Balance is correct", async function () {
-    //         const returnEth0 = priceInStage(0).mul(new BN(1500));
-    //         const returnEth1 = priceInStage(1).mul(new BN(1500));
-    //         const returnEth5 = priceInStage(5).mul(new BN(1500));
-            
-    //         // add them up and divide by 2 ( or multiply by 0.5 (unlockPercentage) )
-    //         const expectedReturnEth = new BN(returnEth0.add(returnEth1).add(returnEth5)).div(new BN("2"));
-    //         const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
-    //         const txCost = new BN(this.withdrawTx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
-
-    //         console.log("returnEth0:        ", returnEth0.toString());
-    //         console.log("returnEth1:        ", returnEth1.toString());
-    //         console.log("returnEth5:        ", returnEth5.toString());
-    //         console.log("expectedReturnEth: ", expectedReturnEth.toString());
-
-    //         console.log("this.ethBefore:    ", this.ethBefore.toString());
-    //         console.log("ethAfter:          ", ethAfter.toString());
-    //         console.log("eth diff:          ", ethAfter.sub(this.ethBefore).toString());
-
-
-    //         expect(ethAfter).to.be.bignumber.equal(this.ethBefore.sub(txCost).add(expectedReturnEth));
-    //     });
-
-    //     it("Token Balance is correct", async function () {
-    //         const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-    //         expect(balance).to.be.equal("3000000000000000000000");
-    //     });
-    // });
+    describe("Multiple withdrawals", async function () {
+
+        let ParticipantBalanceBefore;
+
+        before(async () => {
+            await revertToFreshDeployment();
+        });
+
+        it("Whitelist buyer", async function () {
+            whitelistTx = await this.ReversibleICO.methods.whitelist(
+                [TestParticipant],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
+
+        it("Buy 2000 tokens in stage 0", async function () {
+            const stageId = 0;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+
+            const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("2000000000000000000000");
+        });
+
+        it("Return 500 tokens in stage 0", async function () {
+            const stageId = 0;
+
+            const expectedReturnEth = new BN((500 * (stageId + 1) * commitPhasePrice).toString());
+
+            const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
+                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("1500000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Buy 2000 tokens in stage 1", async function () {
+            const stageId = 1;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+
+            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+
+            const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("3500000000000000000000");
+        });
+
+        it("Return 500 tokens in stage 1", async function () {
+            const stageId = 1;
+
+            // since we already bought 2000 tokens in this stage,
+            // and the locked amount is higher than what we want
+            // to return we'll get full price for them
+            const expectedReturnEth = priceInStage(stageId).mul(new BN(500));
+
+            const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
+                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("3000000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(
+                ethBefore.sub(txCost).add(expectedReturnEth)
+            );
+        });
+
+        it("Buy 2000 tokens in stage 5", async function () {
+            const stageId = 5;
+
+            // jump to stage
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+
+            const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount.toString(),
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("5000000000000000000000");
+        });
+
+        it("Return 500 tokens in stage 5", async function () {
+            const stageId = 5;
+
+            // since we already bought 2000 tokens in this stage,
+            // and the locked amount is higher than what we want
+            // to return we'll get full price for them
+            const expectedReturnEth = priceInStage(stageId).mul(new BN(500));
+
+            const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
+                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("4500000000000000000000");
+
+            const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const txCost = new BN(tx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Jump to end of phase 5 (50 % unlocked)", async function () {
+            // jump to last block of stage 5
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 5, true);
+        });
+        
+        it("Expect Unlock percentage to be 50%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("50000000000000000000");
+        });
+
+        it("Withdraw all tokens", async function () {
+            this.ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+
+            this.withdrawTx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, balance)
+                .send({ 
+                    from: TestParticipant,
+                    gas: 1000000,
+                    gasPrice: helpers.networkConfig.gasPrice 
+                });
+        });
+
+        it("ETH Balance is correct", async function () {
+            const returnEth0 = priceInStage(0).mul(new BN(1000));
+            const returnEth1 = priceInStage(1).mul(new BN(1000));
+            const returnEth5 = priceInStage(5).mul(new BN(1000));
+
+            // add them up and divide by 2
+            const expectedReturnEth = new BN(
+                returnEth0
+                .add(returnEth1)
+                .add(returnEth5)
+            ).div(new BN("2"));
+
+            const ethAfter = await helpers.utils.getBalance(helpers, TestParticipant);
+            const txCost = new BN(this.withdrawTx.gasUsed).mul(new BN(helpers.networkConfig.gasPrice.toString()));
+
+            expect(ethAfter).to.be.bignumber.equal(this.ethBefore.sub(txCost).add(expectedReturnEth));
+        });
+
+        it("Token Balance is correct", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("3000000000000000000000");
+        });
+    });
     
 });

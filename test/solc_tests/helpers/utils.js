@@ -404,7 +404,7 @@ module.exports = {
         console.log("Total pendingTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.pendingTokens.toString()) +" tokens" );
         console.log("Total boughtTokens:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.boughtTokens.toString())   +" tokens" );
         console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedTokens.toString()) +" tokens" );
-        console.log("Total allocatedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedTokens.toString()) +" tokens" );
+        console.log("Total processedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.processedTokens.toString()) +" tokens" );
         console.log("Total activeTokens:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.activeTokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
         console.log("Unlocked Token Balance:   ", helpers.utils.toEth(helpers, UnlockedBalance.toString()) +" tokens" );
@@ -430,7 +430,7 @@ module.exports = {
             console.log("pendingTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stagePendingTokens.toString() ) +" tokens" );
             console.log("boughtTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageBoughtTokens.toString() )   +" tokens" );
             console.log("returnedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedTokens.toString() ) +" tokens" );
-            console.log("allocatedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAllocatedTokens.toString() )   +" tokens" );
+            console.log("processedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageProcessedTokens.toString() )   +" tokens" );
             console.log("activeTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageActiveTokens.toString() )   +" tokens" );
         }
 
@@ -504,9 +504,9 @@ module.exports = {
                     const stagePendingTokens = new helpers.BN(ParticipantRecordByStage.stagePendingTokens);
                     const StageBoughtTokens = new helpers.BN(ParticipantRecordByStage.stageBoughtTokens);
                     const StageReturnedTokens = new helpers.BN(ParticipantRecordByStage.stageReturnedTokens);
-                    const StageAllocatedTokens = new helpers.BN(ParticipantRecordByStage.stageAllocatedTokens);
+                    const StageProcessedTokens = new helpers.BN(ParticipantRecordByStage.stageProcessedTokens);
 
-                    const stageTokens = StageBoughtTokens.sub(StageReturnedTokens).sub(StageAllocatedTokens);
+                    const stageTokens = StageBoughtTokens.sub(StageReturnedTokens).sub(StageProcessedTokens);
 
                     let reservedTokensInStage = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                         helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock,
