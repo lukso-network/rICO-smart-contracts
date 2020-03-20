@@ -128,8 +128,8 @@ contract ReversibleICO is IERC777Recipient {
         uint256 committedETH;           // lower than msg.value if maxCap already reached
         uint256 withdrawnETH;           // withdrawn from current stage
         uint256 allocatedETH;           // allocated to project when contributing or exiting
-        uint256 reservedTokens;         // tokens bought in this stage
-        uint256 boughtTokens;           // tokens already sent to the participant in this stage
+        uint256 pendingTokens;          // tokens bought in this stage
+        uint256 reservedTokens;         // tokens already sent to the participant in this stage
         uint256 returnedTokens;         // tokens returned by participant to contract
         uint256 processedTokens;        // tokens allocated as unlocked at withdraw()
         uint256 allocationBlock;
@@ -321,7 +321,6 @@ contract ReversibleICO is IERC777Recipient {
             tokenSupply += _amount;
             return;
         } else {
-
             // 2 - rICO contributor sends tokens back
             withdraw(_from, _amount);
         }
@@ -608,10 +607,10 @@ contract ReversibleICO is IERC777Recipient {
         uint256 stageCommittedETH,
         uint256 stageWithdrawnETH,
         uint256 stageAllocatedETH,
+        uint256 stagePendingTokens,
         uint256 stageReservedTokens,
-        uint256 stageBoughtTokens,
         uint256 stageReturnedTokens,
-        uint256 stageprocessedTokens,
+        uint256 stageProcessedTokens,
         uint256 stageAllocationBlock
     ) {
 
@@ -622,8 +621,8 @@ contract ReversibleICO is IERC777Recipient {
             totalsRecord.committedETH,
             totalsRecord.withdrawnETH,
             totalsRecord.allocatedETH,
+            totalsRecord.pendingTokens,
             totalsRecord.reservedTokens,
-            totalsRecord.boughtTokens,
             totalsRecord.returnedTokens,
             totalsRecord.processedTokens,
             totalsRecord.allocationBlock
@@ -804,7 +803,7 @@ contract ReversibleICO is IERC777Recipient {
     function getLockedTokenAmount(address _participantAddress, bool includeReserved) public view returns (uint256) {
 
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-        uint256 availableTokens = aggregatedStats.boughtTokens
+        uint256 availableTokens = aggregatedStats.reservedTokens
             .sub(aggregatedStats.returnedTokens)
             .sub(aggregatedStats.processedTokens);
 
@@ -843,7 +842,7 @@ contract ReversibleICO is IERC777Recipient {
         // if returned amount is greater than the locked amount...
         // set it equal to locked, keep track of the overflow tokens (returnedTokenAmount)
         if (returnedTokenAmount > maxLocked) {
-            overflowingTokenAmount = returnedTokenAmount - maxLocked;
+            overflowingTokenAmount = returnedTokenAmount.sub(maxLocked);
             returnedTokenAmount = maxLocked;
         }
 
@@ -873,10 +872,10 @@ contract ReversibleICO is IERC777Recipient {
             ParticipantDetails storage byStage = participantsByAddress[_from].byStage[stageId];
 
             // allocation is updated based on these.
-            // uint256 userTokens = byStage.boughtTokens.sub(byStage.returnedTokens);
+            // uint256 userTokens = byStage.reservedTokens.sub(byStage.returnedTokens);
 
             // locked are based on these
-            uint256 activeTokens = byStage.boughtTokens.sub(byStage.returnedTokens); // .sub(byStage.processedTokens);
+            uint256 activeTokens = byStage.reservedTokens.sub(byStage.returnedTokens); // .sub(byStage.processedTokens);
 
             uint256 unlockedTokens = (activeTokens.sub(byStage.processedTokens))
                 .mul(currentUnlockPercentage).div(10 ** 20)
@@ -897,7 +896,10 @@ contract ReversibleICO is IERC777Recipient {
                 // if the remaining amount is less than the amount available in the current stage
                 if (returnedTokenAmount < lockedTokens) {
                     lockedTokens = returnedTokenAmount;
-                    byStage.processedTokens = returnedTokenAmount;
+
+                    if(getCurrentBlockNumber() >= buyPhaseStartBlock) {
+                        byStage.processedTokens = returnedTokenAmount;
+                    }
                 }
 
                 // increase the returned token counters accordingly
@@ -946,6 +948,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // transfer ETH back to participant
         address(uint160(_from)).transfer(returnETHAmount);
+
         emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
         return;
     }
@@ -974,8 +977,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update participant's reserved tokens
         // TODO: what does this mean?: then can change when contribution is accepted if max cap is hit
-        byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
-        aggregatedStats.reservedTokens = aggregatedStats.reservedTokens.add(newTokenAmount);
+        byStage.pendingTokens = byStage.pendingTokens.add(newTokenAmount);
+        aggregatedStats.pendingTokens = aggregatedStats.pendingTokens.add(newTokenAmount);
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
@@ -1006,8 +1009,8 @@ contract ReversibleICO is IERC777Recipient {
                 ParticipantDetails storage byStage = participantRecord.byStage[stageId];
 
                 // handle the case when we have reserved more tokens than globally available
-                aggregatedStats.reservedTokens = aggregatedStats.reservedTokens.sub(byStage.reservedTokens);
-                byStage.reservedTokens = 0;
+                aggregatedStats.pendingTokens = aggregatedStats.pendingTokens.sub(byStage.pendingTokens);
+                byStage.pendingTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 uint256 maxAcceptableValue = availableEthAtStage(currentStage);
@@ -1041,8 +1044,8 @@ contract ReversibleICO is IERC777Recipient {
                     );
 
                     // update participant's token amounts
-                    aggregatedStats.boughtTokens = aggregatedStats.boughtTokens.add(newTokenAmount);
-                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
+                    aggregatedStats.reservedTokens = aggregatedStats.reservedTokens.add(newTokenAmount);
+                    byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
 
                     // aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(newTokenAmount);
                     // byStage.activeTokens = byStage.activeTokens.add(newTokenAmount);
@@ -1119,7 +1122,7 @@ contract ReversibleICO is IERC777Recipient {
         returnedETH = returnedETH.add(participantPendingETH);
 
         // update participant's audit values
-        aggregatedStats.reservedTokens = 0;
+        aggregatedStats.pendingTokens = 0;
         aggregatedStats.returnedETH = aggregatedStats.returnedETH.add(participantPendingETH);
 
         uint8 currentStage = getCurrentStage();
@@ -1134,7 +1137,7 @@ contract ReversibleICO is IERC777Recipient {
             byStage.returnedETH = byStage.totalReceivedETH.sub(byStage.committedETH);
 
 
-            byStage.reservedTokens = 0;
+            byStage.pendingTokens = 0;
         }
 
         // transfer ETH back to participant including received value

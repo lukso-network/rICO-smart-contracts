@@ -401,8 +401,8 @@ module.exports = {
         console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
         console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.withdrawnETH.toString())   +" eth" );
         console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedETH.toString())   +" eth" );
-        console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString()) +" tokens" );
-        console.log("Total boughtTokens:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.boughtTokens.toString())   +" tokens" );
+        console.log("Total pendingTokens:      ", helpers.utils.toEth(helpers, ParticipantTotalStats.pendingTokens.toString()) +" tokens" );
+        console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString())   +" tokens" );
         console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedTokens.toString()) +" tokens" );
         console.log("Total processedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.processedTokens.toString()) +" tokens" );
         console.log("Total allocationBlock:    ", ParticipantTotalStats.allocationBlock.toString() );
@@ -427,10 +427,10 @@ module.exports = {
             console.log("committedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )    +" eth" );
             console.log("withdrawnETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageWithdrawnETH.toString() )   +" eth" );
             console.log("allocatedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAllocatedETH.toString() )   +" eth" );
-            console.log("reservedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReservedTokens.toString() ) +" tokens" );
-            console.log("boughtTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageBoughtTokens.toString() )   +" tokens" );
+            console.log("pendingTokens:       ", helpers.utils.toEth(helpers,ParticipantStageDetails.stagePendingTokens.toString() ) +" tokens" );
+            console.log("reservedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReservedTokens.toString() )   +" tokens" );
             console.log("returnedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedTokens.toString() ) +" tokens" );
-            console.log("processedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageprocessedTokens.toString() )   +" tokens" );
+            console.log("processedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageProcessedTokens.toString() )   +" tokens" );
             // console.log("activeTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageActiveTokens.toString() )   +" tokens" );
         }
 
@@ -501,12 +501,12 @@ module.exports = {
                     let stage_id = i;
 
                     const ParticipantRecordByStage = await contract.methods.getParticipantDetailsByStage(_from, stage_id).call();
-                    const StageReservedTokens = new helpers.BN(ParticipantRecordByStage.stageReservedTokens);
-                    const StageBoughtTokens = new helpers.BN(ParticipantRecordByStage.stageBoughtTokens);
+                    const StagependingTokens = new helpers.BN(ParticipantRecordByStage.stagependingTokens);
+                    const StagereservedTokens = new helpers.BN(ParticipantRecordByStage.stagereservedTokens);
                     const StageReturnedTokens = new helpers.BN(ParticipantRecordByStage.stageReturnedTokens);
                     const StageprocessedTokens = new helpers.BN(ParticipantRecordByStage.stageprocessedTokens);
 
-                    const stageTokens = StageBoughtTokens.sub(StageReturnedTokens).sub(StageprocessedTokens);
+                    const stageTokens = StagereservedTokens.sub(StageReturnedTokens).sub(StageprocessedTokens);
 
                     let lockedTokensInStage = helpers.utils.calculateLockedTokensAtBlockForBoughtAmount(
                         helpers, currentBlockNumber, BuyPhaseStartBlock, BuyPhaseEndBlock,
