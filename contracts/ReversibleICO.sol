@@ -851,6 +851,8 @@ contract ReversibleICO is IERC777Recipient {
 
         if(getCurrentBlockNumber() >= buyPhaseStartBlock) {
             doWithdraw(_from, returnedTokenAmount, overflowingTokenAmount);
+
+        // TODO remove?
         } else {
             // just do stage 0 returns
             ParticipantDetails storage byStage = participantsByAddress[_from].byStage[0];
