@@ -1000,7 +1000,7 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = maxLocked;
         }
 
-        require(getCurrentBlockNumber() < buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
+        require(getCurrentBlockNumber() <= buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
         require(returnedTokenAmount > 0, "Withdraw not possible. Participant has no locked tokens.");
 
         doWithdraw(_from, returnedTokenAmount, overflowingTokenAmount);
