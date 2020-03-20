@@ -849,7 +849,34 @@ contract ReversibleICO is IERC777Recipient {
         require(getCurrentBlockNumber() <= buyPhaseEndBlock, "Withdraw not possible. Buy phase ended.");
         require(returnedTokenAmount > 0, "Withdraw not possible. Participant has no locked tokens.");
 
-        doWithdraw(_from, returnedTokenAmount, overflowingTokenAmount);
+        if(getCurrentBlockNumber() >= buyPhaseStartBlock) {
+            doWithdraw(_from, returnedTokenAmount, overflowingTokenAmount);
+        } else {
+            // just do stage 0 returns
+            ParticipantDetails storage byStage = participantsByAddress[_from].byStage[0];
+            ParticipantDetails storage aggregatedStats = participantAggregatedStats[_from];
+
+            byStage.returnedTokens = byStage.returnedTokens.add(returnedTokenAmount);
+            aggregatedStats.returnedTokens = aggregatedStats.returnedTokens.add(returnedTokenAmount);
+
+            // get the equivalent amount of ETH for this amount of locked tokens in this stage
+            uint256 returnETHAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
+
+            // increase the corresponding ETH counters for returned amount
+            byStage.withdrawnETH = byStage.withdrawnETH.add(returnETHAmount);
+
+            // increase participant's withdrawnETH counter
+            aggregatedStats.withdrawnETH = aggregatedStats.withdrawnETH.add(returnETHAmount);
+
+            // Update total ETH withdrawn
+            withdrawnETH = withdrawnETH.add(returnETHAmount);
+
+            // transfer ETH back to participant
+            address(uint160(_from)).transfer(returnETHAmount);
+
+            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _from, returnETHAmount);
+            return;
+        }
     }
 
     function doWithdraw(address _from, uint256 _returnedTokenAmount, uint256 overflowingTokenAmount) internal {
