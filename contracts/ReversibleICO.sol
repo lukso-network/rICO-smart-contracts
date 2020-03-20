@@ -124,12 +124,12 @@ contract ReversibleICO is IERC777Recipient {
 
     struct ParticipantDetails {
         uint256 totalSentETH;           // Total amount of ETH sent to the smart contract
+        uint256 totalReservedTokens;    // initial reserved token amount over all contributions
         uint256 returnedETH;            // ETH returned by that couldn't be accepted (tokens sold out)
         uint256 committedETH;           // ETH committed to reserve tokens
         uint256 withdrawnETH;           // ETH withdrawn by sending back tokens
         uint256 allocatedETH;           // ETH allocated to project when contributing or withdrawing
         uint256 pendingTokens;          // tokens that are pending, because the participant is not whitelisted yet
-        uint256 boughtTokens;           // tokens already bought by the participant
         uint256 returnedTokens;         // tokens returned by participant to contract
         uint256 processedTokens;        // tokens allocated to the project when contributing or withdrawing
         uint256 activeTokens;           // tokens that are untouched, those are the basis for reserved/bought calculations
@@ -609,7 +609,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 stageWithdrawnETH,
         uint256 stageAllocatedETH,
         uint256 stagePendingTokens,
-        uint256 stageBoughtTokens,
+        uint256 stageTotalReservedTokens,
         uint256 stageReturnedTokens,
         uint256 stageProcessedTokens,
         uint256 stageActiveTokens
@@ -623,7 +623,7 @@ contract ReversibleICO is IERC777Recipient {
             totalsRecord.withdrawnETH,
             totalsRecord.allocatedETH,
             totalsRecord.pendingTokens,
-            totalsRecord.boughtTokens,
+            totalsRecord.totalReservedTokens,
             totalsRecord.returnedTokens,
             totalsRecord.processedTokens,
             totalsRecord.activeTokens
@@ -642,7 +642,7 @@ contract ReversibleICO is IERC777Recipient {
 //        );
 
         ParticipantDetails storage aggregatedStats = participantAggregatedStats[_participantAddress];
-        uint256 availableTokens = aggregatedStats.boughtTokens
+        uint256 availableTokens = aggregatedStats.totalReservedTokens
         .sub(aggregatedStats.returnedTokens)
         .sub(aggregatedStats.processedTokens);
 
@@ -775,7 +775,7 @@ contract ReversibleICO is IERC777Recipient {
         if (_tokenAmount > 0) {
 
             // if before "development / buy  phase" ( in stage 0 )
-            //   - return all tokens bought through contributions.
+            //   - return all tokens reserved throughout contributions.
             // if in development phase ( in stage 1 to n )
             //   - calculate and return
             // else if after end_block
@@ -1025,10 +1025,10 @@ contract ReversibleICO is IERC777Recipient {
             ParticipantDetails storage byStage = participantsByAddress[_from].byStage[stageId];
 
             // allocation is updated based on these.
-            // uint256 userTokens = byStage.boughtTokens.sub(byStage.returnedTokens);
+            // uint256 userTokens = byStage.totalReservedTokens.sub(byStage.returnedTokens);
 
             // locked are based on these
-            uint256 activeTokens = byStage.boughtTokens.sub(byStage.returnedTokens); // .sub(byStage.processedTokens);
+            uint256 activeTokens = byStage.totalReservedTokens.sub(byStage.returnedTokens); // .sub(byStage.processedTokens);
 
             uint256 boughtTokens = (activeTokens.sub(byStage.processedTokens))
             .mul(currentUnlockPercentage).div(10 ** 20)
@@ -1190,8 +1190,8 @@ contract ReversibleICO is IERC777Recipient {
                     );
 
                     // update participant's token amounts
-                    aggregatedStats.boughtTokens = aggregatedStats.boughtTokens.add(newTokenAmount);
-                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
+                    aggregatedStats.totalReservedTokens = aggregatedStats.totalReservedTokens.add(newTokenAmount);
+                    byStage.totalReservedTokens = byStage.totalReservedTokens.add(newTokenAmount);
 
                     aggregatedStats.activeTokens = aggregatedStats.activeTokens.add(newTokenAmount);
                     byStage.activeTokens = byStage.activeTokens.add(newTokenAmount);
