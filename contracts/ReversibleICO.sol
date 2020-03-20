@@ -1049,7 +1049,10 @@ contract ReversibleICO is IERC777Recipient {
                 // if the remaining amount is less than the amount available in the current stage
                 if (returnedTokenAmount < reservedTokens) {
                     reservedTokens = returnedTokenAmount;
-                    byStage.processedTokens = returnedTokenAmount;
+
+                    if(getCurrentBlockNumber() >= buyPhaseStartBlock) {
+                        byStage.processedTokens = returnedTokenAmount;
+                    }
                 }
 
                 // increase the returned token counters accordingly
