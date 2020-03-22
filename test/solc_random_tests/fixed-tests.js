@@ -116,11 +116,8 @@ module.exports = {
                 console.log("lockedTokens:          ", participants[0].toEth(lockedToken));
                 console.log("balanceOf:             ", participants[0].toEth(balanceOf));
 
-                const getLockedTokenAmount = new helpers.BN( await rICO.methods.getLockedTokenAmount(participants[0].address, false).call() );
+                const getLockedTokenAmount = new helpers.BN( await rICO.methods.getLockedTokenAmount(participants[0].address).call() );
                 console.log("getLockedTokenAmount:  ", participants[0].toEth(getLockedTokenAmount));
-
-                const getLockedTokenAmount2 = new helpers.BN( await rICO.methods.getLockedTokenAmount(participants[0].address, true).call() );
-                console.log("getLockedTokenAmount2: ", participants[0].toEth(getLockedTokenAmount2));
 
                 const getCurrentUnlockPercentage = new helpers.BN( await rICO.methods.getCurrentUnlockPercentage().call() );
                 console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentUnlockPercentage));

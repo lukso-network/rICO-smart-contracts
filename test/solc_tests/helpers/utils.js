@@ -376,11 +376,17 @@ module.exports = {
 
         let StageCount = await contract.methods.stageCount().call();
         const contributionsCount = ParticipantByAddress.contributionsCount;
-        const LockedBalance = await contract.methods.getLockedTokenAmount(participant_address, false).call();
+        let LockedBalance = 0, UnlockedBalance = 0;
+        try {
+            LockedBalance = await contract.methods.getLockedTokenAmount(participant_address).call();
+            // UnlockedBalance = await contract.methods.getUnlockedTokenAmount(participant_address).call();
+        } catch(e) {
+            console.log(e)
+        }
 
-        let UnlockedBalance, BalanceOf;
+        let UnlockedBalanceAtToken, BalanceOf;
         if(tokenContract !== null) {
-            UnlockedBalance = await tokenContract.methods.getUnlockedBalance(participant_address).call();
+            UnlockedBalanceAtToken = await tokenContract.methods.getUnlockedBalance(participant_address).call();
             BalanceOf = await tokenContract.methods.balanceOf(participant_address).call();
         }
 
@@ -405,12 +411,14 @@ module.exports = {
         console.log("Total reservedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString())   +" tokens" );
         console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedTokens.toString()) +" tokens" );
         console.log("Total processedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.processedTokens.toString()) +" tokens" );
+        console.log("Total allocatedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedTokens.toString()) +" tokens" );
         console.log("Total allocationBlock:    ", ParticipantTotalStats.allocationBlock.toString() );
         console.log("currentBlockNumber:       ", currentBlockNumber.toString() );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
+        console.log("Unlocked Token Balance:   ", helpers.utils.toEth(helpers, UnlockedBalance.toString()) +" tokens" );
         
         if(tokenContract !== null) {
-            console.log("Unlocked Token Balance:   ", helpers.utils.toEth(helpers, UnlockedBalance.toString()) +" tokens" );
+            console.log("Unlocked Token Balance @T:", helpers.utils.toEth(helpers, UnlockedBalanceAtToken.toString()) +" tokens" );
             console.log("Total Token Balance:      ", helpers.utils.toEth(helpers, BalanceOf.toString()) +" tokens" );
         }
         
@@ -431,7 +439,7 @@ module.exports = {
             console.log("reservedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReservedTokens.toString() )   +" tokens" );
             console.log("returnedTokens:      ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedTokens.toString() ) +" tokens" );
             console.log("processedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageProcessedTokens.toString() )   +" tokens" );
-            // console.log("activeTokens:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageActiveTokens.toString() )   +" tokens" );
+            console.log("allocatedTokens:     ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageAllocatedTokens.toString() )   +" tokens" );
         }
 
         console.log("\n");
@@ -461,7 +469,7 @@ module.exports = {
 
         const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
         const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
-        const maxLocked = new helpers.BN( await contract.methods.getLockedTokenAmount(_from, false).call() );
+        const maxLocked = new helpers.BN( await contract.methods.getLockedTokenAmount(_from).call() );
         const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
 
         if(maxLocked > 0) {
