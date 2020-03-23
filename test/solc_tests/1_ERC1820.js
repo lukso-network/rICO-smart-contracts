@@ -4,6 +4,10 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const {
+    validatorHelper
+} = require('./rework/includes/setup');
+
+const {
     saveSnapshot,
 } = require('./rework/includes/deployment');
 

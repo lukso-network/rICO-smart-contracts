@@ -13,6 +13,10 @@ const newManager = accounts[9];
 let _ricoAddress;
 
 const {
+    validatorHelper
+} = require('./rework/includes/setup');
+
+const {
     requiresERC1820Instance,
     restoreFromSnapshot
 } = require('./rework/includes/deployment');
