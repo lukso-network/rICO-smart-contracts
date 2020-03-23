@@ -1079,7 +1079,7 @@ describe("Flow Testing", function () {
                         console.log("ParticipantreservedTokenBalanceAfter:           ", ParticipantreservedTokenBalanceAfter.toString());
 
 
-                        await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
+                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
 
                         expect( ParticipantreservedTokenBalanceAfter.toString() )
                             .to.be.equal( 
