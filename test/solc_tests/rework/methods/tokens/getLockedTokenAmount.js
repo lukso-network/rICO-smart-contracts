@@ -86,7 +86,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = 0;
                     let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
                     const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
 
                     this.jsValidator.setBlockNumber(currentBlock);
                     let validatorTokenAmount = this.jsValidator.getLockedTokenAmount(participantAddress);
@@ -138,7 +138,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
 
                     const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
@@ -157,7 +157,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
@@ -175,7 +175,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
@@ -192,7 +192,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                     const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
@@ -209,7 +209,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                     const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
@@ -226,7 +226,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                     let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
@@ -243,7 +243,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                     let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();
@@ -255,7 +255,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     this.jsValidator.setBlockNumber(currentBlock);
 
                     ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
-                    ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                    ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                     getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participantAddress).call();

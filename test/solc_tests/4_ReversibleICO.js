@@ -1012,7 +1012,7 @@ describe("ReversibleICO", function () {
 
                                     const processedTotals = accepted + returned + withdrawn;
 
-                                    expect( (parseInt(ParticipantTotalStats.reservedTokens, 10) ) ).to.be.above(0);
+                                    expect( (parseInt(ParticipantTotalStats.pendingTokens, 10) ) ).to.be.above(0);
                                     expect( processedTotals ).to.be.below(received);
 
                                 });
@@ -1148,7 +1148,7 @@ describe("ReversibleICO", function () {
                 const stageId = 0;
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
                 const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_6).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
 
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_6).call();
                 // make sure we return full purchased amount.
@@ -1183,7 +1183,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, false, -1);
 
                 const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
 
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
@@ -1205,7 +1205,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId);
 
                 const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
+                const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1222,7 +1222,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
 
                 const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1240,7 +1240,7 @@ describe("ReversibleICO", function () {
                 const currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 0);
 
                 const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 const getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1258,7 +1258,7 @@ describe("ReversibleICO", function () {
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true);
 
                 let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1277,7 +1277,7 @@ describe("ReversibleICO", function () {
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1);
 
                 let ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 let getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();
@@ -1291,7 +1291,7 @@ describe("ReversibleICO", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1000);
 
                 ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
-                ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
+                ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
                 getLockedTokenAmount = await this.ReversibleICO.methods.getLockedTokenAmount(participant_1).call();

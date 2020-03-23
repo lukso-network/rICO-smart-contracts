@@ -260,12 +260,12 @@ describe("Withdrawal Testing", function () {
             let committedETH = result["stageCommittedETH"];
             let withdrawnETH = result["stageWithdrawnETH"];
             let allocatedETH = result["stageAllocatedETH"];
-            let reservedTokens = result["stageReservedTokens"];
-            let boughtTokens = result["stageBoughtTokens"];
+            let pendingTokens = result["stageReservedTokens"];
+            let reservedTokens = result["stageBoughtTokens"];
             let returnedTokens = result["stageReturnedTokens"];
 
             expect(committedETH).to.be.equal(withdrawnETH);
-            expect(boughtTokens).to.be.equal(returnedTokens);
+            expect(reservedTokens).to.be.equal(returnedTokens);
         });
     });
 

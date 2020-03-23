@@ -62,7 +62,7 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
         });
 
         describe("ParticipantRecord", function () {
-            let oldParticipantRecord, newParticipantRecord, oldbyStage, newbyStage, reservedTokens;
+            let oldParticipantRecord, newParticipantRecord, oldbyStage, newbyStage, pendingTokens;
 
             before(function () {
 
@@ -75,7 +75,7 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                 oldbyStage = oldParticipantRecord.byStage[_testStage];
                 newbyStage = newParticipantRecord.byStage[_testStage];
 
-                reservedTokens = this.oldState.getTokenAmountForEthAtStage(
+                pendingTokens = this.oldState.getTokenAmountForEthAtStage(
                     this.CommitTestValue.toString(), _testStage
                 );
 
@@ -124,14 +124,14 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     expect(difference.toString()).is.equal(this.CommitTestValue.toString());
                 });
 
-                it("reservedTokens is 0", function () {
-                    expect(newParticipantRecord.reservedTokens.toString()).is.equal("0");
+                it("pendingTokens is 0", function () {
+                    expect(newParticipantRecord.pendingTokens.toString()).is.equal("0");
                 });
 
-                it("boughtTokens increases by getTokenAmountForEthAtStage(value)", function () {
-                    const difference = new BN(newParticipantRecord.boughtTokens.toString())
-                        .sub(new BN(oldParticipantRecord.boughtTokens.toString()));
-                    expect(difference.toString()).is.equal(reservedTokens.toString());
+                it("reservedTokens increases by getTokenAmountForEthAtStage(value)", function () {
+                    const difference = new BN(newParticipantRecord.reservedTokens.toString())
+                        .sub(new BN(oldParticipantRecord.reservedTokens.toString()));
+                    expect(difference.toString()).is.equal(pendingTokens.toString());
                 });
 
             } else {
@@ -141,15 +141,15 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                         .is.equal(oldParticipantRecord.committedETH.toString());
                 });
 
-                conditional("doesNotChange", "boughtTokens does not change", function () {
-                    expect(newParticipantRecord.boughtTokens.toString())
-                        .is.equal(oldParticipantRecord.boughtTokens.toString());
+                conditional("doesNotChange", "reservedTokens does not change", function () {
+                    expect(newParticipantRecord.reservedTokens.toString())
+                        .is.equal(oldParticipantRecord.reservedTokens.toString());
                 });
 
-                it("reservedTokens increases by getTokenAmountForEthAtStage(value)", function () {
-                    const difference = new BN(newParticipantRecord.reservedTokens.toString())
-                        .sub(new BN(oldParticipantRecord.reservedTokens.toString()));
-                    expect(difference.toString()).is.equal(reservedTokens.toString());
+                it("pendingTokens increases by getTokenAmountForEthAtStage(value)", function () {
+                    const difference = new BN(newParticipantRecord.pendingTokens.toString())
+                        .sub(new BN(oldParticipantRecord.pendingTokens.toString()));
+                    expect(difference.toString()).is.equal(pendingTokens.toString());
                 });
             }
 
@@ -192,26 +192,26 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
 
                 if (_whitelisted) {
 
-                    it("reservedTokens is 0", function () {
-                        expect(newbyStage.reservedTokens.toString()).is.equal("0");
+                    it("pendingTokens is 0", function () {
+                        expect(newbyStage.pendingTokens.toString()).is.equal("0");
                     });
-
-                    it("boughtTokens increases by getTokenAmountForEthAtStage(value)", function () {
-                        const difference = new BN(newbyStage.boughtTokens.toString())
-                            .sub(new BN(oldbyStage.boughtTokens.toString()));
-                        expect(difference.toString()).is.equal(reservedTokens.toString());
-                    });
-
-                } else {
 
                     it("reservedTokens increases by getTokenAmountForEthAtStage(value)", function () {
                         const difference = new BN(newbyStage.reservedTokens.toString())
                             .sub(new BN(oldbyStage.reservedTokens.toString()));
-                        expect(difference.toString()).is.equal(reservedTokens.toString());
+                        expect(difference.toString()).is.equal(pendingTokens.toString());
                     });
 
-                    conditional("doesNotChange", "boughtTokens does not change", function () {
-                        expect(newbyStage.boughtTokens.toString()).is.equal(oldbyStage.boughtTokens.toString());
+                } else {
+
+                    it("pendingTokens increases by getTokenAmountForEthAtStage(value)", function () {
+                        const difference = new BN(newbyStage.pendingTokens.toString())
+                            .sub(new BN(oldbyStage.pendingTokens.toString()));
+                        expect(difference.toString()).is.equal(pendingTokens.toString());
+                    });
+
+                    conditional("doesNotChange", "reservedTokens does not change", function () {
+                        expect(newbyStage.reservedTokens.toString()).is.equal(oldbyStage.reservedTokens.toString());
                     });
 
                 }
@@ -268,32 +268,32 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
 
                     if (_whitelisted) {
                     
-                        conditional("doesNotChange", "reservedTokens is 0", function () {
+                        conditional("doesNotChange", "pendingTokens is 0", function () {
                             for(let i = _testStage - 1; i >= 0; i--) {
-                                expect(oldParticipantRecord.byStage[i].reservedTokens.toString()).is.equal("0");
-                                expect(newParticipantRecord.byStage[i].reservedTokens.toString()).is.equal("0");
+                                expect(oldParticipantRecord.byStage[i].pendingTokens.toString()).is.equal("0");
+                                expect(newParticipantRecord.byStage[i].pendingTokens.toString()).is.equal("0");
                             }
                         });
                     
                     } else {
 
-                        conditional("doesNotChange", "reservedTokens does not change", function () {
+                        conditional("doesNotChange", "pendingTokens does not change", function () {
                             for(let i = _testStage - 1; i >= 0; i--) {
                                 expect(
-                                    newParticipantRecord.byStage[i].reservedTokens.toString()
+                                    newParticipantRecord.byStage[i].pendingTokens.toString()
                                 ).is.equal(
-                                    oldParticipantRecord.byStage[i].reservedTokens.toString()
+                                    oldParticipantRecord.byStage[i].pendingTokens.toString()
                                 );
                             }
                         });
 
                     }
-                    conditional("doesNotChange", "boughtTokens does not change", function () {
+                    conditional("doesNotChange", "reservedTokens does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].boughtTokens.toString()
+                                newParticipantRecord.byStage[i].reservedTokens.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].boughtTokens.toString()
+                                oldParticipantRecord.byStage[i].reservedTokens.toString()
                             );
                         }
                     });

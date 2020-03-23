@@ -13,6 +13,10 @@ const newManager = accounts[9];
 let _ricoAddress;
 
 const {
+    validatorHelper
+} = require('./rework/includes/setup');
+
+const {
     requiresERC1820Instance,
     restoreFromSnapshot
 } = require('./rework/includes/deployment');
@@ -203,6 +207,7 @@ describe("ERC777 - RICO Token", async function () {
                         await this.RicoToken.methods.getLockedBalance(holder).call()
                     ).to.be.equal(lockedAmount.toString());
                 });
+                
                 it("returns their unlocked balance when calling `getUnlockedBalance` ", async function () {
                     await this.ReversibleICOMock777.methods
                         .setLockedTokenAmount(holder, lockedAmount)

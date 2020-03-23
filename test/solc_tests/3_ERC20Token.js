@@ -6,6 +6,10 @@ const TokenSettings = setup.settings.token;
 const creator = accounts[10];
 
 const {
+    validatorHelper
+} = require('./rework/includes/setup');
+
+const {
     requiresERC1820Instance,
     restoreFromSnapshot,
     saveSnapshot,

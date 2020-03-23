@@ -1070,17 +1070,17 @@ describe("Flow Testing", function () {
                             .sub(withdrawCalculatedBefore.withdrawn_tokens);
 
 
-                        console.log("ParticipantTokenBalanceBefore:               ", ParticipantTokenBalanceBefore.toString());
-                        console.log("ParticipantTokenBalanceAfter:                ", ParticipantTokenBalanceAfter.toString());
+                        // console.log("ParticipantTokenBalanceBefore:               ", ParticipantTokenBalanceBefore.toString());
+                        // console.log("ParticipantTokenBalanceAfter:                ", ParticipantTokenBalanceAfter.toString());
 
-                        console.log("ParticipantLockedTokenBalanceBefore:          ", ParticipantLockedTokenBalanceBefore.toString());
-                        console.log("withdrawCalculatedBefore.withdrawn_tokens:       ", withdrawCalculatedBefore.withdrawn_tokens.toString());
-                        console.log("ParticipantLockedTokenBalanceAfterValidation: ", ParticipantLockedTokenBalanceAfterValidation.toString());
-                        console.log("ParticipantLockedTokenBalanceAfter:           ", ParticipantLockedTokenBalanceAfter.toString());
+                        // console.log("ParticipantLockedTokenBalanceBefore:          ", ParticipantLockedTokenBalanceBefore.toString());
+                        // console.log("withdrawCalculatedBefore.withdrawn_tokens:       ", withdrawCalculatedBefore.withdrawn_tokens.toString());
+                        // console.log("ParticipantLockedTokenBalanceAfterValidation: ", ParticipantLockedTokenBalanceAfterValidation.toString());
+                        // console.log("ParticipantLockedTokenBalanceAfter:           ", ParticipantLockedTokenBalanceAfter.toString());
 
 
-                        await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
-
+                        // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7, TokenContractInstance );
+                        
                         expect( ParticipantLockedTokenBalanceAfter.toString() )
                             .to.be.equal( 
                                 ParticipantLockedTokenBalanceAfterValidation.toString(),
@@ -1474,96 +1474,95 @@ describe("Flow Testing", function () {
             });
         });
 
-        // describe("4 - contract after buy phase", async function () {
+        describe("4 - contract after buy phase", async function () {
 
-        //     describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
-        //         const TestParticipantAddress = participant_1;
-        //         before(async () => {
-        //             await revertToFreshDeployment();
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+            describe("participant is whitelisted and has 3 contributions ( 1 in stage 0 / 1 in stage 1 / 1 in stage 6 )", async function () {
+                const TestParticipantAddress = participant_1;
+                before(async () => {
+                    await revertToFreshDeployment();
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
 
-        //             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+                    const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-        //             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-        //                 from: TestParticipantAddress,
-        //                 to: ReversibleICOInstance.receipt.contractAddress,
-        //                 value: ContributionAmount.toString(),
-        //                 gasPrice: helpers.networkConfig.gasPrice
-        //             });
+                    let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: TestParticipantAddress,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
 
-        //             // whitelist and accept contribution
-        //             let whitelistTx = await ReversibleICOInstance.methods.whitelist(
-        //                 [TestParticipantAddress],
-        //                 true,
-        //             ).send({
-        //                 from: whitelistControllerAddress
-        //             });
+                    // whitelist and accept contribution
+                    let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                        [TestParticipantAddress],
+                        true,
+                    ).send({
+                        from: whitelistControllerAddress
+                    });
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
 
-        //             newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-        //                 from: TestParticipantAddress,
-        //                 to: ReversibleICOInstance.receipt.contractAddress,
-        //                 value: ContributionAmount.toString(),
-        //                 gasPrice: helpers.networkConfig.gasPrice
-        //             });
+                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: TestParticipantAddress,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
 
-        //             newContributionTx = await helpers.web3Instance.eth.sendTransaction({
-        //                 from: TestParticipantAddress,
-        //                 to: ReversibleICOInstance.receipt.contractAddress,
-        //                 value: ContributionAmount.toString(),
-        //                 gasPrice: helpers.networkConfig.gasPrice
-        //             });
+                    newContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: TestParticipantAddress,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
 
-        //             helpers.utils.resetAccountNonceCache(helpers);
+                    helpers.utils.resetAccountNonceCache(helpers);
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
-        //         });
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
+                });
 
-        //         it("getCancelModes() returns (false, false)", async function () {
-        //             const CancelStates = await ReversibleICOInstance.methods.getCancelModes(TestParticipantAddress).call();
-        //             expect(CancelStates[0]).to.be.equal(false);
-        //             expect(CancelStates[1]).to.be.equal(false);
-        //         });
+                it("getCancelModes() returns (false, false)", async function () {
+                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(TestParticipantAddress).call();
+                    expect(CancelStates[0]).to.be.equal(false);
+                    expect(CancelStates[1]).to.be.equal(false);
+                });
 
-        //         it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Buy phase ended.\"", async function () {
+                it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Buy phase ended.\"", async function () {
 
-        //             const TestParticipantAddress = TestParticipantAddress;
-        //             const ReturnTokenAmount = new BN(
-        //                 await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
-        //             );
+                    const ReturnTokenAmount = new BN(
+                        await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
+                    );
 
-        //             const ParticipantUnlockedTokenBalanceBefore = new BN(
-        //                 await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
-        //             );
-        //             const ParticipantLockedTokenBalanceBefore = new BN(
-        //                 await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
-        //             );
+                    const ParticipantUnlockedTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.getUnlockedBalance(TestParticipantAddress).call()
+                    );
+                    const ParticipantLockedTokenBalanceBefore = new BN(
+                        await TokenContractInstance.methods.getLockedBalance(TestParticipantAddress).call()
+                    );
 
-        //             // since we're in a later stage, unlocked need to be above 0
-        //             expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
+                    // since we're in a later stage, unlocked need to be above 0
+                    expect( ParticipantUnlockedTokenBalanceBefore ).to.be.bignumber.above( new BN("0") );
 
-        //             // since we already sent back all our tokens.. we should have 0 locked remaining
-        //             expect( ParticipantLockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
+                    // since we already sent back all our tokens.. we should have 0 locked remaining
+                    expect( ParticipantLockedTokenBalanceBefore ).to.be.bignumber.equal( new BN("0") );
 
-        //             await helpers.assertInvalidOpcode( async () => {
-        //                 // attempt to send full token balance back to rico
-        //                 let withdrawTx = await TokenContractInstance.methods.send(
-        //                     ReversibleICOInstance.receipt.contractAddress,
-        //                     ReturnTokenAmount.toString(),
-        //                     ERC777data
-        //                 ).send({
-        //                     from: TestParticipantAddress,
-        //                     gas: 1000000,
-        //                     gasPrice: helpers.networkConfig.gasPrice
-        //                 });
-        //             }, "Withdraw not possible. Buy phase ended.");
+                    await helpers.assertInvalidOpcode( async () => {
+                        // attempt to send full token balance back to rico
+                        let withdrawTx = await TokenContractInstance.methods.send(
+                            ReversibleICOInstance.receipt.contractAddress,
+                            ReturnTokenAmount.toString(),
+                            ERC777data
+                        ).send({
+                            from: TestParticipantAddress,
+                            gas: 1000000,
+                            gasPrice: helpers.networkConfig.gasPrice
+                        });
+                    }, "Withdraw not possible. Buy phase ended.");
 
-        //         });
-        //     });
-        // });
+                });
+            });
+        });
     });
 
 

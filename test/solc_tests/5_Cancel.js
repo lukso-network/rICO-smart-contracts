@@ -713,9 +713,9 @@ describe("Testing canceling", function () {
                 expect(new helpers.BN(aggregated[4]))
                     .to.be.bignumber.equal(participantAllocatedETH, "aggregated.allocatedETH mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[5]))
-                    .to.be.bignumber.equal(participantReservedTokens, "aggregated.reservedTokens mismatch for participant " + p);
+                    .to.be.bignumber.equal(participantReservedTokens, "aggregated.pendingTokens mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[6]))
-                    .to.be.bignumber.equal(participantBoughtTokens, "aggregated.boughtTokens mismatch for participant " + p);
+                    .to.be.bignumber.equal(participantBoughtTokens, "aggregated.reservedTokens mismatch for participant " + p);
                 expect(new helpers.BN(aggregated[7]))
                     .to.be.bignumber.equal(participantReturnedTokens, "aggregated.returnedTokens mismatch for participant " + p);
             }

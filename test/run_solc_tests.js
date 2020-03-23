@@ -22,17 +22,16 @@ async function runTests(init) {
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",
-    // "rework/flows/whitelist",
 
-    // // // these need to be reworked
+    // // these need to be reworked
     // "5_Cancel",
     // "5_Contributions",
-    // "5_Flows",
     // "10_ProjectWithdraw",
+    // "5_Flows",
     
     // "5_Flows",
-    "rework/flows/withdraw",
     // "rework/flows/whitelist",
+    "rework/flows/withdraw",
 
     // "5_ProjectWithdraw",
     // "6_Gnosis-Safe",

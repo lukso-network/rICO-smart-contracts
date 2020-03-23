@@ -31,8 +31,8 @@ const Participant = {
     committedETH: new BN("0"),      // lower than msg.value if maxCap already reached
     withdrawnETH: new BN("0"),      // cancel() / withdraw()
     allocatedETH: new BN("0"),      // allocated to project when contributing or exiting
-    reservedTokens: new BN("0"),    // total tokens bought in all stages
-    boughtTokens: new BN("0"),      // total tokens already sent to the participant in all stages
+    pendingTokens: new BN("0"),    // total tokens bought in all stages
+    reservedTokens: new BN("0"),      // total tokens already sent to the participant in all stages
     returnedTokens: new BN("0"),    // total tokens returned by participant to contract in all stages
     byStage: [],
 }
@@ -43,8 +43,8 @@ const ParticipantDetailsByStage = {
     committedETH: new BN("0"),      // lower than msg.value if maxCap already reached
     withdrawnETH: new BN("0"),      // withdrawn from current stage
     allocatedETH: new BN("0"),      // allocated to project when contributing or exiting
-    reservedTokens: new BN("0"),    // tokens bought in this stage
-    boughtTokens: new BN("0"),      // tokens already sent to the participant in this stage
+    pendingTokens: new BN("0"),    // tokens bought in this stage
+    reservedTokens: new BN("0"),      // tokens already sent to the participant in this stage
     returnedTokens: new BN("0"),    // tokens returned by participant to contract
 }
 
@@ -165,8 +165,8 @@ class Contract extends Validator {
         );
 
         // Update participant's reserved tokens
-        byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
-        participantRecord.reservedTokens = participantRecord.reservedTokens.add(newTokenAmount);
+        byStage.pendingTokens = byStage.pendingTokens.add(newTokenAmount);
+        participantRecord.pendingTokens = participantRecord.pendingTokens.add(newTokenAmount);
 
         this.ApplicationEvent(
             this.ApplicationEventTypes.CONTRIBUTION_NEW,
@@ -191,8 +191,8 @@ class Contract extends Validator {
             if (processedTotals.lt(participantRecord.totalReceivedETH)) {
 
                 // handle the case when we have reserved more tokens than globally available
-                participantRecord.reservedTokens = participantRecord.reservedTokens.sub(byStage.reservedTokens);
-                byStage.reservedTokens = 0;
+                participantRecord.pendingTokens = participantRecord.pendingTokens.sub(byStage.pendingTokens);
+                byStage.pendingTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 const maxAcceptableValue = this.availableEthAtStage(currentStage);
@@ -230,8 +230,8 @@ class Contract extends Validator {
                     );
 
                     // update participant's token amounts
-                    participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
-                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
+                    participantRecord.reservedTokens = participantRecord.reservedTokens.add(newTokenAmount);
+                    byStage.reservedTokens = byStage.reservedTokens.add(newTokenAmount);
 
                     // allocate tokens to participant
                     this.IERC777().send(this.contractAddress, _from, newTokenAmount);
@@ -300,7 +300,7 @@ class Contract extends Validator {
         // Since we want to display token amounts even when they are not already
         // transferred to their accounts, we use reserved + bought
         return this.getLockedTokenAmountAtBlock(
-            participantRecord.reservedTokens.add(participantRecord.boughtTokens),
+            participantRecord.pendingTokens.add(participantRecord.reservedTokens),
             this.getCurrentBlockNumber()
         ).sub(participantRecord.returnedTokens);
     }
@@ -362,7 +362,7 @@ class Contract extends Validator {
             this.returnedETH = this.returnedETH.add(participantAvailableETH);
 
             // update participant's audit values
-            participantRecord.reservedTokens = 0;
+            participantRecord.pendingTokens = 0;
             participantRecord.withdrawnETH = participantRecord.withdrawnETH.add(participantAvailableETH);
 
             // transfer ETH back to participant including received value
@@ -436,15 +436,15 @@ class Contract extends Validator {
                 for (let stageId = currentStageNumber; stageId >= 0; stageId--) {
 
                     // total participant tokens at the current stage i.e. reserved + bought - returned
-                    const totalInStage = participantRecord.byStage[stageId].reservedTokens
-                        .add(participantRecord.byStage[stageId].boughtTokens)
+                    const totalInStage = participantRecord.byStage[stageId].pendingTokens
+                        .add(participantRecord.byStage[stageId].reservedTokens)
                         .sub(participantRecord.byStage[stageId].returnedTokens);
 
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
                     let tokensInStage = getLockedTokenAmountAtBlock(
-                        participantRecord.byStage[stageId].reservedTokens.add(participantRecord.byStage[stageId].boughtTokens),
+                        participantRecord.byStage[stageId].pendingTokens.add(participantRecord.byStage[stageId].reservedTokens),
                         currentBlockNumber
                     ).sub(participantRecord.byStage[stageId].returnedTokens);
 
