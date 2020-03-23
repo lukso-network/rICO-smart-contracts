@@ -14,23 +14,23 @@ async function runTests(init) {
     "external/SafeMath",
     "1_ERC1820",
 
-    // "2_ERC777_Token",
-    // "3_ERC20Token",
-    // "rework/phases",
-    // "rework/methods/stages",
-    // "rework/methods/tokens/getReservedTokenAmount",
-    // "rework/methods/tokens/buyTokens",
-    // "rework/flows/whitelist",
-    // "rework/flows/withdraw",
+    "2_ERC777_Token",
+    "3_ERC20Token",
+    "rework/phases",
+    "rework/methods/stages",
+    "rework/methods/tokens/getReservedTokenAmount",
+    "rework/methods/tokens/buyTokens",
+    "rework/flows/whitelist",
+    "rework/flows/withdraw",
 
-    // // // these need to be reworked
-    // "5_Cancel",
-    // "5_Contributions",
-    // "5_Flows",
-    // "10_ProjectWithdraw",
+    // // these need to be reworked
+    "5_Cancel",
+    "5_Contributions",
+    "5_Flows",
+    "10_ProjectWithdraw",
     
     // "5_Flows",
-    "rework/flows/withdraw",
+    // "rework/flows/withdraw",
     // "rework/flows/whitelist",
 
     // "5_ProjectWithdraw",
