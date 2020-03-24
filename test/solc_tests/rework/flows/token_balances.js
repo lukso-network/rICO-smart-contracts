@@ -10,9 +10,9 @@ const {
     restoreFromSnapshot,
 } = require('../includes/deployment');
 
-const testKey = "WithdrawTests";
+const testKey = "WithdrawTokenTests";
 
-describe("ReversibleICO - Withdraw Testing", function () {
+describe("ReversibleICO - Withdraw Token Balance", function () {
 
     const deployerAddress = accounts[0];
     const whitelistControllerAddress = accounts[1];
@@ -66,7 +66,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     });
 
-    describe("token lock and unlock amount tests - branch 1", async function () {
+    describe("token lock and unlock amount tests - branch 1 - no returns", async function () {
 
         before(async () => {
             await revertToFreshDeployment();
@@ -79,6 +79,26 @@ describe("ReversibleICO - Withdraw Testing", function () {
             ).send({
                 from: whitelistControllerAddress
             });
+        });
+
+        it("Expect Unlock percentage to be 0%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("0");
+        });
+
+        it("Expect getCurrentUnlockPercentageFor to be 0%", async function () {
+
+            const buyPhaseEndBlock = await this.ReversibleICO.methods.buyPhaseEndBlock().call();
+            const buyPhaseStartBlock = await this.ReversibleICO.methods.buyPhaseStartBlock().call();
+            const getCurrentBlockNumber = await this.ReversibleICO.methods.getCurrentBlockNumber().call();
+
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber,
+                buyPhaseStartBlock,
+                buyPhaseEndBlock
+            ).call();
+
+            expect(unlockPercentage).to.be.equal("0");
         });
 
         it("2 - Buy 1 tokens in phase 0", async function () {
@@ -101,6 +121,26 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributionsCount).to.be.equal("1");
+        });
+
+        it("Expect Unlock percentage to be 0%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("0");
+        });
+
+        it("Expect getCurrentUnlockPercentageFor to be 0%", async function () {
+
+            const buyPhaseEndBlock = await this.ReversibleICO.methods.buyPhaseEndBlock().call();
+            const buyPhaseStartBlock = await this.ReversibleICO.methods.buyPhaseStartBlock().call();
+            const getCurrentBlockNumber = await this.ReversibleICO.methods.getCurrentBlockNumber().call();
+
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentageFor(
+                getCurrentBlockNumber,
+                buyPhaseStartBlock,
+                buyPhaseEndBlock
+            ).call();
+
+            expect(unlockPercentage).to.be.equal("0");
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
@@ -148,6 +188,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(balance).to.be.equal("100000000000000000");
         });
         
+
         it("4 - Jump to stage 3 end (30%)", async function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 3, true);
@@ -359,7 +400,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
     });
 
-    describe("token lock and unlock amount tests - branch 3 - return 1 of 3 in stage 1", async function () {
+    describe("token lock and unlock amount tests - branch 3 - return all tokens in stage 1", async function () {
 
         before(async () => {
             await revertToFreshDeployment();
@@ -441,33 +482,23 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(balance).to.be.equal("300000000000000000");
         });
         
-        it("4 - Return 1 token", async function () {
-            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
-
-            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1000000000000000000" )
+        it("4 - Return 3 tokens", async function () {
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
                 .send({ from: TestParticipant, gas: 1000000 });
-
-            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
-
         });
 
-        it("Expect balance to be 2 tokens", async function () {
+        it("Expect balance to be 0.3 tokens", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-            expect(balance).to.be.equal("2000000000000000000");
-        });
-
-        it("Expect locked tokens to be 1.7 tokens (90%)", async function () {
-            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-            expect(locked).to.be.equal("1700000000000000000");
-        });
-
-        it("Expect unlocked tokens TO REMAIN THE SAME - 0.3 tokens (10%) @call token", async function () {
-            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
             expect(balance).to.be.equal("300000000000000000");
         });
 
-        it("Expect unlocked tokens TO REMAIN THE SAME - 0.3 tokens (10%) @call rico", async function () {
-            const balance = await this.ReversibleICO.methods.getUnlockedTokenAmount(TestParticipant).call();
+        it("Expect locked tokens to be 0 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("0");
+        });
+
+        it("Expect unlocked tokens TO REMAIN THE SAME - 0.3 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
             expect(balance).to.be.equal("300000000000000000");
         });
 
@@ -482,19 +513,19 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(unlockPercentage).to.be.equal("30000000000000000000");
         });
 
-        it("Expect balance to be 2 tokens", async function () {
+        it("Expect balance to be 0.3 tokens", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-            expect(balance).to.be.equal("2000000000000000000");
+            expect(balance).to.be.equal("300000000000000000");
         });
 
-        it("Expect locked tokens to be 1.4 tokens", async function () {
+        it("Expect locked tokens to be 0 tokens", async function () {
             const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-            expect(locked).to.be.equal("1400000000000000000");
+            expect(locked).to.be.equal("0");
         });
 
-        it("Expect unlocked tokens to be 0.6 tokens", async function () {
+        it("Expect unlocked tokens to be 0.3 tokens", async function () {
             const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-            expect(balance).to.be.equal("600000000000000000");
+            expect(balance).to.be.equal("300000000000000000");
         });
 
         it("6 - Jump to stage 8 end (80%)", async function () {
@@ -507,21 +538,412 @@ describe("ReversibleICO - Withdraw Testing", function () {
             expect(unlockPercentage).to.be.equal("80000000000000000000");
         });
 
-        it("Expect balance to be 2 tokens", async function () {
+        it("Expect balance to be 0.3 tokens", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
-            expect(balance).to.be.equal("2000000000000000000");
+            expect(balance).to.be.equal("300000000000000000");
         });
 
-        it("Expect locked tokens to be 0.4 tokens", async function () {
+        it("Expect locked tokens to be 0 tokens", async function () {
             const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
-            expect(locked).to.be.equal("400000000000000000");
+            expect(locked).to.be.equal("0");
         });
 
-        it("Expect unlocked tokens to be 1.6 tokens", async function () {
+        it("Expect unlocked tokens to be 0.3 tokens", async function () {
             const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
-            expect(balance).to.be.equal("1600000000000000000");
+            expect(balance).to.be.equal("300000000000000000");
         });
 
+        it("6 - Jump to stage 10 end (100%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 10, true);
+        });
+
+        it("Expect Unlock percentage to be 100%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect balance to be 0.3 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("300000000000000000");
+        });
+
+        it("Expect locked tokens to be 0 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("0");
+        });
+
+        it("Expect unlocked tokens to be 0.3 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("300000000000000000");
+        });
     });
     
+
+    describe("token lock and unlock amount tests - branch 4 - return 60 of 100 in stage 1", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+        });
+
+        it("1 - Whitelist buyer", async function () {
+            whitelistTx = await this.ReversibleICO.methods.whitelist(
+                [TestParticipant],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
+
+        it("2 - Buy 100 tokens in phase 0", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+
+            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("0");
+
+            const ContributionAmount = 100 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("100000000000000000000");
+
+            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("1");
+        });
+
+        it("Expect balance to be 100 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect locked tokens to be 100 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 0 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("0");
+        });
+
+        it("Expect Unlock percentage to be 0%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("0");
+        });
+
+        it("3 - Jump to stage 2 end", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 2, true);
+        });
+
+        it("Expect Unlock percentage to be 20%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("20000000000000000000");
+        });
+
+        it("Expect balance to be 100 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect locked tokens to be 80 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("80000000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 20 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("20000000000000000000");
+        });
+        
+        it("4 - Return 60 token", async function () {
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "60000000000000000000" )
+                .send({ from: TestParticipant, gas: 1000000 });
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 20 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("20000000000000000000");
+        });
+
+        it("Expect unlocked tokens TO REMAIN THE SAME - 20 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("20000000000000000000");
+        });
+
+        it("5 - Jump to stage 3 end (30%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 3, true);
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect Unlock percentage to be 30%", async function () {
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("30000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 17.5 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("17500000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 22.5 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("22500000000000000000");
+        });
+
+        it("6 - Jump to stage 8 end (80%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 8, true);
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect Unlock percentage to be 80%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("80000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 5 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("5000000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 35 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("35000000000000000000");
+        });
+
+        it("6 - Jump to stage 10 end (100%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 10, true);
+        });
+
+        it("Expect Unlock percentage to be 100%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 0 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("0");
+        });
+
+        it("Expect unlocked tokens to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+    });
+    
+    describe("token lock and unlock amount tests - branch 5 - return 10 of 50 in stage 1", async function () {
+
+        before(async () => {
+            await revertToFreshDeployment();
+        });
+
+        it("1 - Whitelist buyer", async function () {
+            whitelistTx = await this.ReversibleICO.methods.whitelist(
+                [TestParticipant],
+                true
+            ).send({
+                from: whitelistControllerAddress
+            });
+        });
+
+        it("2 - Buy 50 tokens in phase 0", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+
+            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("0");
+
+            const ContributionAmount = 50 * commitPhasePrice;
+            await helpers.web3Instance.eth.sendTransaction({
+                from: TestParticipant,
+                to: this.ReversibleICO.receipt.contractAddress,
+                value: ContributionAmount,
+                gasPrice: helpers.networkConfig.gasPrice
+            });
+
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("50000000000000000000");
+
+            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            expect(ParticipantByAddress.contributionsCount).to.be.equal("1");
+        });
+
+        it("Expect balance to be 50 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("50000000000000000000");
+        });
+
+        it("Expect locked tokens to be 50 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("50000000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 0 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("0");
+        });
+
+        it("Expect Unlock percentage to be 0%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("0");
+        });
+
+        it("3 - Jump to stage 2 end", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 2, true);
+        });
+
+        it("Expect Unlock percentage to be 20%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("20000000000000000000");
+        });
+
+        it("Expect balance to be 50 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("50000000000000000000");
+        });
+
+        it("Expect locked tokens to be 40 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 10 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("10000000000000000000");
+        });
+        
+        it("4 - Return 10 token", async function () {
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+            await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "10000000000000000000" )
+                .send({ from: TestParticipant, gas: 1000000 });
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 30 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("30000000000000000000");
+        });
+
+        it("Expect unlocked tokens TO REMAIN THE SAME - 10 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("10000000000000000000");
+        });
+
+        it("5 - Jump to stage 3 end (30%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 3, true);
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect Unlock percentage to be 30%", async function () {
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("30000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 26.25 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("26250000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 13.75 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("13750000000000000000");
+        });
+
+        it("6 - Jump to stage 8 end (80%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 8, true);
+            // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 3 );
+        });
+
+        it("Expect Unlock percentage to be 80%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("80000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 7.5 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("7500000000000000000");
+        });
+
+        it("Expect unlocked tokens to be 32.5 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("32500000000000000000");
+        });
+
+        it("6 - Jump to stage 10 end (100%)", async function () {
+            // jump to phase 0
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 10, true);
+        });
+
+        it("Expect Unlock percentage to be 100%", async function () {
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            expect(unlockPercentage).to.be.equal("100000000000000000000");
+        });
+
+        it("Expect balance to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+
+        it("Expect locked tokens to be 0 tokens", async function () {
+            const locked = await this.ReversibleICO.methods.getReservedTokenAmount(TestParticipant).call();
+            expect(locked).to.be.equal("0");
+        });
+
+        it("Expect unlocked tokens to be 40 tokens", async function () {
+            const balance = await TokenContractInstance.methods.getUnlockedBalance(TestParticipant).call();
+            expect(balance).to.be.equal("40000000000000000000");
+        });
+    });
+
 });
