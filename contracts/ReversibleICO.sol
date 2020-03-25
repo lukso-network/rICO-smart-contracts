@@ -1124,23 +1124,11 @@ contract ReversibleICO is IERC777Recipient {
         // ...so it does not interfere with project withdraw calculations
         returnedETH = returnedETH.add(participantPendingETH);
 
-        // update participant's audit values
-//        aggregatedStats.pendingTokens = 0;
-//        aggregatedStats.returnedETH = aggregatedStats.returnedETH.add(participantPendingETH);
 
         uint8 currentStage = getCurrentStage();
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
             ParticipantStageDetails storage byStage = participantRecord.byStage[stageId];
 
-            // byStage.returnedETH = byStage.totalSentETH
-            //     .sub(byStage.returnedETH)
-            //     .sub(byStage.committedETH)
-            //     .sub(byStage.withdrawnETH);
-
-//            byStage.returnedETH = byStage.totalSentETH.sub(byStage.committedETH);
-
-
-//            byStage.pendingTokens = 0;
         }
 
         // transfer ETH back to participant including received value
