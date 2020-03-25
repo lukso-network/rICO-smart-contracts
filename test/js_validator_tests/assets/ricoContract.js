@@ -25,7 +25,7 @@ const solidity = {
 
 const Participant = {
     whitelisted: false,
-    contributionsCount: 0,
+    contributions: 0,
     totalSentETH: new BN("0"),  // Total amount of ETH received by the smart contract.
     returnedETH: new BN("0"),       // totalSentETH - committedETH
     committedETH: new BN("0"),      // lower than msg.value if maxCap already reached
@@ -120,7 +120,7 @@ class Contract extends Validator {
         let participantRecord = this.getParticipantRecordByAddress(msg_sender);
 
         // Check if participant has previous contributions
-        if (participantRecord.contributionsCount == 0) {
+        if (participantRecord.contributions == 0) {
             // increase participant count
             this.participantCount++;
 
@@ -152,7 +152,7 @@ class Contract extends Validator {
         const participantRecord = this.getParticipantRecordByAddress(_from);
 
         // Update participant's total stats
-        participantRecord.contributionsCount++;
+        participantRecord.contributions++;
         participantRecord.totalSentETH = participantRecord.totalSentETH.add(_receivedValue);
 
         // Update participant's per-stage stats
@@ -170,7 +170,7 @@ class Contract extends Validator {
 
         this.ApplicationEvent(
             this.ApplicationEventTypes.CONTRIBUTION_NEW,
-            participantRecord.contributionsCount,
+            participantRecord.contributions,
             _from,
             _receivedValue
         );
@@ -379,7 +379,7 @@ class Contract extends Validator {
             this.TransferEvent(currentTransferEventType, _from, participantAvailableETH);
             this.ApplicationEvent(
                 _eventType,
-                participantRecord.contributionsCount,
+                participantRecord.contributions,
                 _from,
                 participantAvailableETH
             );

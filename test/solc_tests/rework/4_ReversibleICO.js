@@ -782,7 +782,7 @@ describe("ReversibleICO", function () {
                             it("Participant Contribution count is correct", async function () {
                                 const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
                                 expect(
-                                    ParticipantByAddress.contributionsCount.toString()
+                                    ParticipantByAddress.contributions.toString()
                                 ).to.be.equal(
                                     ContributionCountToProcess.toString()
                                 );
@@ -809,11 +809,11 @@ describe("ReversibleICO", function () {
 
                             describe("new contribution from the TestAcceptParticipant that is now whitelisted, is acceepted automatically.", async function () {
 
-                                let newContributionTx, initialContributionsCount, afterContributionsCount;
+                                let newContributionTx, initialContributions, afterContributions;
 
                                 before(async function () {
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
-                                    initialContributionsCount = ParticipantByAddress.contributionsCount;
+                                    initialContributions = ParticipantByAddress.contributions;
 
                                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                                         from: TestAcceptParticipant,
@@ -829,11 +829,11 @@ describe("ReversibleICO", function () {
 
                                 it("Participant Contribution Count increases by 1", async function () {
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
-                                    afterContributionsCount = ParticipantByAddress.contributionsCount;
+                                    afterContributions = ParticipantByAddress.contributions;
                                     expect(
-                                        afterContributionsCount
+                                        afterContributions
                                     ).to.be.equal(
-                                        ( ( parseInt(initialContributionsCount, 10) + 1 ) ).toString()
+                                        ( ( parseInt(initialContributions, 10) + 1 ) ).toString()
                                     );
                                 });
 
@@ -905,7 +905,7 @@ describe("ReversibleICO", function () {
                             it("Participant Contribution count is correct", async function () {
                                 const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
                                 expect(
-                                    ParticipantByAddress.contributionsCount.toString()
+                                    ParticipantByAddress.contributions.toString()
                                 ).to.be.equal(
                                     ContributionCountToProcess.toString()
                                 );
@@ -925,11 +925,11 @@ describe("ReversibleICO", function () {
 
                             describe("new contribution from the RejectParticipant is now waiting processing.", async function () {
 
-                                let newContributionTx, initialContributionsCount, afterContributionsCount;
+                                let newContributionTx, initialContributions, afterContributions;
 
                                 before(async function () {
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
-                                    initialContributionsCount = ParticipantByAddress.contributionsCount;
+                                    initialContributions = ParticipantByAddress.contributions;
 
                                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                                         from: TestRejectParticipant,
@@ -945,11 +945,11 @@ describe("ReversibleICO", function () {
 
                                 it("Participant Contribution Count increases by 1", async function () {
                                     let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
-                                    afterContributionsCount = ParticipantByAddress.contributionsCount;
+                                    afterContributions = ParticipantByAddress.contributions;
                                     expect(
-                                        afterContributionsCount
+                                        afterContributions
                                     ).to.be.equal(
-                                        ( ( parseInt(initialContributionsCount, 10) + 1 ) ).toString()
+                                        ( ( parseInt(initialContributions, 10) + 1 ) ).toString()
                                     );
                                 });
 

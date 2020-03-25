@@ -23,9 +23,9 @@ function shouldHaveValidStateAfterFirstContributionFromParticipant(_address, _te
 
         describe("ParticipantRecord", function () {
 
-            it("contributionsCount is 1", function () {
+            it("contributions is 1", function () {
                 const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                expect(newParticipantRecord.contributionsCount).is.equal(1);
+                expect(newParticipantRecord.contributions).is.equal(1);
             });
 
         });
@@ -81,11 +81,11 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
 
             });
 
-            it("contributionsCount increases by 1", function () {
+            it("contributions increases by 1", function () {
                 expect(
-                    newParticipantRecord.contributionsCount
+                    newParticipantRecord.contributions
                 ).is.equal(
-                    oldParticipantRecord.contributionsCount + 1
+                    oldParticipantRecord.contributions + 1
                 );
             });
 

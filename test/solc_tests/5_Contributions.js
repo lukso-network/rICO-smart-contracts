@@ -214,7 +214,7 @@ describe("Contribution Testing", function () {
 
                 let contributionCount = 0;
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
                 await helpers.web3Instance.eth.sendTransaction({
@@ -257,12 +257,12 @@ describe("Contribution Testing", function () {
                 contributionCount++;
 
                 ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                const afterContributions = ParticipantByAddress.contributions;
 
                 expect(
-                    afterContributionsCount.toString()
+                    afterContributions.toString()
                 ).to.be.equal(
-                    (parseInt(initialContributionsCount) + contributionCount).toString()
+                    (parseInt(initialContributions) + contributionCount).toString()
                 );
 
             });

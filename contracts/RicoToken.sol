@@ -54,9 +54,9 @@ contract RicoToken is ERC777 {
 
     function getUnlockedBalance(address _owner) public view returns(uint) {
         uint256 balance = balanceOf(_owner);
-        uint256 Locked = rICO.getReservedTokenAmount(_owner);
-        if(balance > 0 && Locked > 0 && balance >= Locked) {
-            return balance.sub(Locked);
+        uint256 locked = rICO.getReservedTokenAmount(_owner);
+        if(balance > 0 && locked > 0 && balance >= locked) {
+            return balance.sub(locked);
         }
         return balance;
     }

@@ -995,7 +995,7 @@ describe("ProjectWithdraw Testing", function () {
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                     let ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(participant_1).call();
-                    const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                    const initialContributions = ParticipantByAddress.contributions;
 
                     const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                     const ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipantAddress);
@@ -1020,12 +1020,12 @@ describe("ProjectWithdraw Testing", function () {
                     });
 
                     ParticipantByAddress = await ReversibleICOInstance.methods.ParticipantsByAddress(TestParticipantAddress).call();
-                    const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                    const afterContributions = ParticipantByAddress.contributions;
 
                     expect(
-                        afterContributionsCount.toString()
+                        afterContributions.toString()
                     ).to.be.equal(
-                        (parseInt(initialContributionsCount) + 1).toString()
+                        (parseInt(initialContributions) + 1).toString()
                     );
 
                     const ContractBalanceAfter = await helpers.utils.getBalance(helpers, ReversibleICOAddress);

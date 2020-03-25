@@ -427,7 +427,7 @@ describe("Testing canceling", function () {
             it("value >= rico.minContribution results in a new contribution", async function () {
 
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
                 await helpers.web3Instance.eth.sendTransaction({
@@ -438,12 +438,12 @@ describe("Testing canceling", function () {
                 });
 
                 ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                const afterContributions = ParticipantByAddress.contributions;
 
                 expect(
-                    afterContributionsCount.toString()
+                    afterContributions.toString()
                 ).to.be.equal(
-                    (parseInt(initialContributionsCount) + 1).toString()
+                    (parseInt(initialContributions) + 1).toString()
                 );
 
             });
@@ -462,7 +462,7 @@ describe("Testing canceling", function () {
                 });
 
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionTxCost = new helpers.BN( ContributionTx.gasUsed ).mul(
                     new helpers.BN(helpers.networkConfig.gasPrice)
@@ -540,13 +540,13 @@ describe("Testing canceling", function () {
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
 
                 ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                const afterContributions = ParticipantByAddress.contributions;
 
                 // no additional contributions logged.
                 expect(
-                    afterContributionsCount.toString()
+                    afterContributions.toString()
                 ).to.be.equal(
-                    initialContributionsCount.toString()
+                    initialContributions.toString()
                 );
 
             });

@@ -171,7 +171,7 @@ Compiling your contracts...
         [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
         [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m          ParticipantRecord[0m
-          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m        State changes after a new contribution[0m
         [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m          ParticipantRecord[0m
@@ -211,7 +211,7 @@ Compiling your contracts...
         [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
         [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m          ParticipantRecord[0m
-          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m        State changes after a new contribution[0m
         [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m          ParticipantRecord[0m
@@ -231,7 +231,7 @@ Compiling your contracts...
           [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
           [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m            ParticipantRecord[0m
-            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m          State changes after a new contribution[0m
           [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m            ParticipantRecord[0m
@@ -247,7 +247,7 @@ Compiling your contracts...
           [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
           [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m            ParticipantRecord[0m
-            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m          State changes after a new contribution[0m
           [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m            ParticipantRecord[0m

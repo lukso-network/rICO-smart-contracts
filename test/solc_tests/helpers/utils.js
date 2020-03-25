@@ -374,7 +374,7 @@ module.exports = {
         let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant_address).call();
 
         let StageCount = await contract.methods.stageCount().call();
-        const contributionsCount = ParticipantByAddress.contributionsCount;
+        const contributions = ParticipantByAddress.contributions;
         const LockedBalance = await contract.methods.getReservedTokenAmount(participant_address).call();
 
         let UnlockedBalance, BalanceOf;
@@ -394,7 +394,7 @@ module.exports = {
         console.log("Project ETH Withdrawn:    ", helpers.utils.toEth(helpers, projectWithdrawnETH.toString()) +" eth" );
 
         console.log("Contributions for address:", participant_address);
-        console.log("Count:                    ", contributionsCount.toString());
+        console.log("Count:                    ", contributions.toString());
         console.log("Total totalSentETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.totalSentETH.toString())   +" eth" );
         console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedETH.toString())    +" eth" );
         console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
