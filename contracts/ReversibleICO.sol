@@ -124,7 +124,7 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool whitelisted;
         uint32 contributions;
-        mapping(uint8 => ParticipantDetails) byStage;
+        mapping(uint8 => ParticipantStageDetails) byStage;
     }
 
     struct ParticipantDetails {
@@ -142,9 +142,15 @@ contract ReversibleICO is IERC777Recipient {
         uint256 NEWtotalReservedTokens; // unecessary
         uint256 NEWreservedTokens;
         uint256 NEWunlockedTokens;
-        uint256 NEWlastBlock;
         uint256 NEWpendingEth;
-        uint256 NEWunlockedEth;
+        uint256 NEWallocatedEth;
+        uint256 NEWlastBlock;
+    }
+    
+    struct ParticipantStageDetails {
+        uint256 NEWreservedTokens;
+        uint256 NEWpendingEth;
+        uint256 NEWallocatedEth;
     }
 
     /// @dev Maps participants aggregated (i.e. all stages) stats by their address.
@@ -615,10 +621,14 @@ contract ReversibleICO is IERC777Recipient {
     public
     view
     returns (
-        uint256 stagetotalSentETH,
+        uint256 NEWreservedTokens,
+        uint256 NEWpendingEth,
+        uint256 NEWallocatedEth
+
+//        uint256 stagetotalSentETH,
 //        uint256 stageReturnedETH,
-        uint256 stageCommittedETH,
-        uint256 stageWithdrawnETH
+//        uint256 stageCommittedETH,
+//        uint256 stageWithdrawnETH
 //        uint256 stageAllocatedETH,
 //        uint256 stagePendingTokens
 //        uint256 stageTotalReservedTokens,
@@ -626,12 +636,16 @@ contract ReversibleICO is IERC777Recipient {
 //        uint256 stageAllocatedTokens
     ) {
 
-        ParticipantDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
+        ParticipantStageDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
         return (
-        totalsRecord.totalSentETH,
+        totalsRecord.NEWreservedTokens,
+        totalsRecord.NEWpendingEth,
+        totalsRecord.NEWallocatedEth
+
+//        totalsRecord.totalSentETH,
 //        totalsRecord.returnedETH,
-        totalsRecord.committedETH,
-        totalsRecord.withdrawnETH
+//        totalsRecord.committedETH,
+//        totalsRecord.withdrawnETH
 //        totalsRecord.allocatedETH,
 //        totalsRecord.pendingTokens,
 //        totalsRecord.totalReservedTokens,
@@ -1030,22 +1044,6 @@ contract ReversibleICO is IERC777Recipient {
         return getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0);
     }
 
-    //    /**
-    //     * @notice Returns the participant's amount of locked tokens at the current block.
-    //     * @param _participantAddress The participant's address.
-    //     */
-    //    function getReservedTokenAmount(address _participantAddress) public view returns (uint256) {
-    //        // LOCKED tokens
-    //        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
-    //
-    //        if(participantStats.totalReservedTokens > 0) {
-    //            return participantStats.totalReservedTokens
-    //            .sub(participantStats.returnedTokens)
-    //            .sub(getUnlockedTokenAmount(_participantAddress));
-    //        }
-    //        return 0;
-    //    }
-
 
     // ------------------------------------------------------------------------------------------------
 
@@ -1056,14 +1054,85 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Allow a participant to withdraw by sending tokens back to rICO contract.
-     * @param _from Sender's (participant's) address.
+     * @param _participantAddress participant address.
      * @param _returnedTokenAmount The amount of tokens returned.
      */
-    function withdraw(address _from, uint256 _returnedTokenAmount) internal {
+    function withdraw(address _participantAddress, uint256 _returnedTokenAmount) internal {
+        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+
         uint256 returnedTokenAmount = _returnedTokenAmount;
-        uint256 maxLocked = getReservedTokenAmount(_from);
-        // get locked, but exclude reserved
+        uint256 currentlyLocked = getReservedTokenAmount(_participantAddress);
         uint256 overflowingTokenAmount;
+        uint256 returnEthAmount;
+        uint256 allocatedEthAmount;
+
+        // Only allow reserved tokens be returned, return the overflow.
+        if (returnedTokenAmount > currentlyLocked) {
+            overflowingTokenAmount = returnedTokenAmount.sub(currentlyLocked);
+            returnedTokenAmount = currentlyLocked;
+        }
+
+        // UPDATE STATS
+        participantStats.NEWunlockedTokens = participantStats.NEWreservedTokens.sub(currentlyLocked); // Important: NEWreservedTokens aren't updated yet
+        participantStats.NEWreservedTokens = currentlyLocked.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
+        participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
+
+        // reset all calculations to this point in time.
+        participantStats.NEWlastBlock = getCurrentBlockNumber();
+
+
+        // iterate over stages and calculate the ETH amounts
+        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
+            ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
+
+            // cancel if all is accounted for
+            if(returnedTokenAmount == 0) {
+                break;
+            }
+
+            uint256 processTokens = byStage.NEWreservedTokens;
+            if (returnedTokenAmount < processTokens) {
+                processTokens = returnedTokenAmount;
+            }
+
+            // get ETH amount for tokens
+            returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
+            uint256 allocatedEthAmountInStage = getEthAmountForTokensAtStage(
+                byStage.NEWreservedTokens.mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
+            , stageId);
+
+            // UPDATE participantStats
+            byStage.NEWreservedTokens = byStage.NEWreservedTokens.sub(processTokens);
+            byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
+
+
+            allocatedEthAmount = allocatedEthAmount.add(allocatedEthAmountInStage);
+
+            // reduce processed token amount from returned token amount
+            returnedTokenAmount = returnedTokenAmount.sub(processTokens);
+        }
+
+
+        // UPDATE global STATS
+        withdrawnETH = withdrawnETH.add(returnEthAmount);
+//        committedETH = committedETH.sub(returnEthAmount);  // gets deducted in getProjectAvailableEth()
+        projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
+
+
+
+
+
+        // Return overflowing tokens received
+        if (overflowingTokenAmount > 0) {
+            // send tokens back to participant
+            bytes memory data;
+            // solium-disable-next-line security/no-send
+            IERC777(tokenContractAddress).send(_participantAddress, overflowingTokenAmount, data);
+        }
+
+        // Return ETH back to participant
+        address(uint160(_participantAddress)).transfer(returnEthAmount);
+        emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
     }
 
     /**
@@ -1082,18 +1151,14 @@ contract ReversibleICO is IERC777Recipient {
 
         Participant storage participantRecord = participantsByAddress[_from];
         ParticipantDetails storage participantStats = participantAggregatedStats[_from];
-        ParticipantDetails storage byStage = participantRecord.byStage[currentStage];
+        ParticipantStageDetails storage byStage = participantRecord.byStage[currentStage];
 
         // UPDATE STATS
         participantRecord.contributions++;
 
-        byStage.totalSentETH = byStage.totalSentETH.add(_receivedValue);
         byStage.NEWpendingEth = byStage.NEWpendingEth.add(_receivedValue);
-//        byStage.pendingTokens = byStage.pendingTokens.add(newTokenAmount);
 
-        participantStats.totalSentETH = participantStats.totalSentETH.add(_receivedValue);
         participantStats.NEWpendingEth = participantStats.NEWpendingEth.add(_receivedValue);
-//        participantStats.pendingTokens = participantStats.pendingTokens.add(newTokenAmount);
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
@@ -1121,7 +1186,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 totalReturnETH;
 
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
-            ParticipantDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
+            ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
 
             // skip if not ETH is pending
             if (byStage.NEWpendingEth == 0) {
@@ -1130,15 +1195,15 @@ contract ReversibleICO is IERC777Recipient {
 
             uint256 maxAvailableEth = availableEthAtStage(currentStage);
             uint256 pendingEth = byStage.NEWpendingEth;
-            uint256 returnETH = 0;
+            uint256 returnEth = 0;
 
             // if incoming value is higher than what we can accept,
             // just accept the difference and return the rest
             if (pendingEth > maxAvailableEth) {
-                returnETH = pendingEth.sub(maxAvailableEth);
-                totalReturnETH = totalReturnETH.add(returnETH);
-                // increase the amount finally returned
+                returnEth = pendingEth.sub(maxAvailableEth);
                 pendingEth = maxAvailableEth;
+
+                totalReturnETH = totalReturnETH.add(returnEth);
             }
 
             // convert ETH to TOKENS
@@ -1147,9 +1212,8 @@ contract ReversibleICO is IERC777Recipient {
             );
 
 
-
             // calculate the instant allocation for the new contribution
-            calculateAndSetNewContribution(_participantAddress, stageId, newTokenAmount, pendingEth, returnETH, unlockRatio);
+            calculateAndSetNewContribution(_participantAddress, stageId, newTokenAmount, pendingEth, returnEth, unlockRatio);
 
             // Transfer tokens to the participant
             // solium-disable-next-line security/no-send
@@ -1171,37 +1235,35 @@ contract ReversibleICO is IERC777Recipient {
 
     function calculateAndSetNewContribution(address _participantAddress, uint8 _stageId, uint256 _newTokenAmount, uint256 _pendingEth, uint256 _returnETH, uint256 _unlockRatio) internal {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
-        ParticipantDetails storage byStage = participantsByAddress[_participantAddress].byStage[_stageId];
+        ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[_stageId];
 
         uint256 newUnlockedTokens = _newTokenAmount.mul(_unlockRatio);
         uint256 newReservedTokens = _newTokenAmount.sub(newUnlockedTokens);
-        uint256 newUnlockedETHAmount = _pendingEth.mul(_unlockRatio);
+        uint256 allocatedEthAmount = _pendingEth.mul(_unlockRatio);
 
         // UPDATE STATS
         byStage.NEWreservedTokens = byStage.NEWreservedTokens.add(newReservedTokens);
-        byStage.NEWunlockedTokens = byStage.NEWunlockedTokens.add(newUnlockedTokens);
-        byStage.NEWtotalReservedTokens = byStage.NEWtotalReservedTokens.add(_newTokenAmount);
-        byStage.NEWunlockedEth = byStage.NEWunlockedEth.add(newUnlockedETHAmount);
+        byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
         byStage.NEWpendingEth = byStage.NEWpendingEth.sub(_pendingEth).sub(_returnETH);
 
         participantStats.NEWreservedTokens = participantStats.NEWreservedTokens.add(newReservedTokens);
         participantStats.NEWunlockedTokens = participantStats.NEWunlockedTokens.add(newUnlockedTokens);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.add(_newTokenAmount);
-        participantStats.NEWunlockedEth = participantStats.NEWunlockedEth.add(newUnlockedETHAmount);
+        participantStats.NEWallocatedEth = participantStats.NEWallocatedEth.add(allocatedEthAmount);
         participantStats.NEWpendingEth = participantStats.NEWpendingEth.sub(_pendingEth).sub(_returnETH);
 
         // UPDATE global STATS
         committedETH = committedETH.add(_pendingEth);
-        projectAllocatedETH = projectAllocatedETH.add(newUnlockedETHAmount);
+        projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
 
 
         // TODO remove? {
         //                byStage.totalReservedTokens = byStage.totalReservedTokens.add(newTokenAmount);
-        //                byStage.allocatedETH = byStage.allocatedETH.add(newUnlockedETHAmount);
+        //                byStage.allocatedETH = byStage.allocatedETH.add(NEWallocatedEthAmount);
 
         //                participantStats.allocatedTokens = participantStats.allocatedTokens.add(newUnlockedTokens);
         //                participantStats.totalReservedTokens = participantStats.totalReservedTokens.add(newTokenAmount);
-        //                participantStats.allocatedETH = participantStats.allocatedETH.add(newUnlockedETHAmount);
+        //                participantStats.allocatedETH = participantStats.allocatedETH.add(NEWallocatedEthAmount);
         // TODO remove? }
     }
 
@@ -1252,7 +1314,7 @@ contract ReversibleICO is IERC777Recipient {
     //        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
     //
     //            // PART 1: calculate tokens
-    //            ParticipantDetails storage byStage = participantsByAddress[_from].byStage[stageId];
+    //            ParticipantStageDetails storage byStage = participantsByAddress[_from].byStage[stageId];
     //
     //            // --- CALCULATIONS
     //
@@ -1361,7 +1423,7 @@ contract ReversibleICO is IERC777Recipient {
     //
     //            for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
     //
-    //                ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+    //                ParticipantStageDetails storage byStage = participantRecord.byStage[stageId];
     //
     //                // handle the case when we have reserved more tokens than globally available
     //                aggregatedStats.pendingTokens = aggregatedStats.pendingTokens.sub(byStage.pendingTokens);
@@ -1462,7 +1524,7 @@ contract ReversibleICO is IERC777Recipient {
 
         uint8 currentStage = getCurrentStage();
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
-            ParticipantDetails storage byStage = participantRecord.byStage[stageId];
+            ParticipantStageDetails storage byStage = participantRecord.byStage[stageId];
 
             // byStage.returnedETH = byStage.totalSentETH
             //     .sub(byStage.returnedETH)
