@@ -912,7 +912,7 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.NEWreservedTokens = currentlyLocked.sub(returnedTokenAmount); // Another way: participantStats.NEWreservedTokens.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
 
-        // reset all calculations to this point in time.
+        // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
 
         DEBUG1 = participantStats.NEWlastBlock;
@@ -1015,6 +1015,12 @@ contract ReversibleICO is IERC777Recipient {
             return;
         }
 
+        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+
+        // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
+        participantStats.NEWlastBlock = getCurrentBlockNumber();
+
+
         uint8 currentStage = getCurrentStage();
         uint256 unlockRatio = getUnlockRatio(_participantAddress, getCurrentBlockNumber(), buyPhaseStartBlock);
         uint256 totalReturnETH;
@@ -1089,7 +1095,6 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         committedETH = committedETH.add(_pendingEth);
         projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
-
     }
 
 
