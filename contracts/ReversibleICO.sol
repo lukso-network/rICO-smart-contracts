@@ -1127,10 +1127,8 @@ contract ReversibleICO is IERC777Recipient {
                 pendingEth, stageId
             );
 
-
             // calculate the instant allocation for the new contribution
             calculateAndSetNewContribution(_participantAddress, stageId, newTokenAmount, pendingEth, returnETH, unlockRatio);
-
 
             // Transfer tokens to the participant
             // solium-disable-next-line security/no-send
