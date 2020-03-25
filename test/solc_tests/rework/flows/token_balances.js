@@ -507,6 +507,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
             // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
             console.log('DEBUG1 ',  await this.ReversibleICO.methods.DEBUG1().call());
+
+            console.log('buyPhaseStartBlock ',  await this.ReversibleICO.methods.buyPhaseStartBlock().call());
+            console.log('buyPhaseEndBlock ',  await this.ReversibleICO.methods.buyPhaseEndBlock().call());
+
             console.log('getCurrentBlockNumber ',  await this.ReversibleICO.methods.getCurrentBlockNumber().call());
 
         });

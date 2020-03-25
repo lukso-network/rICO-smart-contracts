@@ -763,42 +763,6 @@ contract ReversibleICO is IERC777Recipient {
         ).div(10 ** 18);
     }
 
-
-    /**
-     * @notice Returns the amount of locked tokens at a certain block.
-     * @param _tokenAmount The amount on tokens.
-     * @param _blockNumber The specified block number.
-     */
-    function getReservedTokenAmountAtBlock(uint256 _tokenAmount, uint256 _blockNumber) public view returns (uint256) {
-
-        if (_tokenAmount > 0) {
-
-            // if before "development / buy  phase" ( in stage 0 )
-            //   - return all tokens reserved throughout contributions.
-            // if in development phase ( in stage 1 to n )
-            //   - calculate and return
-            // else if after end_block
-            //   - return 0
-            if (_blockNumber < buyPhaseStartBlock) {
-
-                // commit phase
-                return _tokenAmount;
-
-            } else if (_blockNumber <= buyPhaseEndBlock) {
-
-                // buy  phase
-                uint256 unlocked = _tokenAmount.mul(
-                    getCurrentUnlockPercentage()
-                ).div(10 ** 20);
-
-                return _tokenAmount.sub(unlocked);
-            }
-            // after buyPhase's end
-            return 0;
-        }
-        return 0;
-    }
-
     /**
      * @notice Calculates the percentage of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
      * @return Unlock percentage multiplied by 10 to the power of precision. (should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals).

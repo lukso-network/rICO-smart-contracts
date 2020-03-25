@@ -323,13 +323,8 @@ class Participant extends Actor {
 
         const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
 
-        const getReservedTokenAmountAtBlock = await this.rICO.methods.getReservedTokenAmountAtBlock(
-            aggregatedStats.boughtTokens.toString(),
-            blockNumber
-        ).call();
-        console.log("getReservedTokenAmountAtBlock        ", this.toEth(getReservedTokenAmountAtBlock), "tokens");
-
-        
+        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address).call();
+        console.log("getReservedTokenAmount        ", this.toEth(getReservedTokenAmount), "tokens");
 
     }
 
