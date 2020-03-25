@@ -891,7 +891,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 startBlock;
 
         // IF never set, set it to the start of the buy phase
-        if (participantStats.NEWlastBlock == 0) {
+        if (participantStats.NEWlastBlock < buyPhaseStartBlock) {
             startBlock = buyPhaseStartBlock;
         } else {
             startBlock = participantStats.NEWlastBlock;
@@ -951,7 +951,6 @@ contract ReversibleICO is IERC777Recipient {
         // reset all calculations to this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
 
-
         // iterate over stages and calculate the ETH amounts
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
             ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
@@ -968,16 +967,16 @@ contract ReversibleICO is IERC777Recipient {
 
             // get ETH amount for tokens
             returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
-            uint256 allocatedEthAmountInStage = getEthAmountForTokensAtStage(
-                byStage.NEWreservedTokens.mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
-            , stageId);
+            // TODO fix
+//            uint256 allocatedEthAmountInStage = getEthAmountForTokensAtStage(
+//                byStage.NEWreservedTokens.mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
+//            , stageId);
 
             // UPDATE participantStats
             byStage.NEWreservedTokens = byStage.NEWreservedTokens.sub(processTokens);
-            byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
-
-
-            allocatedEthAmount = allocatedEthAmount.add(allocatedEthAmountInStage);
+            // TODO fix
+//            byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
+//            allocatedEthAmount = allocatedEthAmount.add(allocatedEthAmountInStage);
 
             // reduce processed token amount from returned token amount
             returnedTokenAmount = returnedTokenAmount.sub(processTokens);
@@ -987,7 +986,8 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         withdrawnETH = withdrawnETH.add(returnEthAmount);
         // committedETH = committedETH.sub(returnEthAmount);  // gets deducted in getProjectAvailableEth()
-        projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
+        // TODO fix
+//        projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
 
 
         // Return overflowing tokens received
@@ -1241,6 +1241,7 @@ contract ReversibleICO is IERC777Recipient {
         _;
     }
 
+    // TODO remove?
     function uintToString(uint i) internal pure returns (string memory _uintAsString) {
         uint _i = i;
         if (_i == 0) {

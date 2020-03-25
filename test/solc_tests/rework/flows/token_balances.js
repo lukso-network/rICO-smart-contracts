@@ -325,7 +325,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 1, true);
 
-            console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
+            // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
+            console.log('DEBUG1 ',  await this.ReversibleICO.methods.DEBUG1().call());
+            console.log('getCurrentBlockNumber ',  await this.ReversibleICO.methods.getCurrentBlockNumber().call());
 
         });
 
