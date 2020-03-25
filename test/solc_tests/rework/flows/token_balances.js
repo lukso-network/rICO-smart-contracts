@@ -274,9 +274,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
 
-
-            // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
-
         });
 
         it("Expect locked tokens to be 2 tokens", async function () {
@@ -327,6 +324,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         it("4 - Jump to stage 1 end (10%)", async function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 1, true);
+
+            // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
+
         });
 
         it("Expect Unlock percentage to be 10%", async function () {
