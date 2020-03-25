@@ -276,7 +276,7 @@ contract ReversibleICO is IERC777Recipient {
         // The buy phase ends when the lat stage ends
         buyPhaseEndBlock = previousStageEndBlock;
         // The duration of buyPhase in blocks
-        buyPhaseBlockCount = previousStageEndBlock.sub(buyPhaseStartBlock).add(1);
+        buyPhaseBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
         // The contract is now initialized
         initialized = true;
     }
@@ -963,9 +963,10 @@ contract ReversibleICO is IERC777Recipient {
         if (participantStats.NEWreservedTokens == 0) {
             return 0;
         } else {
-            return participantStats.NEWreservedTokens
-            .mul(one.sub(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0)))
-            .div(10 ** 20);
+            return (
+                participantStats.NEWreservedTokens
+                .mul(one.sub(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0)))
+            ).div(10 ** 20);
         }
     }
 
@@ -980,15 +981,16 @@ contract ReversibleICO is IERC777Recipient {
         if (participantStats.NEWreservedTokens == 0) {
             return 0;
         } else {
-            return participantStats.NEWreservedTokens
-            .mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
-            .div(10 ** 20);
+            return (
+                participantStats.NEWreservedTokens
+                .mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
+            ).div(10 ** 20);
         }
     }
 
 
     /**
-     * @notice Returns the participant's ratio of unlocked tokens at a current block.
+     * @notice Returns the participant's ratio of unlocked tokens at a given block.
      * @param _participantAddress The participant's address.
      * @param _blockNumber the current block number.
      * @param _overwriteLastBlock if not 0 it uses the given value instead of `participantStats.NEWlastBlock`
@@ -1016,8 +1018,16 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // Calc currentBlock - lastBlock / period
-        return _blockNumber.sub(startBlock).mul(10 ** 20)
-        .div(buyPhaseBlockCount.sub(startBlock));
+        return (_blockNumber.add(1).sub(startBlock)).mul(10 ** 20)
+        .div(buyPhaseEndBlock.sub(startBlock).add(1));
+    }
+
+    /**
+     * @notice Returns the participant's ratio of unlocked tokens at a current block.
+     * @param _participantAddress The participant's address.
+     */
+    function getCurrentUnlockRatio(address _participantAddress) public view returns (uint256) {
+        return getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0);
     }
 
     //    /**
