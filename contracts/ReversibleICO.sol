@@ -890,7 +890,7 @@ contract ReversibleICO is IERC777Recipient {
 
         uint256 startBlock;
 
-        // IF never set, set it to the start of the buy phase
+        // IF never set OR before buy phase, set it to the start of the buy phase
         if (participantStats.NEWlastBlock < buyPhaseStartBlock) {
             startBlock = buyPhaseStartBlock;
         } else {
@@ -945,7 +945,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE STATS
         participantStats.NEWunlockedTokens = participantStats.NEWreservedTokens.sub(currentlyLocked); // Important: NEWreservedTokens aren't updated yet
-        participantStats.NEWreservedTokens = currentlyLocked.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
+        participantStats.NEWreservedTokens = currentlyLocked.sub(returnedTokenAmount); // Another way: participantStats.NEWreservedTokens.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
 
         // reset all calculations to this point in time.
