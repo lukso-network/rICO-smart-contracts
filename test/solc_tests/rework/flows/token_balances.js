@@ -483,12 +483,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         it("4 - Return 3 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
                 .send({ from: TestParticipant, gas: 1000000 });
-
-
-            // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
-            console.log('DEBUG1 ',  await this.ReversibleICO.methods.DEBUG1().call());
-            console.log('getCurrentBlockNumber ',  await this.ReversibleICO.methods.getCurrentBlockNumber().call());
-
         });
 
         it("Expect balance to be 0.3 tokens", async function () {
@@ -509,6 +503,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         it("5 - Jump to stage 3 end (30%)", async function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 3, true);
+
+
+            // console.log('DEBUG ',  await this.ReversibleICO.methods.getCurrentUnlockRatio(TestParticipant).call());
+            console.log('DEBUG1 ',  await this.ReversibleICO.methods.DEBUG1().call());
+            console.log('getCurrentBlockNumber ',  await this.ReversibleICO.methods.getCurrentBlockNumber().call());
+
         });
 
         it("Expect Unlock percentage to be 30%", async function () {

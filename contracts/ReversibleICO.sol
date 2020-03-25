@@ -2,7 +2,7 @@
  * source       https://github.com/lukso-network/rICO-smart-contracts
  * @name        rICO
  * @package     rICO-smart-contracts
- * @author      Micky Socaci <micky@nowlive.ro>, Fabian Vogelsteller <@frozeman>
+ * @author      Micky Socaci <micky@binarzone.com>, Fabian Vogelsteller <@frozeman>
  * @license     MIT
  */
 
@@ -903,7 +903,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // Calc currentBlock - lastBlock / period
-        return (_blockNumber.add(1).sub(startBlock)).mul(10 ** 20)
+        return (_blockNumber.sub(startBlock)).mul(10 ** 20)
         .div(buyPhaseEndBlock.sub(startBlock).add(1));
     }
 
@@ -950,6 +950,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // reset all calculations to this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
+
+        DEBUG1 = participantStats.NEWlastBlock;
 
         // iterate over stages and calculate the ETH amounts
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
