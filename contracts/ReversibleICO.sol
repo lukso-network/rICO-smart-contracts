@@ -113,10 +113,10 @@ contract ReversibleICO is IERC777Recipient {
     uint8 public stageCount;
     uint256 public stageBlockCount;
 
-    uint256 public DEBUG1 = 9999;
-    uint256 public DEBUG2 = 9999;
-    uint256 public DEBUG3 = 9999;
-    uint256 public DEBUG4 = 9999;
+//    uint256 public DEBUG1 = 9999;
+//    uint256 public DEBUG2 = 9999;
+//    uint256 public DEBUG3 = 9999;
+//    uint256 public DEBUG4 = 9999;
 
     /*
      * Participants
@@ -914,8 +914,6 @@ contract ReversibleICO is IERC777Recipient {
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
-
-        DEBUG1 = participantStats.NEWlastBlock;
 
         // iterate over stages and calculate the ETH amounts
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
