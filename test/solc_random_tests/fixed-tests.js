@@ -236,9 +236,9 @@ async function display(rICO, helpers, Project) {
     );
 
     const result = unlocked.add(projectAllocatedETH).sub(projectWithdrawnETH);
-    const getProjectAvailableEth =  await rICO.methods.getProjectAvailableEth().call() 
+    const getUnlockedProjectETH =  await rICO.methods.getUnlockedProjectETH().call()
 
-    console.log(" > getProjectAvailableEth: calc     ", Project.toEth(result) + " eth");
-    console.log(" > getProjectAvailableEth: unlocked ", Project.toEth(new helpers.BN( getProjectAvailableEth )) + " eth");
+    console.log(" > getUnlockedProjectETH: calc     ", Project.toEth(result) + " eth");
+    console.log(" > getUnlockedProjectETH: unlocked ", Project.toEth(new helpers.BN( getUnlockedProjectETH )) + " eth");
 
 }

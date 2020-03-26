@@ -427,14 +427,14 @@ describe("ProjectWithdraw Testing", function () {
 
                     it("reverts \"Requested amount too big, not enough unlocked ETH available.\"", async function () {
 
-                        let Available = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        let Available = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH: ", helpers.utils.toEth(helpers, Available.toString() ) +" eth" );
 
                         // expect( Available ).to.be.bignumber.above( new BN("0") );
 
 
 
-                        let AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        let AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         let AfterWithdrawcommittedETH = new BN( await ReversibleICOInstance.methods.committedETH().call() );
                         let AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
                         let AfterWithdrawAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
@@ -465,7 +465,7 @@ describe("ProjectWithdraw Testing", function () {
 
                         console.log("after projectWithdrawTx", helpers.utils.toEth(helpers, projSum) +" eth", "\n");
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         AfterWithdrawcommittedETH = new BN( await ReversibleICOInstance.methods.committedETH().call() );
                         AfterWithdrawwithdrawnETH = new BN( await ReversibleICOInstance.methods.withdrawnETH().call() );
                         AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
@@ -520,7 +520,7 @@ describe("ProjectWithdraw Testing", function () {
                         ContractBalance = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
                         console.log("ContractBalance:     ", helpers.utils.toEth(helpers, ContractBalance.toString() ) +" eth" );
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
 
 
@@ -553,7 +553,7 @@ describe("ProjectWithdraw Testing", function () {
                         AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
                         console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
 
                         console.log("");
@@ -576,7 +576,7 @@ describe("ProjectWithdraw Testing", function () {
                         AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
                         console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
 
 
@@ -606,7 +606,7 @@ describe("ProjectWithdraw Testing", function () {
                         AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
                         console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
 
                         console.log("");
@@ -627,7 +627,7 @@ describe("ProjectWithdraw Testing", function () {
                         AfterWithdrawProjectETHWithdrawn = new BN( await ReversibleICOInstance.methods.projectWithdrawnETH().call() );
                         console.log("projectWithdrawnETH: ", helpers.utils.toEth(helpers, AfterWithdrawProjectETHWithdrawn.toString() ) +" eth" );
 
-                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                        AvailableAfterWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
                         console.log("Available ETH:       ", helpers.utils.toEth(helpers, AvailableAfterWithdraw.toString() ) +" eth" );
 
                     });
@@ -636,7 +636,7 @@ describe("ProjectWithdraw Testing", function () {
             
             /*
 
-            describe("getProjectAvailableEth", async function () {
+            describe("getUnlockedProjectETH", async function () {
 
 
                 before(async () => {
@@ -680,11 +680,11 @@ describe("ProjectWithdraw Testing", function () {
 
                 });
 
-                it("getProjectAvailableEth()", async function () {
-                    // getProjectAvailableEth
+                it("getUnlockedProjectETH()", async function () {
+                    // getUnlockedProjectETH
 
-                    const getProjectAvailableEth = await ReversibleICOInstance.methods.getProjectAvailableEth().call();
-                    console.log(getProjectAvailableEth);
+                    const getUnlockedProjectETH = await ReversibleICOInstance.methods.getUnlockedProjectETH().call();
+                    console.log(getUnlockedProjectETH);
 
                 });
 

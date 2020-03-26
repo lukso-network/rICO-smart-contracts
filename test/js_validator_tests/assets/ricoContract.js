@@ -256,7 +256,7 @@ class Contract extends Validator {
         );
     }
 
-    getProjectAvailableEth() {
+    getUnlockedProjectETH() {
 
         let remainingFromAllocation = new BN("0");
         // Calculate the amount of allocated ETH, not withdrawn yet
@@ -514,7 +514,7 @@ class Contract extends Validator {
     projectWithdraw(_ethAmount) {
 
         // Get project unlocked ETH (available for withdrawing)
-        const unlocked = this.getProjectAvailableEth();
+        const unlocked = this.getUnlockedProjectETH();
 
         // Update stats:  number of project withdrawals, total amount withdrawn by the project
         this.projectWithdrawCount++;
