@@ -342,7 +342,7 @@ module.exports = {
     },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
         const stageData = await contract.methods.stages(stageId).call();
-        let block = stageData.startBlock;
+        let block = Number(stageData.startBlock);
         if(end) {
             block = Number(stageData.endBlock) + 1;
         }

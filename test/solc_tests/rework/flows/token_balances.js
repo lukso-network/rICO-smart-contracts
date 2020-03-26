@@ -21,7 +21,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
-    customTestSettings.rico.startBlockDelay = 10;
+    customTestSettings.rico.startBlockDelay = 11; // thats the block when the rICO starts currentBlock + delay = 0 + 11;
     customTestSettings.rico.blocksPerDay = 10;
     customTestSettings.rico.stageDays = 10;
     customTestSettings.rico.stageCount = 10;
@@ -40,14 +40,22 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
     async function revertToFreshDeployment() {
 
-        // console.log('SETTINGS', customTestSettings);
-        
         const contracts = await doFreshDeployment(testKey, 2, customTestSettings);
         this.ReversibleICO = contracts.ReversibleICOInstance;
         TokenContractInstance = contracts.TokenContractInstance;
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
+        console.log('SETTINGS', customTestSettings);
+
+        console.log('commitPhaseStartBlock ', await this.ReversibleICO.methods.commitPhaseStartBlock().call());
+        console.log('commitPhaseEndBlock ', await this.ReversibleICO.methods.commitPhaseEndBlock().call());
+        console.log('commitPhaseBlockCount ', await this.ReversibleICO.methods.commitPhaseBlockCount().call());
+
+
+        console.log('buyPhaseStartBlock ', await this.ReversibleICO.methods.buyPhaseStartBlock().call());
+        console.log('buyPhaseEndBlock ', await this.ReversibleICO.methods.buyPhaseEndBlock().call());
+        console.log('buyPhaseBlockCount ', await this.ReversibleICO.methods.buyPhaseBlockCount().call());
 
 
         const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);

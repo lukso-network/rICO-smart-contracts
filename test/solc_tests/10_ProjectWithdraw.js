@@ -55,7 +55,7 @@ const deployerAddress = accounts[0];
 const whitelistControllerAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
-    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, StageCount,
     StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
     TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
@@ -125,8 +125,8 @@ async function revertToFreshDeployment() {
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
-        // starts in one day (5 blocks)
-        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+        // starts in one day (5 blocks) + one extra block, to make it round for the stages
+        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay + 1;
 
         // 20 days allocation
         commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 20
@@ -136,9 +136,6 @@ async function revertToFreshDeployment() {
         StageCount = 12;
         StageBlockCount = blocksPerDay * StageDays; // 10
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-        // BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _TokenContractAddress
