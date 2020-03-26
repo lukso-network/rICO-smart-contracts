@@ -218,7 +218,7 @@ async function display(rICO, helpers, Project) {
         .sub(projectAllocatedETH);
 
     const unlocked = globalAvailable.mul(
-        helpers.utils.getCurrentUnlockPercentage(
+        helpers.utils.getCurrentGlobalUnlockRatio(
             helpers,
             _currentBlock,
             buyPhaseStartBlock,

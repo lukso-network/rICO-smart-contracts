@@ -272,7 +272,7 @@ module.exports = {
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
     },
-    getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
+    getCurrentGlobalUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
 
         currentBlock = new helpers.BN(currentBlock);
         BuyPhaseStartBlock = new helpers.BN(BuyPhaseStartBlock);
@@ -308,7 +308,7 @@ module.exports = {
                 // buy phase
                 const precision = new helpers.BN(20);
                 const unlocked = tokenAmount.mul(
-                    helpers.utils.getCurrentUnlockPercentage(
+                    helpers.utils.getCurrentGlobalUnlockRatio(
                         helpers,
                         currentBlock,
                         BuyPhaseStartBlock,

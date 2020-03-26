@@ -122,8 +122,8 @@ module.exports = {
                 const getReservedTokenAmount2 = new helpers.BN( await rICO.methods.getReservedTokenAmount(participants[0].address).call() );
                 console.log("getReservedTokenAmount2: ", participants[0].toEth(getReservedTokenAmount2));
 
-                const getCurrentUnlockPercentage = new helpers.BN( await rICO.methods.getCurrentUnlockPercentage().call() );
-                console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentUnlockPercentage));
+                const getCurrentGlobalUnlockRatio = new helpers.BN( await rICO.methods.getCurrentGlobalUnlockRatio().call() );
+                console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentGlobalUnlockRatio));
                 
             }
 
@@ -224,7 +224,7 @@ async function display(rICO, helpers, Project) {
         .sub(projectAllocatedETH);
 
     const unlocked = globalAvailable.mul(
-        helpers.utils.getCurrentUnlockPercentage(
+        helpers.utils.getCurrentGlobalUnlockRatio(
             helpers,
             _currentBlock,
             buyPhaseStartBlock,

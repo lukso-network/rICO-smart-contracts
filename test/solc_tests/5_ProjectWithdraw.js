@@ -1345,8 +1345,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentGlobalUnlockRatio(20).call();
+    const ratioC = helpers.utils.getCurrentGlobalUnlockRatio(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }

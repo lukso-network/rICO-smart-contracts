@@ -119,7 +119,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -129,7 +129,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 10%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("10000000000000000000");
     //     });
 
@@ -154,7 +154,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 30%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("30000000000000000000");
     //     });
 
@@ -179,7 +179,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 80%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("80000000000000000000");
     //     });
 
@@ -253,7 +253,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -263,7 +263,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -288,7 +288,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 10%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("10000000000000000000");
     //     });
 
@@ -313,7 +313,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 30%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("30000000000000000000");
     //     });
 
@@ -338,7 +338,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 80%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("80000000000000000000");
     //     });
 
@@ -412,7 +412,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -462,7 +462,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 40%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("40000000000000000000");
     //     });
 
@@ -487,7 +487,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 80%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("80000000000000000000");
     //     });
 
@@ -562,7 +562,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -650,7 +650,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -737,7 +737,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     //     });
 
     //     it("Expect Unlock percentage to be 0%", async function () {
-    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //         let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //         expect(unlockPercentage).to.be.equal("0");
     //     });
 
@@ -902,7 +902,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 2;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            const unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            const unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("20000000000000000000");
 
         });
@@ -985,7 +985,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 2;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("20000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
@@ -1026,7 +1026,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 4;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("40000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
@@ -1067,7 +1067,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 6;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("60000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
@@ -1220,7 +1220,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 8;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("80000000000000000000");
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
@@ -2043,7 +2043,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         
     //     // it("Expect Unlock percentage to be 60%", async function () {
-    //     //     let unlockPercentage = await this.ReversibleICO.methods.getCurrentUnlockPercentage().call();
+    //     //     let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
     //     //     expect(unlockPercentage).to.be.equal("60000000000000000000");
     //     // });
 

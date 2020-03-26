@@ -241,7 +241,7 @@ class Participant extends Actor {
             acceptedValue = ETH;
         }
 
-        const unlockPercentage = this.getCurrentUnlockPercentage();
+        const unlockPercentage = this.getCurrentGlobalUnlockRatio();
 
         const isWhitelisted = await this.rICO.methods.isWhitelisted(this.address).call();
         if(isWhitelisted) {
@@ -416,7 +416,7 @@ class Participant extends Actor {
         }
 
         const price = await this.rICO.methods.getCurrentPrice().call();
-        const unlockPercentage = this.getCurrentUnlockPercentage();
+        const unlockPercentage = this.getCurrentGlobalUnlockRatio();
 
         if(mode === true) {
 
@@ -430,7 +430,7 @@ class Participant extends Actor {
             if(unlockPercentage.gt(new this.helpers.BN("0"))) {
     
                 // console.log("accept > unlockPercentage: ", unlockPercentage.toString() );
-                // const RicoUnlockPercentage = await this.rICO.methods.getCurrentUnlockPercentage().call(); 
+                // const RicoUnlockPercentage = await this.rICO.methods.getCurrentGlobalUnlockRatio().call(); 
                 // console.log("rico   > unlockPercentage: ", RicoUnlockPercentage.toString() );
 
                 this.expectedBalances.withdrawableETH = this.currentBalances.withdrawableETH.add(
@@ -717,14 +717,14 @@ class Participant extends Actor {
         return rec;
     }
 
-    getCurrentUnlockPercentage() {
-        return this.helpers.utils.getCurrentUnlockPercentage(
+    getCurrentGlobalUnlockRatio() {
+        return this.helpers.utils.getCurrentGlobalUnlockRatio(
             this.helpers, this.block, this.startAndEndBlocks.buyPhaseStartBlock, this.startAndEndBlocks.buyPhaseEndBlock, 20
         ); 
     }
 
     async getContractUnlockPercentage() {
-        return await this.rICO.methods.getCurrentUnlockPercentage().call();
+        return await this.rICO.methods.getCurrentGlobalUnlockRatio().call();
     }
 
     getLastAction() {

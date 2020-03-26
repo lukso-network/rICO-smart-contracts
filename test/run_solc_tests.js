@@ -27,10 +27,10 @@ async function runTests(init) {
     // "5_Cancel",
     // "5_Contributions",
     // "5_Flows",
-    // "10_ProjectWithdraw",
+    "10_ProjectWithdraw",
     
     // "5_Flows",
-    "rework/flows/token_balances",
+    // "rework/flows/token_balances",
     // "rework/flows/withdraw",
 
     // "rework/flows/whitelist",

@@ -125,16 +125,16 @@ async function revertToFreshDeployment() {
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
-        // starts in one day (5 blocks) + one extra block, to make it round for the stages
+        // starts in one day + 1, so the stages are even and end on nice numbers
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay + 1;
 
-        // 20 days allocation
-        commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 20
+        // 22 days allocation
+        commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 22
         commitPhasePrice = helpers.solidity.ether * 0.002;
 
-        // 12 x 2 day periods for distribution
+        // 12 x 30 day periods for distribution
         StageCount = 12;
-        StageBlockCount = blocksPerDay * StageDays; // 10
+        StageBlockCount = blocksPerDay * StageDays; // 30
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
 
         await ReversibleICOInstance.methods.init(
@@ -319,11 +319,11 @@ describe("ProjectWithdraw Testing", function () {
 
             });
 
-            describe("- contract in commit phase ( stage 0 - 6th block )", async function () {
+            describe("- contract in commit phase ( stage 0 - last block )", async function () {
 
                 before(async () => {
                     const stage = 0;
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, false, 6);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, true, 0);
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
@@ -410,9 +410,9 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                it("returns 100 eth ( half of both contributions )", async function () {
-                    console.log('current block number ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                 it("returns 100 eth ( half of both contributions )", async function () {
+
+                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -478,6 +478,14 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 0 (project withdrew the 50 that were available)", async function () {
+
+                    console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
+                    console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
+                    console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
+                    console.log('projectWithdrawnETH ', await ReversibleICOInstance.methods.projectWithdrawnETH().call());
+                    console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
+                    console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
+
 
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
@@ -928,8 +936,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentGlobalUnlockRatio(20).call();
+    const ratioC = helpers.utils.getCurrentGlobalUnlockRatio(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }

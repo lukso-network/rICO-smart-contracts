@@ -273,7 +273,7 @@ class Contract extends Validator {
 
         // Multiply the available ETH with the percentage that belongs to the project now
         let unlocked = globalAvailable.mul(
-            getCurrentUnlockPercentage()
+            getCurrentGlobalUnlockRatio()
         ).div(10 ** 20);
 
         // Available = unlocked + projectNotWithdrawn

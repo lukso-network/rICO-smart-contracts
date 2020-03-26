@@ -98,7 +98,7 @@ class Validator {
         );
     }
 
-    getCurrentUnlockPercentage() {
+    getCurrentGlobalUnlockRatio() {
         const currentBlock = new BN( this.getCurrentBlockNumber() );
         const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );

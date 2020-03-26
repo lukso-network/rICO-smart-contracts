@@ -390,7 +390,7 @@ describe("Withdrawal Testing", function () {
             // jump to last block of phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1, true);
 
-            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("10000000000000000000");
         });
 
@@ -629,7 +629,7 @@ describe("Withdrawal Testing", function () {
             // jump to last block of phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 5, true);
 
-            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("50000000000000000000");
         });
 
