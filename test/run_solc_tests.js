@@ -30,8 +30,8 @@ async function runTests(init) {
     // "10_ProjectWithdraw",
     
     // "5_Flows",
-    "rework/flows/token_balances",
-    // "rework/flows/withdraw",
+    //"rework/flows/token_balances",
+    "rework/flows/withdraw",
 
     // "rework/flows/whitelist",
 
