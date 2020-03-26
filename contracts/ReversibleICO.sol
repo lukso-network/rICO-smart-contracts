@@ -66,8 +66,8 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectWithdrawCount; // default: 0
     /// @dev Total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH; // default: 0
-    /// @dev Last block since the project has withdrawn.
-//    uint256 public projectWithdrawnBlock; // default: 0
+    /// @dev Last block since the project has withdrawn. TODO remove?
+    uint256 public projectWithdrawnBlock; // default: 0
     /// @dev Total amount allocated to the project by participant withdraws/contributions.
     uint256 public projectAllocatedETH; // default: 0
 
@@ -290,7 +290,7 @@ contract ReversibleICO is IERC777Recipient {
         buyPhaseBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
 
         // UPDATE global stats
-//        projectWithdrawnBlock = buyPhaseStartBlock;
+        projectWithdrawnBlock = buyPhaseStartBlock;
 
         // The contract is now initialized
         initialized = true;
@@ -502,7 +502,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         projectWithdrawCount++;
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
-//        projectWithdrawnBlock = getCurrentBlockNumber();
+        projectWithdrawnBlock = getCurrentBlockNumber();
 
         // Transfer ETH to project wallet
         address(uint160(projectWalletAddress)).transfer(_ethAmount);
@@ -539,7 +539,7 @@ contract ReversibleICO is IERC777Recipient {
         return newlyAvailable.mul(
             getGlobalUnlockRatio(
                 getCurrentBlockNumber(),
-                buyPhaseStartBlock,
+                buyPhaseStartBlock,//projectWithdrawnBlock,//buyPhaseStartBlock,
                 buyPhaseEndBlock
             )
         ).div(10 ** 20)
@@ -992,6 +992,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         withdrawnETH = withdrawnETH.add(returnEthAmount);
         committedETH = committedETH.sub(returnEthAmount);
+        projectWithdrawnBlock = getCurrentBlockNumber();
 
 
         // Return overflowing tokens received
@@ -1131,6 +1132,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         committedETH = committedETH.add(_committedEth);
         projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
+        projectWithdrawnBlock = getCurrentBlockNumber();
     }
 
 
