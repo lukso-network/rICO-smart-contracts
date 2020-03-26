@@ -479,14 +479,6 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("returns 0 (project withdrew the 50 that were available)", async function () {
 
-                    console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
-                    console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
-                    console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
-                    console.log('projectWithdrawnETH ', await ReversibleICOInstance.methods.projectWithdrawnETH().call());
-                    console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
-                    console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
-
-
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
@@ -583,6 +575,16 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 50 eth ( allocated by withdraw )", async function () {
+
+                    console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
+                    console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
+                    console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
+                    console.log('projectWithdrawnETH ', await ReversibleICOInstance.methods.projectWithdrawnETH().call());
+                    console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
+                    console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
+                    console.log('DEBUG2 ', await ReversibleICOInstance.methods.DEBUG2().call());
+
+
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()
