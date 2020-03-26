@@ -539,7 +539,7 @@ contract ReversibleICO is IERC777Recipient {
         return newlyAvailable.mul(
             getGlobalUnlockRatio(
                 getCurrentBlockNumber(),
-                projectWithdrawnBlock.add(1),//projectWithdrawnBlock,//buyPhaseStartBlock,
+                buyPhaseStartBlock,//projectWithdrawnBlock,//buyPhaseStartBlock,
                 buyPhaseEndBlock
             )
         ).div(10 ** 20)
