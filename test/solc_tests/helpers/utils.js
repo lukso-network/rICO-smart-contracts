@@ -344,7 +344,7 @@ module.exports = {
         const stageData = await contract.methods.stages(stageId).call();
         let block = Number(stageData.startBlock);
         if(end) {
-            block = Number(stageData.endBlock) + 1;
+            block = Number(stageData.endBlock);
         }
 
         if(addToBlockNumber !== false) {

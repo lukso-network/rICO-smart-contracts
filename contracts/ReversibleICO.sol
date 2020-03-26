@@ -859,7 +859,7 @@ contract ReversibleICO is IERC777Recipient {
         if (participantStats.NEWlastBlock < buyPhaseStartBlock) {
             startBlock = buyPhaseStartBlock;
         } else {
-            startBlock = participantStats.NEWlastBlock;
+            startBlock = participantStats.NEWlastBlock.add(1);
         }
 
         // overwrite last block, if _overwriteLastBlock is given
@@ -867,9 +867,12 @@ contract ReversibleICO is IERC777Recipient {
             startBlock = _overwriteLastBlock;
         }
 
+        // we subtract the start block, to get the full period
+        startBlock = startBlock.sub(1);
+
         // Calc currentBlock - lastBlock / period
         return (_blockNumber.sub(startBlock)).mul(10 ** 20)
-        .div(buyPhaseEndBlock.sub(startBlock).add(1));
+        .div(buyPhaseEndBlock.sub(startBlock));
     }
 
     /**
