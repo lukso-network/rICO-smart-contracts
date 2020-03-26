@@ -113,10 +113,10 @@ contract ReversibleICO is IERC777Recipient {
     uint8 public stageCount;
     uint256 public stageBlockCount;
 
-//    uint256 public DEBUG1 = 9999;
-//    uint256 public DEBUG2 = 9999;
-//    uint256 public DEBUG3 = 9999;
-//    uint256 public DEBUG4 = 9999;
+    uint256 public DEBUG1 = 9999;
+    uint256 public DEBUG2 = 9999;
+    uint256 public DEBUG3 = 9999;
+    uint256 public DEBUG4 = 9999;
 
     /*
      * Participants
@@ -976,11 +976,6 @@ contract ReversibleICO is IERC777Recipient {
 
         uint8 currentStage = getCurrentStage();
 
-        // Get the equivalent amount in tokens
-        uint256 newTokenAmount = getTokenAmountForEthAtStage(
-            _receivedValue, currentStage
-        );
-
         Participant storage participantRecord = participantsByAddress[_from];
         ParticipantDetails storage participantStats = participantAggregatedStats[_from];
         ParticipantStageDetails storage byStage = participantRecord.byStage[currentStage];
@@ -1035,6 +1030,7 @@ contract ReversibleICO is IERC777Recipient {
             uint256 pendingEth = byStage.NEWpendingEth;
             uint256 returnEth = 0;
 
+
             // if incoming value is higher than what we can accept,
             // just accept the difference and return the rest
             if (pendingEth > maxAvailableEth) {
@@ -1049,6 +1045,10 @@ contract ReversibleICO is IERC777Recipient {
                 pendingEth, stageId
             );
 
+            DEBUG1 = pendingEth;
+            DEBUG2 = newTokenAmount;
+            DEBUG3 = stages[stageId].tokenPrice;
+            DEBUG4 = stageId;
 
             // calculate the instant allocation for the new contribution
             calculateAndSetNewContribution(_participantAddress, stageId, newTokenAmount, pendingEth, returnEth, unlockRatio);
@@ -1075,9 +1075,9 @@ contract ReversibleICO is IERC777Recipient {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
         ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[_stageId];
 
-        uint256 newUnlockedTokens = _newTokenAmount.mul(_unlockRatio);
+        uint256 newUnlockedTokens = _newTokenAmount.mul(_unlockRatio).div(10 ** 20);
         uint256 newReservedTokens = _newTokenAmount.sub(newUnlockedTokens);
-        uint256 allocatedEthAmount = _pendingEth.mul(_unlockRatio);
+        uint256 allocatedEthAmount = _pendingEth.mul(_unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
         byStage.NEWreservedTokens = byStage.NEWreservedTokens.add(newReservedTokens);
