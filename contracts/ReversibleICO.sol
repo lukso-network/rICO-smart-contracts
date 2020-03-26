@@ -131,8 +131,8 @@ contract ReversibleICO is IERC777Recipient {
         uint256 totalSentETH;           // Total amount of ETH sent to the smart contract
 //        uint256 totalReservedTokens;    // initial reserved token amount over all contributions
 //        uint256 returnedETH;            // ETH returned by that couldn't be accepted (tokens sold out)
-        uint256 committedETH;           // ETH committed to reserve tokens
-        uint256 withdrawnETH;           // ETH withdrawn by sending back tokens
+//        uint256 committedETH;           // ETH committed to reserve tokens
+//        uint256 withdrawnETH;           // ETH withdrawn by sending back tokens
 //        uint256 allocatedETH;           // ETH allocated to project when contributing or withdrawing
 //        uint256 pendingTokens;          // tokens that are pending, because the participant is not whitelisted yet
 //        uint256 returnedTokens;         // tokens returned by participant to contract
@@ -243,7 +243,7 @@ contract ReversibleICO is IERC777Recipient {
         whitelistControllerAddress = _whitelistControllerAddress;
         projectWalletAddress = _projectWalletAddress;
 
-        // Assign other variables
+        // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;
         commitPhaseBlockCount = _commitPhaseBlockCount;
         commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
@@ -271,12 +271,13 @@ contract ReversibleICO is IERC777Recipient {
             stageN.startBlock = uint128(previousStageEndBlock.add(1));
             // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
             stageN.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
-            // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
             // Store the current stage endBlock in order to update the next one
             previousStageEndBlock = stageN.endBlock;
+            // At each stage the token price increases by _stagePriceIncrease * stageCount
+            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
         }
 
+        // UPDATE global STATS
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
         buyPhaseStartBlock = commitPhaseEndBlock.add(1);
         // The buy phase ends when the lat stage ends
@@ -512,9 +513,9 @@ contract ReversibleICO is IERC777Recipient {
      */
     function getProjectAvailableEth() public view returns (uint256) {
         // how much eth has been "approved", minus returned, minus allocated directly
-        uint256 globalAvailable = committedETH
-        .sub(withdrawnETH)
-        .sub(projectAllocatedETH);
+        uint256 globalAvailable = committedETH;
+//        .sub(withdrawnETH)
+//        .sub(projectAllocatedETH);
 
         // Multiply by percentage
         uint256 unlocked = globalAvailable.mul(
@@ -814,7 +815,7 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             return (
                 participantStats.NEWreservedTokens
-                .mul(one.sub(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0)))
+                .mul(one.sub(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0)))
             ).div(10 ** 20);
         }
     }
@@ -832,7 +833,7 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             return (
                 participantStats.NEWreservedTokens
-                .mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
+                .mul(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0))
             ).div(10 ** 20);
         }
     }
@@ -844,7 +845,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _blockNumber the current block number.
      * @param _overwriteLastBlock if not 0 it uses the given value instead of `participantStats.NEWlastBlock`
      */
-    function getUnlockRatio(address _participantAddress, uint256 _blockNumber, uint256 _overwriteLastBlock) public view returns (uint256) {
+    function getUnlockRatioForParticipant(address _participantAddress, uint256 _blockNumber, uint256 _overwriteLastBlock) public view returns (uint256) {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
         // IF buy phase hasn't started, return 0
@@ -876,7 +877,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _participantAddress The participant's address.
      */
     function getCurrentUnlockRatio(address _participantAddress) public view returns (uint256) {
-        return getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0);
+        return getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0);
     }
 
 
@@ -933,7 +934,7 @@ contract ReversibleICO is IERC777Recipient {
             returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
             // TODO fix
 //            uint256 allocatedEthAmountInStage = getEthAmountForTokensAtStage(
-//                byStage.NEWreservedTokens.mul(getUnlockRatio(_participantAddress, getCurrentBlockNumber(), 0))
+//                byStage.NEWreservedTokens.mul(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0))
 //            , stageId);
 
             // UPDATE participantStats
@@ -949,7 +950,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE global STATS
         withdrawnETH = withdrawnETH.add(returnEthAmount);
-        // committedETH = committedETH.sub(returnEthAmount);  // gets deducted in getProjectAvailableEth()
+        committedETH = committedETH.sub(returnEthAmount);
         // TODO fix
 //        projectAllocatedETH = projectAllocatedETH.add(allocatedEthAmount);
 
@@ -1015,7 +1016,7 @@ contract ReversibleICO is IERC777Recipient {
 
 
         uint8 currentStage = getCurrentStage();
-        uint256 unlockRatio = getUnlockRatio(_participantAddress, getCurrentBlockNumber(), buyPhaseStartBlock);
+        uint256 unlockRatio = getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), buyPhaseStartBlock);
         uint256 totalReturnETH;
 
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {

@@ -125,20 +125,20 @@ async function revertToFreshDeployment() {
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
-        // starts in one day
+        // starts in one day (5 blocks)
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
 
-        // 22 days allocation
-        commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 22
+        // 20 days allocation
+        commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 20
         commitPhasePrice = helpers.solidity.ether * 0.002;
 
-        // 12 x 30 day periods for distribution
+        // 12 x 2 day periods for distribution
         StageCount = 12;
-        StageBlockCount = blocksPerDay * StageDays; // 30
+        StageBlockCount = blocksPerDay * StageDays; // 10
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
         commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
 
-        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+        // BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _TokenContractAddress
@@ -322,11 +322,11 @@ describe("ProjectWithdraw Testing", function () {
 
             });
 
-            describe("- contract in commit phase ( stage 0 - last block )", async function () {
+            describe("- contract in commit phase ( stage 0 - 6th block )", async function () {
 
                 before(async () => {
                     const stage = 0;
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, false, 6);
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
@@ -414,6 +414,7 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 100 eth ( half of both contributions )", async function () {
+                    console.log('current block number ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
                     expect(
                         ProjectAvailableEth.toString()

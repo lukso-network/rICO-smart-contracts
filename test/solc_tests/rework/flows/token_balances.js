@@ -40,11 +40,14 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
     async function revertToFreshDeployment() {
 
+        // console.log('SETTINGS', customTestSettings);
+        
         const contracts = await doFreshDeployment(testKey, 2, customTestSettings);
         this.ReversibleICO = contracts.ReversibleICOInstance;
         TokenContractInstance = contracts.TokenContractInstance;
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
+
 
 
         const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
