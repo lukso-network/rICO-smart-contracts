@@ -21,7 +21,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
-    customTestSettings.rico.startBlockDelay = 10;
+    customTestSettings.rico.startBlockDelay = 11;
     customTestSettings.rico.blocksPerDay = 10;
     customTestSettings.rico.stageDays = 10;
     customTestSettings.rico.stageCount = 10;
@@ -746,6 +746,11 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("3 - Jump to stage 2 end block (20 % unlocked)", async function () {
             const stageId = 2;
             await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+
+            console.log('currentBlock ', await this.ReversibleICO.methods.getCurrentBlockNumber().call());
+            console.log('buyPhaseStartBlock ', await this.ReversibleICO.methods.buyPhaseStartBlock().call());
+            console.log('buyPhaseEndBlock ', await this.ReversibleICO.methods.buyPhaseEndBlock().call());
+            console.log('buyPhaseBlockCount ', await this.ReversibleICO.methods.buyPhaseBlockCount().call());
         });
 
         it("Expect full token balance to be 2 tokens", async function () {
