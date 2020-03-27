@@ -634,7 +634,8 @@ contract ReversibleICO is IERC777Recipient {
     function getParticipantDetailsByStage(address _address, uint8 _stageId) public view
     returns (
         uint256 NEWreservedTokens,
-        uint256 NEWpendingEth
+        uint256 NEWpendingEth,
+        uint256 NEWcommittedEth
 //        uint256 NEWallocatedEth
 
 //        uint256 stagetotalSentETH,
@@ -651,7 +652,8 @@ contract ReversibleICO is IERC777Recipient {
         ParticipantStageDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
         return (
         totalsRecord.NEWreservedTokens,
-        totalsRecord.NEWpendingEth
+        totalsRecord.NEWpendingEth,
+        totalsRecord.NEWcommittedEth
 //        totalsRecord.NEWallocatedEth
 
 //        totalsRecord.totalSentETH,
