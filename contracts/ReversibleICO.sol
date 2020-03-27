@@ -964,7 +964,13 @@ contract ReversibleICO is IERC777Recipient {
                 break;
             }
 
+
             uint256 processTokens = byStage.NEWreservedTokens;
+            
+            // reduce the process tokens in this stage by whats currently still locked
+            uint256 one = (10 ** 20);
+            processTokens = processTokens.mul(one.sub(unlockRatio)).div(10 ** 20);
+
             if (returnedTokenAmount < processTokens) {
                 processTokens = returnedTokenAmount;
             }
