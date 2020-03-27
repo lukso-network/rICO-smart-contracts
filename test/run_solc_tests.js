@@ -21,8 +21,8 @@ async function runTests(init) {
     // "rework/methods/tokens/getReservedTokenAmount",
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
-    // "rework/flows/withdraw",
-    "rework/flows/token_balances",
+    "rework/flows/withdraw",
+    // "rework/flows/token_balances",
 
     // // // these need to be reworked
     // "5_Cancel",
@@ -31,7 +31,7 @@ async function runTests(init) {
     // "10_ProjectWithdraw",
     
     // "5_Flows","rework/flows/withdraw",
-    "rework/flows/withdraw",
+    // "rework/flows/withdraw",
 
     // "5_ProjectWithdraw",
     // "6_Gnosis-Safe",

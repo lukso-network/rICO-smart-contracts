@@ -142,17 +142,18 @@ contract ReversibleICO is IERC777Recipient {
 //        uint256 lastWithdrawBlock;      // block when last withdraw operation was recorded
 
         uint256 NEWtotalReservedTokens; // unecessary
-        uint256 NEWreservedTokens;
+        uint256 NEWcurrentReservedTokens;
 //        uint256 NEWunlockedTokens; // NEEDED?
         uint256 NEWallocatedTokens;
         uint256 NEWpendingEth;
 //        uint256 NEWcommittedEth;
 //        uint256 NEWallocatedEth;
         uint256 NEWlastBlock;
+        uint256 NEWlastHigh;
     }
     
     struct ParticipantStageDetails {
-        uint256 NEWreservedTokens;
+        uint256 NEWcurrentReservedTokens;
         uint256 NEWpendingEth;
 //        uint256 NEWcommittedEth;
 //        uint256 NEWallocatedEth;
@@ -634,7 +635,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function getParticipantDetailsByStage(address _address, uint8 _stageId) public view
     returns (
-        uint256 NEWreservedTokens,
+        uint256 NEWcurrentReservedTokens,
         uint256 NEWpendingEth
 //        uint256 NEWcommittedEth
 //        uint256 NEWallocatedEth
@@ -652,7 +653,7 @@ contract ReversibleICO is IERC777Recipient {
 
         ParticipantStageDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
         return (
-        totalsRecord.NEWreservedTokens,
+        totalsRecord.NEWcurrentReservedTokens,
         totalsRecord.NEWpendingEth
 //        totalsRecord.NEWcommittedEth
 //        totalsRecord.NEWallocatedEth
@@ -810,11 +811,11 @@ contract ReversibleICO is IERC777Recipient {
 
         uint256 one = (10 ** 20);
 
-        if (participantStats.NEWreservedTokens == 0) {
+        if (participantStats.NEWcurrentReservedTokens == 0) {
             return 0;
         } else {
             return (
-                participantStats.NEWreservedTokens
+                participantStats.NEWcurrentReservedTokens
                 .mul(one.sub(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0)))
             ).div(10 ** 20);
 //            .sub(participantStats.NEWallocatedTokens);
@@ -829,11 +830,11 @@ contract ReversibleICO is IERC777Recipient {
     function getUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
-        if (participantStats.NEWreservedTokens == 0) {
+        if (participantStats.NEWcurrentReservedTokens == 0) {
             return 0;
         } else {
             return (
-                participantStats.NEWreservedTokens
+                participantStats.NEWcurrentReservedTokens
                 .mul(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0))
             ).div(10 ** 20);
         }
@@ -914,13 +915,15 @@ contract ReversibleICO is IERC777Recipient {
 
         // Only allocate the portion of what he returns
         // uint256 allocatedEth = participantStats.NEWcommittedEth.mul(unlockRatio).div(10 ** 20);
-        uint256 allocatedTokens = returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
+        // TODO correct?
+        uint256 allocatedTokens = participantStats.NEWcurrentReservedTokens.mul(unlockRatio).div(10 ** 20);// returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
-//        participantStats.NEWunlockedTokens = participantStats.NEWreservedTokens.sub(currentlyLocked); // Important: NEWreservedTokens aren't updated yet
-        participantStats.NEWreservedTokens = currentlyLocked.sub(returnedTokenAmount); // Another way: participantStats.NEWreservedTokens.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
+//        participantStats.NEWunlockedTokens = participantStats.NEWcurrentReservedTokens.sub(currentlyLocked); // Important: NEWcurrentReservedTokens aren't updated yet
+        participantStats.NEWcurrentReservedTokens = currentlyLocked.sub(returnedTokenAmount); // Another way: participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount).sub(participantStats.NEWunlockedTokens);
+        participantStats.NEWlastHigh = participantStats.NEWtotalReservedTokens;
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
-        participantStats.NEWallocatedTokens = participantStats.NEWallocatedTokens.add(allocatedTokens);
+//        participantStats.NEWallocatedTokens = participantStats.NEWallocatedTokens.add(allocatedTokens);
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
@@ -936,7 +939,7 @@ contract ReversibleICO is IERC777Recipient {
                 break;
             }
 
-            uint256 processTokens = byStage.NEWreservedTokens;//NEWcommittedEth;
+            uint256 processTokens = byStage.NEWcurrentReservedTokens;//NEWcommittedEth;
 
             // reduce the process tokens in this stage by whats currently still locked
             processTokens = processTokens.mul(unlockRatio).div(10 ** 20);
@@ -973,7 +976,7 @@ contract ReversibleICO is IERC777Recipient {
                 break;
             }
 
-            uint256 processTokens = byStage.NEWreservedTokens;
+            uint256 processTokens = byStage.NEWcurrentReservedTokens;
 
             // reduce the process tokens in this stage by whats currently still locked
             uint256 one = (10 ** 20);
@@ -987,7 +990,7 @@ contract ReversibleICO is IERC777Recipient {
             returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
 
             // UPDATE participantStats
-            byStage.NEWreservedTokens = byStage.NEWreservedTokens.sub(processTokens);
+            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(processTokens);
 
             // reduce processed token amount from returned token amount
             returnedTokenAmount = returnedTokenAmount.sub(processTokens);
@@ -1121,17 +1124,17 @@ contract ReversibleICO is IERC777Recipient {
 
 //        uint256 newUnlockedTokens = _newTokenAmount.mul(_unlockRatio).div(10 ** 20);
         uint256 one = (10 ** 20);
-        uint256 newReservedTokens = _newTokenAmount.mul(one.sub(_unlockRatio)).div(10 ** 20);
+        uint256 NEWcurrentReservedTokens = _newTokenAmount.mul(one.sub(_unlockRatio)).div(10 ** 20);
         uint256 allocatedEthAmount = _committedEth.mul(_unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
 //        byStage.NEWcommittedEth = byStage.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
-        byStage.NEWreservedTokens = byStage.NEWreservedTokens.add(newReservedTokens);
+        byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.add(NEWcurrentReservedTokens);
 //        byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
         byStage.NEWpendingEth = byStage.NEWpendingEth.sub(_committedEth).sub(_returnETH);
 
 //        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
-        participantStats.NEWreservedTokens = participantStats.NEWreservedTokens.add(newReservedTokens);
+        participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.add(NEWcurrentReservedTokens);
 //        participantStats.NEWunlockedTokens = participantStats.NEWunlockedTokens.add(newUnlockedTokens);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.add(_newTokenAmount);
 //        participantStats.NEWallocatedEth = participantStats.NEWallocatedEth.add(allocatedEthAmount);
