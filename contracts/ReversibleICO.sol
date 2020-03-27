@@ -908,6 +908,9 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = currentlyLocked;
         }
 
+        // Only allocate the portion of what he returns
+        // uint256 allocatedEth = participantStats.NEWcommittedEth.mul(unlockRatio).div(10 ** 20);
+        uint256 allocatedTokens = returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
         participantStats.NEWunlockedTokens = participantStats.NEWreservedTokens.sub(currentlyLocked); // Important: NEWreservedTokens aren't updated yet
@@ -917,10 +920,7 @@ contract ReversibleICO is IERC777Recipient {
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
 
-        // Only allocate the portion of what he returns
-        // uint256 allocatedEth = participantStats.NEWcommittedEth.mul(unlockRatio).div(10 ** 20);
-        uint256 allocatedTokens = returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
-
+        
         // -> ALLOCATE TO PROJECT
         // ALLOCATES FIRST STAGES UNLOCKED TOKENS FIRST (LOWEST PRICED TOKENS)
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
