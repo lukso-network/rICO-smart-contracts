@@ -153,7 +153,7 @@ contract ReversibleICO is IERC777Recipient {
     struct ParticipantStageDetails {
         uint256 NEWreservedTokens;
         uint256 NEWpendingEth;
-        uint256 NEWcommittedEth;
+//        uint256 NEWcommittedEth;
 //        uint256 NEWallocatedEth;
     }
 
@@ -910,6 +910,9 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = currentlyLocked;
         }
 
+        // Only allocate the portion of what he returns
+        // uint256 allocatedEth = participantStats.NEWcommittedEth.mul(unlockRatio).div(10 ** 20);
+        uint256 allocatedTokens = returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
         participantStats.NEWunlockedTokens = participantStats.NEWreservedTokens.sub(currentlyLocked); // Important: NEWreservedTokens aren't updated yet
@@ -919,10 +922,7 @@ contract ReversibleICO is IERC777Recipient {
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
 
-        // Only allocate the portion of what he returns
-        // uint256 allocatedEth = participantStats.NEWcommittedEth.mul(unlockRatio).div(10 ** 20);
-        uint256 allocatedTokens = returnedTokenAmount.mul(unlockRatio).div(10 ** 20);
-
+        
         // -> ALLOCATE TO PROJECT
         // ALLOCATES FIRST STAGES UNLOCKED TOKENS FIRST (LOWEST PRICED TOKENS)
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
@@ -934,6 +934,10 @@ contract ReversibleICO is IERC777Recipient {
             }
 
             uint256 processTokens = byStage.NEWreservedTokens;//NEWcommittedEth;
+
+            // reduce the process tokens in this stage by whats currently still locked
+            processTokens = processTokens.mul(unlockRatio).div(10 ** 20);
+
             if (allocatedTokens < processTokens) {
                 processTokens = allocatedTokens;
             }
@@ -965,7 +969,7 @@ contract ReversibleICO is IERC777Recipient {
             if(returnedTokenAmount == 0) {
                 break;
             }
-            
+
             uint256 processTokens = byStage.NEWreservedTokens;
 
             // reduce the process tokens in this stage by whats currently still locked
@@ -1117,12 +1121,12 @@ contract ReversibleICO is IERC777Recipient {
         uint256 allocatedEthAmount = _committedEth.mul(_unlockRatio).div(10 ** 20);
 
         // UPDATE STATS
-        byStage.NEWcommittedEth = byStage.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
+//        byStage.NEWcommittedEth = byStage.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
         byStage.NEWreservedTokens = byStage.NEWreservedTokens.add(newReservedTokens);
 //        byStage.NEWallocatedEth = byStage.NEWallocatedEth.add(allocatedEthAmount);
         byStage.NEWpendingEth = byStage.NEWpendingEth.sub(_committedEth).sub(_returnETH);
 
-        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
+//        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.add(_committedEth.sub(allocatedEthAmount));
         participantStats.NEWreservedTokens = participantStats.NEWreservedTokens.add(newReservedTokens);
         participantStats.NEWunlockedTokens = participantStats.NEWunlockedTokens.add(newUnlockedTokens);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.add(_newTokenAmount);
