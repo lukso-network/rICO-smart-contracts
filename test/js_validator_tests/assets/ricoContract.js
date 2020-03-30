@@ -63,7 +63,7 @@ class Contract extends Validator {
         this.participantsById = [];
         this.participantCount = 0;
 
-        this.projectAllocatedETH = new BN("0");
+        this.projectUnlockedETH = new BN("0");
         this.projectWithdrawnETH = new BN("0");
         this.committedETH = new BN("0");
         this.withdrawnETH = new BN("0");
@@ -256,12 +256,12 @@ class Contract extends Validator {
         );
     }
 
-    getUnlockedProjectETH() {
+    getAvailableProjectETH() {
 
         let remainingFromAllocation = new BN("0");
         // Calculate the amount of allocated ETH, not withdrawn yet
-        if (this.projectAllocatedETH.gt(this.projectWithdrawnETH)) {
-            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
+        if (this.projectUnlockedETH.gt(this.projectWithdrawnETH)) {
+            remainingFromAllocation = projectUnlockedETH.sub(projectWithdrawnETH);
         }
 
         // Calculate ETH that is globally available:
@@ -417,7 +417,7 @@ class Contract extends Validator {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            this.projectAllocatedETH = projectAllocatedETH.sub(participantRecord.allocatedETH);
+            this.projectUnlockedETH = projectUnlockedETH.sub(participantRecord.allocatedETH);
 
             if (remainingTokenAmount.gt(new BN("0"))) {
 
@@ -499,7 +499,7 @@ class Contract extends Validator {
 
                 // allocate remaining ETH to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
-                this.projectAllocatedETH = this.projectAllocatedETH.add(participantRecord.allocatedETH);
+                this.projectUnlockedETH = this.projectUnlockedETH.add(participantRecord.allocatedETH);
 
                 // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);
@@ -514,7 +514,7 @@ class Contract extends Validator {
     projectWithdraw(_ethAmount) {
 
         // Get project unlocked ETH (available for withdrawing)
-        const unlocked = this.getUnlockedProjectETH();
+        const unlocked = this.getAvailableProjectETH();
 
         // Update stats:  number of project withdrawals, total amount withdrawn by the project
         this.projectWithdrawCount++;

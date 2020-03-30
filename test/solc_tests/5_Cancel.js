@@ -779,8 +779,8 @@ describe("Testing canceling", function () {
                 .to.be.bignumber.equal(globalCommittedETH, "ReversibleICO.committedETH mismatch");
             expect(new helpers.BN(await ReversibleICOInstance.methods.withdrawnETH().call()))
                 .to.be.bignumber.equal(globalWithdrawnETH, "ReversibleICO.withdrawnETH mismatch");
-            expect(new helpers.BN(await ReversibleICOInstance.methods.projectAllocatedETH().call()))
-                .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectAllocatedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.projectUnlockedETH().call()))
+                .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectUnlockedETH mismatch");
         });
     });
 

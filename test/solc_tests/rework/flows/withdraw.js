@@ -1945,8 +1945,8 @@ describe("ReversibleICO - Withdraw Testing", function () {
         //     expect(aggregatedStatsBefore.allocatedETH).to.be.equal("0");
         // });
 
-        it("getUnlockedProjectETH returns 0 (since project cannot withdraw at this point)", async function () {
-            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+        it("getAvailableProjectETH returns 0 (since project cannot withdraw at this point)", async function () {
+            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
             expect(ProjectAvailableEth.toString()).to.equal("0");
         });
 
@@ -1986,8 +1986,8 @@ describe("ReversibleICO - Withdraw Testing", function () {
         //     expect(aggregatedStatsBefore.allocatedETH).to.be.equal("0");
         // });
 
-        it("getUnlockedProjectETH returns 0 (since project cannot withdraw at this point)", async function () {
-            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+        it("getAvailableProjectETH returns 0 (since project cannot withdraw at this point)", async function () {
+            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
             expect(ProjectAvailableEth.toString()).to.equal("0");
         });
 
@@ -2029,8 +2029,8 @@ describe("ReversibleICO - Withdraw Testing", function () {
         //     expect(aggregatedStatsBefore.allocatedETH).to.be.equal("0");
         // });
 
-        it("getUnlockedProjectETH returns 20% of contributions", async function () {
-            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+        it("getAvailableProjectETH returns 20% of contributions", async function () {
+            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
             const ContributionAmount = priceInStage(0).mul(new BN(1500))
                 .add( priceInStage(2).mul(new BN(2000)) );
             const projectAmount = ContributionAmount.div(new BN(100)).mul(new BN(20));
@@ -2084,13 +2084,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
         //     expect(aggregatedStats.allocatedETH).to.be.equal(AllocationAmount.toString());
         // });
 
-        it("getUnlockedProjectETH returns 20% of the stage 0 + stage 2 contribution before first return", async function () {
+        it("getAvailableProjectETH returns 20% of the stage 0 + stage 2 contribution before first return", async function () {
 
-            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
-            const projectAllocatedETH = new BN( await ReversibleICOInstance.methods.projectAllocatedETH().call() );
+            const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
+            const projectUnlockedETH = new BN( await ReversibleICOInstance.methods.projectUnlockedETH().call() );
 
             // console.log("ProjectAvailableEth:         ", ProjectAvailableEth.toString());
-            // console.log("projectAllocatedETH:         ", projectAllocatedETH.toString());
+            // console.log("projectUnlockedETH:         ", projectUnlockedETH.toString());
 
 
             const ContributionAmountInStage0 = priceInStage(0).mul(new BN(1500));

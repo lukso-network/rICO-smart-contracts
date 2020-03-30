@@ -224,7 +224,7 @@ describe("ProjectWithdraw Testing", function () {
         await revertToFreshDeployment();
     });
 
-    describe("getUnlockedProjectETH()", function () {
+    describe("getAvailableProjectETH()", function () {
 
         const ContributionAmount = new BN("100").mul( helpers.solidity.etherBN );
 
@@ -253,7 +253,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since project cannot withdraw at this point)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(ProjectAvailableEth.toString()).to.equal("0");
                 });
 
@@ -272,7 +272,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since contribution is not whitelisted)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -291,7 +291,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since contribution is not whitelisted)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -328,7 +328,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since project cannot withdraw at this point)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(ProjectAvailableEth.toString()).to.equal("0");
                 });
 
@@ -347,7 +347,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 50 eth (project gets 50%)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -368,7 +368,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 100 eth (project gets 100%)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -412,7 +412,7 @@ describe("ProjectWithdraw Testing", function () {
 
                  it("returns 100 eth ( half of both contributions )", async function () {
 
-                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -432,7 +432,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 200 eth", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -463,7 +463,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
@@ -479,7 +479,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("returns 0 (project withdrew the 50 that were available)", async function () {
 
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal("0");
@@ -499,7 +499,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("returns 25 (project already withdrew the 50 that were available at middle)", async function () {
 
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -519,7 +519,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 50 eth ( that was remaining in contract )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -585,7 +585,7 @@ describe("ProjectWithdraw Testing", function () {
                     console.log('DEBUG3 ', await ReversibleICOInstance.methods.DEBUG3().call());
 
 
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -605,7 +605,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 50 eth", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -657,7 +657,7 @@ describe("ProjectWithdraw Testing", function () {
                 projectWalletBalanceBefore = await helpers.utils.getBalance(helpers, projectWalletAddress);
 
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
@@ -676,7 +676,7 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 0 eth ( since balance was already withdrawn )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -715,7 +715,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 eth ( since balance was already withdrawn )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -745,7 +745,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
@@ -765,7 +765,7 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 50 eth ( 0 from first, half of the second contribution )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -787,7 +787,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 100 eth ( 25 from first, 75 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -807,7 +807,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 150 eth ( 50 from first, 100 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -838,7 +838,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.div(new BN("2")).toString()
                 ).send({
@@ -858,7 +858,7 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 75 eth ( 25 from first, half of the second contribution )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -880,7 +880,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 125 eth ( 50 from first, 75 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -900,7 +900,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 175 eth ( 75 from first, 100 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getUnlockedProjectETH().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
