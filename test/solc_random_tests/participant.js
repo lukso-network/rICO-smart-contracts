@@ -299,8 +299,8 @@ class Participant extends Actor {
         console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
-        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address).call();
-        console.log("getReservedTokenAmount               ", this.toEth(getReservedTokenAmount), "tokens");
+        const currentReservedTokenAmount = await this.rICO.methods.currentReservedTokenAmount(this.address).call();
+        console.log("currentReservedTokenAmount               ", this.toEth(currentReservedTokenAmount), "tokens");
         
 
         const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
@@ -323,8 +323,8 @@ class Participant extends Actor {
 
         const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
 
-        const getReservedTokenAmount = await this.rICO.methods.getReservedTokenAmount(this.address).call();
-        console.log("getReservedTokenAmount        ", this.toEth(getReservedTokenAmount), "tokens");
+        const currentReservedTokenAmount = await this.rICO.methods.currentReservedTokenAmount(this.address).call();
+        console.log("currentReservedTokenAmount        ", this.toEth(currentReservedTokenAmount), "tokens");
 
     }
 

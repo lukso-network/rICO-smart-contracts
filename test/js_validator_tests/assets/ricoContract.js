@@ -63,7 +63,7 @@ class Contract extends Validator {
         this.participantsById = [];
         this.participantCount = 0;
 
-        this.projectUnlockedETH = new BN("0");
+        this.projectTotalUnlockedETH = new BN("0");
         this.projectWithdrawnETH = new BN("0");
         this.committedETH = new BN("0");
         this.withdrawnETH = new BN("0");
@@ -260,8 +260,8 @@ class Contract extends Validator {
 
         let remainingFromAllocation = new BN("0");
         // Calculate the amount of allocated ETH, not withdrawn yet
-        if (this.projectUnlockedETH.gt(this.projectWithdrawnETH)) {
-            remainingFromAllocation = projectUnlockedETH.sub(projectWithdrawnETH);
+        if (this.projectTotalUnlockedETH.gt(this.projectWithdrawnETH)) {
+            remainingFromAllocation = projectTotalUnlockedETH.sub(projectWithdrawnETH);
         }
 
         // Calculate ETH that is globally available:
@@ -294,12 +294,12 @@ class Contract extends Validator {
         }
     }
 
-    getReservedTokenAmount(_address) {
+    currentReservedTokenAmount(_address) {
         const participantRecord = this.getParticipantRecordByAddress(_address);
 
         // Since we want to display token amounts even when they are not already
         // transferred to their accounts, we use reserved + bought
-        return this.getReservedTokenAmountAtBlock(
+        return this.currentReservedTokenAmountAtBlock(
             participantRecord.pendingTokens.add(participantRecord.boughtTokens),
             this.getCurrentBlockNumber()
         ).sub(participantRecord.returnedTokens);
@@ -323,7 +323,7 @@ class Contract extends Validator {
     }
 
     canWithdraw(_address) {
-        if (this.getReservedTokenAmount(_address).gt(new BN("0"))) {
+        if (this.currentReservedTokenAmount(_address).gt(new BN("0"))) {
             return true;
         }
         return false;
@@ -405,7 +405,7 @@ class Contract extends Validator {
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
             let remainingTokenAmount = _returnedTokenAmount;
-            const maxLocked = this.getReservedTokenAmount(_from);
+            const maxLocked = this.currentReservedTokenAmount(_from);
             let returnTokenAmount;
             let allocatedEthAmount;
 
@@ -417,7 +417,7 @@ class Contract extends Validator {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            this.projectUnlockedETH = projectUnlockedETH.sub(participantRecord.allocatedETH);
+            this.projectTotalUnlockedETH = projectTotalUnlockedETH.sub(participantRecord.allocatedETH);
 
             if (remainingTokenAmount.gt(new BN("0"))) {
 
@@ -443,7 +443,7 @@ class Contract extends Validator {
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
-                    let tokensInStage = getReservedTokenAmountAtBlock(
+                    let tokensInStage = currentReservedTokenAmountAtBlock(
                         participantRecord.byStage[stageId].pendingTokens.add(participantRecord.byStage[stageId].boughtTokens),
                         currentBlockNumber
                     ).sub(participantRecord.byStage[stageId].returnedTokens);
@@ -499,7 +499,7 @@ class Contract extends Validator {
 
                 // allocate remaining ETH to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
-                this.projectUnlockedETH = this.projectUnlockedETH.add(participantRecord.allocatedETH);
+                this.projectTotalUnlockedETH = this.projectTotalUnlockedETH.add(participantRecord.allocatedETH);
 
                 // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);

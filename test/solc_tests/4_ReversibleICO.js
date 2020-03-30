@@ -1113,7 +1113,7 @@ describe("ReversibleICO", function () {
             });
         });
 
-        describe("view getReservedTokenAmount(address)", async function () {
+        describe("view currentReservedTokenAmount(address)", async function () {
 
             const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
             let BuyPhaseStartBlock, BuyPhaseBlockCount;
@@ -1150,30 +1150,30 @@ describe("ReversibleICO", function () {
                 const ParticipantsTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_6).call();
                 const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
 
-                let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_6).call();
+                let currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_6).call();
                 // make sure we return full purchased amount.
-                expect(getReservedTokenAmount).to.be.equal(ContractContributionTokens);
+                expect(currentReservedTokenAmount).to.be.equal(ContractContributionTokens);
 
                 // now let's validate the js calculations
                 let calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
 
 
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 1);
-                getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_6).call();
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_6).call();
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
 
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12);
-                getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_6).call();
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_6).call();
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
 
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, 12, false, 1);
-                getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_6).call();
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_6).call();
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
             });
 
             it("Returns participant's purchased token amount before stage 1 start_block", async function () {
@@ -1185,16 +1185,16 @@ describe("ReversibleICO", function () {
                 const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
                 const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
 
-                const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                const currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                expect(getReservedTokenAmount).to.be.equal(ContractContributionTokens);
+                expect(currentReservedTokenAmount).to.be.equal(ContractContributionTokens);
 
                 let calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
 
 
@@ -1208,11 +1208,11 @@ describe("ReversibleICO", function () {
                 const ContractContributionTokens = ParticipantTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                const currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
 
             it("Returns proper amount at stage 6 end_block - 1", async function () {
@@ -1225,12 +1225,12 @@ describe("ReversibleICO", function () {
                 const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                const currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
 
             it("Returns proper amount at stage 12 end_block - 1", async function () {
@@ -1243,12 +1243,12 @@ describe("ReversibleICO", function () {
                 const ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                const getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                const currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 const calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
             });
 
             it("Returns 0 locked tokens at stage 12 end_block ( also known as BuyPhaseEndBlock )", async function () {
@@ -1261,13 +1261,13 @@ describe("ReversibleICO", function () {
                 let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                let currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 let calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
             });
 
             it("Returns 0 locked tokens after BuyPhaseEndBlock", async function () {
@@ -1280,13 +1280,13 @@ describe("ReversibleICO", function () {
                 let ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                let getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                let currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 let calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
 
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployerAddress, stageId, true, 1000);
 
@@ -1294,13 +1294,13 @@ describe("ReversibleICO", function () {
                 ContractContributionTokens = ParticipantsTotalStats.boughtTokens;
                 expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                getReservedTokenAmount = await this.ReversibleICO.methods.getReservedTokenAmount(participant_1).call();
+                currentReservedTokenAmount = await this.ReversibleICO.methods.currentReservedTokenAmount(participant_1).call();
                 calculatedTokenAmount = helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(
                     helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, ContractContributionTokens
                 );
 
-                expect(getReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
-                expect(getReservedTokenAmount.toString()).to.be.equal("0");
+                expect(currentReservedTokenAmount).to.be.equal(calculatedTokenAmount.toString());
+                expect(currentReservedTokenAmount.toString()).to.be.equal("0");
             });
 
         });

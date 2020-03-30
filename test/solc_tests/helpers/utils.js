@@ -366,7 +366,7 @@ module.exports = {
         let returnedETH = await contract.methods.returnedETH().call();
         let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
-        let allocatedETH = await contract.methods.projectUnlockedETH().call();
+        let allocatedETH = await contract.methods.projectTotalUnlockedETH().call();
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
@@ -375,7 +375,7 @@ module.exports = {
 
         let StageCount = await contract.methods.stageCount().call();
         const contributions = ParticipantByAddress.contributions;
-        const LockedBalance = await contract.methods.getReservedTokenAmount(participant_address).call();
+        const LockedBalance = await contract.methods.currentReservedTokenAmount(participant_address).call();
 
         let UnlockedBalance, BalanceOf;
         if(tokenContract !== null) {
@@ -457,7 +457,7 @@ module.exports = {
 
         const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
         const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
-        const maxLocked = new helpers.BN( await contract.methods.getReservedTokenAmount(_from).call() );
+        const maxLocked = new helpers.BN( await contract.methods.currentReservedTokenAmount(_from).call() );
         const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
 
         if(maxLocked > 0) {
@@ -478,7 +478,7 @@ module.exports = {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            // projectUnlockedETH = projectUnlockedETH.sub(ParticipantRecord.allocatedETH);
+            // projectTotalUnlockedETH = projectTotalUnlockedETH.sub(ParticipantRecord.allocatedETH);
 
             if(RemainingTokenAmount.gt( new helpers.BN("0") )) {
 
