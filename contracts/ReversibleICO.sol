@@ -450,22 +450,6 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
-    // ------------------------------------------------------------------------------------------------
-
-    /*
-     * Public view functions
-     */
-
-    /**
-     * @notice Returns TRUE if the participant is whitelisted, otherwise FALSE.
-     * @param _address the participant's address.
-     * @return Boolean
-     */
-    function isWhitelisted(address _address) public view returns (bool) {
-        return participantsByAddress[_address].whitelisted;
-    }
-
-
     /**
      * @notice Allows for the project to withdraw ETH.
      * @param _ethAmount The ETH amount in wei.
@@ -484,7 +468,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE global STATS
         projectWithdrawCount++;
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
-//        projectWithdrawnBlock = getCurrentBlockNumber();
+        //        projectWithdrawnBlock = getCurrentBlockNumber();
 
         // Transfer ETH to project wallet
         address(uint160(projectWalletAddress)).transfer(_ethAmount);
@@ -501,6 +485,21 @@ contract ReversibleICO is IERC777Recipient {
             projectWalletAddress,
             _ethAmount
         );
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+    /*
+     * Public view functions
+     */
+
+    /**
+     * @notice Returns TRUE if the participant is whitelisted, otherwise FALSE.
+     * @param _address the participant's address.
+     * @return Boolean
+     */
+    function isWhitelisted(address _address) public view returns (bool) {
+        return participantsByAddress[_address].whitelisted;
     }
 
     /**
@@ -722,7 +721,7 @@ contract ReversibleICO is IERC777Recipient {
         // at the specified stage and perform precision adjustments(div).
         return IERC777(tokenContractAddress).balanceOf(address(this)).mul(
             stages[_stage].tokenPrice
-        ).div(10 ** 18);
+        ).div(10 ** 18); // should we use 10 ** 20?
     }
 
     /**
@@ -770,6 +769,7 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Calculates the percentage of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
      * @return Unlock percentage multiplied by 10 to the power of precision. (should be 20 resulting in 10 ** 20, so we can divide by 100 later and get 18 decimals).
+     TODO remove
      */
     function getGlobalUnlockRatio(
         uint256 _currentBlock,
@@ -795,6 +795,7 @@ contract ReversibleICO is IERC777Recipient {
         }
     }
 
+    // TODO remove
     function getCurrentGlobalUnlockRatio() public view returns (uint256) {
         return getGlobalUnlockRatio(
             getCurrentBlockNumber(),
@@ -811,79 +812,25 @@ contract ReversibleICO is IERC777Recipient {
     function getReservedTokenAmount(address _participantAddress) public view returns (uint256) {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
-        uint256 one = (10 ** 20);
-
-        if (participantStats.NEWcurrentReservedTokens == 0) {
+        if(participantStats.NEWcurrentReservedTokens == 0) {
             return 0;
-        } else {
-            return (
-                participantStats.NEWcurrentReservedTokens
-                .mul(one.sub(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0)))
-            ).div(10 ** 20);
         }
+
+        return participantStats.NEWcurrentReservedTokens.sub(
+            calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
+        );
     }
 
     /**
      * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
-     // TODO needed?
+     // TODO needed? Also needs to add accumulated past locked tokens
      */
     function getUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
-        if (participantStats.NEWcurrentReservedTokens == 0) {
-            return 0;
-        } else {
-            return (
-                participantStats.NEWcurrentReservedTokens
-                .mul(getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0))
-            ).div(10 ** 20);
-        }
-    }
-
-
-    /**
-     * @notice Returns the participant's ratio of unlocked tokens at a given block.
-     * @param _participantAddress The participant's address.
-     * @param _blockNumber the current block number.
-     * @param _overwriteLastBlock if not 0 it uses the given value and overwrites `participantStats.NEWlastBlock`
-     */
-    function getUnlockRatioForParticipant(address _participantAddress, uint256 _blockNumber, uint256 _overwriteLastBlock) public view returns (uint256) {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
-
-        // IF buy phase hasn't started, return 0
-        if (_blockNumber < buyPhaseStartBlock) {
-            return 0;
-        }
-
-        uint256 startBlock;
-
-        // IF never set OR before buy phase, set it to the start of the buy phase
-        if (participantStats.NEWlastBlock < buyPhaseStartBlock) {
-            startBlock = buyPhaseStartBlock;
-        } else {
-            startBlock = participantStats.NEWlastBlock.add(1);
-        }
-
-        // overwrite last block, if _overwriteLastBlock is given
-        if (_overwriteLastBlock != 0) {
-            startBlock = _overwriteLastBlock;
-        }
-
-        // we subtract the start block, to get the full period
-        startBlock = startBlock.sub(1);
-
-        // Calc currentBlock - lastBlock / period
-        return (_blockNumber.sub(startBlock)).mul(10 ** 20)
-        .div(buyPhaseEndBlock.sub(startBlock));
-    }
-
-    /**
-     * @notice Returns the participant's ratio of unlocked tokens at a current block.
-     * @param _participantAddress The participant's address.
-     */
-    function getCurrentUnlockRatio(address _participantAddress) public view returns (uint256) {
-        return getUnlockRatioForParticipant(_participantAddress, getCurrentBlockNumber(), 0);
+        return calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock);
+        // + accumulated reserved token amounts, should we keep track of that?
     }
 
 
@@ -902,7 +849,8 @@ contract ReversibleICO is IERC777Recipient {
     function withdraw(address _participantAddress, uint256 _returnedTokenAmount) internal {
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
-        participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
+        // UPDATE the locked/unlocked ratio for this participant
+        participantStats.NEWcurrentReservedTokens = getReservedTokenAmount(_participantAddress);
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
         uint256 overflowingTokenAmount;
@@ -1009,10 +957,8 @@ contract ReversibleICO is IERC777Recipient {
 
         ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
-        // UPDATE reserved tokens
-        if(participantStats.NEWcurrentReservedTokens != 0) {
-            participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
-        }
+        // UPDATE the locked/unlocked ratio for this participant
+        participantStats.NEWcurrentReservedTokens = getReservedTokenAmount(_participantAddress);
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();

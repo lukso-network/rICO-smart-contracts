@@ -93,9 +93,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            console.log('DEBUG 1', await this.ReversibleICO.methods.DEBUG1().call());
-            console.log('DEBUG 2', await this.ReversibleICO.methods.DEBUG2().call());
-            console.log('DEBUG 3', await this.ReversibleICO.methods.DEBUG3().call());
+            // console.log('DEBUG 1', await this.ReversibleICO.methods.DEBUG1().call());
+            // console.log('DEBUG 2', await this.ReversibleICO.methods.DEBUG2().call());
+            // console.log('DEBUG 3', await this.ReversibleICO.methods.DEBUG3().call());
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1000000000000000000");
