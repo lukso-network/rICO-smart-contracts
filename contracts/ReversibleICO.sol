@@ -53,25 +53,27 @@ contract ReversibleICO is IERC777Recipient {
      *   Public Variables
      */
     /// @dev Accumulated amount tokens sent to the rICO by the projectWallet.
-    uint256 public tokenSupply; // default: 0
-    /// @dev Total amount of ETH currently accepted as a commitment to buy tokens (excluding pending).
-    uint256 public committedETH; // default: 0
+    uint256 public tokenSupply;
+    /// @dev Total amount of ETH currently accepted as a commitment to buy tokens (excluding pendingETH).
+    uint256 public committedETH;
+    /// @dev Total amount of ETH currently pending to be whitelisted.
+    uint256 public pendingETH;
     /// @dev Accumulated amount of ETH received by the smart contract.
-    uint256 public totalSentETH; // default: 0
+    uint256 public totalSentETH;
     /// @dev Accumulated amount of ETH returned from canceled pending ETH.
-    uint256 public canceledETH; // default: 0
+    uint256 public canceledETH;
     /// @dev Accumulated amount of ETH withdrawn by participants.
-    uint256 public withdrawnETH; // default: 0
+    uint256 public withdrawnETH;
     /// @dev Count of the number the project has withdrawn from the funds raised.
-    uint256 public projectWithdrawCount; // default: 0
+    uint256 public projectWithdrawCount;
     /// @dev Total amount of ETH withdrawn by the project
-    uint256 public projectWithdrawnETH; // default: 0
+    uint256 public projectWithdrawnETH;
     /// @dev Total amount of the current reserved ETH for the project by the participants contributions.
-    uint256 public projectCurrentlyReservedETH; // default: 0
+    uint256 public projectCurrentlyReservedETH;
     /// @dev Accumulated amount allocated to the project by participants.
-    uint256 public projectTotalUnlockedETH; // default: 0
+    uint256 public projectTotalUnlockedETH;
     /// @dev Last block since the project has withdrawn.
-    uint256 public projectLastBlock; // default: 0
+    uint256 public projectLastBlock;
 
     /// @dev Minimum amount of ETH accepted for a contribution.
     /// @dev Everything lower than that will trigger a canceling of pending ETH.
@@ -117,10 +119,10 @@ contract ReversibleICO is IERC777Recipient {
     uint8 public stageCount;
     uint256 public stageBlockCount;
 
-//    uint256 public DEBUG1 = 9999;
-//    uint256 public DEBUG2 = 9999;
-//    uint256 public DEBUG3 = 9999;
-//    uint256 public DEBUG4 = 9999;
+    uint256 public DEBUG1 = 9999;
+    uint256 public DEBUG2 = 9999;
+    uint256 public DEBUG3 = 9999;
+    uint256 public DEBUG4 = 9999;
 
     /*
      * Participants
@@ -814,6 +816,20 @@ contract ReversibleICO is IERC777Recipient {
      */
 
 
+    /**
+    * @notice Checks the core variables for correctness.
+    */
+    function sanityChecks() internal  {
+        // PROJECT: The sum of reserved + unlocked has to be equal the committedETH.
+        require(committedETH == projectCurrentlyReservedETH.add(projectTotalUnlockedETH), 'Project Sanity check failed! Reserved + Unlock must equal committedETH');
+
+//        DEBUG1 = address(this).balance;
+//        DEBUG2 = projectTotalUnlockedETH.add(projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH);
+        
+        // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
+        require(address(this).balance == projectTotalUnlockedETH.add(projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH), 'Project sanity check failed! balance = Unlock + Reserved - Withdrawn');
+    }
+
 
     /**
      * @notice Calculates the projects allocation since the last calculation
@@ -826,6 +842,8 @@ contract ReversibleICO is IERC777Recipient {
         projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(newlyUnlockedEth);
         projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
         projectLastBlock = getCurrentBlockNumber();
+
+        sanityChecks();
     }
 
 
@@ -930,6 +948,9 @@ contract ReversibleICO is IERC777Recipient {
         byStage.NEWpendingEth = byStage.NEWpendingEth.add(_receivedValue);
         participantStats.NEWpendingEth = participantStats.NEWpendingEth.add(_receivedValue);
 
+        // UPDATE GLOBAL STATS
+        pendingETH = pendingETH.add(_receivedValue);
+
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
             uint32(participantRecord.contributions),
@@ -980,7 +1001,7 @@ contract ReversibleICO is IERC777Recipient {
             }
 
 
-            // if incoming value is higher than what we can accept,
+            // If incoming value is higher than what we can accept,
             // just accept the difference and return the rest
             if (newlyCommittedEth > maxAvailableEth) {
                 returnEth = newlyCommittedEth.sub(maxAvailableEth);
@@ -1003,9 +1024,9 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.NEWpendingEth = participantStats.NEWpendingEth.sub(newlyCommittedEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
+            pendingETH = pendingETH.sub(newlyCommittedEth);
             committedETH = committedETH.add(newlyCommittedEth);
             projectCurrentlyReservedETH = projectCurrentlyReservedETH.add(newlyCommittedEth);
-
 
             // Transfer tokens to the participant
             // TODO AUDIT: as this is in a loop, can it create a recursive situation for the next stages?
@@ -1028,19 +1049,25 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Cancels all of the participant's contributions so far.
-     * @param _from Participant's address
+     * @param _participantAddress Participant's address
      * @param _value the ETH amount sent with the transaction, to return
      * @param _eventType Reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
      */
-    function cancelContributionsForAddress(address _from, uint256 _value, uint8 _eventType) internal {
-        Participant storage participantRecord = participantsByAddress[_from];
-        uint256 allPendingEth = getParticipantPendingETH(_from);
+    function cancelContributionsForAddress(address _participantAddress, uint256 _value, uint8 _eventType) internal {
+        Participant storage participantRecord = participantsByAddress[_participantAddress];
+        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+
+        uint256 allPendingEth = participantStats.NEWpendingEth;
 
         // Revert if there is no pending ETH contribution
         require(allPendingEth > 0, "Participant has no contributions to cancel.");
 
-        // UPDATE global STATS
+        // UPDATE PARTICIPANT STATS
+        participantStats.NEWpendingEth = 0;
+
+        // UPDATE GLOBAL STATS
         canceledETH = canceledETH.add(allPendingEth);
+        pendingETH = pendingETH.sub(allPendingEth);
 
         // Update stages
         uint8 currentStage = getCurrentStage();
@@ -1051,14 +1078,14 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // transfer ETH back to participant including received value
-        address(uint160(_from)).transfer(allPendingEth.add(_value));
+        address(uint160(_participantAddress)).transfer(allPendingEth.add(_value));
 
         // event emission
-        emit TransferEvent(_eventType, _from, allPendingEth);
+        emit TransferEvent(_eventType, _participantAddress, allPendingEth);
         emit ApplicationEvent(
             _eventType,
             uint32(participantRecord.contributions),
-            _from,
+            _participantAddress,
             allPendingEth
         );
     }

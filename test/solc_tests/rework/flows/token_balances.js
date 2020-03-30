@@ -93,9 +93,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            // console.log('DEBUG 1', await this.ReversibleICO.methods.DEBUG1().call());
-            // console.log('DEBUG 2', await this.ReversibleICO.methods.DEBUG2().call());
-            // console.log('DEBUG 3', await this.ReversibleICO.methods.DEBUG3().call());
+            console.log('DEBUG 1', await this.ReversibleICO.methods.DEBUG1().call());
+            console.log('DEBUG 2', await this.ReversibleICO.methods.DEBUG2().call());
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1000000000000000000");
@@ -1064,7 +1063,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("7 - Jump to stage 6 end (60%)", async function () {
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 6, true);
-            console.log('current block number ', await ReversibleICO.methods.getCurrentBlockNumber().call());
         });
 
         it("Expect balance to be 3.3 tokens", async function () {
