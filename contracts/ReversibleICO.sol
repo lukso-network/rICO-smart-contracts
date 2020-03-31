@@ -553,6 +553,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _ethAmount The ETH amount in wei.
      * @param _stageId The stage we are interested in.
      * @return The token amount in its smallest unit
+     * TODO move to "acceptContributionsForAddress", as its only used there?
      */
     function getTokenAmountForEthAtStage(uint256 _ethAmount, uint8 _stageId) public view returns (uint256) {
         return _ethAmount
@@ -565,6 +566,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _tokenAmount The amount of token.
      * @param _stageId The stage we are interested in.
      * @return The ETH amount in wei
+     * TODO remove
      */
     function getEthAmountForTokensAtStage(uint256 _tokenAmount, uint8 _stageId) public view returns (uint256) {
         return _tokenAmount
