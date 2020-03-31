@@ -709,7 +709,6 @@ contract ReversibleICO is IERC777Recipient {
      */
     function calcUnlockRatio(uint256 _amount, uint256 _lastBlock) public view returns (uint256) {
 
-        uint8 precision = 20;
         uint256 currentBlock = getCurrentBlockNumber();
 
         if(_lastBlock == 0) {
@@ -730,8 +729,9 @@ contract ReversibleICO is IERC777Recipient {
             uint256 passedBlocks = currentBlock.sub(_lastBlock).add(1);
 
             return _amount.mul(
-                passedBlocks.mul(10 ** uint256(precision))
-                .div(totalBlockCount)).div(10 ** uint256(precision));
+                passedBlocks.mul(10 ** 20)
+                .div(totalBlockCount)
+            ).div(10 ** 20);
 
         // Return everything AFTER the buy phase
         } else if (currentBlock > buyPhaseEndBlock) {
@@ -885,11 +885,11 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = participantStats.NEWcurrentReservedTokens;
         }
 
-        // TODO get ratio of reserved vs returned to be applied to
+        // Calc proportion ratio of returned vs current reserved
+        uint256 perStageRatio = returnedTokenAmount.mul(10 ** 20).div(participantStats.NEWcurrentReservedTokens);
 
         // -> RETURN ETH for TOKENS
-        // RETURNS LAST STAGES LOCKED TOKENS FIRST (HIGHEST PRICED TOKENS)
-        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
+        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
             ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
 
             // UPDATE the locked/unlocked ratio for this participant, PER STAGE
@@ -905,6 +905,9 @@ contract ReversibleICO is IERC777Recipient {
             if (returnedTokenAmount < processTokens) {
                 processTokens = returnedTokenAmount;
             }
+
+            // only return proportional per block
+            processTokens = processTokens.mul(perStageRatio).div(10 ** 20);
 
             //198999865627519484009
             //1000000000000000000
@@ -923,13 +926,51 @@ contract ReversibleICO is IERC777Recipient {
 
             // reduce processed token amount from returned token amount
             returnedTokenAmount = returnedTokenAmount.sub(processTokens);
-
-            if(stageId == 0) {
-                break;
-            }
         }
 
-        require(returnedTokenAmount == 0, 'Withdraw: Returned tokens not 0?');
+        // RETURNS LAST STAGES LOCKED TOKENS FIRST (HIGHEST PRICED TOKENS)
+//        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
+//            ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
+//
+//            // UPDATE the locked/unlocked ratio for this participant, PER STAGE
+//            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(calcUnlockRatio(byStage.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
+//
+//            // cancel if all is accounted for
+//            if(returnedTokenAmount == 0) {
+//                continue;
+//            }
+//
+//            uint256 processTokens = byStage.NEWcurrentReservedTokens;
+//
+//            if (returnedTokenAmount < processTokens) {
+//                processTokens = returnedTokenAmount;
+//            }
+//
+//            //198999865627519484009
+//            //1000000000000000000
+//            //999998656275194841 unlock calc
+              //1499589827727645612
+//
+//            // get ETH amount for tokens
+//            returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
+//
+//            // UPDATE PARTICIPANT STATS
+//            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(processTokens);
+//            participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(processTokens);
+//            participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(processTokens);
+//
+//            // UPDATE global STATS
+//            tokenSupply = tokenSupply.add(processTokens);
+//
+//            // reduce processed token amount from returned token amount
+//            returnedTokenAmount = returnedTokenAmount.sub(processTokens);
+//
+//            if(stageId == 0) {
+//                break;
+//            }
+//        }
+
+//        require(returnedTokenAmount == 0, 'Withdraw: Returned tokens not 0?');
 
 
         // UPDATE global STATS
@@ -1102,8 +1143,7 @@ contract ReversibleICO is IERC777Recipient {
         pendingETH = pendingETH.sub(allPendingEth);
 
         // Update stages
-        uint8 currentStage = getCurrentStage();
-        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
+        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
             ParticipantStageDetails storage byStage = participantRecord.byStage[stageId];
 
             byStage.NEWpendingEth = 0;
