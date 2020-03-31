@@ -868,6 +868,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
+        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
 
 
         // UPDATE the locked/unlocked ratio for the project
@@ -883,7 +884,6 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = participantStats.NEWcurrentReservedTokens;
         }
 
-
 //        returnProportion = returnTokens / participantStats.NEWcurrentReservedTokens
 //        returnProportion = 0,033333333333333
 //        returnETH = TotalETH (wo dont have right now) * returnProportion
@@ -898,6 +898,8 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(returnEthAmount);
+
+        DEBUG3 = participantStats.NEWcommittedEth;
 
         // UPDATE global STATS
         tokenSupply = tokenSupply.add(returnedTokenAmount);
@@ -973,6 +975,8 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
+        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
+
 
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
