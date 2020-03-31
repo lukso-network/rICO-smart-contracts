@@ -1276,6 +1276,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         });
 
         it("8 - Return 0.1 tokens", async function () {
+
+            console.log('DEBUG 3', await this.ReversibleICO.methods.DEBUG3().call());
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 5, TokenContractInstance );
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "100000000000000000" )
                 .send({ from: TestParticipant, gas: 1000000 });

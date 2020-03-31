@@ -885,29 +885,30 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = participantStats.NEWcurrentReservedTokens;
         }
 
+        // TODO get ratio of reserved vs returned to be applied to
+
         // -> RETURN ETH for TOKENS
         // RETURNS LAST STAGES LOCKED TOKENS FIRST (HIGHEST PRICED TOKENS)
         for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
             ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
 
+            // UPDATE the locked/unlocked ratio for this participant, PER STAGE
+            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(calcUnlockRatio(byStage.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
 
             // cancel if all is accounted for
             if(returnedTokenAmount == 0) {
-                break;
+                continue;
             }
 
             uint256 processTokens = byStage.NEWcurrentReservedTokens;
 
-            // reduce the process tokens in this stage by whats currently still locked
-//            processTokens = processTokens.sub(calcUnlockRatio(processTokens, participantStats.NEWlastBlock));
-            
-            //198999865627519484009
-            //1000000000000000000
-            //999998656275194841 unlock calc
-
             if (returnedTokenAmount < processTokens) {
                 processTokens = returnedTokenAmount;
             }
+
+            //198999865627519484009
+            //1000000000000000000
+            //999998656275194841 unlock calc
 
             // get ETH amount for tokens
             returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
@@ -922,7 +923,13 @@ contract ReversibleICO is IERC777Recipient {
 
             // reduce processed token amount from returned token amount
             returnedTokenAmount = returnedTokenAmount.sub(processTokens);
+
+            if(stageId == 0) {
+                break;
+            }
         }
+
+        require(returnedTokenAmount == 0, 'Withdraw: Returned tokens not 0?');
 
 
         // UPDATE global STATS
@@ -1011,6 +1018,9 @@ contract ReversibleICO is IERC777Recipient {
         // Iterate over all stages and their pending contributions
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
             ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
+
+            // UPDATE the locked/unlocked ratio for this participant, PER STAGE
+            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(calcUnlockRatio(byStage.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
 
             uint256 maxAvailableEth = availableEthAtStage(currentStage);
             uint256 newlyCommittedEth = byStage.NEWpendingEth;
