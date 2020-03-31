@@ -902,12 +902,12 @@ contract ReversibleICO is IERC777Recipient {
 
             uint256 processTokens = byStage.NEWcurrentReservedTokens;
 
+            // only return proportional per block
+            processTokens = processTokens.mul(perStageRatio).div(10 ** 20);
+
             if (returnedTokenAmount < processTokens) {
                 processTokens = returnedTokenAmount;
             }
-
-            // only return proportional per block
-            processTokens = processTokens.mul(perStageRatio).div(10 ** 20);
 
             //198999865627519484009
             //1000000000000000000
@@ -1050,9 +1050,6 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
 
-        // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
-        participantStats.NEWlastBlock = getCurrentBlockNumber();
-
         uint8 currentStage = getCurrentStage();
         uint256 totalReturnETH;
 
@@ -1094,6 +1091,9 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.add(newTokenAmount);
             participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.add(newTokenAmount);
             participantStats.NEWpendingEth = participantStats.NEWpendingEth.sub(newlyCommittedEth).sub(returnEth);
+
+            // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
+            participantStats.NEWlastBlock = getCurrentBlockNumber();
 
             // UPDATE GLOBAL STATS
             tokenSupply = tokenSupply.sub(newTokenAmount);
