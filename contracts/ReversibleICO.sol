@@ -52,7 +52,7 @@ contract ReversibleICO is IERC777Recipient {
     /*
      *   Public Variables
      */
-    /// @dev Accumulated amount tokens sent to the rICO by the projectWallet.
+    /// @dev Total amount tokens available to be bought.
     uint256 public tokenSupply;
     /// @dev Total amount of ETH currently accepted as a commitment to buy tokens (excluding pendingETH).
     uint256 public committedETH;
@@ -334,7 +334,7 @@ contract ReversibleICO is IERC777Recipient {
         // 1 - project wallet adds tokens to the sale
         if (_from == projectWalletAddress) {
             // Save the token amount allocated to the rICO address
-            tokenSupply += _amount;
+            tokenSupply = tokenSupply.add(_amount);
             return;
 
         // 2 - rICO contributor sends tokens back
@@ -817,17 +817,28 @@ contract ReversibleICO is IERC777Recipient {
 
 
     /**
-    * @notice Checks the core variables for correctness.
+    * @notice Checks the projects core variables and ETH amounts in the contract for correctness.
     */
-    function sanityChecks() internal  {
+    function sanityCheckProject() internal  {
         // PROJECT: The sum of reserved + unlocked has to be equal the committedETH.
         require(committedETH == projectCurrentlyReservedETH.add(projectTotalUnlockedETH), 'Project Sanity check failed! Reserved + Unlock must equal committedETH');
 
-//        DEBUG1 = address(this).balance;
-//        DEBUG2 = projectTotalUnlockedETH.add(projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH);
-        
         // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
         require(address(this).balance == projectTotalUnlockedETH.add(projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH), 'Project sanity check failed! balance = Unlock + Reserved - Withdrawn');
+    }
+
+    /**
+    * @notice Checks the projects core variables and ETH amounts in the contract for correctness.
+    */
+    function sanityCheckParticipant(address _participantAddress) internal  {
+        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+
+                DEBUG1 = participantStats.NEWtotalReservedTokens;
+                DEBUG2 = participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens);
+
+        // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
+//        require(participantStats.NEWtotalReservedTokens == participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens), 'Participant Sanity check failed! Reser. + Unlock must equal totalReser');
+
     }
 
 
@@ -843,7 +854,7 @@ contract ReversibleICO is IERC777Recipient {
         projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
         projectLastBlock = getCurrentBlockNumber();
 
-        sanityChecks();
+        sanityCheckProject();
     }
 
 
@@ -889,6 +900,10 @@ contract ReversibleICO is IERC777Recipient {
 
             // reduce the process tokens in this stage by whats currently still locked
 //            processTokens = processTokens.sub(calcUnlockRatio(processTokens, participantStats.NEWlastBlock));
+            
+            //198999865627519484009
+            //1000000000000000000
+            //999998656275194841 unlock calc
 
             if (returnedTokenAmount < processTokens) {
                 processTokens = returnedTokenAmount;
@@ -902,6 +917,9 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(processTokens);
             participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(processTokens);
 
+            // UPDATE global STATS
+            tokenSupply = tokenSupply.add(processTokens);
+
             // reduce processed token amount from returned token amount
             returnedTokenAmount = returnedTokenAmount.sub(processTokens);
         }
@@ -914,6 +932,9 @@ contract ReversibleICO is IERC777Recipient {
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
+
+        // SANITY CHECK
+        sanityCheckParticipant(_participantAddress);
 
 
         // Return overflowing tokens received
@@ -1024,6 +1045,7 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.NEWpendingEth = participantStats.NEWpendingEth.sub(newlyCommittedEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
+            tokenSupply = tokenSupply.sub(newTokenAmount);
             pendingETH = pendingETH.sub(newlyCommittedEth);
             committedETH = committedETH.add(newlyCommittedEth);
             projectCurrentlyReservedETH = projectCurrentlyReservedETH.add(newlyCommittedEth);
