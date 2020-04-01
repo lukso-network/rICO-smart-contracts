@@ -213,7 +213,7 @@ describe("Contribution Testing", function () {
             it("value >= rico.minContribution results in a new contribution", async function () {
 
                 let contributionCount = 0;
-                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
@@ -256,7 +256,7 @@ describe("Contribution Testing", function () {
                 });
                 contributionCount++;
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const afterContributions = ParticipantByAddress.contributions;
 
                 expect(

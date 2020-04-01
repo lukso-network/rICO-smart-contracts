@@ -426,7 +426,7 @@ describe("Testing canceling", function () {
 
             it("value >= rico.minContribution results in a new contribution", async function () {
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
@@ -437,7 +437,7 @@ describe("Testing canceling", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const afterContributions = ParticipantByAddress.contributions;
 
                 expect(
@@ -461,7 +461,7 @@ describe("Testing canceling", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionTxCost = new helpers.BN( ContributionTx.gasUsed ).mul(
@@ -539,7 +539,7 @@ describe("Testing canceling", function () {
                 );
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const afterContributions = ParticipantByAddress.contributions;
 
                 // no additional contributions logged.
@@ -620,7 +620,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -656,7 +656,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -732,7 +732,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -797,7 +797,7 @@ describe("Testing canceling", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 900 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -829,7 +829,7 @@ describe("Testing canceling", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({

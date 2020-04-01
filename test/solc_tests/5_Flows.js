@@ -1233,7 +1233,7 @@ describe("Flow Testing", function () {
 
                 //         const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
-                //         let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(TestParticipantAddress).call();
+                //         let ParticipantByAddress = await ReversibleICOInstance.methods.participants(TestParticipantAddress).call();
                 //         const initialContributions = ParticipantByAddress.contributions;
 
                 //         const ContractBalanceBefore = await helpers.utils.getBalance(helpers, ReversibleICOAddress);
@@ -1258,7 +1258,7 @@ describe("Flow Testing", function () {
                 //             gasPrice: helpers.networkConfig.gasPrice
                 //         });
 
-                //         ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(TestParticipantAddress).call();
+                //         ParticipantByAddress = await ReversibleICOInstance.methods.participants(TestParticipantAddress).call();
                 //         const afterContributions = ParticipantByAddress.contributions;
 
                 //         expect(

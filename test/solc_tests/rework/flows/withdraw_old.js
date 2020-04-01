@@ -85,7 +85,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
 
             const ContributionAmount = 1 * commitPhasePrice;
@@ -99,7 +99,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1000000000000000000");
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
         });
         
@@ -173,7 +173,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
 
             const ContributionAmount = 1 * commitPhasePrice;
@@ -187,7 +187,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1000000000000000000");
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
         });
         
@@ -260,7 +260,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
 
             const ContributionAmount = 1 * commitPhasePrice;
@@ -274,7 +274,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1000000000000000000");
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
         });
         
@@ -446,7 +446,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 1;
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -459,7 +459,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             contributionTotals = contributionTotals.add(ContributionAmount);
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("2");
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -557,7 +557,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("20000000000000000000");
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("2");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -570,7 +570,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             contributionTotals = contributionTotals.add(ContributionAmount);
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("3");
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -601,7 +601,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("40000000000000000000");
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("3");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -614,7 +614,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             contributionTotals = contributionTotals.add(ContributionAmount);
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("4");
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -644,7 +644,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("50000000000000000000");
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("4");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -657,7 +657,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
             contributionTotals = contributionTotals.add(ContributionAmount);
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("5");
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -803,7 +803,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("80000000000000000000");
 
-            let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("5");
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -814,7 +814,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("6");
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -1222,7 +1222,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
 
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
             await helpers.web3Instance.eth.sendTransaction({

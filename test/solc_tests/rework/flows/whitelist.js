@@ -52,7 +52,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         }
 
         it("Buy 1 token before whitelisting", async function () {
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(participant_1).call();
             const stageId = 0;
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -73,7 +73,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Buy 1 token before whitelisting", async function () {
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(participant_1).call();
             const stageId = 0;
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -98,7 +98,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Buy 1 token after getting whitelisted", async function () {
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(participant_1).call();
             const stageId = 0;
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -186,7 +186,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Buy 1 token while being un-whitelisted", async function () {
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(participant_1).call();
             const stageId = 0;
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -255,7 +255,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         });
 
         it("Buy 1 token while being un-whitelisted", async function () {
-            const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await this.ReversibleICO.methods.participants(participant_1).call();
             const stageId = 0;
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));

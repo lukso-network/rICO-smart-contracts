@@ -370,7 +370,7 @@ module.exports = {
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
-        let ParticipantByAddress = await contract.methods.participantsByAddress(participant_address).call();
+        let ParticipantByAddress = await contract.methods.participants(participant_address).call();
         let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant_address).call();
 
         let StageCount = await contract.methods.stageCount().call();
@@ -458,7 +458,7 @@ module.exports = {
         const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
         const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
         const maxLocked = new helpers.BN( await contract.methods.currentReservedTokenAmount(_from).call() );
-        const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
+        const ParticipantRecord = await contract.methods.participants(_from).call();
 
         if(maxLocked > 0) {
 

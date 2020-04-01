@@ -202,7 +202,7 @@ describe("Javascript Validator - Contract - whitelist()", function () {
                 this.oldState = clone(this.JSContract);
                 this.JSContract.whitelist(address, _accept);
 
-                const oldParticipantRecord = this.oldState.participantsByAddress[address];
+                const oldParticipantRecord = this.oldState.participants[address];
                 const oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                     .sub(oldParticipantRecord.withdrawnETH)
                     .sub(oldParticipantRecord.returnedETH);

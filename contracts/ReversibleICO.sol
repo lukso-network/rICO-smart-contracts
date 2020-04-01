@@ -130,26 +130,22 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool whitelisted;
         uint32 contributions;
-        mapping(uint8 => ParticipantStageDetails) byStage;
-    }
 
-    struct ParticipantDetails {
         uint256 NEWtotalReservedTokens;
         uint256 NEWtotalUnlockedTokens;
         uint256 NEWcurrentReservedTokens;
         uint256 NEWcommittedEth;
         uint256 NEWpendingEth;
         uint256 NEWlastBlock;
+
+        mapping(uint8 => ParticipantStageDetails) byStage;
     }
-    
     struct ParticipantStageDetails {
         uint256 NEWpendingEth;
     }
 
-    /// @dev Maps participants aggregated (i.e. all stages) stats by their address.
-    mapping(address => ParticipantDetails) public participantAggregatedStats;
-    /// @dev Maps participants stage stats by their address.
-    mapping(address => Participant) public participantsByAddress;
+    /// @dev Maps participants stats by their address.
+    mapping(address => Participant) public participants;
     /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
     mapping(uint256 => address) public participantsById;
     /// @dev Total number of rICO participants.
@@ -372,7 +368,7 @@ contract ReversibleICO is IERC777Recipient {
         totalSentETH = totalSentETH.add(_value);
 
         // Participant initial state record
-        Participant storage participantRecord = participantsByAddress[_sender];
+        Participant storage participantRecord = participants[_sender];
 
         // Check if participant already exists
         if (participantRecord.contributions == 0) {
@@ -437,7 +433,7 @@ contract ReversibleICO is IERC777Recipient {
         for (uint256 i = 0; i < _addresses.length; i++) {
             address participantAddress = _addresses[i];
 
-            Participant storage participantRecord = participantsByAddress[participantAddress];
+            Participant storage participantRecord = participants[participantAddress];
 
             if (_approve) {
                 if (!participantRecord.whitelisted) {
@@ -506,7 +502,7 @@ contract ReversibleICO is IERC777Recipient {
      * @return Boolean
      */
     function isWhitelisted(address _address) public view returns (bool) {
-        return participantsByAddress[_address].whitelisted;
+        return participants[_address].whitelisted;
     }
 
     /**
@@ -583,7 +579,7 @@ contract ReversibleICO is IERC777Recipient {
     * @param _participantAddress The participant's address.
     */
     function getParticipantPendingETH(address _participantAddress) public view returns (uint256) {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
         return participantStats.NEWpendingEth;
     }
 
@@ -592,17 +588,18 @@ contract ReversibleICO is IERC777Recipient {
      * @param _address The participant's address.
      * @param _stageId The relevant stage.
 
-     * @dev Direct call: participantsByAddress[_address].byStage[_stageId]._accepted
+     * @dev Direct call: participants[_address].byStage[_stageId]._accepted
      // TODO remove?
      */
-    function getParticipantDetailsByStage(address _address, uint8 _stageId) public view
+    function getParticipantStageDetails(address _address, uint8 _stageId) public view
     returns (
         uint256 NEWpendingEth
     ) {
 
-        ParticipantStageDetails storage totalsRecord = participantsByAddress[_address].byStage[_stageId];
+        ParticipantStageDetails storage byStage = participants[_address].byStage[_stageId];
+
         return (
-        totalsRecord.NEWpendingEth
+            byStage.NEWpendingEth
         );
     }
 
@@ -787,7 +784,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _participantAddress The participant's address.
      */
     function currentReservedTokenAmount(address _participantAddress) public view returns (uint256) {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
 
         if(participantStats.NEWcurrentReservedTokens == 0) {
             return 0;
@@ -802,7 +799,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _participantAddress The participant's address.
      */
     function currentUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
 
         return calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
         .add(participantStats.NEWtotalUnlockedTokens);
@@ -831,10 +828,10 @@ contract ReversibleICO is IERC777Recipient {
     * @notice Checks the projects core variables and ETH amounts in the contract for correctness.
     */
     function sanityCheckParticipant(address _participantAddress) internal  {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
 
-                DEBUG1 = participantStats.NEWtotalReservedTokens;
-                DEBUG2 = participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens);
+        DEBUG1 = participantStats.NEWtotalReservedTokens;
+        DEBUG2 = participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens);
 
         // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
 //        require(participantStats.NEWtotalReservedTokens == participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens), 'Participant Sanity check failed! Reser. + Unlock must equal totalReser');
@@ -865,7 +862,7 @@ contract ReversibleICO is IERC777Recipient {
      * @param _returnedTokenAmount The amount of tokens returned.
      */
     function withdraw(address _participantAddress, uint256 _returnedTokenAmount) internal {
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
 
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
@@ -900,8 +897,9 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(returnEthAmount);
+        // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
+        participantStats.NEWlastBlock = getCurrentBlockNumber();
 
-        DEBUG3 = participantStats.NEWcommittedEth;
 
         // UPDATE global STATS
         tokenSupply = tokenSupply.add(returnedTokenAmount);
@@ -909,8 +907,6 @@ contract ReversibleICO is IERC777Recipient {
         committedETH = committedETH.sub(returnEthAmount);
         projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(returnEthAmount);
 
-        // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
-        participantStats.NEWlastBlock = getCurrentBlockNumber();
 
         // SANITY CHECK
         sanityCheckParticipant(_participantAddress);
@@ -939,14 +935,13 @@ contract ReversibleICO is IERC777Recipient {
 
         uint8 currentStage = getCurrentStage();
 
-        Participant storage participantRecord = participantsByAddress[_from];
-        ParticipantDetails storage participantStats = participantAggregatedStats[_from];
+        Participant storage participantRecord = participants[_from];
         ParticipantStageDetails storage byStage = participantRecord.byStage[currentStage];
 
         // UPDATE PARTICIPANT STATS
         participantRecord.contributions++;
+        participantRecord.NEWpendingEth = participantRecord.NEWpendingEth.add(_receivedValue);
         byStage.NEWpendingEth = byStage.NEWpendingEth.add(_receivedValue);
-        participantStats.NEWpendingEth = participantStats.NEWpendingEth.add(_receivedValue);
 
         // UPDATE GLOBAL STATS
         pendingETH = pendingETH.add(_receivedValue);
@@ -966,13 +961,13 @@ contract ReversibleICO is IERC777Recipient {
     * @param _eventType Can be either WHITELIST_APPROVE or COMMITMENT_ACCEPTED.
     */
     function acceptContributionsForAddress(address _participantAddress, uint8 _eventType) internal {
+        Participant storage participantStats = participants[_participantAddress];
 
         // stop if no ETH are pending
-        if (participantAggregatedStats[_participantAddress].NEWpendingEth == 0) {
+        if (participantStats.NEWpendingEth == 0) {
             return;
         }
 
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
 
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
@@ -988,7 +983,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Iterate over all stages and their pending contributions
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
-            ParticipantStageDetails storage byStage = participantsByAddress[_participantAddress].byStage[stageId];
+            ParticipantStageDetails storage byStage = participants[_participantAddress].byStage[stageId];
 
             uint256 maxAvailableEth = availableEthAtStage(currentStage);
             uint256 newlyCommittedEth = byStage.NEWpendingEth;
@@ -1057,16 +1052,15 @@ contract ReversibleICO is IERC777Recipient {
      * @param _eventType Reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
      */
     function cancelContributionsForAddress(address _participantAddress, uint256 _value, uint8 _eventType) internal {
-        Participant storage participantRecord = participantsByAddress[_participantAddress];
-        ParticipantDetails storage participantStats = participantAggregatedStats[_participantAddress];
+        Participant storage participantRecord = participants[_participantAddress];
 
-        uint256 allPendingEth = participantStats.NEWpendingEth;
+        uint256 allPendingEth = participantRecord.NEWpendingEth;
 
         // Revert if there is no pending ETH contribution
         require(allPendingEth > 0, "Participant has no contributions to cancel.");
 
         // UPDATE PARTICIPANT STATS
-        participantStats.NEWpendingEth = 0;
+        participantRecord.NEWpendingEth = 0;
 
         // UPDATE GLOBAL STATS
         canceledETH = canceledETH.add(allPendingEth);

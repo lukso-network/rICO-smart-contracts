@@ -220,7 +220,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -282,7 +282,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -341,7 +341,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -367,7 +367,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * (2 * commitPhasePrice);
             await helpers.web3Instance.eth.sendTransaction({
@@ -449,7 +449,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 900 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -475,7 +475,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -514,7 +514,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -553,7 +553,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -592,7 +592,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({

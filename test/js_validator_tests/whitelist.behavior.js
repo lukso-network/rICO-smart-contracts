@@ -23,7 +23,7 @@ function shouldHaveValidStateAfterWhitelistModeWithNoContributions(_address, _ac
             let newParticipantRecord;
 
             before(function () {
-                newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                newParticipantRecord = this.JSContract.participants[_address];
             });
 
             it("whitelisted is " + _accept.toString(), function () {
@@ -44,7 +44,7 @@ function shouldHaveValidStateAfterWhitelistMode(_address, _testStage, _accept) {
             let newParticipantRecord;
 
             before(function () {
-                newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                newParticipantRecord = this.JSContract.participants[_address];
             });
 
             it("whitelisted is " + _accept.toString(), function () {
@@ -69,8 +69,8 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
         let oldParticipantRecord, newParticipantRecord, oldStateParticipantAvailableETH, newStateParticipantAvailableETH;
 
         before(function () {
-            oldParticipantRecord = this.oldState.participantsByAddress[_address];
-            newParticipantRecord = this.JSContract.participantsByAddress[_address];
+            oldParticipantRecord = this.oldState.participants[_address];
+            newParticipantRecord = this.JSContract.participants[_address];
 
             oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                 .sub(oldParticipantRecord.withdrawnETH)
@@ -100,7 +100,7 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
             let newParticipantRecord;
 
             before(function () {
-                newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                newParticipantRecord = this.JSContract.participants[_address];
             });
 
             it("whitelisted is " + _accept.toString(), function () {
@@ -123,7 +123,7 @@ function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testS
         describe("Tokens:", function () {
 
             it("Participant token balance is oldState.ParticipantRecord.pendingTokens", function () {
-                const expectedBalance = this.oldState.participantsByAddress[_address].pendingTokens;
+                const expectedBalance = this.oldState.participants[_address].pendingTokens;
                 const balance = this.JSContract.TokenContractInstance.balanceOf(_address);
                 expect(
                     balance.toString()
@@ -151,8 +151,8 @@ function shouldHaveValidStateAfterCancelContributionsForAddress(_address, _accep
         let oldParticipantRecord, newParticipantRecord, oldStateParticipantAvailableETH, newStateParticipantAvailableETH;
 
         before(function () {
-            oldParticipantRecord = this.oldState.participantsByAddress[_address];
-            newParticipantRecord = this.JSContract.participantsByAddress[_address];
+            oldParticipantRecord = this.oldState.participants[_address];
+            newParticipantRecord = this.JSContract.participants[_address];
 
             oldStateParticipantAvailableETH = oldParticipantRecord.totalSentETH
                 .sub(oldParticipantRecord.withdrawnETH)

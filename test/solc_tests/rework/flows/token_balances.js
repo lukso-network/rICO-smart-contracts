@@ -618,7 +618,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("50000000000000000000");
 
-            ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestParticipant).call();
+            ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
         });
 
         it("Expect balance to be 50 tokens", async function () {

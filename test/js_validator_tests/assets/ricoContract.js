@@ -59,7 +59,7 @@ class Contract extends Validator {
     constructor(settings, currentBlock = 0) {
         super(settings, currentBlock);
 
-        this.participantsByAddress = {};
+        this.participants = {};
         this.participantsById = [];
         this.participantCount = 0;
 
@@ -560,11 +560,11 @@ class Contract extends Validator {
     }
 
     getParticipantRecordByAddress(_address) {
-        const record = this.participantsByAddress[_address];
+        const record = this.participants[_address];
         if (!record) {
-            this.participantsByAddress[_address] = this.setupNewParticipant();
+            this.participants[_address] = this.setupNewParticipant();
         }
-        return this.participantsByAddress[_address];
+        return this.participants[_address];
     }
 
     TransferEvent(_type, _address, _value) {

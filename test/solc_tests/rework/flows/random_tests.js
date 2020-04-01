@@ -26,7 +26,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         tokenBalance: new BN(0)
     };
     // generate n participants
-    let numberOfParticipants = 5;
+    let numberOfParticipants = 2;
     let participants = [];
 
     const customTestSettings = clone(setup.settings);
@@ -227,6 +227,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             it(participant.address + ": compare full token balances", async function () {
                 const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
+
+                console.log('Participant stats ', await ReversibleICO.methods.participants(participant.address).call());
+                console.log('currentReservedTokenAmount ', await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call());
+                console.log('currentUnlockedTokenAmount ', await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call());
             });
             it(participant.address + ": reserved token balance should be 0", async function () {
                 const balance = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();

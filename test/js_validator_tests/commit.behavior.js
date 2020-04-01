@@ -24,7 +24,7 @@ function shouldHaveValidStateAfterFirstContributionFromParticipant(_address, _te
         describe("ParticipantRecord", function () {
 
             it("contributions is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                const newParticipantRecord = this.JSContract.participants[_address];
                 expect(newParticipantRecord.contributions).is.equal(1);
             });
 
@@ -66,11 +66,11 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
 
             before(function () {
 
-                oldParticipantRecord = this.oldState.participantsByAddress[_address];
+                oldParticipantRecord = this.oldState.participants[_address];
                 if (!oldParticipantRecord) {
                     oldParticipantRecord = this.oldState.setupNewParticipant();
                 }
-                newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                newParticipantRecord = this.JSContract.participants[_address];
 
                 oldbyStage = oldParticipantRecord.byStage[_testStage];
                 newbyStage = newParticipantRecord.byStage[_testStage];

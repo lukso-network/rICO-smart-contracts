@@ -267,7 +267,7 @@ describe("Website States", function () {
             ).to.be.equal( "1" );
 
             let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participants(participant_address).call();
 
             expect(
                 Participant.whitelisted
@@ -313,7 +313,7 @@ describe("Website States", function () {
             ).to.be.equal( "1" );
 
             let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participants(participant_address).call();
 
             expect(
                 Participant.whitelisted

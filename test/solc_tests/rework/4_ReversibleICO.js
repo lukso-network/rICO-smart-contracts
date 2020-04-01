@@ -663,7 +663,7 @@ describe("ReversibleICO", function () {
                                 from: whitelistControllerAddress
                             });
 
-                            let Participant = await this.ReversibleICO.methods.participantsByAddress(accounts[3]).call();
+                            let Participant = await this.ReversibleICO.methods.participants(accounts[3]).call();
                             expect(
                                 Participant.whitelisted
                             ).to.be.equal( true );
@@ -780,7 +780,7 @@ describe("ReversibleICO", function () {
                             });
 
                             it("Participant Contribution count is correct", async function () {
-                                const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
+                                const ParticipantByAddress = await this.ReversibleICO.methods.participants(TestAcceptParticipant).call();
                                 expect(
                                     ParticipantByAddress.contributions.toString()
                                 ).to.be.equal(
@@ -812,7 +812,7 @@ describe("ReversibleICO", function () {
                                 let newContributionTx, initialContributions, afterContributions;
 
                                 before(async function () {
-                                    let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
+                                    let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestAcceptParticipant).call();
                                     initialContributions = ParticipantByAddress.contributions;
 
                                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -828,7 +828,7 @@ describe("ReversibleICO", function () {
                                 });
 
                                 it("Participant Contribution Count increases by 1", async function () {
-                                    let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestAcceptParticipant).call();
+                                    let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestAcceptParticipant).call();
                                     afterContributions = ParticipantByAddress.contributions;
                                     expect(
                                         afterContributions
@@ -876,7 +876,7 @@ describe("ReversibleICO", function () {
 
                                 initialParticipantTokenBalance = await TokenContractInstance.methods.balanceOf(TestRejectParticipant).call();
 
-                                let Participant = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
+                                let Participant = await this.ReversibleICO.methods.participants(TestRejectParticipant).call();
                                 expect(
                                     Participant.whitelisted
                                 ).to.be.equal( false );
@@ -903,7 +903,7 @@ describe("ReversibleICO", function () {
                             });
 
                             it("Participant Contribution count is correct", async function () {
-                                const ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
+                                const ParticipantByAddress = await this.ReversibleICO.methods.participants(TestRejectParticipant).call();
                                 expect(
                                     ParticipantByAddress.contributions.toString()
                                 ).to.be.equal(
@@ -928,7 +928,7 @@ describe("ReversibleICO", function () {
                                 let newContributionTx, initialContributions, afterContributions;
 
                                 before(async function () {
-                                    let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
+                                    let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestRejectParticipant).call();
                                     initialContributions = ParticipantByAddress.contributions;
 
                                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -944,7 +944,7 @@ describe("ReversibleICO", function () {
                                 });
 
                                 it("Participant Contribution Count increases by 1", async function () {
-                                    let ParticipantByAddress = await this.ReversibleICO.methods.participantsByAddress(TestRejectParticipant).call();
+                                    let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestRejectParticipant).call();
                                     afterContributions = ParticipantByAddress.contributions;
                                     expect(
                                         afterContributions

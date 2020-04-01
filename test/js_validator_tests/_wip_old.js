@@ -100,7 +100,7 @@ function shouldRunMod(_address, _testStage, _whitelisted = false) {
                 [
                     [
                         "contributions is 1", function () {
-                            const newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                            const newParticipantRecord = this.JSContract.participants[_address];
                             expect(newParticipantRecord.contributions).is.equal(1);
                         }
                     ]
@@ -113,7 +113,7 @@ function shouldRunMod(_address, _testStage, _whitelisted = false) {
                 [
                     [
                         "contributions is 1", function () {
-                            const newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                            const newParticipantRecord = this.JSContract.participants[_address];
                             expect(newParticipantRecord.contributions).is.equal(1);
                         }
                     ],
@@ -143,7 +143,7 @@ function shouldRunOrig(_address, _testStage, _whitelisted = false) {
         describe("ParticipantRecord", function () {
 
             it("contributions is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                const newParticipantRecord = this.JSContract.participants[_address];
                 expect(newParticipantRecord.contributions).is.equal(1);
             });
 
@@ -152,7 +152,7 @@ function shouldRunOrig(_address, _testStage, _whitelisted = false) {
         describe("ParticipantRecord 2", function () {
 
             it("contributions is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                const newParticipantRecord = this.JSContract.participants[_address];
                 expect(newParticipantRecord.contributions).is.equal(1);
             });
 
