@@ -122,9 +122,16 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             for (let i = 0; i < numberOfParticipants; i++) {
                 let participant = participants[i];
 
+                // we have 10, so that in 80% ther is no actions, as only 2 numbers represent actions
                 let task = getRandomInt(10);
 
-                console.log(participant.address +' Task: ', task);
+                let taskName = '';
+                if(task === 1)
+                    taskName = 'CONTRIBUTE';
+                if(task === 2)
+                    taskName = 'WITHDRAW';
+
+                console.log(participant.address +' Task: ' + taskName + ' '+ task);
 
                 // CONTRIBUTE
                 if(task === 1) {
@@ -205,6 +212,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             const blockNumber = await ReversibleICO.methods.getCurrentBlockNumber().call();
             const buyPhaseEndBlock = await ReversibleICO.methods.buyPhaseEndBlock().call();
             expect(blockNumber).to.be.equal(buyPhaseEndBlock);
+        });
+
+        it("Project should have gotten all committed ETH", async function () {
+            const committedEth = await ReversibleICO.methods.committedETH().call();
+            const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
+            expect(committedEth).to.be.equal(rICOEthbalance);
         });
 
         // go over every participant
