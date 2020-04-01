@@ -22,7 +22,8 @@ async function runTests(init) {
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",
-    "rework/flows/token_balances",
+    // "rework/flows/token_balances",
+    "rework/flows/random_tests",
 
     // // // these need to be reworked
     // "5_Cancel",
