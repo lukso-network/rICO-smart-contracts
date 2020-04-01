@@ -26,19 +26,20 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         tokenBalance: new BN(0)
     };
     // generate n participants
-    let numberOfParticipants = 1;
+    let numberOfParticipants = 5;
     let participants = [];
 
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
-    customTestSettings.rico.blocksPerDay = 2;
+    customTestSettings.rico.blocksPerDay = 3;
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
     let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.stageDays;
     let buyPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.stageDays * customTestSettings.rico.stageCount;
+    let buyPhaseEndBlock = 60 + commitPhaseStartBlock + commitPhaseBlockCount + buyPhaseBlockCount;
 
     const commitPhasePrice = helpers.solidity.ether * 0.002;
 
@@ -108,14 +109,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         });
 
 
-
-
-        console.log('rICO duration in blocks: ', (commitPhaseBlockCount + buyPhaseBlockCount));
-        console.log('Commit phase start block: ', commitPhaseStartBlock);
+        // console.log('rICO duration in blocks: ', (commitPhaseBlockCount + buyPhaseBlockCount));
+        // console.log('Commit phase start block: ', commitPhaseStartBlock);
         // console.log('Current block: ', await ReversibleICO.methods.getCurrentBlockNumber().call());
 
         // iterate over all phases
-        for (let blockNumber = commitPhaseStartBlock; blockNumber < (commitPhaseBlockCount + buyPhaseBlockCount); blockNumber++) {
+        for (let blockNumber = commitPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
 
             console.log('Current Block: ', blockNumber);
 
@@ -127,12 +126,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                 console.log(participant.address +' Task: ', task);
 
-                // contribute
+                // CONTRIBUTE
                 if(task === 1) {
 
                     it(participant.address + ": Buy tokens", async function () {
 
-                        // whitelist
+                        // WHITELIST
                         let isWhitelisted = await ReversibleICO.methods.isWhitelisted(participant.address).call();
 
                         if (!isWhitelisted) {
@@ -146,8 +145,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                         // calc random token amount
                         // user balance: 1000000 ETH?
-                        const contribTokenAmount = new BN(getRandomInt(100)); // 0-100 tokens //.mul(new BN('1000000000000000000'))
-
+                        const contribTokenAmount = new BN(getRandomInt(100)); // 0-100 tokens //
                         const stageId = await ReversibleICO.methods.getCurrentStage().call();
 
                         if (contribTokenAmount > 0) {
@@ -160,21 +158,21 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             });
 
                             // update his balance
-                            participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount);
+                            participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
                         }
 
                     });
                 }
 
-                // withdraw
+                // WITHDRAW
                 if(task === 2) {
 
-                    it(participant.address + ": Returns tokens", async function () {
+                    it(participant.address + ": Return tokens", async function () {
 
                         const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
 
-                        console.log(maxTokens);
-                        console.log(getRandomInt(maxTokens));
+                        // console.log(maxTokens);
+                        // console.log(getRandomInt(maxTokens));
 
                         // calc random token amount
                         const returnTokenAmount = new BN(String(getRandomInt(maxTokens))); // 0-max reserved tokens
@@ -203,6 +201,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         console.log('Number of Participants: ', numberOfParticipants);
         // let balance = 0;
 
+        it("rICO should be finished", async function () {
+            const blockNumber = await ReversibleICO.methods.getCurrentBlockNumber().call();
+            const buyPhaseEndBlock = await ReversibleICO.methods.buyPhaseEndBlock().call();
+            expect(blockNumber).to.be.equal(buyPhaseEndBlock);
+        });
+
         // go over every participant
         for (let i = 0; i < numberOfParticipants; i++) {
             let participant = participants[i];
@@ -211,16 +215,15 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
             });
-            it(participant.address + ": compare reserved token balances", async function () {
+            it(participant.address + ": reserved token balance should be 0", async function () {
                 const balance = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
                 expect(balance).to.be.equal("0");
             });
-            it(participant.address + ": compare unlocked token balances", async function () {
+            it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
                 const balance = await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call();
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
             });
         }
-
 
     });
 
