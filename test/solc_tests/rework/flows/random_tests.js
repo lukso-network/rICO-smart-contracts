@@ -31,8 +31,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
 
-    customTestSettings.rico.commitPhasePrice = "1000000000000000000"; // price is 1:1
-    customTestSettings.rico.stagePriceIncrease = 0;
+    customTestSettings.rico.commitPhasePrice = "250000000000000000"; // price is 1:1
+    customTestSettings.rico.stagePriceIncrease = "3333333330000000";
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
     let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.commitPhaseDays;
@@ -186,7 +186,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                         const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                         if(returnTokenAmount > 0) {
-                            await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000});
+                            await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 4000000});
 
                             // update his balance
                             participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);
