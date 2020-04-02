@@ -579,8 +579,8 @@ contract ReversibleICO is IERC777Recipient {
     * @param _participantAddress The participant's address.
     */
     function getParticipantPendingETH(address _participantAddress) public view returns (uint256) {
-        Participant storage participantStats = participants[_participantAddress];
-        return participantStats.NEWpendingEth;
+//        Participant storage participantStats = participants[_participantAddress];
+        return participants[_participantAddress].NEWpendingEth;
     }
 
     /**
@@ -935,12 +935,12 @@ contract ReversibleICO is IERC777Recipient {
 
         uint8 currentStage = getCurrentStage();
 
-        Participant storage participantRecord = participants[_from];
-        ParticipantStageDetails storage byStage = participantRecord.byStage[currentStage];
+        Participant storage participantStats = participants[_from];
+        ParticipantStageDetails storage byStage = participantStats.byStage[currentStage];
 
         // UPDATE PARTICIPANT STATS
-        participantRecord.contributions++;
-        participantRecord.NEWpendingEth = participantRecord.NEWpendingEth.add(_receivedValue);
+        participantStats.contributions++;
+        participantStats.NEWpendingEth = participantStats.NEWpendingEth.add(_receivedValue);
         byStage.NEWpendingEth = byStage.NEWpendingEth.add(_receivedValue);
 
         // UPDATE GLOBAL STATS
@@ -948,7 +948,7 @@ contract ReversibleICO is IERC777Recipient {
 
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
-            uint32(participantRecord.contributions),
+            uint32(participantStats.contributions),
             _from,
             _receivedValue
         );
@@ -1052,15 +1052,15 @@ contract ReversibleICO is IERC777Recipient {
      * @param _eventType Reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
      */
     function cancelContributionsForAddress(address _participantAddress, uint256 _value, uint8 _eventType) internal {
-        Participant storage participantRecord = participants[_participantAddress];
+        Participant storage participantStats = participants[_participantAddress];
 
-        uint256 allPendingEth = participantRecord.NEWpendingEth;
+        uint256 allPendingEth = participantStats.NEWpendingEth;
 
         // Revert if there is no pending ETH contribution
         require(allPendingEth > 0, "Participant has no contributions to cancel.");
 
         // UPDATE PARTICIPANT STATS
-        participantRecord.NEWpendingEth = 0;
+        participantStats.NEWpendingEth = 0;
 
         // UPDATE GLOBAL STATS
         canceledETH = canceledETH.add(allPendingEth);
@@ -1068,7 +1068,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Update stages
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
-            ParticipantStageDetails storage byStage = participantRecord.byStage[stageId];
+            ParticipantStageDetails storage byStage = participantStats.byStage[stageId];
 
             byStage.NEWpendingEth = 0;
         }
@@ -1080,7 +1080,7 @@ contract ReversibleICO is IERC777Recipient {
         emit TransferEvent(_eventType, _participantAddress, allPendingEth);
         emit ApplicationEvent(
             _eventType,
-            uint32(participantRecord.contributions),
+            uint32(participantStats.contributions),
             _participantAddress,
             allPendingEth
         );
