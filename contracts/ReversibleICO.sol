@@ -845,7 +845,7 @@ contract ReversibleICO is IERC777Recipient {
         projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
         projectLastBlock = getCurrentBlockNumber();
 
-        sanityCheckProject();
+//        sanityCheckProject();
     }
 
 
@@ -938,7 +938,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
-//        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
+        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
@@ -1024,7 +1024,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
-//        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
+        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
 
 
         // UPDATE the locked/unlocked ratio for the project
@@ -1091,8 +1091,14 @@ contract ReversibleICO is IERC777Recipient {
 //        returnETH = 0.213 eth
 //        returnEthAmount = returnedTokenAmount.mul(
 //            participantStats.NEWcommittedEth.mul(10 ** 20)
-//            .div(participantStats.NEWcurrentReservedTokens)
+//            .div(participantStats.NEWtotalReservedTokens).sub(1)
 //        ).div(10 ** 20);
+
+
+        DEBUG1 = returnEthAmount;
+        DEBUG2 = participantStats.NEWcommittedEth;
+        DEBUG3 = committedETH;
+        DEBUG4 = projectCurrentlyReservedETH;
 
 
         // UPDATE PARTICIPANT STATS
@@ -1108,7 +1114,13 @@ contract ReversibleICO is IERC777Recipient {
         tokenSupply = tokenSupply.add(returnedTokenAmount);
         withdrawnETH = withdrawnETH.add(returnEthAmount);
         committedETH = committedETH.sub(returnEthAmount);
-        projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(returnEthAmount);
+
+        // TODO remove IF, as its a great protection
+//        if(returnEthAmount <= projectCurrentlyReservedETH) {
+            projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(returnEthAmount);
+//        } else {
+//            projectCurrentlyReservedETH = 0;
+//        }
 
 
         // SANITY CHECK

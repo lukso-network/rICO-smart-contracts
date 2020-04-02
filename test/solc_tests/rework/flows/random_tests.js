@@ -180,16 +180,21 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                         const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
 
                         // console.log(maxTokens);
-                        // console.log(getRandomInt(maxTokens));
+
 
                         // calc random token amount
-                        const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                        const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                         if(returnTokenAmount > 0) {
-                            await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 4000000});
+                            await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000});
 
                             // update his balance
                             participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);
+
+                            console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                            console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                            console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
+                            console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
                         }
 
                     });
