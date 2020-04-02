@@ -242,6 +242,17 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             expect(new BN(rICOEthbalance).sub(new BN(getAvailableProjectETH)).toString()).to.be.equal('0');
         });
 
+        it("rICO rest balance should be no more or less than 0% off to what was ever committed ETH", async function () {
+            const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
+            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+            const difference = new BN(rICOEthbalance).sub(new BN(getAvailableProjectETH));
+            const committedETH = await ReversibleICO.methods.committedETH().call();
+            console.log('difference', difference.mul(new BN(10000)).toString());
+            console.log('committedETH', committedETH);
+            console.log('result', difference.mul(new BN(10000)).div(new BN(committedETH)).toString());
+            expect(difference.mul(new BN(10000)).div(new BN(committedETH)).toString() / 10000 * 100 + '%').to.be.equal('0%');
+        });
+
         it("rICO balance should have all getAvailableProjectETH still", async function () {
             const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
             const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
@@ -258,6 +269,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             const projectWithdrawnETH = await ReversibleICO.methods.projectWithdrawnETH().call();
             expect(project.weiBalance.toString()).to.be.equal(projectWithdrawnETH);
         });
+
+
+        //1.071895458893164771
+        //0.158799946098144033
 
         // go over every participant
         for (let i = 0; i < numberOfParticipants; i++) {
