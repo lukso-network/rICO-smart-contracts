@@ -196,18 +196,18 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
 
                 // PROJECT WITHDRAW
-                // if(task === 3) {
-                //     it("Project: Withdraws ETH", async function () {
-                //         const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
-                //
-                //         // withdraw everything the project can at that point in time
-                //         await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
-                //             from: project.address,
-                //             gas: 1000000
-                //         });
-                //         project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
-                //     });
-                // }
+                if(task === 3) {
+                    it(project.address +" Project: Withdraws ETH", async function () {
+                        const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+
+                        // withdraw everything the project can at that point in time
+                        await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
+                            from: project.address,
+                            gas: 1000000
+                        });
+                        project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+                    });
+                }
 
             }
 
@@ -275,9 +275,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         });
 
 
-        //1.071895458893164771
-        //0.158799946098144033
-
         // go over every participant
         for (let i = 0; i < numberOfParticipants; i++) {
             let participant = participants[i];
@@ -291,15 +288,14 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 console.log('currentUnlockedTokenAmount ', await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call());
             });
             it(participant.address + ": reserved token balance should be 0", async function () {
-                const balance = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
-                expect(balance).to.be.equal("0");
+                const currentReservedTokenAmount = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
+                expect(currentReservedTokenAmount).to.be.equal("0");
             });
             it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
-                const balance = await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call();
-                expect(balance).to.be.equal(participant.tokenBalance.toString());
+                const currentUnlockedTokenAmount = await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call();
+                expect(currentUnlockedTokenAmount).to.be.equal(participant.tokenBalance.toString());
             });
         }
-
     });
 
 });
