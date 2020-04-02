@@ -27,15 +27,19 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
     customTestSettings.rico.blocksPerDay = 3;
+    customTestSettings.rico.commitPhaseDays = 2;
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
 
-    let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
-    let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.stageDays;
-    let buyPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.stageDays * customTestSettings.rico.stageCount;
-    let buyPhaseEndBlock = 60 + commitPhaseStartBlock + commitPhaseBlockCount + buyPhaseBlockCount;
+    customTestSettings.rico.commitPhasePrice = "1000000000000000000"; // price is 1:1
+    customTestSettings.rico.stagePriceIncrease = 0;
 
-    const commitPhasePrice = helpers.solidity.ether * 0.002;
+    let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
+    let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.commitPhaseDays;
+    let buyPhaseStartBlock = commitPhaseStartBlock + commitPhaseBlockCount + 1;
+    let buyPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.stageDays * customTestSettings.rico.stageCount;
+    let buyPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount + buyPhaseBlockCount;
+
 
     let project = {
         address: projectWalletAddress,
@@ -89,7 +93,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         RICOContractAddress = ReversibleICO.receipt.contractAddress;
 
 
-        const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployerAddress, 0);
+        // const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployerAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
 
     });
@@ -99,21 +103,16 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         before(async () => {
             await revertToFreshDeployment();
 
-            // await helpers.utils.jumpToContractStage(ReversibleICO, deployerAddress, commitPhaseStartBlock);
-            await ReversibleICO.methods.jumpToBlockNumber(commitPhaseStartBlock).send({
+            await ReversibleICO.methods.jumpToBlockNumber(buyPhaseStartBlock).send({ //commitPhaseStartBlock
                 from: deployerAddress,
                 gas: 100000
             });
 
         });
 
-
-        // console.log('rICO duration in blocks: ', (commitPhaseBlockCount + buyPhaseBlockCount));
-        // console.log('Commit phase start block: ', commitPhaseStartBlock);
-        // console.log('Current block: ', await ReversibleICO.methods.getCurrentBlockNumber().call());
-
         // iterate over all phases
-        for (let blockNumber = commitPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
+        //commitPhaseStartBlock
+        for (let blockNumber = buyPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
 
             console.log('Current Block: ', blockNumber);
 
@@ -197,18 +196,18 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
 
                 // PROJECT WITHDRAW
-                if(task === 1) {
-                    it("Project: Withdraws ETH", async function () {
-                        const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
-
-                        // withdraw everything the project can at that point in time
-                        await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
-                            from: project.address,
-                            gas: 1000000
-                        });
-                        project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
-                    });
-                }
+                // if(task === 3) {
+                //     it("Project: Withdraws ETH", async function () {
+                //         const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+                //
+                //         // withdraw everything the project can at that point in time
+                //         await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
+                //             from: project.address,
+                //             gas: 1000000
+                //         });
+                //         project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+                //     });
+                // }
 
             }
 
@@ -218,6 +217,11 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                     from: deployerAddress,
                     gas: 100000
                 });
+
+                const stage = await ReversibleICO.methods.getCurrentStage().call();
+                const price = await ReversibleICO.methods.getCurrentPrice().call();
+
+                console.log('Stage: '+ stage + ', Price: '+ price);
             });
         }
 
