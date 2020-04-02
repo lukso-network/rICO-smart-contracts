@@ -251,7 +251,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         it("Project balance + getAvailableProjectETH should be committedETH", async function () {
             const committedETH = await ReversibleICO.methods.committedETH().call();
             const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
-            expect(project.weiBalance.add(new BN(getAvailableProjectETH))).to.be.equal(committedETH);
+            expect(project.weiBalance.add(new BN(getAvailableProjectETH)).toString()).to.be.equal(committedETH);
         });
 
         it("Project should have all projectWithdrawnETH", async function () {
