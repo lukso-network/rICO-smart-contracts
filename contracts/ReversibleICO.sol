@@ -893,6 +893,16 @@ contract ReversibleICO is IERC777Recipient {
         ).div(10 ** 20);
 
 
+//        returnPrice = TotalETH (wo dont have right now) / participantStats.NEWcurrentReservedTokens
+//        returnPrice = 0,021333333333333
+//        returnETH = returnTokens * returnPrice
+//        returnETH = 0.213 eth
+//        returnEthAmount = returnedTokenAmount.mul(
+//            participantStats.NEWcommittedEth.mul(10 ** 20)
+//            .div(participantStats.NEWcurrentReservedTokens)
+//        ).div(10 ** 20);
+
+
         // UPDATE PARTICIPANT STATS
         participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);

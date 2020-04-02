@@ -19,12 +19,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
     let ReversibleICO;
-
-    let project = {
-        address: null,
-        weiBalance: new BN(0),
-        tokenBalance: new BN(0)
-    };
     // generate n participants
     let numberOfParticipants = 2;
     let participants = [];
@@ -42,6 +36,11 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     let buyPhaseEndBlock = 60 + commitPhaseStartBlock + commitPhaseBlockCount + buyPhaseBlockCount;
 
     const commitPhasePrice = helpers.solidity.ether * 0.002;
+
+    let project = {
+        address: projectWalletAddress,
+        weiBalance: new BN(0)
+    };
 
     // add accounts
     for(let i = 0; i < numberOfParticipants; i++){
@@ -130,6 +129,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                     taskName = 'CONTRIBUTE';
                 if(task === 2)
                     taskName = 'WITHDRAW';
+                if(task === 3)
+                    taskName = 'PROJECT WITHDRAW';
 
                 console.log(participant.address +' Task: ' + taskName + ' '+ task);
 
@@ -194,6 +195,21 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                     });
                 }
 
+
+                // PROJECT WITHDRAW
+                if(task === 1) {
+                    it("Project: Withdraws ETH", async function () {
+                        const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+
+                        // withdraw everything the project can at that point in time
+                        await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
+                            from: project.address,
+                            gas: 1000000
+                        });
+                        project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+                    });
+                }
+
             }
 
             it("Jump to the next block: "+ blockNumber, async function () {
@@ -214,10 +230,33 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             expect(blockNumber).to.be.equal(buyPhaseEndBlock);
         });
 
-        it("Project should have gotten all committed ETH", async function () {
-            const committedEth = await ReversibleICO.methods.committedETH().call();
+        // it("rICO should have all committed ETH as balance", async function () {
+        //     const committedEth = await ReversibleICO.methods.committedETH().call();
+        //     const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
+        //     expect(committedEth).to.be.equal(rICOEthbalance);
+        // });
+
+        it("rICO balance - getAvailableProjectETH should be 0", async function () {
             const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
-            expect(committedEth).to.be.equal(rICOEthbalance);
+            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+            expect(new BN(rICOEthbalance).sub(new BN(getAvailableProjectETH)).toString()).to.be.equal('0');
+        });
+
+        it("rICO balance should have all getAvailableProjectETH still", async function () {
+            const rICOEthbalance = await helpers.web3Instance.eth.getBalance(ReversibleICO.receipt.contractAddress);
+            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+            expect(rICOEthbalance).to.be.equal(getAvailableProjectETH);
+        });
+
+        it("Project balance + getAvailableProjectETH should be committedETH", async function () {
+            const committedETH = await ReversibleICO.methods.committedETH().call();
+            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+            expect(project.weiBalance.add(new BN(getAvailableProjectETH))).to.be.equal(committedETH);
+        });
+
+        it("Project should have all projectWithdrawnETH", async function () {
+            const projectWithdrawnETH = await ReversibleICO.methods.projectWithdrawnETH().call();
+            expect(project.weiBalance.toString()).to.be.equal(projectWithdrawnETH);
         });
 
         // go over every participant
