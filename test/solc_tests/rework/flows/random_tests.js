@@ -102,8 +102,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         before(async () => {
             await revertToFreshDeployment();
+            // helpers.utils.resetAccountNonceCache(helpers);
 
-            await ReversibleICO.methods.jumpToBlockNumber(buyPhaseStartBlock).send({ //commitPhaseStartBlock
+            await ReversibleICO.methods.jumpToBlockNumber(commitPhaseStartBlock).send({
                 from: deployerAddress,
                 gas: 100000
             });
@@ -112,7 +113,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         // iterate over all phases
         //commitPhaseStartBlock
-        for (let blockNumber = buyPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
+        for (let blockNumber = commitPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
 
             console.log('Current Block: ', blockNumber);
 
@@ -120,8 +121,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             for (let i = 0; i < numberOfParticipants; i++) {
                 let participant = participants[i];
 
-                // we have 10, so that in 80% ther is no actions, as only 2 numbers represent actions
-                let task = getRandomInt(10);
+                // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
+                let task = getRandomInt(5);
 
                 let taskName = '';
                 if(task === 1)
@@ -182,7 +183,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                         // console.log(getRandomInt(maxTokens));
 
                         // calc random token amount
-                        const returnTokenAmount = new BN(String(getRandomInt(maxTokens))); // 0-max reserved tokens
+                        const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                         if(returnTokenAmount > 0) {
                             await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000});
