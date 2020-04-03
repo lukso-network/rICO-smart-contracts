@@ -1088,15 +1088,15 @@ contract ReversibleICO is IERC777Recipient {
         ).div(10 ** 20);
 
 
+        // AVG TOKEN PRICE
+//        returnEthAmount = returnedTokenAmount
+//            .mul(participantStats.avgTokenPrice)
+//            .div(10 ** 18);
 
         // Overwrite if stage 0
         if(getCurrentStage() == 0) {
             returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
         }
-        // AVG TOKEN PRICE
-//        returnEthAmount = returnedTokenAmount
-//            .mul(participantStats.avgTokenPrice)
-//            .div(10 ** 18);
 
 
 //        returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, getCurrentStage());
