@@ -32,7 +32,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     customTestSettings.rico.stageCount = 10;
 
     customTestSettings.rico.commitPhasePrice = "25000000000000000"; // 0.025 ETH
-    customTestSettings.rico.stagePriceIncrease = "3333333330000000"; // 0.003333... ETH
+    customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
     let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.commitPhaseDays;
@@ -123,7 +123,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 let participant = participants[i];
 
                 // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
-                let task = getRandomInt(5);
+                let task = getRandomInt(20);
 
                 let taskName = '';
                 if(task === 1)

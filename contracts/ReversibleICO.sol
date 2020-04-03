@@ -468,7 +468,7 @@ contract ReversibleICO is IERC777Recipient {
         calcProjectAllocation();
 
         // Get current allocated ETH to the project
-        uint256 availableForWithdraw = getAvailableProjectETH();
+        uint256 availableForWithdraw = projectTotalUnlockedETH.sub(projectWithdrawnETH);
 
         require(_ethAmount <= availableForWithdraw, "Requested amount too big, not enough ETH available.");
 
