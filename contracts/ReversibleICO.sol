@@ -1044,49 +1044,55 @@ contract ReversibleICO is IERC777Recipient {
 
 
         // RETURNS LAST STAGES LOCKED TOKENS FIRST (HIGHEST PRICED TOKENS)
-        uint256 stageReturnTokens = returnedTokenAmount;
-//        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
-        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
-            ParticipantStageDetails storage byStage = participantStats.byStage[stageId];
-
-            // UPDATE the locked/unlocked ratio for this participant, PER STAGE
-//            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(calcUnlockRatio(byStage.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
-
-            // cancel if all is accounted for
-//            if(stageReturnTokens == 0) {
-//                continue;
+//        uint256 stageReturnTokens = returnedTokenAmount;
+////        for (uint8 stageId = getCurrentStage(); stageId >= 0; stageId--) {
+//        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
+//            ParticipantStageDetails storage byStage = participantStats.byStage[stageId];
+//
+//            // UPDATE the locked/unlocked ratio for this participant, PER STAGE
+////            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(calcUnlockRatio(byStage.NEWcurrentReservedTokens, participantStats.NEWlastBlock));
+//
+//            // cancel if all is accounted for
+////            if(stageReturnTokens == 0) {
+////                continue;
+////            }
+//
+//            uint256 processTokens = byStage.NEWcurrentReservedTokens;
+//
+//            if (stageReturnTokens < byStage.NEWcurrentReservedTokens) {
+//                processTokens = stageReturnTokens;
 //            }
-
-            uint256 processTokens = byStage.NEWcurrentReservedTokens;
-
-            if (stageReturnTokens < byStage.NEWcurrentReservedTokens) {
-                processTokens = stageReturnTokens;
-            }
-
-            // get ETH amount for tokens
-            returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
-
-            // UPDATE PARTICIPANT STATS
-            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(processTokens);
-
-            // reduce processed token amount from returned token amount
-            stageReturnTokens = stageReturnTokens.sub(processTokens);
-
-//            if(stageId == 0) {
-//                break;
-//            }
-        }
+//
+//            // get ETH amount for tokens
+//            returnEthAmount = returnEthAmount.add(getEthAmountForTokensAtStage(processTokens, stageId));
+//
+//            // UPDATE PARTICIPANT STATS
+//            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.sub(processTokens);
+//
+//            // reduce processed token amount from returned token amount
+//            stageReturnTokens = stageReturnTokens.sub(processTokens);
+//
+////            if(stageId == 0) {
+////                break;
+////            }
+//        }
 
 
 //        returnProportion = returnTokens / participantStats.NEWcurrentReservedTokens
 //        returnProportion = 0,033333333333333
 //        returnETH = TotalETH (wo dont have right now) * returnProportion
 //        returnETH = 0,213333333333312
-//        returnEthAmount = participantStats.NEWcommittedEth.mul(
-//            returnedTokenAmount.mul(10 ** 20)
-//            .div(participantStats.NEWcurrentReservedTokens)//.sub(1) // we subtract one, to round down, to prevent subtraction overflows
-//        ).div(10 ** 20);
+        returnEthAmount = participantStats.NEWcommittedEth.mul(
+            returnedTokenAmount.mul(10 ** 20)
+            .div(participantStats.NEWtotalReservedTokens)//.sub(1) // we subtract one, to round down, to prevent subtraction overflows
+        ).div(10 ** 20);
 
+
+
+        // Overwrite if stage 0
+        if(getCurrentStage() == 0) {
+            returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
+        }
         // AVG TOKEN PRICE
 //        returnEthAmount = returnedTokenAmount
 //            .mul(participantStats.avgTokenPrice)
@@ -1118,7 +1124,7 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.withdraws++;
         participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
-//        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(returnEthAmount);
+        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(returnEthAmount);
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
