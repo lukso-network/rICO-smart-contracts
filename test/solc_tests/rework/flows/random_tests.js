@@ -183,7 +183,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
 
                                     done();
-                                }, done);
+                                }, (error) => {
+                                    helpers.utils.resetAccountNonceCache(helpers);
+                                    done(error);
+                                });
 
                             } else {
                                 done();
@@ -202,6 +205,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                         ( async function(){
                             const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
+                            // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
                             const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
@@ -233,7 +237,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                         }
 
                                         done();
-                                    }, done);
+                                    }, (error) => {
+                                        helpers.utils.resetAccountNonceCache(helpers);
+                                        done(error);
+                                    });
 
                             } else {
                                 done();
@@ -364,8 +371,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 if(participant.pricesAtWithdraw.length)
                     console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
 
-
-                let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
+                // if(participant.pricesAtWithdraw.length && participant.pricesPaid.length)
+                //     let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
 
                 // expect(difference.mul(new BN(10000)).div(pricesPaidSum.div(new BN(participant.pricesPaid.length))).toString() / 10000 * 100 + '%').to.be.equal('0%');
 
