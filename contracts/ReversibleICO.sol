@@ -726,7 +726,7 @@ contract ReversibleICO is IERC777Recipient {
             if(_lastBlock < buyPhaseStartBlock) {
                 _lastBlock = buyPhaseStartBlock;
             }
-            
+
             // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
             uint256 totalBlockCount = buyPhaseEndBlock.sub(_lastBlock).add(1);
 
@@ -831,7 +831,7 @@ contract ReversibleICO is IERC777Recipient {
 //        DEBUG2 = participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens);
 
         // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
-//        require(participantStats.NEWtotalReservedTokens == participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens), 'Participant Sanity check failed! Reser. + Unlock must equal totalReser');
+        require(participantStats.NEWtotalReservedTokens == participantStats.NEWcurrentReservedTokens.add(participantStats.NEWtotalUnlockedTokens), 'Participant Sanity check failed! Reser. + Unlock must equal totalReser');
 
     }
 
@@ -848,7 +848,7 @@ contract ReversibleICO is IERC777Recipient {
         projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
         projectLastBlock = getCurrentBlockNumber();
 
-//        sanityCheckProject();
+        sanityCheckProject();
     }
 
 
@@ -1002,6 +1002,9 @@ contract ReversibleICO is IERC777Recipient {
             emit ApplicationEvent(_eventType, uint32(stageId), _participantAddress, newlyCommittedEth);
         }
 
+        // SANITY CHECK
+        sanityCheckParticipant(_participantAddress);
+
         // Return what couldn't be accepted
         if (totalReturnETH > 0) {
 
@@ -1114,11 +1117,11 @@ contract ReversibleICO is IERC777Recipient {
 
 
         // DEBUG: Check that user doesnt get to much!
-        if(returnEthAmount > projectCurrentlyReservedETH) {
-            DEBUG1 = returnEthAmount;
-            DEBUG2 = projectCurrentlyReservedETH;
-            return; // stop here so nobody is trying to transfer more ETH than they could
-        }
+//        if(returnEthAmount > projectCurrentlyReservedETH) {
+//            DEBUG1 = returnEthAmount;
+//            DEBUG2 = projectCurrentlyReservedETH;
+//            return; // stop here so nobody is trying to transfer more ETH than they could
+//        }
 
 
         // UPDATE PARTICIPANT STATS

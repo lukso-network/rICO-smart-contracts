@@ -203,7 +203,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
 
                             // calc random token amount
-                            const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                            const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                             if(returnTokenAmount.toString() > '0') {
                                 console.log('returnTokenAmount', returnTokenAmount.toString());
