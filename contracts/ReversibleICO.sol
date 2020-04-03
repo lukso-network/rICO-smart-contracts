@@ -130,6 +130,7 @@ contract ReversibleICO is IERC777Recipient {
     struct Participant {
         bool whitelisted;
         uint32 contributions;
+        uint32 withdraws;
 
         uint256 NEWtotalReservedTokens;
         uint256 NEWtotalUnlockedTokens;
@@ -168,10 +169,10 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     event ApplicationEvent (
-        uint8 indexed _type,
-        uint32 indexed _id,
-        address indexed _address,
-        uint256 _value
+        uint8 indexed typeId,
+        uint32 indexed id,
+        address indexed relatedAddress,
+        uint256 value
     );
 
     enum TransferTypes {
@@ -184,9 +185,9 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     event TransferEvent (
-        uint8 indexed _type,
-        address indexed _address,
-        uint256 indexed _value
+        uint8 indexed typeId,
+        address indexed relatedAddress,
+        uint256 indexed value
     );
 
 
@@ -1078,7 +1079,7 @@ contract ReversibleICO is IERC777Recipient {
 //        returnETH = 0,213333333333312
         returnEthAmount = participantStats.NEWcommittedEth.mul(
             returnedTokenAmount.mul(10 ** 20)
-            .div(participantStats.NEWtotalReservedTokens).sub(1) // we subtract one, to round down, to prevent subtraction overflows
+            .div(participantStats.NEWcurrentReservedTokens)//.sub(1) // we subtract one, to round down, to prevent subtraction overflows
         ).div(10 ** 20);
 
 
@@ -1091,7 +1092,7 @@ contract ReversibleICO is IERC777Recipient {
 //        returnETH = 0.213 eth
 //        returnEthAmount = returnedTokenAmount.mul(
 //            participantStats.NEWcommittedEth.mul(10 ** 20)
-//            .div(participantStats.NEWtotalReservedTokens).sub(1)
+//            .div(participantStats.NEWcurrentReservedTokens).sub(1)
 //        ).div(10 ** 20);
 
 
@@ -1102,6 +1103,7 @@ contract ReversibleICO is IERC777Recipient {
 
 
         // UPDATE PARTICIPANT STATS
+        participantStats.withdraws++;
         participantStats.NEWcurrentReservedTokens = participantStats.NEWcurrentReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWtotalReservedTokens = participantStats.NEWtotalReservedTokens.sub(returnedTokenAmount);
         participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(returnEthAmount);
