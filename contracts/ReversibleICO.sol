@@ -1089,6 +1089,42 @@ contract ReversibleICO is IERC777Recipient {
     }
 
 
+    // DEBUG function
+    function debug_getParticipantEthForTokens(address _participantAddress, uint256 _tokenAmount) public view returns(uint256 returnsEth, uint256 overflowingTokens) {
+        Participant storage participantStats = participants[_participantAddress];
+
+        uint256 returnedTokenAmount = _tokenAmount;
+        uint256 overflowingTokenAmount;
+        uint256 returnEthAmount;
+
+
+        // UPDATE the locked/unlocked ratio for this participant
+        uint256 participantReservedTokens = currentReservedTokenAmount(_participantAddress);
+        uint256 participantCommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
+
+
+        // Only allow reserved tokens be returned, return the overflow.
+        if (returnedTokenAmount > participantReservedTokens) {
+            overflowingTokenAmount = returnedTokenAmount.sub(participantReservedTokens);
+            returnedTokenAmount = participantReservedTokens;
+        }
+
+
+        // Overwrite if stage 0
+        if(getCurrentStage() == 0) {
+            returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
+        } else {
+            returnEthAmount = participantCommittedEth.mul(
+                returnedTokenAmount.mul(10 ** 20)
+                .div(participantStats.NEWtotalReservedTokens)
+            ).div(10 ** 20);
+        }
+
+        returnsEth = returnEthAmount;
+        overflowingTokens = overflowingTokenAmount;
+    }
+
+
     /*
      *   Modifiers
      */
