@@ -135,10 +135,19 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                 console.log(participant.address +' Task: ' + taskName + ' '+ task);
 
+                // if(!participants[i].contrCount)
+                //     participants[i].contrCount = 0;
+                // if(!participants[i].withdCount)
+                //     participants[i].withdCount = 0;
+
                 // CONTRIBUTE
-                if(task === 1) {
+                if(task === 1) {// && participants[i].contrCount <= 3) {
+
+                    // participants[i].contrCount++;
+
 
                     it(participant.address + ": Buy tokens", function (done) {
+
 
                         ( async function(){
                             // WHITELIST
@@ -157,6 +166,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             // user balance: 1000000 ETH?
                             const contribTokenAmount = new BN(getRandomInt(100)); // 0-100 tokens //
                             const stageId = await ReversibleICO.methods.getCurrentStage().call();
+                            const currentPrice = await ReversibleICO.methods.getCurrentPrice().call();
 
                             if (contribTokenAmount.toString() > '0') {
                                 const ContributionAmount = priceInStage(stageId).mul(contribTokenAmount);
@@ -165,16 +175,14 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     to: ReversibleICO.receipt.contractAddress,
                                     value: ContributionAmount.toString(),
                                     gasPrice: helpers.networkConfig.gasPrice
-                                }).then(async () => {
+                                }).then(() => {
 
                                     // update his balance
-                                    participant.pricesPaid.push(new BN(await ReversibleICO.methods.getCurrentPrice().call()));
+                                    participant.pricesPaid.push(new BN(currentPrice));
                                     participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
 
                                     done();
-                                }, function() {
-                                    done();
-                                });
+                                }, done);
 
                             } else {
                                 done();
@@ -182,24 +190,25 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                         })();
                     });
                 }
-
                 // WITHDRAW
-                if(task === 2) {
+                if(task === 2) {// && participants[i].withdCount <= 3) {
+
+                    // participants[i].withdCount++;
+
 
                     it(participant.address + ": Return tokens", function (done) {
+
 
                         ( async function(){
                             const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
 
-                            // console.log(maxTokens);
-
-
                             // calc random token amount
-                            const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                            const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                             if(returnTokenAmount.toString() > '0') {
-                                                      // console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                // console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                console.log('returnTokenAmount', returnTokenAmount.toString());
+                                console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                                console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
                                 // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
                                 // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
@@ -212,8 +221,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                         if(receipt.events['0']) {
                                             let pow18 = new BN(10).pow(new BN(18));
 
-                                            console.log('RET TOKEN', returnTokenAmount.toString());
-                                            console.log('ETH RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
+                                            // console.log('RET TOKEN', returnTokenAmount.toString());
+                                            // console.log('ETH RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
 
                                             participant.pricesAtWithdraw.push(
                                                 new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).mul(pow18)
@@ -223,9 +232,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                         }
 
                                         done();
-                                    }, function() {
-                                        done();
-                                    });
+                                    }, done);
 
                             } else {
                                 done();
@@ -267,7 +274,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         }
 
         console.log('Number of Participants: ', numberOfParticipants);
-        // let balance = 0;
 
         it("rICO should be finished", async function () {
             const blockNumber = await ReversibleICO.methods.getCurrentBlockNumber().call();
@@ -292,9 +298,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
             const difference = new BN(rICOEthbalance).sub(new BN(getAvailableProjectETH));
             const committedETH = await ReversibleICO.methods.committedETH().call();
-            console.log('difference', difference.mul(new BN(10000)).toString());
-            console.log('committedETH', committedETH);
-            console.log('result', difference.mul(new BN(10000)).div(new BN(committedETH)).toString());
+            // console.log('difference', difference.mul(new BN(10000)).toString());
+            // console.log('committedETH', committedETH);
+            // console.log('result', difference.mul(new BN(10000)).div(new BN(committedETH)).toString());
             expect(difference.mul(new BN(10000)).div(new BN(committedETH)).toString() / 10000 * 100 + '%').to.be.equal('0%');
         });
 
@@ -333,25 +339,31 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 expect(currentUnlockedTokenAmount).to.be.equal(participant.tokenBalance.toString());
             });
 
-            it(participant.address + ": compare price average", async function () {
+            it(participant.address + ": compare price average, should be 0", async function () {
 
                 let pricesPaidSum = new BN(0);
                 participant.pricesPaid.forEach((price, i) => {
-                    console.log('Compare paid '+i, price.toString());
+                    // console.log('Compare paid '+i, price.toString());
                     pricesPaidSum = pricesPaidSum.add(price);
                 });
 
                 let pricesWithdrawnSum = new BN(0);
                 participant.pricesAtWithdraw.forEach((price, i) => {
-                    console.log('Compare withdraw '+i, price.toString());
+                    // console.log('Compare withdraw '+i, price.toString());
                     pricesWithdrawnSum = pricesWithdrawnSum.add(price);
                 });
+
+
 
                 console.log('-------');
                 console.log('Compare prices paid ', pricesPaidSum.div(new BN(participant.pricesPaid.length)).toString());
                 console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
 
                 console.log('Participant Stats ', await ReversibleICO.methods.participants(participant.address).call());
+
+                let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
+
+                // expect(difference.mul(new BN(10000)).div(pricesPaidSum.div(new BN(participant.pricesPaid.length))).toString() / 10000 * 100 + '%').to.be.equal('0%');
 
             });
         }
