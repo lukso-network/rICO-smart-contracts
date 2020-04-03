@@ -2,7 +2,7 @@
  * source       https://github.com/lukso-network/rICO-smart-contracts
  * @name        rICO
  * @package     rICO-smart-contracts
- * @author      Micky Socaci <micky@binarzone.com>, Fabian Vogelsteller <@frozeman>
+ * @author      Micky Socaci <micky@binarzone.com>, Fabian Vogelsteller <@frozeman>, Marjorie Hernandez <marjorie@lukso.io>
  * @license     MIT
  */
 
@@ -72,8 +72,8 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectCurrentlyReservedETH;
     /// @dev Accumulated amount allocated to the project by participants.
     uint256 public projectTotalUnlockedETH;
-    /// @dev Last block since the project has withdrawn.
-    uint256 public projectLastBlock;
+    /// @dev Last block since the project has calculated the projectTotalUnlockedETH.
+    uint256 public _projectLastBlock;
 
     /// @dev Minimum amount of ETH accepted for a contribution.
     /// @dev Everything lower than that will trigger a canceling of pending ETH.
@@ -295,15 +295,14 @@ contract ReversibleICO is IERC777Recipient {
     function()
     external
     payable
+    isInitialized
+    isNotFrozen
+    isRunning
     {
-        // Accept contributions higher than the minimum amount
-        if (msg.value >= minContribution) {
-            commit(msg.sender, msg.value);
-        } else {
-            // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
-            // This also allows for extended wallet compatibility by sending a non-zereo amount
-            cancel(msg.sender, msg.value);
-        }
+        require(msg.value > minContribution, 'To contribute, call the commit() function and send ETH along.');
+
+        // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
+        cancel(msg.sender, msg.value);
     }
 
     /**
@@ -321,19 +320,16 @@ contract ReversibleICO is IERC777Recipient {
     )
     external
     isInitialized
-        // isNotFrozen TODO??
-        // requireNotEnded
+    isNotFrozen
     {
         // rICO should only receive tokens from the rICO Token Tracker.
         // Transactions from any other sender should revert
         require(msg.sender == tokenContractAddress, "Invalid token sent.");
 
-        // two cases:
         // 1 - project wallet adds tokens to the sale
         if (_from == projectWalletAddress) {
             // Save the token amount allocated to the rICO address
             tokenSupply = tokenSupply.add(_amount);
-            return;
 
             // 2 - rICO contributor sends tokens back
         } else {
@@ -514,7 +510,7 @@ contract ReversibleICO is IERC777Recipient {
     function getAvailableProjectETH() public view returns (uint256) {
 
         // calc from the last known point on
-        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, _projectLastBlock);
 
         return projectTotalUnlockedETH
         .add(newlyUnlockedEth)
@@ -840,12 +836,12 @@ contract ReversibleICO is IERC777Recipient {
      */
     function calcProjectAllocation() internal {
 
-        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, _projectLastBlock);
 
         // UPDATE GLOBAL STATS
         projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(newlyUnlockedEth);
         projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
-        projectLastBlock = getCurrentBlockNumber();
+        _projectLastBlock = getCurrentBlockNumber();
 
         sanityCheckProject();
     }
@@ -1031,7 +1027,10 @@ contract ReversibleICO is IERC777Recipient {
      * @param _participantAddress participant address.
      * @param _returnedTokenAmount The amount of tokens returned.
      */
-    function withdraw(address _participantAddress, uint256 _returnedTokenAmount) internal {
+    function withdraw(address _participantAddress, uint256 _returnedTokenAmount)
+    internal
+    isRunning
+    {
         Participant storage participantStats = participants[_participantAddress];
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
@@ -1139,7 +1138,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     modifier isRunning() {
         uint256 blockNumber = getCurrentBlockNumber();
-        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Contract outside buy in range");
+        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Current block number outside the rICO range.");
         _;
     }
 }

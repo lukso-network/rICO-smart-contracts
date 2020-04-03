@@ -174,6 +174,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     from: participant.address,
                                     to: ReversibleICO.receipt.contractAddress,
                                     value: ContributionAmount.toString(),
+                                    data: '0x3c7a3aff', // commit()
                                     gasPrice: helpers.networkConfig.gasPrice
                                 }).then(() => {
 
@@ -354,12 +355,15 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 });
 
 
+                console.log('Participant Stats ', await ReversibleICO.methods.participants(participant.address).call());
 
                 console.log('-------');
-                console.log('Compare prices paid ', pricesPaidSum.div(new BN(participant.pricesPaid.length)).toString());
-                console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
+                if(participant.pricesPaid.length)
+                    console.log('Compare prices paid ', pricesPaidSum.div(new BN(participant.pricesPaid.length)).toString());
 
-                console.log('Participant Stats ', await ReversibleICO.methods.participants(participant.address).call());
+                if(participant.pricesAtWithdraw.length)
+                    console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
+
 
                 let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
 
