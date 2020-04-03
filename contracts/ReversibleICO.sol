@@ -720,12 +720,12 @@ contract ReversibleICO is IERC777Recipient {
             return 0;
         }
 
-        if(_lastBlock == 0) {
+        if(_lastBlock < buyPhaseStartBlock) {
             _lastBlock = buyPhaseStartBlock;
         }
 
-        // Calculate WITHING the buy phase
-        if (currentBlock >= _lastBlock && currentBlock <= buyPhaseEndBlock) {
+        // Calculate WITHIN the buy phase
+        if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
             // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
             uint256 totalBlockCount = buyPhaseEndBlock.sub(_lastBlock).add(1);
 
