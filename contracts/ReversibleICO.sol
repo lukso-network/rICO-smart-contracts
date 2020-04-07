@@ -144,7 +144,6 @@ contract ReversibleICO is IERC777Recipient {
 
     struct ParticipantStageDetails {
         uint256 NEWpendingEth;
-        uint256 NEWcurrentReservedTokens;
     }
 
     /// @dev Maps participants stats by their address.
@@ -591,24 +590,6 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns participant's stats by stage.
-     * @param _address The participant's address.
-     * @param _stageId The relevant stage.
-
-     * @dev Direct call: participants[_address].byStage[_stageId]._accepted
-     // TODO remove?
-     */
-    function getParticipantStageDetails(address _address, uint8 _stageId) public view
-    returns (
-        uint256 NEWpendingEth
-    ) {
-        ParticipantStageDetails storage byStage = participants[_address].byStage[_stageId];
-        return (
-        byStage.NEWpendingEth
-        );
-    }
-
-    /**
      * @notice Returns TRUE if the participant has reserved tokens in the current stage.
      * @param _participantAddress The participant's address.
      */
@@ -993,7 +974,6 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.add(newlyCommittedEth);
             participantStats.NEWpendingEth = participantStats.NEWpendingEth.sub(byStage.NEWpendingEth);
 
-            byStage.NEWcurrentReservedTokens = byStage.NEWcurrentReservedTokens.add(newTokenAmount);
             byStage.NEWpendingEth = byStage.NEWpendingEth.sub(byStage.NEWpendingEth);
 
             // UPDATE GLOBAL STATS
