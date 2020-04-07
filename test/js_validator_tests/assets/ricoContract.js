@@ -82,11 +82,12 @@ class Contract extends Validator {
 
         this.TransferTypes = {
             "NOT_SET": 0,
-            "AUTOMATIC_RETURN": 1,
-            "WHITELIST_REJECTED": 2,
-            "CONTRIBUTION_CANCELED": 3,
+            "WHITELIST_REJECTED": 1,
+            "CONTRIBUTION_CANCELED": 2,
+            "CONTRIBUTION_ACCEPTED_OVERFLOW": 3,
             "PARTICIPANT_WITHDRAW": 4,
-            "PROJECT_WITHDRAWN": 5
+            "PARTICIPANT_WITHDRAW_OVERFLOW": 5,
+            "PROJECT_WITHDRAWN": 6
         }
 
         this.contractAddress = "ricoContractAddress";
@@ -240,7 +241,7 @@ class Contract extends Validator {
                 // ... we must tranfer back the difference.
                 if (returnValue.gt(new BN("0"))) {
                     this.address(this.uint160(_from)).transfer(returnValue);
-                    this.TransferEvent(this.TransferTypes.AUTOMATIC_RETURN, _from, returnValue);
+                    this.TransferEvent(this.TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW, _from, returnValue);
                 }
 
                 this.ApplicationEvent(_eventType, stageId, _from, newAcceptedValue);

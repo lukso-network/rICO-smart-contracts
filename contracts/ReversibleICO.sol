@@ -181,11 +181,12 @@ contract ReversibleICO is IERC777Recipient {
 
     enum TransferTypes {
         NOT_SET, // 0
-        AUTOMATIC_RETURN, // 1
-        WHITELIST_REJECTED, // 2
-        CONTRIBUTION_CANCELED, // 3
+        WHITELIST_REJECTED, // 1
+        CONTRIBUTION_CANCELED, // 2
+        CONTRIBUTION_ACCEPTED_OVERFLOW, // 3 not accepted ETH
         PARTICIPANT_WITHDRAW, // 4
-        PROJECT_WITHDRAWN // 5
+        PARTICIPANT_WITHDRAW_OVERFLOW, // 5 not returnable tokens
+        PROJECT_WITHDRAWN // 6
     }
 
 
@@ -995,7 +996,7 @@ contract ReversibleICO is IERC777Recipient {
             withdrawnETH = withdrawnETH.add(totalReturnETH);
 
             address(uint160(_participantAddress)).transfer(totalReturnETH);
-            emit TransferEvent(uint8(TransferTypes.AUTOMATIC_RETURN), _participantAddress, totalReturnETH);
+            emit TransferEvent(uint8(TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW), _participantAddress, totalReturnETH);
         }
 
         // Transfer tokens to the participant
@@ -1066,6 +1067,7 @@ contract ReversibleICO is IERC777Recipient {
             bytes memory data;
             // solium-disable-next-line security/no-send
             IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
+            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
         }
 
         // Return ETH back to participant
