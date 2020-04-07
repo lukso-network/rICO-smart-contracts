@@ -156,17 +156,6 @@ contract ReversibleICO is IERC777Recipient {
     /*
      * Events
      */
-    enum ApplicationEventTypes {
-        NOT_SET, // 0; will match default value of a mapping result
-        CONTRIBUTION_NEW, // 1
-        CONTRIBUTION_CANCEL, // 2
-        PARTICIPANT_CANCEL, // 3
-        COMMITMENT_ACCEPTED, // 4
-        WHITELIST_APPROVE, // 5
-        WHITELIST_REJECT, // 6
-        PROJECT_WITHDRAW // 7
-    }
-
     event ApplicationEvent (
         uint8 indexed typeId,
         uint32 indexed id,
@@ -174,20 +163,31 @@ contract ReversibleICO is IERC777Recipient {
         uint256 value
     );
 
-    enum TransferTypes {
-        NOT_SET, // 0
-        AUTOMATIC_RETURN, // 1
-        WHITELIST_REJECT, // 2
-        PARTICIPANT_CANCEL, // 3
-        PARTICIPANT_WITHDRAW, // 4
-        PROJECT_WITHDRAW // 5
-    }
-
     event TransferEvent (
         uint8 indexed typeId,
         address indexed relatedAddress,
         uint256 indexed value
     );
+
+    enum ApplicationEventTypes {
+        NOT_SET, // 0; will match default value of a mapping result
+        CONTRIBUTION_ADDED, // 1
+        CONTRIBUTION_CANCELED, // 2
+        CONTRIBUTION_ACCEPTED, // 3
+        WHITELIST_APPROVED, // 4
+        WHITELIST_REJECTED, // 5
+        PROJECT_WITHDRAWN // 6
+    }
+
+    enum TransferTypes {
+        NOT_SET, // 0
+        AUTOMATIC_RETURN, // 1
+        WHITELIST_REJECTED, // 2
+        CONTRIBUTION_CANCELED, // 3
+        PARTICIPANT_WITHDRAW, // 4
+        PROJECT_WITHDRAWN // 5
+    }
+
 
 
     // ------------------------------------------------------------------------------------------------
@@ -380,7 +380,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.COMMITMENT_ACCEPTED));
+            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED));
         }
     }
 
@@ -409,7 +409,7 @@ contract ReversibleICO is IERC777Recipient {
         require(hasPendingETH(_sender), "Participant has no pending contributions.");
 
         // Cancel participant's contribution.
-        cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.PARTICIPANT_CANCEL));
+        cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED));
     }
 
     /**
@@ -435,12 +435,12 @@ contract ReversibleICO is IERC777Recipient {
                 if (!participantRecord.whitelisted) {
                     // If participants are approved: whitelist them and accept their contributions
                     participantRecord.whitelisted = true;
-                    acceptContributionsForAddress(participantAddress, uint8(ApplicationEventTypes.WHITELIST_APPROVE));
+                    acceptContributionsForAddress(participantAddress, uint8(ApplicationEventTypes.WHITELIST_APPROVED));
                 }
             } else {
                 // Decline participant and cancel their contributions, if they have pending ETH.
                 if (hasPendingETH(participantAddress)) {
-                    cancelContributionsForAddress(participantAddress, 0, uint8(ApplicationEventTypes.WHITELIST_REJECT));
+                    cancelContributionsForAddress(participantAddress, 0, uint8(ApplicationEventTypes.WHITELIST_REJECTED));
                 }
                 participantRecord.whitelisted = false;
             }
@@ -474,13 +474,13 @@ contract ReversibleICO is IERC777Recipient {
 
         // Event emission
         emit ApplicationEvent(
-            uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
+            uint8(ApplicationEventTypes.PROJECT_WITHDRAWN),
             uint32(projectWithdrawCount),
             projectAddress,
             _ethAmount
         );
         emit TransferEvent(
-            uint8(TransferTypes.PROJECT_WITHDRAW),
+            uint8(TransferTypes.PROJECT_WITHDRAWN),
             projectAddress,
             _ethAmount
         );
@@ -872,7 +872,7 @@ contract ReversibleICO is IERC777Recipient {
         pendingETH = pendingETH.add(_receivedValue);
 
         emit ApplicationEvent(
-            uint8(ApplicationEventTypes.CONTRIBUTION_NEW),
+            uint8(ApplicationEventTypes.CONTRIBUTION_ADDED),
             uint32(participantStats.contributions),
             _from,
             _receivedValue
@@ -883,7 +883,7 @@ contract ReversibleICO is IERC777Recipient {
     * @notice Cancels all of the participant's contributions so far.
     * @param _participantAddress Participant's address
     * @param _value the ETH amount sent with the transaction, to return
-    * @param _eventType Reason for canceling: {WHITELIST_REJECT, PARTICIPANT_CANCEL}
+    * @param _eventType Reason for canceling: {WHITELIST_REJECTED, CONTRIBUTION_CANCELED}
     */
     function cancelContributionsForAddress(address _participantAddress, uint256 _value, uint8 _eventType) internal {
         Participant storage participantStats = participants[_participantAddress];
@@ -922,7 +922,7 @@ contract ReversibleICO is IERC777Recipient {
     /**
     * @notice Accept a participant's contribution.
     * @param _participantAddress Participant's address.
-    * @param _eventType Can be either WHITELIST_APPROVE or COMMITMENT_ACCEPTED.
+    * @param _eventType Can be either WHITELIST_APPROVED or CONTRIBUTION_ACCEPTED.
     */
     function acceptContributionsForAddress(address _participantAddress, uint8 _eventType) internal {
         Participant storage participantStats = participants[_participantAddress];

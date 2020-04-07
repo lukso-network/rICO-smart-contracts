@@ -72,22 +72,21 @@ class Contract extends Validator {
 
         this.ApplicationEventTypes = {
             "NOT_SET": 0,
-            "CONTRIBUTION_NEW": 1,
-            "CONTRIBUTION_CANCEL": 2,
-            "PARTICIPANT_CANCEL": 3,
-            "COMMITMENT_ACCEPTED": 4,
-            "WHITELIST_APPROVE": 5,
-            "WHITELIST_REJECT": 6,
-            "PROJECT_WITHDRAW": 7
+            "CONTRIBUTION_ADDED": 1,
+            "CONTRIBUTION_CANCELED": 2,
+            "CONTRIBUTION_ACCEPTED": 3,
+            "WHITELIST_APPROVED": 4,
+            "WHITELIST_REJECTED": 5,
+            "PROJECT_WITHDRAWN": 6
         }
 
         this.TransferTypes = {
             "NOT_SET": 0,
             "AUTOMATIC_RETURN": 1,
-            "WHITELIST_REJECT": 2,
-            "PARTICIPANT_CANCEL": 3,
+            "WHITELIST_REJECTED": 2,
+            "CONTRIBUTION_CANCELED": 3,
             "PARTICIPANT_WITHDRAW": 4,
-            "PROJECT_WITHDRAW": 5
+            "PROJECT_WITHDRAWN": 5
         }
 
         this.contractAddress = "ricoContractAddress";
@@ -133,7 +132,7 @@ class Contract extends Validator {
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            this.acceptContributionsForAddress(msg_sender, this.ApplicationEventTypes.COMMITMENT_ACCEPTED);
+            this.acceptContributionsForAddress(msg_sender, this.ApplicationEventTypes.CONTRIBUTION_ACCEPTED);
         }
     }
 
@@ -169,7 +168,7 @@ class Contract extends Validator {
         participantRecord.pendingTokens = participantRecord.pendingTokens.add(newTokenAmount);
 
         this.ApplicationEvent(
-            this.ApplicationEventTypes.CONTRIBUTION_NEW,
+            this.ApplicationEventTypes.CONTRIBUTION_ADDED,
             participantRecord.contributions,
             _from,
             _receivedValue
@@ -286,11 +285,11 @@ class Contract extends Validator {
         if (_approve) {
             // If participants are approved: whitelist them and accept their contributions
             participantRecord.whitelisted = true;
-            this.acceptContributionsForAddress(_address, this.ApplicationEventTypes.WHITELIST_APPROVE);
+            this.acceptContributionsForAddress(_address, this.ApplicationEventTypes.WHITELIST_APPROVED);
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
             participantRecord.whitelisted = false;
-            this.cancelContributionsForAddress(_address, 0, this.ApplicationEventTypes.WHITELIST_REJECT);
+            this.cancelContributionsForAddress(_address, 0, this.ApplicationEventTypes.WHITELIST_REJECTED);
         }
     }
 
@@ -369,10 +368,10 @@ class Contract extends Validator {
             this.address(this.uint160(_from)).transfer(participantAvailableETH.add(new BN(_value)));
 
             let currentTransferEventType;
-            if (_eventType == this.ApplicationEventTypes.WHITELIST_REJECT) {
-                currentTransferEventType = this.TransferTypes.WHITELIST_REJECT;
-            } else if (_eventType == this.ApplicationEventTypes.PARTICIPANT_CANCEL) {
-                currentTransferEventType = this.TransferTypes.PARTICIPANT_CANCEL;
+            if (_eventType == this.ApplicationEventTypes.WHITELIST_REJECTED) {
+                currentTransferEventType = this.TransferTypes.WHITELIST_REJECTED;
+            } else if (_eventType == this.ApplicationEventTypes.CONTRIBUTION_CANCELED) {
+                currentTransferEventType = this.TransferTypes.CONTRIBUTION_CANCELED;
             }
 
             // event emission
@@ -525,13 +524,13 @@ class Contract extends Validator {
 
         // Event emission
         ApplicationEvent(
-            ApplicationEventTypes.PROJECT_WITHDRAW,
+            ApplicationEventTypes.PROJECT_WITHDRAWN,
             projectWithdrawCount,
             projectAddress,
             _ethAmount
         );
         TransferEvent(
-            TransferTypes.PROJECT_WITHDRAW,
+            TransferTypes.PROJECT_WITHDRAWN,
             projectAddress,
             _ethAmount
         );
