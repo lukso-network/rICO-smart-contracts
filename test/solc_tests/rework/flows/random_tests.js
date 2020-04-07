@@ -123,7 +123,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 let participant = participants[i];
 
                 // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
-                let task = getRandomInt(20);
+                let task = getRandomInt(10);
 
                 let taskName = '';
                 if(task === 1)
