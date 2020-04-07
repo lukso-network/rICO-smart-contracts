@@ -105,8 +105,8 @@ module.exports = {
 
                 await participants[0].displayBalances();
                 
-                // const byStage = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
-                // console.log(byStage);
+                // const stages = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
+                // console.log(stages);
 
                 const boughtToken = new helpers.BN( await rICOToken.methods.getUnlockedBalance(participants[0].address).call() );
                 const reservedToken = new helpers.BN( await rICOToken.methods.getLockedBalance(participants[0].address).call() );

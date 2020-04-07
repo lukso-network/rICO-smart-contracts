@@ -34,7 +34,7 @@ const Participant = {
     pendingTokens: new BN("0"),    // total tokens bought in all stages
     boughtTokens: new BN("0"),      // total tokens already sent to the participant in all stages
     returnedTokens: new BN("0"),    // total tokens returned by participant to contract in all stages
-    byStage: [],
+    stages: [],
 }
 
 const ParticipantDetailsByStage = {
@@ -156,8 +156,8 @@ class Contract extends Validator {
         participantRecord.totalSentETH = participantRecord.totalSentETH.add(_receivedValue);
 
         // Update participant's per-stage stats
-        const byStage = participantRecord.byStage[currentStage];
-        byStage.totalSentETH = byStage.totalSentETH.add(_receivedValue);
+        const stages = participantRecord.stages[currentStage];
+        stages.totalSentETH = stages.totalSentETH.add(_receivedValue);
 
         // Get the equivalent amount in tokens
         const newTokenAmount = this.getTokenAmountForEthAtStage(
@@ -165,7 +165,7 @@ class Contract extends Validator {
         );
 
         // Update participant's reserved tokens
-        byStage.pendingTokens = byStage.pendingTokens.add(newTokenAmount);
+        stages.pendingTokens = stages.pendingTokens.add(newTokenAmount);
         participantRecord.pendingTokens = participantRecord.pendingTokens.add(newTokenAmount);
 
         this.ApplicationEvent(
@@ -185,36 +185,36 @@ class Contract extends Validator {
         for (let i = 0; i <= currentStage; i++) {
 
             const stageId = i;
-            const byStage = participantRecord.byStage[stageId];
+            const stages = participantRecord.stages[stageId];
             const processedTotals = participantRecord.committedETH.add(participantRecord.returnedETH);
 
             if (processedTotals.lt(participantRecord.totalSentETH)) {
 
                 // handle the case when we have reserved more tokens than globally available
-                participantRecord.pendingTokens = participantRecord.pendingTokens.sub(byStage.pendingTokens);
-                byStage.pendingTokens = 0;
+                participantRecord.pendingTokens = participantRecord.pendingTokens.sub(stages.pendingTokens);
+                stages.pendingTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 const maxAcceptableValue = this.availableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalSentETH - committedETH
-                let newAcceptedValue = byStage.totalSentETH.sub(byStage.committedETH);
+                let newAcceptedValue = stages.totalSentETH.sub(stages.committedETH);
                 let returnValue = new BN("0");
 
                 // if incomming value is higher than what we can accept,
                 // just accept the difference and return the rest
                 if (newAcceptedValue.gt(maxAcceptableValue)) {
                     newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.totalSentETH
-                        .sub(byStage.returnedETH)
-                        .sub(byStage.committedETH)
-                        .sub(byStage.withdrawnETH)
+                    returnValue = stages.totalSentETH
+                        .sub(stages.returnedETH)
+                        .sub(stages.committedETH)
+                        .sub(stages.withdrawnETH)
                         .sub(newAcceptedValue);
 
                     // update return values
                     this.returnedETH = this.returnedETH.add(returnValue);
                     participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
-                    byStage.returnedETH = returnValue;
+                    stages.returnedETH = returnValue;
                 }
 
                 if (newAcceptedValue.gt(new BN("0"))) {
@@ -222,7 +222,7 @@ class Contract extends Validator {
                     // update values by adding the new accepted amount
                     this.committedETH = this.committedETH.add(newAcceptedValue);
                     participantRecord.committedETH = participantRecord.committedETH.add(newAcceptedValue);
-                    byStage.committedETH = byStage.committedETH.add(newAcceptedValue);
+                    stages.committedETH = stages.committedETH.add(newAcceptedValue);
 
                     // calculate the equivalent token amount
                     const newTokenAmount = this.getTokenAmountForEthAtStage(
@@ -231,7 +231,7 @@ class Contract extends Validator {
 
                     // update participant's token amounts
                     participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
-                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
+                    stages.boughtTokens = stages.boughtTokens.add(newTokenAmount);
 
                     // allocate tokens to participant
                     this.IERC777().send(this.contractAddress, _from, newTokenAmount);
@@ -436,17 +436,17 @@ class Contract extends Validator {
                 for (let stageId = currentStageNumber; stageId >= 0; stageId--) {
 
                     // total participant tokens at the current stage i.e. reserved + bought - returned
-                    const totalInStage = participantRecord.byStage[stageId].pendingTokens
-                        .add(participantRecord.byStage[stageId].boughtTokens)
-                        .sub(participantRecord.byStage[stageId].returnedTokens);
+                    const totalInStage = participantRecord.stages[stageId].pendingTokens
+                        .add(participantRecord.stages[stageId].boughtTokens)
+                        .sub(participantRecord.stages[stageId].returnedTokens);
 
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
                     let tokensInStage = currentReservedTokenAmountAtBlock(
-                        participantRecord.byStage[stageId].pendingTokens.add(participantRecord.byStage[stageId].boughtTokens),
+                        participantRecord.stages[stageId].pendingTokens.add(participantRecord.stages[stageId].boughtTokens),
                         currentBlockNumber
-                    ).sub(participantRecord.byStage[stageId].returnedTokens);
+                    ).sub(participantRecord.stages[stageId].returnedTokens);
 
                     // only try to process stages that the participant has actually reserved tokens.
                     if (tokensInStage.gt(new BN("0"))) {
@@ -460,11 +460,11 @@ class Contract extends Validator {
 
                         //increase the returned tokens counters accordingly
                         participantRecord.returnedTokens = participantRecord.returnedTokens.add(tokensInStage);
-                        participantRecord.byStage[stageId].returnedTokens = participantRecord.byStage[stageId].returnedTokens.add(tokensInStage);
+                        participantRecord.stages[stageId].returnedTokens = participantRecord.stages[stageId].returnedTokens.add(tokensInStage);
 
                         // increase the corresponding ETH counters
                         returnETHAmount = returnETHAmount.add(currentETHAmount);
-                        participantRecord.byStage[stageId].withdrawnETH = participantRecord.byStage[stageId].withdrawnETH.add(currentETHAmount);
+                        participantRecord.stages[stageId].withdrawnETH = participantRecord.stages[stageId].withdrawnETH.add(currentETHAmount);
 
                         // allocated to project
                         const unlockedETHAmount = getEthAmountForTokensAtStage(
@@ -473,7 +473,7 @@ class Contract extends Validator {
                         );
 
                         this.allocatedEthAmount = this.allocatedEthAmount.add(unlockedETHAmount);
-                        participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
+                        participantRecord.stages[stageId].allocatedETH = unlockedETHAmount;
 
                         // remove processed token amount from requested amount
                         remainingTokenAmount = remainingTokenAmount.sub(tokensInStage);
@@ -554,7 +554,7 @@ class Contract extends Validator {
     setupNewParticipant() {
         const variable = clone(Participant);
         for (let i = 0; i <= this.stageCount; i++) {
-            variable.byStage[i] = clone(ParticipantDetailsByStage);
+            variable.stages[i] = clone(ParticipantDetailsByStage);
         }
         return variable;
     }

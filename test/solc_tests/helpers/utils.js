@@ -532,7 +532,7 @@ module.exports = {
                         ReturnETHAmount = ReturnETHAmount.add(CurrentETHAmount);
                         
                         allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
-                        // participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
+                        // participantRecord.stages[stageId].allocatedETH = unlockedETHAmount;
 
                         // remove processed token amount from requested amount
                         RemainingTokenAmount = RemainingTokenAmount.sub(reservedTokensInStage);

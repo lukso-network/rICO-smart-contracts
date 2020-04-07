@@ -310,16 +310,16 @@ class Participant extends Actor {
         // console.log("aggregatedStats.returnedTokens     ", this.toEth(aggregatedStats.returnedTokens), "tokens");
         // console.log("aggregatedStats.pendingTokens     ", this.toEth(aggregatedStats.pendingTokens), "tokens");
 
-        // const byStage0 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 0).call();
-        // const byStage1 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 1).call();
+        // const stages0 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 0).call();
+        // const stages1 = await this.rICO.methods.getParticipantDetailsByStage(this.address, 1).call();
 
-        // console.log("byStage0.unlockedTokens              ", this.toEth(byStage0.stageunlockedTokens), "tokens");
-        // console.log("byStage0.returnedTokens            ", this.toEth(byStage0.stageReturnedTokens), "tokens");
-        // console.log("byStage0.pendingTokens            ", this.toEth(byStage0.stagePendingTokens), "tokens");
+        // console.log("stages0.unlockedTokens              ", this.toEth(stages0.stageunlockedTokens), "tokens");
+        // console.log("stages0.returnedTokens            ", this.toEth(stages0.stageReturnedTokens), "tokens");
+        // console.log("stages0.pendingTokens            ", this.toEth(stages0.stagePendingTokens), "tokens");
 
-        // console.log("byStage1.unlockedTokens              ", this.toEth(byStage1.stageunlockedTokens), "tokens");
-        // console.log("byStage1.returnedTokens            ", this.toEth(byStage1.stageReturnedTokens), "tokens");
-        // console.log("byStage1.pendingTokens            ", this.toEth(byStage1.stagePendingTokens), "tokens");
+        // console.log("stages1.unlockedTokens              ", this.toEth(stages1.stageunlockedTokens), "tokens");
+        // console.log("stages1.returnedTokens            ", this.toEth(stages1.stageReturnedTokens), "tokens");
+        // console.log("stages1.pendingTokens            ", this.toEth(stages1.stagePendingTokens), "tokens");
 
 
         // const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
@@ -723,12 +723,12 @@ class Participant extends Actor {
         const rec = await this.rICO.methods.participants(this.address).call();
   
         const retVal = {};
-        retVal.committedEth            = new BN(rec.NEWcommittedEth);
-        retVal.pendingEth              = new BN(rec.NEWpendingEth);
-        retVal.totalReservedTokens     = new BN(rec.NEWtotalReservedTokens);
-        retVal.totalUnlockedTokens     = new BN(rec.NEWtotalUnlockedTokens);
-        retVal.currentReservedTokens   = new BN(rec.NEWcurrentReservedTokens);
-        retVal.lastBlock               = new BN(rec.NEWlastBlock);
+        retVal.committedEth            = new BN(rec.committedEth);
+        retVal.pendingEth              = new BN(rec.pendingEth);
+        retVal.totalReservedTokens     = new BN(rec.totalReservedTokens);
+        retVal.totalUnlockedTokens     = new BN(rec.totalUnlockedTokens);
+        retVal.currentReservedTokens   = new BN(rec.currentReservedTokens);
+        retVal.lastBlock               = new BN(rec.lastBlock);
         return retVal;
     }
 
@@ -756,7 +756,7 @@ class Participant extends Actor {
         // Calculate WITHIN the buy phase
         if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
 
-            const lastBlock = participantRecord.NEWlastBlock;
+            const lastBlock = participantRecord.lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
                 lastBlock = buyPhaseStartBlock - 1;
             }

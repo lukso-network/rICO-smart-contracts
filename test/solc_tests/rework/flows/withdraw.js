@@ -847,7 +847,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         // it("committedETH equals withdrawnETH times 2", async function () {
         //     const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-        //     const committedETH = result.NEWcommittedEth;
+        //     const committedETH = result.committedEth;
         //     const withdrawnETH = new BN(result.stageWithdrawnETH).mul( new BN(2) );
         //     expect(committedETH).to.be.equal(withdrawnETH.toString(), "committedETH does not match withdrawnETH");
         // });
