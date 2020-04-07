@@ -5,7 +5,7 @@ const expect = helpers.expect
 const fs = require('fs');
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -48,7 +48,7 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -146,8 +146,8 @@ async function doFreshDeployment(name) {
 
     await ReversibleICOInstance.methods.init(
         TokenContractAddress,        // address _TokenContractAddress
-        whitelistControllerAddress, // address _whitelistControllerAddress
-        projectWalletAddress,          // address _projectWalletAddress
+        whitelisterAddress, // address _whitelisterAddress
+        projectAddress,          // address _projectAddress
         commitPhaseStartBlock,                 // uint256 _StartBlock
         commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
         commitPhasePrice,            // uint256 _commitPhasePrice in wei
@@ -296,7 +296,7 @@ describe("Website States", function () {
                 [participant_1],
                 true,
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 

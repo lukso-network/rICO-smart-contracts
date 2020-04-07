@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -49,7 +49,7 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -135,9 +135,9 @@ async function revertToFreshDeployment() {
 
 
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,       // address _tokenContractAddress
-            whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,       // address _projectWalletAddress
+            TokenContractAddress,       // address _tokenAddress
+            whitelisterAddress, // address _whitelisterAddress
+            projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
             commitPhasePrice,           // uint256 _commitPhasePrice in wei
@@ -212,7 +212,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -306,7 +306,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
 
             let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
@@ -333,7 +333,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -441,7 +441,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -504,7 +504,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 

@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -52,7 +52,7 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, StageCount,
@@ -139,8 +139,8 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _TokenContractAddress
-            whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,       // address _projectWalletAddress
+            whitelisterAddress, // address _whitelisterAddress
+            projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
             commitPhasePrice,           // uint256 _commitPhasePrice in wei
@@ -214,7 +214,7 @@ async function whitelist(address) {
         [address],
         true,
     ).send({
-        from: whitelistControllerAddress
+        from: whitelisterAddress
     });
 }
 
@@ -467,7 +467,7 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 currentBlock = middleBlock;
@@ -654,18 +654,18 @@ describe("ProjectWithdraw Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                projectWalletBalanceBefore = await helpers.utils.getBalance(helpers, projectWalletAddress);
+                projectWalletBalanceBefore = await helpers.utils.getBalance(helpers, projectAddress);
 
                 // project withdraw
                 const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress,
+                    from: projectAddress,
                     gasPrice: helpers.networkConfig.gasPrice.toString()
                 });
 
-                projectWalletBalanceAfter = await helpers.utils.getBalance(helpers, projectWalletAddress);
+                projectWalletBalanceAfter = await helpers.utils.getBalance(helpers, projectAddress);
 
                 currentBlock = middleBlock;
                 helpers.utils.resetAccountNonceCache(helpers);
@@ -749,7 +749,7 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 // contribution 2
@@ -842,7 +842,7 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.div(new BN("2")).toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 // contribution 2

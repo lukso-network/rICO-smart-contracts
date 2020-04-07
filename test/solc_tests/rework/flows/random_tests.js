@@ -15,7 +15,7 @@ const testKey = "WithdrawTokenTests";
 describe("ReversibleICO - Withdraw Token Balance", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
     let ReversibleICO;
@@ -42,7 +42,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
 
     let project = {
-        address: projectWalletAddress,
+        address: projectAddress,
         weiBalance: new BN(0)
     };
 
@@ -158,7 +158,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     [participant.address],
                                     true
                                 ).send({
-                                    from: whitelistControllerAddress
+                                    from: whitelisterAddress
                                 });
                             }
 

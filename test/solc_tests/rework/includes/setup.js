@@ -4,10 +4,10 @@ global.MAX_UINT256 = helpers.MAX_UINT256;
 global.expect = helpers.expect
 
 global.deployerAddress = accounts[0];
-global.whitelistControllerAddress = accounts[1];
+global.whitelisterAddress = accounts[1];
 
 global.holder = accounts[10];
-global.projectWalletAddress = holder;
+global.projectAddress = holder;
 
 global.participant_1 = accounts[4];
 global.participant_2 = accounts[5];

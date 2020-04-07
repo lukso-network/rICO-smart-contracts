@@ -14,7 +14,7 @@ const testKey = "TokensTests";
 describe("ReversibleICO - Methods - Tokens", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -61,7 +61,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     [participant_1],
                     true,
                 ).send({
-                    from: whitelistControllerAddress
+                    from: whitelisterAddress
                 });
 
                 /*

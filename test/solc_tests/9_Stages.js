@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -41,7 +41,7 @@ let errorMessage;
 describe("ReversibleICO", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, stageValidation = [], currentBlock, commitPhaseStartBlock,
         commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
         StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock;
@@ -107,11 +107,11 @@ describe("ReversibleICO", function () {
         });
 
         it("Property TokenContractAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.tokenContractAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+            expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
-        it("Property whitelistControllerAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.whitelistControllerAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+        it("Property whitelisterAddress should be address(0x0)", async function () {
+            expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
     });
@@ -163,9 +163,9 @@ describe("ReversibleICO", function () {
             BuyPhaseBlockCount = BuyPhaseEndBlock - BuyPhaseStartBlock;
 
             await this.ReversibleICO.methods.init(
-                TokenContractAddress,        // address _tokenContractAddress
-                whitelistControllerAddress,  // address _whitelistControllerAddress
-                projectWalletAddress,        // address _projectWalletAddress
+                TokenContractAddress,        // address _tokenAddress
+                whitelisterAddress,  // address _whitelisterAddress
+                projectAddress,        // address _projectAddress
                 commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
                 commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
                 commitPhasePrice,            // uint256 _commitPhasePrice in wei
@@ -190,15 +190,15 @@ describe("ReversibleICO", function () {
             });
 
             it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
-                expect(await this.ReversibleICO.methods.tokenContractAddress().call()).to.be.equal(TokenContractAddress);
+                expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal(TokenContractAddress);
             });
 
-            it("Property whitelistControllerAddress should be " + whitelistControllerAddress, async function () {
-                expect(await this.ReversibleICO.methods.whitelistControllerAddress().call()).to.be.equal(whitelistControllerAddress);
+            it("Property whitelisterAddress should be " + whitelisterAddress, async function () {
+                expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal(whitelisterAddress);
             });
 
-            it("Property projectWalletAddress should be " + projectWalletAddress, async function () {
-                expect(await this.ReversibleICO.methods.projectWalletAddress().call()).to.be.equal(projectWalletAddress);
+            it("Property projectAddress should be " + projectAddress, async function () {
+                expect(await this.ReversibleICO.methods.projectAddress().call()).to.be.equal(projectAddress);
             });
 
             it("BuyPhaseEndBlock matches settings", async function () {

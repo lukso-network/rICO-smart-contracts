@@ -15,7 +15,7 @@ const testKey = "WithdrawTests";
 describe("ReversibleICO - Withdraw Testing", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -77,7 +77,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -165,7 +165,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -252,7 +252,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -386,7 +386,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -419,7 +419,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -1087,7 +1087,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -1145,7 +1145,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 

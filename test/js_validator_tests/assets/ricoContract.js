@@ -488,7 +488,7 @@ class Contract extends Validator {
                 // return overflow tokens received
                 if (returnTokenAmount.gt(new BN("0"))) {
                     // send tokens back to participant
-                    IERC777(tokenContractAddress).send(_from, returnTokenAmount, null);
+                    IERC777(tokenAddress).send(_from, returnTokenAmount, null);
                 }
 
                 // increase participant's withdrawnETH counter
@@ -521,18 +521,18 @@ class Contract extends Validator {
         this.projectWithdrawnETH = this.projectWithdrawnETH.add(_ethAmount);
 
         // Transfer ETH to project wallet
-        address(uint160(projectWalletAddress)).transfer(_ethAmount);
+        address(uint160(projectAddress)).transfer(_ethAmount);
 
         // Event emission
         ApplicationEvent(
             ApplicationEventTypes.PROJECT_WITHDRAW,
             projectWithdrawCount,
-            projectWalletAddress,
+            projectAddress,
             _ethAmount
         );
         TransferEvent(
             TransferTypes.PROJECT_WITHDRAW,
-            projectWalletAddress,
+            projectAddress,
             _ethAmount
         );
     }

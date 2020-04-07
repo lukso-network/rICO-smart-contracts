@@ -14,7 +14,7 @@ const testKey = "PhaseTests";
 describe("ReversibleICO - Phases", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress, currentBlock;
     let TokenContractInstance;
 
@@ -51,11 +51,11 @@ describe("ReversibleICO - Phases", function () {
         });
 
         it("Property TokenContractAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.tokenContractAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+            expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
-        it("Property whitelistControllerAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.whitelistControllerAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+        it("Property whitelisterAddress should be address(0x0)", async function () {
+            expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
     });
@@ -88,15 +88,15 @@ describe("ReversibleICO - Phases", function () {
             });
 
             it("Property TokenContractAddress should be deployed ERC777 Token Contract address", async function () {
-                expect(await this.ReversibleICO.methods.tokenContractAddress().call()).to.be.equal(TokenContractAddress);
+                expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal(TokenContractAddress);
             });
 
-            it("Property whitelistControllerAddress should be " + whitelistControllerAddress, async function () {
-                expect(await this.ReversibleICO.methods.whitelistControllerAddress().call()).to.be.equal(whitelistControllerAddress);
+            it("Property whitelisterAddress should be " + whitelisterAddress, async function () {
+                expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal(whitelisterAddress);
             });
 
-            it("Property projectWalletAddress should be " + projectWalletAddress, async function () {
-                expect(await this.ReversibleICO.methods.projectWalletAddress().call()).to.be.equal(projectWalletAddress);
+            it("Property projectAddress should be " + projectAddress, async function () {
+                expect(await this.ReversibleICO.methods.projectAddress().call()).to.be.equal(projectAddress);
             });
 
             it("Property commitPhaseStartBlock matches settings", async function () {

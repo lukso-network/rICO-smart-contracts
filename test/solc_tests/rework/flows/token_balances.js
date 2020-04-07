@@ -15,7 +15,7 @@ const testKey = "WithdrawTokenTests";
 describe("ReversibleICO - Withdraw Token Balance", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -77,7 +77,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -182,7 +182,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -312,7 +312,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -456,7 +456,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -599,7 +599,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -744,7 +744,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -939,7 +939,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -1134,7 +1134,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 

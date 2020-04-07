@@ -15,7 +15,7 @@ const testKey = "WhitelistTests";
 describe("ReversibleICO - Whitelist Testing", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -93,7 +93,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -153,7 +153,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 false
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -298,7 +298,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 

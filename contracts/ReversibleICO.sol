@@ -22,7 +22,7 @@ contract ReversibleICO is IERC777Recipient {
     using SafeMath for uint256;
 
     /// @dev The address of the introspection registry contract deployed.
-    IERC1820Registry private _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
+    IERC1820Registry private ERC1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
 
@@ -30,10 +30,10 @@ contract ReversibleICO is IERC777Recipient {
      *   Contract States
      */
     /// @dev It is set to TRUE after the deployer initializes the contract.
-    bool public initialized; // default: false
+    bool public initialized;
 
     /// @dev The contract can be automatically frozen in case of inconsistencies.
-    bool public frozen; // default: false
+    bool public frozen;
 
 
     /*
@@ -41,12 +41,12 @@ contract ReversibleICO is IERC777Recipient {
      */
     /// @dev Only the deployer is allowed to initialize the contract.
     address public deployerAddress;
-    /// @dev The actual rICO token contract address.
-    address public tokenContractAddress;
+    /// @dev The rICO token contract address.
+    address public tokenAddress;
     /// @dev The address of wallet of the project running the rICO.
-    address public projectWalletAddress;
+    address public projectAddress;
     /// @dev Only the whitelist controller can whitelist addresses.
-    address public whitelistControllerAddress;
+    address public whitelisterAddress;
 
 
     /*
@@ -196,14 +196,14 @@ contract ReversibleICO is IERC777Recipient {
     /// @notice Constructor sets the deployer and defines ERC777TokensRecipient interface support.
     constructor() public {
         deployerAddress = msg.sender;
-        _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
+        ERC1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
     /**
      * @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
-     * @param _tokenContractAddress The address of the ERC777 rICO token contract.
-     * @param _whitelistControllerAddress The address of the controller handling whitelisting.
-     * @param _projectWalletAddress The project wallet that can withdraw the contributions.
+     * @param _tokenAddress The address of the ERC777 rICO token contract.
+     * @param _whitelisterAddress The address of the controller handling whitelisting.
+     * @param _projectAddress The project wallet that can withdraw the contributions.
      * @param _commitPhaseStartBlock The block in which the commit phase starts.
      * @param _commitPhaseBlockCount The duration of the commit phase in blocks.
      * @param _commitPhasePrice The initial token price (in wei) during the commit phase.
@@ -212,9 +212,9 @@ contract ReversibleICO is IERC777Recipient {
      * @param _stagePriceIncrease A factor used to increase the token price at each subsequent stage.
      */
     function init(
-        address _tokenContractAddress,
-        address _whitelistControllerAddress,
-        address _projectWalletAddress,
+        address _tokenAddress,
+        address _whitelisterAddress,
+        address _projectAddress,
         uint256 _commitPhaseStartBlock,
         uint256 _commitPhaseBlockCount,
         uint256 _commitPhasePrice,
@@ -230,9 +230,9 @@ contract ReversibleICO is IERC777Recipient {
         require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
-        tokenContractAddress = _tokenContractAddress;
-        whitelistControllerAddress = _whitelistControllerAddress;
-        projectWalletAddress = _projectWalletAddress;
+        tokenAddress = _tokenAddress;
+        whitelisterAddress = _whitelisterAddress;
+        projectAddress = _projectAddress;
 
         // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;
@@ -324,10 +324,10 @@ contract ReversibleICO is IERC777Recipient {
     {
         // rICO should only receive tokens from the rICO Token Tracker.
         // Transactions from any other sender should revert
-        require(msg.sender == tokenContractAddress, "Invalid token sent.");
+        require(msg.sender == tokenAddress, "Invalid token sent.");
 
         // 1 - project wallet adds tokens to the sale
-        if (_from == projectWalletAddress) {
+        if (_from == projectAddress) {
             // Save the token amount allocated to the rICO address
             tokenSupply = tokenSupply.add(_amount);
 
@@ -456,7 +456,7 @@ contract ReversibleICO is IERC777Recipient {
     external
     isInitialized
     {
-        require(msg.sender == projectWalletAddress, "Only project wallet address.");
+        require(msg.sender == projectAddress, "Only project wallet address.");
 
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
@@ -471,18 +471,18 @@ contract ReversibleICO is IERC777Recipient {
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
 
         // Transfer ETH to project wallet
-        address(uint160(projectWalletAddress)).transfer(_ethAmount);
+        address(uint160(projectAddress)).transfer(_ethAmount);
 
         // Event emission
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.PROJECT_WITHDRAW),
             uint32(projectWithdrawCount),
-            projectWalletAddress,
+            projectAddress,
             _ethAmount
         );
         emit TransferEvent(
             uint8(TransferTypes.PROJECT_WITHDRAW),
-            projectWalletAddress,
+            projectAddress,
             _ethAmount
         );
     }
@@ -675,7 +675,7 @@ contract ReversibleICO is IERC777Recipient {
     function availableEthAtStage(uint8 _stage) public view returns (uint256) {
         // Multiply the number of tokens held by the contract with the token price
         // at the specified stage and perform precision adjustments(div).
-        return IERC777(tokenContractAddress).balanceOf(address(this)).mul(
+        return IERC777(tokenAddress).balanceOf(address(this)).mul(
             stages[_stage].tokenPrice
         ).div(10 ** 18); // should we use 10 ** 20?
     }
@@ -1001,7 +1001,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Transfer tokens to the participant
         // solium-disable-next-line security/no-send
-        IERC777(tokenContractAddress).send(_participantAddress, totalNewTokens, "");
+        IERC777(tokenAddress).send(_participantAddress, totalNewTokens, "");
     }
 
 
@@ -1066,7 +1066,7 @@ contract ReversibleICO is IERC777Recipient {
             // send tokens back to participant
             bytes memory data;
             // solium-disable-next-line security/no-send
-            IERC777(tokenContractAddress).send(_participantAddress, overflowingTokenAmount, data);
+            IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
         }
 
         // Return ETH back to participant
@@ -1090,7 +1090,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Checks if the sender is the whitelist controller.
      */
     modifier onlyWhitelistController() {
-        require(msg.sender == whitelistControllerAddress, "Only the whitelist controller can call this method.");
+        require(msg.sender == whitelisterAddress, "Only the whitelist controller can call this method.");
         _;
     }
 

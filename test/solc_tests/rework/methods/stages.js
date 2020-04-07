@@ -14,7 +14,7 @@ const testKey = "StageTests";
 describe("ReversibleICO - Methods - Stages", function () {
 
     const deployerAddress = accounts[0];
-    const whitelistControllerAddress = accounts[1];
+    const whitelisterAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress, currentBlock;
     let TokenContractInstance;
 
