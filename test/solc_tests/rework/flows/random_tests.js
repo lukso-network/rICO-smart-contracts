@@ -32,7 +32,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     customTestSettings.rico.stageCount = 10;
 
     customTestSettings.rico.commitPhasePrice = "25000000000000000"; // 0.025 ETH
-    customTestSettings.rico.stagePriceIncrease = "3333333330000000"; // 0.003333... ETH
+    customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
     let commitPhaseBlockCount = customTestSettings.rico.blocksPerDay * customTestSettings.rico.commitPhaseDays;
@@ -123,7 +123,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 let participant = participants[i];
 
                 // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
-                let task = getRandomInt(5);
+                let task = getRandomInt(20);
 
                 let taskName = '';
                 if(task === 1)
@@ -174,6 +174,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     from: participant.address,
                                     to: ReversibleICO.receipt.contractAddress,
                                     value: ContributionAmount.toString(),
+                                    data: '0x3c7a3aff', // commit()
                                     gasPrice: helpers.networkConfig.gasPrice
                                 }).then(() => {
 
@@ -182,7 +183,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
 
                                     done();
-                                }, done);
+                                }, (error) => {
+                                    helpers.utils.resetAccountNonceCache(helpers);
+                                    done(error);
+                                });
 
                             } else {
                                 done();
@@ -201,6 +205,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                         ( async function(){
                             const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
+                            // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
                             const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
@@ -232,7 +237,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                         }
 
                                         done();
-                                    }, done);
+                                    }, (error) => {
+                                        helpers.utils.resetAccountNonceCache(helpers);
+                                        done(error);
+                                    });
 
                             } else {
                                 done();
@@ -354,14 +362,17 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 });
 
 
-
-                console.log('-------');
-                console.log('Compare prices paid ', pricesPaidSum.div(new BN(participant.pricesPaid.length)).toString());
-                console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
-
                 console.log('Participant Stats ', await ReversibleICO.methods.participants(participant.address).call());
 
-                let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
+                console.log('-------');
+                if(participant.pricesPaid.length)
+                    console.log('Compare prices paid ', pricesPaidSum.div(new BN(participant.pricesPaid.length)).toString());
+
+                if(participant.pricesAtWithdraw.length)
+                    console.log('Compare prices withdraw ', pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).toString());
+
+                // if(participant.pricesAtWithdraw.length && participant.pricesPaid.length)
+                //     let difference = pricesWithdrawnSum.div(new BN(participant.pricesAtWithdraw.length)).sub(pricesPaidSum.div(new BN(participant.pricesPaid.length)));
 
                 // expect(difference.mul(new BN(10000)).div(pricesPaidSum.div(new BN(participant.pricesPaid.length))).toString() / 10000 * 100 + '%').to.be.equal('0%');
 
