@@ -20,7 +20,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     let TokenContractInstance;
     let ReversibleICO;
     // generate n participants
-    let numberOfParticipants = 2;
+    let numberOfParticipants = 4;
     let participants = [];
 
     const customTestSettings = clone(setup.settings);

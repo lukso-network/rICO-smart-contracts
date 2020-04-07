@@ -558,7 +558,6 @@ contract ReversibleICO is IERC777Recipient {
      * @param _ethAmount The ETH amount in wei.
      * @param _stageId The stage we are interested in.
      * @return The token amount in its smallest unit
-     * TODO move to "acceptContributionsForAddress", as its only used there?
      */
     function getTokenAmountForEthAtStage(uint256 _ethAmount, uint8 _stageId) public view returns (uint256) {
         return _ethAmount
@@ -571,7 +570,6 @@ contract ReversibleICO is IERC777Recipient {
      * @param _tokenAmount The amount of token.
      * @param _stageId The stage we are interested in.
      * @return The ETH amount in wei
-     * TODO remove
      */
     function getEthAmountForTokensAtStage(uint256 _tokenAmount, uint8 _stageId) public view returns (uint256) {
         return _tokenAmount
@@ -704,7 +702,7 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Calculates the unlocked amount of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
      *
-     * This is the rICOs heart, the core of the distribution calculation!
+     * This is the rICOs heart, the CORE of the distribution calculation!
      *
      * @return the unlocked amount of tokens or ETH.
      */
@@ -722,15 +720,14 @@ contract ReversibleICO is IERC777Recipient {
             // security/no-assign-params: "calcUnlockRatio": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock - 1;
+                lastBlock = buyPhaseStartBlock - 1; // We need to reduce it by 1, as the startBlock is alwasy already IN the period.
             }
 
-            // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
-            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock);
-
-            // get the number of blocks that have "elapsed" since the start block
-            // add 1 since start block needs to return higher than 0
+            // get the number of blocks that have "elapsed" since the last block
             uint256 passedBlocks = currentBlock.sub(lastBlock);
+
+            // number of blocks ( ie: start=4/end=10 => 10 - 4 => 6 )
+            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock);
 
             return _amount.mul(
                 passedBlocks.mul(10 ** 20)
@@ -1052,21 +1049,18 @@ contract ReversibleICO is IERC777Recipient {
         }
 
 
-        // Overwrite if stage 0
+        // For STAGE 0, give back the price they put in
         if(getCurrentStage() == 0) {
+
             returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
+
+        // For any other stage, calculate the avg price of all contributions
         } else {
             returnEthAmount = participantStats.NEWcommittedEth.mul(
                 returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.NEWtotalReservedTokens) // .sub(10) remove 10 satoshi, to prevent subtraction overflows from the `projectCurrentlyReservedETH`
+                .div(participantStats.NEWtotalReservedTokens)
             ).div(10 ** 20);
         }
-
-
-//            DEBUG1 = returnEthAmount;
-//            DEBUG2 = projectCurrentlyReservedETH;
-//            DEBUG3 = tokenSupply;
-//            DEBUG4 = participantStats.NEWcommittedEth;
 
 
         // UPDATE PARTICIPANT STATS
