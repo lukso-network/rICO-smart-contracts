@@ -123,7 +123,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 let participant = participants[i];
 
                 // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
-                let task = getRandomInt(20);
+                let task = getRandomInt(10);
 
                 let taskName = '';
                 if(task === 1)
@@ -208,17 +208,19 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
-                            const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                            const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                             if(returnTokenAmount.toString() > '0') {
-                                console.log('returnTokenAmount', returnTokenAmount.toString());
-                                console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
-                                // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
-                                // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
                                 await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000})
-                                    .then((receipt) => {
+                                    .then(async (receipt) => {
+
+                                        console.log('returnTokenAmount', returnTokenAmount.toString());
+                                        console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                                        console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                        console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
+                                        console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
+
 
                                         // update his balance
                                         participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);

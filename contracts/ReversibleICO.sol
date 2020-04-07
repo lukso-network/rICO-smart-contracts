@@ -722,15 +722,15 @@ contract ReversibleICO is IERC777Recipient {
             // security/no-assign-params: "calcUnlockRatio": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock;
+                lastBlock = buyPhaseStartBlock - 1;
             }
 
             // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
-            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock).add(1);
+            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock);
 
             // get the number of blocks that have "elapsed" since the start block
             // add 1 since start block needs to return higher than 0
-            uint256 passedBlocks = currentBlock.sub(lastBlock).add(1);
+            uint256 passedBlocks = currentBlock.sub(lastBlock);
 
             return _amount.mul(
                 passedBlocks.mul(10 ** 20)
@@ -863,9 +863,9 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE the locked/unlocked ratio for this participant
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
-        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(
-            calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
-        );
+//        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(
+//            calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
+//        );
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats.NEWlastBlock = getCurrentBlockNumber();
@@ -1058,9 +1058,15 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             returnEthAmount = participantStats.NEWcommittedEth.mul(
                 returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.NEWtotalReservedTokens)//.sub(1) // we subtract one, to round down, to prevent subtraction overflows
+                .div(participantStats.NEWtotalReservedTokens) // .sub(10) remove 10 satoshi, to prevent subtraction overflows from the `projectCurrentlyReservedETH`
             ).div(10 ** 20);
         }
+
+
+//            DEBUG1 = returnEthAmount;
+//            DEBUG2 = projectCurrentlyReservedETH;
+//            DEBUG3 = tokenSupply;
+//            DEBUG4 = participantStats.NEWcommittedEth;
 
 
         // UPDATE PARTICIPANT STATS
@@ -1093,45 +1099,6 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(_participantAddress)).transfer(returnEthAmount);
         emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
     }
-
-
-    // DEBUG function
-    function debug_getParticipantEthForTokens(address _participantAddress, uint256 _tokenAmount) public view returns(uint256 returnsEth, uint256 overflowingTokens) {
-        Participant storage participantStats = participants[_participantAddress];
-
-        uint256 returnedTokenAmount = _tokenAmount;
-        uint256 overflowingTokenAmount;
-        uint256 returnEthAmount;
-
-
-        // UPDATE the locked/unlocked ratio for this participant
-        uint256 participantReservedTokens = currentReservedTokenAmount(_participantAddress);
-        uint256 participantCommittedEth = participantStats.NEWcommittedEth.sub(
-            calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
-        );
-
-
-        // Only allow reserved tokens be returned, return the overflow.
-        if (returnedTokenAmount > participantReservedTokens) {
-            overflowingTokenAmount = returnedTokenAmount.sub(participantReservedTokens);
-            returnedTokenAmount = participantReservedTokens;
-        }
-
-
-        // Overwrite if stage 0
-        if(getCurrentStage() == 0) {
-            returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
-        } else {
-            returnEthAmount = participantCommittedEth.mul(
-                returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.NEWtotalReservedTokens)
-            ).div(10 ** 20);
-        }
-
-        returnsEth = returnEthAmount;
-        overflowingTokens = overflowingTokenAmount;
-    }
-
 
     /*
      *   Modifiers
