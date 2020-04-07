@@ -796,7 +796,7 @@ class Participant extends Actor {
         // UPDATE the locked/unlocked ratio for this participant
         const participantReservedTokens = new BN( await this.rICO.methods.currentReservedTokenAmount(this.address).call() );
         
-        const ratio = await this.rICO.methods.calcUnlockRatio(
+        const ratio = await this.rICO.methods.calcUnlockAmount(
             participantStats.committedEth.toString(),
             participantStats.lastBlock.toString()
         ).call();

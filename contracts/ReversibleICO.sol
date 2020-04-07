@@ -509,7 +509,7 @@ contract ReversibleICO is IERC777Recipient {
     function getAvailableProjectETH() public view returns (uint256) {
 
         // calc from the last known point on
-        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, _projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockAmount(projectCurrentlyReservedETH, _projectLastBlock);
 
         return projectTotalUnlockedETH
             .add(newlyUnlockedEth)
@@ -687,7 +687,7 @@ contract ReversibleICO is IERC777Recipient {
      *
      * @return the unlocked amount of tokens or ETH.
      */
-    function calcUnlockRatio(uint256 _amount, uint256 _lastBlock) public view returns (uint256) {
+    function calcUnlockAmount(uint256 _amount, uint256 _lastBlock) public view returns (uint256) {
 
         uint256 currentBlock = getCurrentBlockNumber();
 
@@ -698,7 +698,7 @@ contract ReversibleICO is IERC777Recipient {
         // Calculate WITHIN the buy phase
         if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
 
-            // security/no-assign-params: "calcUnlockRatio": Avoid assigning to function parameters.
+            // security/no-assign-params: "calcUnlockAmount": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
                 lastBlock = buyPhaseStartBlock - 1; // We need to reduce it by 1, as the startBlock is alwasy already IN the period.
@@ -760,7 +760,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         return participantStats.NEWcurrentReservedTokens.sub(
-            calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
+            calcUnlockAmount(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
         );
     }
 
@@ -772,7 +772,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         return participantStats.NEWtotalUnlockedTokens.add(
-            calcUnlockRatio(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
+            calcUnlockAmount(participantStats.NEWcurrentReservedTokens, participantStats.NEWlastBlock)
         );
     }
 
@@ -822,7 +822,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function calcProjectAllocation() internal {
 
-        uint256 newlyUnlockedEth = calcUnlockRatio(projectCurrentlyReservedETH, _projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockAmount(projectCurrentlyReservedETH, _projectLastBlock);
 
         // UPDATE GLOBAL STATS
         projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(newlyUnlockedEth);
@@ -842,7 +842,7 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.NEWtotalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
         participantStats.NEWcurrentReservedTokens = currentReservedTokenAmount(_participantAddress);
 //        participantStats.NEWcommittedEth = participantStats.NEWcommittedEth.sub(
-//            calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
+//            calcUnlockAmount(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
 //        );
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
