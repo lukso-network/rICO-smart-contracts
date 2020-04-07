@@ -758,11 +758,11 @@ class Participant extends Actor {
 
             const lastBlock = participantRecord.NEWlastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock;
+                lastBlock = buyPhaseStartBlock - 1;
             }
 
-            const totalBlockCount = buyPhaseEndBlock - lastBlock + 1;
-            const passedBlocks = currentBlock - lastBlock + 1;
+            const totalBlockCount = buyPhaseEndBlock - lastBlock;
+            const passedBlocks = currentBlock - lastBlock;
 
             return passedBlocks / totalBlockCount;
 
@@ -801,9 +801,9 @@ class Participant extends Actor {
             participantStats.lastBlock.toString()
         ).call();
 
-        const participantCommittedEth = participantStats.committedEth.sub(
-            new BN( ratio )
-        );
+        const participantCommittedEth = participantStats.committedEth; //.sub(
+        //     new BN( ratio )
+        // );
 
         // Only allow reserved tokens be returned, return the overflow.
         if (returnedTokenAmount.gt(participantReservedTokens)) {
