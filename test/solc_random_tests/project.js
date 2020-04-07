@@ -151,9 +151,10 @@ class Project extends Actor {
     
     async displayBalances() {
         await this.readBalances();
-        console.log("    address:                         ", this.address);
-        console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
-        console.log("    currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
+        console.log("");
+        console.log("    Project Wallet Balances:           ", this.address);
+        console.log("      currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
+        console.log("      currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
     }
 
     getLastAction() {

@@ -1106,7 +1106,9 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE the locked/unlocked ratio for this participant
         uint256 participantReservedTokens = currentReservedTokenAmount(_participantAddress);
-        uint256 participantCommittedEth = participantStats.NEWcommittedEth.sub(calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock));
+        uint256 participantCommittedEth = participantStats.NEWcommittedEth.sub(
+            calcUnlockRatio(participantStats.NEWcommittedEth, participantStats.NEWlastBlock)
+        );
 
 
         // Only allow reserved tokens be returned, return the overflow.
