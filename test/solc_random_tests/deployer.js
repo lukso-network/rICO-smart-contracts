@@ -74,12 +74,12 @@ module.exports = {
 
         // 22 days allocation
         const commitPhaseBlockCount = blocksPerDay * commitPhaseDays;
-        const commitPhasePrice = helpers.solidity.ether * 0.002;
+        const commitPhasePrice = settings.commitPhasePrice; //  helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         const StageCount = settings.StageCount;
         const StageBlockCount = blocksPerDay * StageDays;
-        const StagePriceIncrease = 0; // helpers.solidity.ether * 0.0001;
+        const StagePriceIncrease = settings.StagePriceIncrease; // helpers.solidity.ether * 0.0001;
 
         await rICO.methods.init(
             helpers.addresses.Token,     // address _tokenContractAddress

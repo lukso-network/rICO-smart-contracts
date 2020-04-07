@@ -25,6 +25,8 @@ module.exports = {
             commitPhaseDays: 1,     // 22;
             StageDays:       2,     // 30;
             StageCount:     10,     // 12;
+            commitPhasePrice:   helpers.solidity.ether * 0.002,
+            StagePriceIncrease: helpers.solidity.ether * 0.0001,
         };
 
         helpers.utils.toLog(
@@ -48,8 +50,6 @@ module.exports = {
         };
 
         const participants = await deployer.createParticipants(init, numberOfParticipants, participantTxBalance);
-        
-        // console.log(participants);
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
