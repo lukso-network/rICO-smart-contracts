@@ -26,7 +26,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
-    customTestSettings.rico.blocksPerDay = 3;
+    customTestSettings.rico.blocksPerDay = 30;
     customTestSettings.rico.commitPhaseDays = 2;
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
@@ -208,17 +208,19 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
-                            const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                            const returnTokenAmount = new BN(String(maxTokens));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                             if(returnTokenAmount.toString() > '0') {
-                                console.log('returnTokenAmount', returnTokenAmount.toString());
-                                console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
-                                // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
-                                // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
                                 await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000})
-                                    .then((receipt) => {
+                                    .then(async (receipt) => {
+
+                                        console.log('returnTokenAmount', returnTokenAmount.toString());
+                                        console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                                        console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                        console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
+                                        console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
+
 
                                         // update his balance
                                         participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);

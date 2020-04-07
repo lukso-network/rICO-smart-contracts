@@ -722,15 +722,15 @@ contract ReversibleICO is IERC777Recipient {
             // security/no-assign-params: "calcUnlockRatio": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock;
+                lastBlock = buyPhaseStartBlock - 1;
             }
 
             // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
-            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock).add(1);
+            uint256 totalBlockCount = buyPhaseEndBlock.sub(lastBlock);
 
             // get the number of blocks that have "elapsed" since the start block
             // add 1 since start block needs to return higher than 0
-            uint256 passedBlocks = currentBlock.sub(lastBlock).add(1);
+            uint256 passedBlocks = currentBlock.sub(lastBlock);
 
             return _amount.mul(
                 passedBlocks.mul(10 ** 20)
@@ -1058,9 +1058,15 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             returnEthAmount = participantStats.NEWcommittedEth.mul(
                 returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.NEWtotalReservedTokens)
-            ).div(10 ** 20).sub(10); // remove 10 satoshi, to prevent subtraction overflows from the `projectCurrentlyReservedETH`
+                .div(participantStats.NEWtotalReservedTokens) // .sub(10) remove 10 satoshi, to prevent subtraction overflows from the `projectCurrentlyReservedETH`
+            ).div(10 ** 20);
         }
+
+
+//            DEBUG1 = returnEthAmount;
+//            DEBUG2 = projectCurrentlyReservedETH;
+//            DEBUG3 = tokenSupply;
+//            DEBUG4 = participantStats.NEWcommittedEth;
 
 
         // UPDATE PARTICIPANT STATS
