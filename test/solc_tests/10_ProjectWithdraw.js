@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -20,23 +20,23 @@ const StageDays = 2;         // 30;
 
 const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_NEW:1,
-    CONTRIBUTION_CANCEL:2,
-    PARTICIPANT_CANCEL:3,
-    COMMITMENT_ACCEPTED:4,
-    WHITELIST_APPROVE:5,
-    WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW:7
+    CONTRIBUTION_ADDED:1,
+    CONTRIBUTION_CANCELED:2,
+    CONTRIBUTION_ACCEPTED:3,
+    WHITELIST_APPROVED:4,
+    WHITELIST_REJECTED:5,
+    PROJECT_WITHDRAWN:6
 }
 
 const TransferTypes = {
-    NOT_SET:0,
-    AUTOMATIC_RETURN:1,
-    WHITELIST_REJECT:2,
-    PARTICIPANT_CANCEL:3,
-    PARTICIPANT_WITHDRAW:4,
-    PROJECT_WITHDRAW:5
-}
+    NOT_SET: 0,
+    WHITELIST_REJECTED: 1,
+    CONTRIBUTION_CANCELED: 2,
+    CONTRIBUTION_ACCEPTED_OVERFLOW: 3,
+    PARTICIPANT_WITHDRAW: 4,
+    PARTICIPANT_WITHDRAW_OVERFLOW: 5,
+    PROJECT_WITHDRAWN: 6
+};
 
 
 const ERC777data = web3.utils.sha3('777TestData');
@@ -52,10 +52,10 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
-    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
+    commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, StageCount,
     StageBlockCount, StagePriceIncrease, BuyPhaseEndBlock, TokenContractInstance,
     TokenContractReceipt, ReversibleICOInstance, ReversibleICOReceipt;
 
@@ -119,14 +119,14 @@ async function revertToFreshDeployment() {
         });
 
 
-        
+
         /*
         *   Add RICO Settings
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
 
-        // starts in one day
-        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+        // starts in one day + 1, so the stages are even and end on nice numbers
+        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay + 1;
 
         // 22 days allocation
         commitPhaseBlockCount = blocksPerDay * commitPhaseDays; // 22
@@ -136,14 +136,11 @@ async function revertToFreshDeployment() {
         StageCount = 12;
         StageBlockCount = blocksPerDay * StageDays; // 30
         StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _TokenContractAddress
-            whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,       // address _projectWalletAddress
+            whitelisterAddress, // address _whitelisterAddress
+            projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
             commitPhasePrice,           // uint256 _commitPhasePrice in wei
@@ -155,7 +152,7 @@ async function revertToFreshDeployment() {
             gas: 3000000
         });
 
-            
+
         buyPhaseStartBlock = parseInt(await ReversibleICOInstance.methods.buyPhaseStartBlock().call(), 10);
         buyPhaseEndBlock = parseInt(await ReversibleICOInstance.methods.buyPhaseEndBlock().call(), 10);
 
@@ -217,7 +214,7 @@ async function whitelist(address) {
         [address],
         true,
     ).send({
-        from: whitelistControllerAddress
+        from: whitelisterAddress
     });
 }
 
@@ -227,18 +224,18 @@ describe("ProjectWithdraw Testing", function () {
         await revertToFreshDeployment();
     });
 
-    describe("getProjectAvailableEth()", function () {
+    describe("getAvailableProjectETH()", function () {
 
         const ContributionAmount = new BN("100").mul( helpers.solidity.etherBN );
 
-        describe("Scenario: One 100 ETH NOT whitelisted contribution in contract (Participant1)", async function () { 
+        describe("Scenario: One 100 ETH NOT whitelisted contribution in contract (Participant1)", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 // await whitelist(participant_1);
 
@@ -256,7 +253,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since project cannot withdraw at this point)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(ProjectAvailableEth.toString()).to.equal("0");
                 });
 
@@ -269,16 +266,16 @@ describe("ProjectWithdraw Testing", function () {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
                         from: deployerAddress, gas: 100000
                     });
-                    
+
                     currentBlock = middleBlock;
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
                 it("returns 0 (since contribution is not whitelisted)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         "0"
                     );
                 });
@@ -294,10 +291,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since contribution is not whitelisted)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         "0"
                     );
                 });
@@ -306,14 +303,14 @@ describe("ProjectWithdraw Testing", function () {
 
         });
 
-        describe("Scenario: One 100 ETH whitelisted contribution in contract (Participant1)", async function () { 
+        describe("Scenario: One 100 ETH whitelisted contribution in contract (Participant1)", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
 
@@ -331,7 +328,7 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 (since project cannot withdraw at this point)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(ProjectAvailableEth.toString()).to.equal("0");
                 });
 
@@ -344,16 +341,16 @@ describe("ProjectWithdraw Testing", function () {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
                         from: deployerAddress, gas: 100000
                     });
-                    
+
                     currentBlock = middleBlock;
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
                 it("returns 50 eth (project gets 50%)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -371,10 +368,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 100 eth (project gets 100%)", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         ContributionAmount.toString()
                     );
                 });
@@ -384,14 +381,14 @@ describe("ProjectWithdraw Testing", function () {
         });
 
 
-        describe("Scenario: One 100 ETH whitelisted contribution in contract (Participant1), Second 100 ETH contribution at middle block (Participant2)", async function () { 
+        describe("Scenario: One 100 ETH whitelisted contribution in contract (Participant1), Second 100 ETH contribution at middle block (Participant2)", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
@@ -413,11 +410,12 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                it("returns 100 eth ( half of both contributions )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                 it("returns 100 eth ( half of both contributions )", async function () {
+
+                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("100").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -434,10 +432,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 200 eth", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("200").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -445,15 +443,15 @@ describe("ProjectWithdraw Testing", function () {
             });
 
         });
-        
-        describe("Scenario: One contribution at stage 0, project withdraw at middle", async function () { 
+
+        describe("Scenario: One contribution at stage 0, project withdraw at middle", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
@@ -463,13 +461,13 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
                     from: deployerAddress, gas: 100000
                 });
-                
+
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 currentBlock = middleBlock;
@@ -480,8 +478,8 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 0 (project withdrew the 50 that were available)", async function () {
-                    
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal("0");
@@ -500,8 +498,8 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 25 (project already withdrew the 50 that were available at middle)", async function () {
-                    
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
@@ -521,10 +519,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 50 eth ( that was remaining in contract )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -535,16 +533,16 @@ describe("ProjectWithdraw Testing", function () {
 
 
 
-        describe("Scenario: One contribution at stage 0 (Participant1), contract at buy phase 50%, full token balance returned ( token withdraw )", async function () { 
+        describe("Scenario: One contribution at stage 0 (Participant1), contract at buy phase 50%, full token balance returned ( token withdraw )", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
-                await commitFundsFromAddress(participant_1, ContributionAmount);
+                await commitFundsFromAddress(participant_1, ContributionAmount); // 100 ETH
                 await whitelist(participant_1);
 
                 // jump to middle block
@@ -567,7 +565,7 @@ describe("ProjectWithdraw Testing", function () {
                     gas: 1000000,
                     gasPrice: helpers.networkConfig.gasPrice
                 });
-                
+
                 currentBlock = middleBlock;
                 helpers.utils.resetAccountNonceCache(helpers);
 
@@ -577,10 +575,20 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 50 eth ( allocated by withdraw )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+
+                    console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
+                    console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
+                    console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
+                    console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
+                    console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
+                    console.log('DEBUG2 ', await ReversibleICOInstance.methods.DEBUG2().call());
+                    console.log('DEBUG3 ', await ReversibleICOInstance.methods.DEBUG3().call());
+
+
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -597,10 +605,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 50 eth", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -609,18 +617,18 @@ describe("ProjectWithdraw Testing", function () {
 
         });
 
-        
 
-        describe("Scenario: One contribution at stage 0 (Participant1), contract at buy phase 50%, full token balance returned ( token withdraw ), project withdraw", async function () { 
+
+        describe("Scenario: One contribution at stage 0 (Participant1), contract at buy phase 50%, full token balance returned ( token withdraw ), project withdraw", async function () {
 
             let projectWalletBalanceBefore, projectWalletBalanceAfter, projectWithdrawTx;
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
@@ -646,18 +654,18 @@ describe("ProjectWithdraw Testing", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                projectWalletBalanceBefore = await helpers.utils.getBalance(helpers, projectWalletAddress);
+                projectWalletBalanceBefore = await helpers.utils.getBalance(helpers, projectAddress);
 
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 projectWithdrawTx = await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress,
+                    from: projectAddress,
                     gasPrice: helpers.networkConfig.gasPrice.toString()
                 });
-               
-                projectWalletBalanceAfter = await helpers.utils.getBalance(helpers, projectWalletAddress);
+
+                projectWalletBalanceAfter = await helpers.utils.getBalance(helpers, projectAddress);
 
                 currentBlock = middleBlock;
                 helpers.utils.resetAccountNonceCache(helpers);
@@ -668,10 +676,10 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 0 eth ( since balance was already withdrawn )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         "0"
                     );
                 });
@@ -683,14 +691,14 @@ describe("ProjectWithdraw Testing", function () {
                     );
 
                     const projectWalletBalanceValidation = projectWalletBalanceBefore
-                    // subtract project withdraw tx cost
-                    .sub(projectWithdrawTxGasCost)
-                    // add how much eth we're expecting to withdraw
-                    .add(new BN("50").mul( helpers.solidity.etherBN ))
-                    
+                        // subtract project withdraw tx cost
+                        .sub(projectWithdrawTxGasCost)
+                        // add how much eth we're expecting to withdraw
+                        .add(new BN("50").mul( helpers.solidity.etherBN ))
+
                     expect(
                         projectWalletBalanceAfter.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         projectWalletBalanceValidation.toString()
                     );
                 });
@@ -707,10 +715,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 0 eth ( since balance was already withdrawn )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         "0"
                     );
                 });
@@ -718,14 +726,14 @@ describe("ProjectWithdraw Testing", function () {
         });
 
 
-        describe("Scenario: One 100 ETH contribution at stage 0 (Participant1), project withdraw at middle, then new 100 ETH contribution (Participant2)", async function () { 
+        describe("Scenario: One 100 ETH contribution at stage 0 (Participant1), project withdraw at middle, then new 100 ETH contribution (Participant2)", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
@@ -735,13 +743,13 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
                     from: deployerAddress, gas: 100000
                 });
-                
+
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 // contribution 2
@@ -757,10 +765,10 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 50 eth ( 0 from first, half of the second contribution )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -777,12 +785,12 @@ describe("ProjectWithdraw Testing", function () {
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
-                
+
                 it("returns 100 eth ( 25 from first, 75 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("100").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -799,10 +807,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 150 eth ( 50 from first, 100 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("150").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -810,15 +818,15 @@ describe("ProjectWithdraw Testing", function () {
             });
 
         });
-        
-        describe("Scenario: One 100 ETH contribution at stage 0 (Participant1), project withdraw HALF available at middle, then new 100 ETH contribution (Participant2)", async function () { 
+
+        describe("Scenario: One 100 ETH contribution at stage 0 (Participant1), project withdraw HALF available at middle, then new 100 ETH contribution (Participant2)", async function () {
 
             before(async () => {
 
                 await revertToFreshDeployment();
-                
+
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
-               
+
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
@@ -828,13 +836,13 @@ describe("ProjectWithdraw Testing", function () {
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
                     from: deployerAddress, gas: 100000
                 });
-                
+
                 // project withdraw
-                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                const AvailableForWithdraw = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                 await ReversibleICOInstance.methods.projectWithdraw(
                     AvailableForWithdraw.div(new BN("2")).toString()
                 ).send({
-                    from: projectWalletAddress
+                    from: projectAddress
                 });
 
                 // contribution 2
@@ -850,10 +858,10 @@ describe("ProjectWithdraw Testing", function () {
             describe("- contract at 50% of the buy phase", async function () {
 
                 it("returns 75 eth ( 25 from first, half of the second contribution )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("75").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -870,12 +878,12 @@ describe("ProjectWithdraw Testing", function () {
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
-                
+
                 it("returns 125 eth ( 50 from first, 75 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("125").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -892,10 +900,10 @@ describe("ProjectWithdraw Testing", function () {
                 });
 
                 it("returns 175 eth ( 75 from first, 100 from second )", async function () {
-                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getProjectAvailableEth().call() );
+                    const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
-                    ).to.equal( 
+                    ).to.equal(
                         new BN("175").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
@@ -917,8 +925,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.getReservedTokenAmount(participant).send({from: deployerAddress });
-    let amount1 = await contract.methods.getReservedTokenAmount(participant).call();
+    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployerAddress });
+    let amount1 = await contract.methods.currentReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
 
@@ -926,12 +934,12 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
     console.log("gas V:   ", tx1.gasUsed);
     console.log("amount:  ", helpers.utils.toFullToken(helpers, new BN(amount1) ));
     console.log("tokensV3:", helpers.utils.toFullToken(
-            helpers, helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
+        helpers, helpers.utils.calculatereservedTokensAtBlockForBoughtAmount(helpers, diffBlock, blocks, totalTokens)
         )
     );
 
-    const ratioA = await contract.methods.getCurrentUnlockPercentage(20).call();
-    const ratioC = helpers.utils.getCurrentUnlockPercentage(helpers, diffBlock, blocks, 20);
+    const ratioA = await contract.methods.getCurrentGlobalUnlockRatio(20).call();
+    const ratioC = helpers.utils.getCurrentGlobalUnlockRatio(helpers, diffBlock, blocks, 20);
     console.log("ratioA:   ", helpers.utils.toFullToken(helpers, ratioA));
     console.log("ratioC:   ", helpers.utils.toFullToken(helpers, ratioC));
 }

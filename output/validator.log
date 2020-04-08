@@ -171,16 +171,16 @@ Compiling your contracts...
         [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
         [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m          ParticipantRecord[0m
-          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m        State changes after a new contribution[0m
         [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m          ParticipantRecord[0m
           [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
           [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
           [32m  ✓[0m[90m participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
-[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
-            [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-            [32m  ✓[0m[90m byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.stages[currentStage] = stages[0m
+            [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+            [32m  ✓[0m[90m stages.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
 [0m      Participant 1 - commits 1 eth - second time[0m
 [0m        Contract State changes after contribution from existing Participant[0m
         [32m  ✓[0m[90m Contract.participantCount does not change[0m
@@ -190,9 +190,9 @@ Compiling your contracts...
           [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
           [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
           [32m  ✓[0m[90m participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
-[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
-            [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-            [32m  ✓[0m[90m byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.stages[currentStage] = stages[0m
+            [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+            [32m  ✓[0m[90m stages.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
 [0m      Participant 1 - commits 1 eth - third time[0m
 [0m        Contract State changes after contribution from existing Participant[0m
         [32m  ✓[0m[90m Contract.participantCount does not change[0m
@@ -202,25 +202,25 @@ Compiling your contracts...
           [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
           [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
           [32m  ✓[0m[90m participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
-[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
-            [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-            [32m  ✓[0m[90m byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.stages[currentStage] = stages[0m
+            [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+            [32m  ✓[0m[90m stages.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
 [0m      Participant 2 - commits 1 eth[0m
       [32m  ✓[0m[90m Contract.participantCount is 2[0m
 [0m        Contract State changes after first contribution by a Participant[0m
         [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
         [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m          ParticipantRecord[0m
-          [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+          [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m        State changes after a new contribution[0m
         [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m          ParticipantRecord[0m
           [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
           [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
           [32m  ✓[0m[90m participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
-[0m            ParticipantRecord.byStage[currentStage] = byStage[0m
-            [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-            [32m  ✓[0m[90m byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m            ParticipantRecord.stages[currentStage] = stages[0m
+            [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+            [32m  ✓[0m[90m stages.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
 [0m    whitelist()[0m
 [0m      Scenario: Participant 1 gets whitelisted then contributes[0m
 [0m        Participant 1 gets whitelisted[0m
@@ -231,32 +231,32 @@ Compiling your contracts...
           [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
           [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m            ParticipantRecord[0m
-            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m          State changes after a new contribution[0m
           [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m            ParticipantRecord[0m
             [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
             [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
             [32m  ✓[0m[90m participantRecord.pendingTokens is 0[0m
-[0m              ParticipantRecord.byStage[currentStage] = byStage[0m
-              [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-              [32m  ✓[0m[90m byStage.pendingTokens is 0[0m
+[0m              ParticipantRecord.stages[currentStage] = stages[0m
+              [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+              [32m  ✓[0m[90m stages.pendingTokens is 0[0m
 [0m      Scenario: Participant 1 contributes then gets rejected[0m
 [0m        Participant 1 - commits 1 eth[0m
 [0m          Contract State changes after first contribution by a Participant[0m
           [32m  ✓[0m[90m Contract.participantsById indexes the participant id => address[0m
           [32m  ✓[0m[90m Contract.participantCount increases by 1[0m
 [0m            ParticipantRecord[0m
-            [32m  ✓[0m[90m ParticipantRecord.contributionsCount is 1[0m
+            [32m  ✓[0m[90m ParticipantRecord.contributions is 1[0m
 [0m          State changes after a new contribution[0m
           [32m  ✓[0m[90m Contract.totalSentETH increases by commited value[0m
 [0m            ParticipantRecord[0m
             [32m  ✓[0m[90m ParticipantRecord contribution count increases by 1[0m
             [32m  ✓[0m[90m ParticipantRecord.totalSentETH increases by commited value[0m
             [32m  ✓[0m[90m participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
-[0m              ParticipantRecord.byStage[currentStage] = byStage[0m
-              [32m  ✓[0m[90m byStage.totalSentETH increases by commited value[0m
-              [32m  ✓[0m[90m byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
+[0m              ParticipantRecord.stages[currentStage] = stages[0m
+              [32m  ✓[0m[90m stages.totalSentETH increases by commited value[0m
+              [32m  ✓[0m[90m stages.pendingTokens increases by getTokenAmountForEthAtStage(value)[0m
 [0m        Participant 1 gets rejected[0m
 [0m          ParticipantRecord[0m
           [32m  ✓[0m[90m ParticipantRecord.whitelisted is now: false[0m

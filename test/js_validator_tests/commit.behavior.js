@@ -23,9 +23,9 @@ function shouldHaveValidStateAfterFirstContributionFromParticipant(_address, _te
 
         describe("ParticipantRecord", function () {
 
-            it("contributionsCount is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                expect(newParticipantRecord.contributionsCount).is.equal(1);
+            it("contributions is 1", function () {
+                const newParticipantRecord = this.JSContract.participants[_address];
+                expect(newParticipantRecord.contributions).is.equal(1);
             });
 
         });
@@ -62,18 +62,18 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
         });
 
         describe("ParticipantRecord", function () {
-            let oldParticipantRecord, newParticipantRecord, oldbyStage, newbyStage, pendingTokens;
+            let oldParticipantRecord, newParticipantRecord, oldstages, newstages, pendingTokens;
 
             before(function () {
 
-                oldParticipantRecord = this.oldState.participantsByAddress[_address];
+                oldParticipantRecord = this.oldState.participants[_address];
                 if (!oldParticipantRecord) {
                     oldParticipantRecord = this.oldState.setupNewParticipant();
                 }
-                newParticipantRecord = this.JSContract.participantsByAddress[_address];
+                newParticipantRecord = this.JSContract.participants[_address];
 
-                oldbyStage = oldParticipantRecord.byStage[_testStage];
-                newbyStage = newParticipantRecord.byStage[_testStage];
+                oldstages = oldParticipantRecord.stages[_testStage];
+                newstages = newParticipantRecord.stages[_testStage];
 
                 pendingTokens = this.oldState.getTokenAmountForEthAtStage(
                     this.CommitTestValue.toString(), _testStage
@@ -81,11 +81,11 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
 
             });
 
-            it("contributionsCount increases by 1", function () {
+            it("contributions increases by 1", function () {
                 expect(
-                    newParticipantRecord.contributionsCount
+                    newParticipantRecord.contributions
                 ).is.equal(
-                    oldParticipantRecord.contributionsCount + 1
+                    oldParticipantRecord.contributions + 1
                 );
             });
 
@@ -156,68 +156,68 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
             describe("currentStageRecord", function () {
 
                 it("totalSentETH increases by commited value", function () {
-                    const difference = new BN(newbyStage.totalSentETH.toString())
-                        .sub(new BN(oldbyStage.totalSentETH.toString()));
+                    const difference = new BN(newstages.totalSentETH.toString())
+                        .sub(new BN(oldstages.totalSentETH.toString()));
                     expect(difference.toString()).is.equal(this.CommitTestValue.toString());
                 });
 
                 conditional("doesNotChange", "returnedETH does not change", function () {
-                    expect(newbyStage.returnedETH.toString()).is.equal(oldbyStage.returnedETH.toString());
+                    expect(newstages.returnedETH.toString()).is.equal(oldstages.returnedETH.toString());
                 });
 
                 if (_whitelisted) {
 
                     it("committedETH increases by commit value", function () {
-                        const difference = new BN(newbyStage.committedETH.toString())
-                            .sub(new BN(oldbyStage.committedETH.toString()));
+                        const difference = new BN(newstages.committedETH.toString())
+                            .sub(new BN(oldstages.committedETH.toString()));
                         expect(difference.toString()).is.equal(this.CommitTestValue.toString());
                     });
 
                 } else {
 
                     conditional("doesNotChange", "committedETH does not change", function () {
-                        expect(newbyStage.committedETH.toString()).is.equal(oldbyStage.committedETH.toString());
+                        expect(newstages.committedETH.toString()).is.equal(oldstages.committedETH.toString());
                     });
 
                 }
 
                 conditional("doesNotChange", "withdrawnETH does not change", function () {
-                    expect(newbyStage.withdrawnETH.toString()).is.equal(oldbyStage.withdrawnETH.toString());
+                    expect(newstages.withdrawnETH.toString()).is.equal(oldstages.withdrawnETH.toString());
                 });
 
                 conditional("doesNotChange", "allocatedETH does not change", function () {
-                    expect(newbyStage.allocatedETH.toString()).is.equal(oldbyStage.allocatedETH.toString());
+                    expect(newstages.allocatedETH.toString()).is.equal(oldstages.allocatedETH.toString());
                 });
 
 
                 if (_whitelisted) {
 
                     it("pendingTokens is 0", function () {
-                        expect(newbyStage.pendingTokens.toString()).is.equal("0");
+                        expect(newstages.pendingTokens.toString()).is.equal("0");
                     });
 
                     it("boughtTokens increases by getTokenAmountForEthAtStage(value)", function () {
-                        const difference = new BN(newbyStage.boughtTokens.toString())
-                            .sub(new BN(oldbyStage.boughtTokens.toString()));
+                        const difference = new BN(newstages.boughtTokens.toString())
+                            .sub(new BN(oldstages.boughtTokens.toString()));
                         expect(difference.toString()).is.equal(pendingTokens.toString());
                     });
 
                 } else {
 
                     it("pendingTokens increases by getTokenAmountForEthAtStage(value)", function () {
-                        const difference = new BN(newbyStage.pendingTokens.toString())
-                            .sub(new BN(oldbyStage.pendingTokens.toString()));
+                        const difference = new BN(newstages.pendingTokens.toString())
+                            .sub(new BN(oldstages.pendingTokens.toString()));
                         expect(difference.toString()).is.equal(pendingTokens.toString());
                     });
 
                     conditional("doesNotChange", "boughtTokens does not change", function () {
-                        expect(newbyStage.boughtTokens.toString()).is.equal(oldbyStage.boughtTokens.toString());
+                        expect(newstages.boughtTokens.toString()).is.equal(oldstages.boughtTokens.toString());
                     });
 
                 }
 
                 conditional("doesNotChange", "returnedTokens does not change", function () {
-                    expect(newbyStage.returnedTokens.toString()).is.equal(oldbyStage.returnedTokens.toString());
+                    expect(newstages.returnedTokens.toString()).is.equal(oldstages.returnedTokens.toString());
                 });
 
             });
@@ -229,9 +229,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "totalSentETH does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].totalSentETH.toString()
+                                newParticipantRecord.stages[i].totalSentETH.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].totalSentETH.toString()
+                                oldParticipantRecord.stages[i].totalSentETH.toString()
                             );
                         }
                     });
@@ -239,9 +239,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "returnedETH does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].returnedETH.toString()
+                                newParticipantRecord.stages[i].returnedETH.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].returnedETH.toString()
+                                oldParticipantRecord.stages[i].returnedETH.toString()
                             );
                         }
                     });
@@ -249,9 +249,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "committedETH does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].committedETH.toString()
+                                newParticipantRecord.stages[i].committedETH.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].committedETH.toString()
+                                oldParticipantRecord.stages[i].committedETH.toString()
                             );
                         }
                     });
@@ -259,9 +259,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "withdrawnETH does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].withdrawnETH.toString()
+                                newParticipantRecord.stages[i].withdrawnETH.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].withdrawnETH.toString()
+                                oldParticipantRecord.stages[i].withdrawnETH.toString()
                             );
                         }
                     });
@@ -270,8 +270,8 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     
                         conditional("doesNotChange", "pendingTokens is 0", function () {
                             for(let i = _testStage - 1; i >= 0; i--) {
-                                expect(oldParticipantRecord.byStage[i].pendingTokens.toString()).is.equal("0");
-                                expect(newParticipantRecord.byStage[i].pendingTokens.toString()).is.equal("0");
+                                expect(oldParticipantRecord.stages[i].pendingTokens.toString()).is.equal("0");
+                                expect(newParticipantRecord.stages[i].pendingTokens.toString()).is.equal("0");
                             }
                         });
                     
@@ -280,9 +280,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                         conditional("doesNotChange", "pendingTokens does not change", function () {
                             for(let i = _testStage - 1; i >= 0; i--) {
                                 expect(
-                                    newParticipantRecord.byStage[i].pendingTokens.toString()
+                                    newParticipantRecord.stages[i].pendingTokens.toString()
                                 ).is.equal(
-                                    oldParticipantRecord.byStage[i].pendingTokens.toString()
+                                    oldParticipantRecord.stages[i].pendingTokens.toString()
                                 );
                             }
                         });
@@ -291,9 +291,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "boughtTokens does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].boughtTokens.toString()
+                                newParticipantRecord.stages[i].boughtTokens.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].boughtTokens.toString()
+                                oldParticipantRecord.stages[i].boughtTokens.toString()
                             );
                         }
                     });
@@ -301,9 +301,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "returnedTokens does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].returnedTokens.toString()
+                                newParticipantRecord.stages[i].returnedTokens.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].returnedTokens.toString()
+                                oldParticipantRecord.stages[i].returnedTokens.toString()
                             );
                         }
                     });
@@ -311,9 +311,9 @@ function shouldHaveValidStateAfterOneNewContribution(_address, _testStage, _whit
                     conditional("doesNotChange", "allocatedETH does not change", function () {
                         for(let i = _testStage - 1; i >= 0; i--) {
                             expect(
-                                newParticipantRecord.byStage[i].allocatedETH.toString()
+                                newParticipantRecord.stages[i].allocatedETH.toString()
                             ).is.equal(
-                                oldParticipantRecord.byStage[i].allocatedETH.toString()
+                                oldParticipantRecord.stages[i].allocatedETH.toString()
                             );
                         }
                     });

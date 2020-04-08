@@ -5,7 +5,7 @@ const expect = helpers.expect
 const fs = require('fs');
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -18,22 +18,21 @@ const blocksPerDay = 6450;
 
 const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_NEW:1,
-    CONTRIBUTION_CANCEL:2,
-    PARTICIPANT_CANCEL:3,
-    COMMITMENT_ACCEPTED:4,
-    WHITELIST_APPROVE:5,
-    WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW: 7
+    CONTRIBUTION_ADDED:1,
+    CONTRIBUTION_CANCELED:2,
+    CONTRIBUTION_ACCEPTED:3,
+    WHITELIST_APPROVED:4,
+    WHITELIST_REJECTED:5,
+    PROJECT_WITHDRAWN: 6
 }
 
 const TransferTypes = {
     NOT_SET:0,
     AUTOMATIC_REFUND:1,
-    WHITELIST_REJECT:2,
-    PARTICIPANT_CANCEL:3,
+    WHITELIST_REJECTED:2,
+    CONTRIBUTION_CANCELED:3,
     PARTICIPANT_WITHDRAW:4,
-    PROJECT_WITHDRAW:5
+    PROJECT_WITHDRAWN:5
 }
 
 const ERC777data = web3.utils.sha3('777TestData');
@@ -48,7 +47,7 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -146,8 +145,8 @@ async function doFreshDeployment(name) {
 
     await ReversibleICOInstance.methods.init(
         TokenContractAddress,        // address _TokenContractAddress
-        whitelistControllerAddress, // address _whitelistControllerAddress
-        projectWalletAddress,          // address _projectWalletAddress
+        whitelisterAddress, // address _whitelisterAddress
+        projectAddress,          // address _projectAddress
         commitPhaseStartBlock,                 // uint256 _StartBlock
         commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
         commitPhasePrice,            // uint256 _commitPhasePrice in wei
@@ -267,7 +266,7 @@ describe("Website States", function () {
             ).to.be.equal( "1" );
 
             let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participants(participant_address).call();
 
             expect(
                 Participant.whitelisted
@@ -296,7 +295,7 @@ describe("Website States", function () {
                 [participant_1],
                 true,
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -313,7 +312,7 @@ describe("Website States", function () {
             ).to.be.equal( "1" );
 
             let participant_address = await Instances.ReversibleICOInstance.methods.participantsById(0).call();
-            let Participant = await Instances.ReversibleICOInstance.methods.participantsByAddress(participant_address).call();
+            let Participant = await Instances.ReversibleICOInstance.methods.participants(participant_address).call();
 
             expect(
                 Participant.whitelisted

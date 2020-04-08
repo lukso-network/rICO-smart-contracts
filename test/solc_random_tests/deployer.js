@@ -13,8 +13,8 @@ module.exports = {
         const expect = helpers.expect;
 
         const ContractsDeployer = settings.ContractsDeployer;
-        const whitelistControllerAddress = settings.whitelistControllerAddress;
-        const projectWalletAddress = settings.projectWalletAddress;
+        const whitelisterAddress = settings.whitelisterAddress;
+        const projectAddress = settings.projectAddress;
         const blocksPerDay = settings.blocksPerDay // 6450;
         const commitPhaseDays = settings.commitPhaseDays // 22;
         const StageDays = settings.StageDays // 30;
@@ -74,17 +74,17 @@ module.exports = {
 
         // 22 days allocation
         const commitPhaseBlockCount = blocksPerDay * commitPhaseDays;
-        const commitPhasePrice = helpers.solidity.ether * 0.002;
+        const commitPhasePrice = settings.commitPhasePrice; //  helpers.solidity.ether * 0.002;
 
         // 12 x 30 day periods for distribution
         const StageCount = settings.StageCount;
         const StageBlockCount = blocksPerDay * StageDays;
-        const StagePriceIncrease = 0; // helpers.solidity.ether * 0.0001;
+        const StagePriceIncrease = settings.StagePriceIncrease; // helpers.solidity.ether * 0.0001;
 
         await rICO.methods.init(
-            helpers.addresses.Token,     // address _tokenContractAddress
-            whitelistControllerAddress,  // address _whitelistControllerAddress
-            projectWalletAddress,        // address _projectWalletAddress
+            helpers.addresses.Token,     // address _tokenAddress
+            whitelisterAddress,  // address _whitelisterAddress
+            projectAddress,        // address _projectAddress
             commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
             commitPhasePrice,            // uint256 _commitPhasePrice in wei
@@ -101,9 +101,9 @@ module.exports = {
         /*
          * Setup - rICO - 2 - add Tokens
          */
-        // send all tokens to projectWalletAddress
+        // send all tokens to projectAddress
         await rICOToken.methods.send(
-            projectWalletAddress,
+            projectAddress,
             init.setup.settings.token.supply.toString(),
             ERC777data
         ).send({
@@ -117,15 +117,15 @@ module.exports = {
             RicoSaleSupply,
             ERC777data
         ).send({
-            from: projectWalletAddress,  // initial token supply holder
+            from: projectAddress,  // initial token supply holder
             gas: 100000
         });
 
         return {
             addresses: {
                 ContractsDeployer: ContractsDeployer,
-                whitelistControllerAddress: whitelistControllerAddress,
-                projectWalletAddress: projectWalletAddress,
+                whitelisterAddress: whitelisterAddress,
+                projectAddress: projectAddress,
             },
             contracts: {
                 rICOToken:rICOToken,

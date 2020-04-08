@@ -181,16 +181,16 @@ Compiling your contracts...
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
           ParticipantRecord
-          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributions is 1</span>
         State changes after a new contribution
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalSentETH increases by commited value</span>
           ParticipantRecord
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
-            ParticipantRecord.byStage[currentStage] = byStage
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.stages[currentStage] = stages
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
       Participant 1 - commits 1 eth - second time
         Contract State changes after contribution from existing Participant
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount does not change</span>
@@ -200,9 +200,9 @@ Compiling your contracts...
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
-            ParticipantRecord.byStage[currentStage] = byStage
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.stages[currentStage] = stages
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
       Participant 1 - commits 1 eth - third time
         Contract State changes after contribution from existing Participant
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount does not change</span>
@@ -212,25 +212,25 @@ Compiling your contracts...
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
-            ParticipantRecord.byStage[currentStage] = byStage
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.stages[currentStage] = stages
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
       Participant 2 - commits 1 eth
       <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount is 2</span>
         Contract State changes after first contribution by a Participant
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
           ParticipantRecord
-          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+          <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributions is 1</span>
         State changes after a new contribution
         <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalSentETH increases by commited value</span>
           ParticipantRecord
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
-            ParticipantRecord.byStage[currentStage] = byStage
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
+            ParticipantRecord.stages[currentStage] = stages
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
     whitelist()
       Scenario: Participant 1 gets whitelisted then contributes
         Participant 1 gets whitelisted
@@ -241,32 +241,32 @@ Compiling your contracts...
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
             ParticipantRecord
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributions is 1</span>
           State changes after a new contribution
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalSentETH increases by commited value</span>
             ParticipantRecord
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens is 0</span>
-              ParticipantRecord.byStage[currentStage] = byStage
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens is 0</span>
+              ParticipantRecord.stages[currentStage] = stages
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens is 0</span>
       Scenario: Participant 1 contributes then gets rejected
         Participant 1 - commits 1 eth
           Contract State changes after first contribution by a Participant
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantsById indexes the participant id =&gt; address</span>
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.participantCount increases by 1</span>
             ParticipantRecord
-            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributionsCount is 1</span>
+            <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.contributions is 1</span>
           State changes after a new contribution
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> Contract.totalSentETH increases by commited value</span>
             ParticipantRecord
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord contribution count increases by 1</span>
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.totalSentETH increases by commited value</span>
             <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> participantRecord.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
-              ParticipantRecord.byStage[currentStage] = byStage
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.totalSentETH increases by commited value</span>
-              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> byStage.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
+              ParticipantRecord.stages[currentStage] = stages
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.totalSentETH increases by commited value</span>
+              <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> stages.pendingTokens increases by getTokenAmountForEthAtStage(value)</span>
         Participant 1 gets rejected
           ParticipantRecord
           <span style="color:lime;">  ✓</span><span style="filter: contrast(70%) brightness(190%);color:dimgray;"> ParticipantRecord.whitelisted is now: false</span>

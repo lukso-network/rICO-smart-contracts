@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -17,23 +17,23 @@ const blocksPerDay = 6450;
 
 const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_NEW:1,
-    CONTRIBUTION_CANCEL:2,
-    PARTICIPANT_CANCEL:3,
-    COMMITMENT_ACCEPTED:4,
-    WHITELIST_APPROVE:5,
-    WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW:7
+    CONTRIBUTION_ADDED:1,
+    CONTRIBUTION_CANCELED:2,
+    CONTRIBUTION_ACCEPTED:3,
+    WHITELIST_APPROVED:4,
+    WHITELIST_REJECTED:5,
+    PROJECT_WITHDRAWN:6
 }
 
 const TransferTypes = {
-    NOT_SET:0,
-    AUTOMATIC_RETURN:1,
-    WHITELIST_REJECT:2,
-    PARTICIPANT_CANCEL:3,
-    PARTICIPANT_WITHDRAW:4,
-    PROJECT_WITHDRAW:5
-}
+    NOT_SET: 0,
+    WHITELIST_REJECTED: 1,
+    CONTRIBUTION_CANCELED: 2,
+    CONTRIBUTION_ACCEPTED_OVERFLOW: 3,
+    PARTICIPANT_WITHDRAW: 4,
+    PARTICIPANT_WITHDRAW_OVERFLOW: 5,
+    PROJECT_WITHDRAWN: 6
+};
 
 
 
@@ -51,7 +51,7 @@ let SnapShotKey = "CancelTestInit";
 let snapshotsEnabled = true;
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -138,8 +138,8 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
-            whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,          // address _projectWalletAddress
+            whitelisterAddress, // address _whitelisterAddress
+            projectAddress,          // address _projectAddress
             commitPhaseStartBlock,                 // uint256 _StartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
             commitPhasePrice,            // uint256 _commitPhasePrice in wei
@@ -273,7 +273,7 @@ describe("Testing canceling", function () {
                         [participant_1],
                         true
                     ).send({
-                        from: whitelistControllerAddress
+                        from: whitelisterAddress
                     });
 
                 });
@@ -342,7 +342,7 @@ describe("Testing canceling", function () {
                         [participant_1],
                         true
                     ).send({
-                        from: whitelistControllerAddress
+                        from: whitelisterAddress
                     });
 
                 });
@@ -426,8 +426,8 @@ describe("Testing canceling", function () {
 
             it("value >= rico.minContribution results in a new contribution", async function () {
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
                 await helpers.web3Instance.eth.sendTransaction({
@@ -437,13 +437,13 @@ describe("Testing canceling", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const afterContributions = ParticipantByAddress.contributions;
 
                 expect(
-                    afterContributionsCount.toString()
+                    afterContributions.toString()
                 ).to.be.equal(
-                    (parseInt(initialContributionsCount) + 1).toString()
+                    (parseInt(initialContributions) + 1).toString()
                 );
 
             });
@@ -461,8 +461,8 @@ describe("Testing canceling", function () {
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
-                let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const initialContributionsCount = ParticipantByAddress.contributionsCount;
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionTxCost = new helpers.BN( ContributionTx.gasUsed ).mul(
                     new helpers.BN(helpers.networkConfig.gasPrice)
@@ -539,14 +539,14 @@ describe("Testing canceling", function () {
                 );
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
 
-                ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
-                const afterContributionsCount = ParticipantByAddress.contributionsCount;
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const afterContributions = ParticipantByAddress.contributions;
 
                 // no additional contributions logged.
                 expect(
-                    afterContributionsCount.toString()
+                    afterContributions.toString()
                 ).to.be.equal(
-                    initialContributionsCount.toString()
+                    initialContributions.toString()
                 );
 
             });
@@ -620,7 +620,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -641,7 +641,7 @@ describe("Testing canceling", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
     });
@@ -656,7 +656,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -732,7 +732,7 @@ describe("Testing canceling", function () {
         });
 
         it("Participant buys 1 tokens in phase 0", async function () {
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -779,8 +779,8 @@ describe("Testing canceling", function () {
                 .to.be.bignumber.equal(globalCommittedETH, "ReversibleICO.committedETH mismatch");
             expect(new helpers.BN(await ReversibleICOInstance.methods.withdrawnETH().call()))
                 .to.be.bignumber.equal(globalWithdrawnETH, "ReversibleICO.withdrawnETH mismatch");
-            expect(new helpers.BN(await ReversibleICOInstance.methods.projectAllocatedETH().call()))
-                .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectAllocatedETH mismatch");
+            expect(new helpers.BN(await ReversibleICOInstance.methods.projectTotalUnlockedETH().call()))
+                .to.be.bignumber.equal(globalAllocatedETH, "ReversibleICO.projectTotalUnlockedETH mismatch");
         });
     });
 
@@ -797,7 +797,7 @@ describe("Testing canceling", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 900 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -821,7 +821,7 @@ describe("Testing canceling", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -829,7 +829,7 @@ describe("Testing canceling", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({

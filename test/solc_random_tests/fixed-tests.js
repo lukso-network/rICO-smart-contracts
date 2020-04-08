@@ -18,13 +18,15 @@ module.exports = {
         const rICOSettings = { 
 
             ContractsDeployer: init.accounts[2],
-            whitelistControllerAddress: init.accounts[3],
-            projectWalletAddress: init.accounts[4],
+            whitelisterAddress: init.accounts[3],
+            projectAddress: init.accounts[4],
 
             blocksPerDay:    5,     // 6450;
             commitPhaseDays: 1,     // 22;
             StageDays:       2,     // 30;
             StageCount:     10,     // 12;
+            commitPhasePrice:   helpers.solidity.ether * 0.002,
+            StagePriceIncrease: helpers.solidity.ether * 0.0001,
         };
 
         helpers.utils.toLog(
@@ -36,8 +38,8 @@ module.exports = {
         init.deployment = {
             addresses: {
                 ContractsDeployer: null,
-                whitelistControllerAddress: null,
-                projectWalletAddress: null,
+                whitelisterAddress: null,
+                projectAddress: null,
             },
             contracts: {
                 rICOToken: null,
@@ -48,8 +50,6 @@ module.exports = {
         };
 
         const participants = await deployer.createParticipants(init, numberOfParticipants, participantTxBalance);
-        
-        // console.log(participants);
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -81,11 +81,11 @@ module.exports = {
         console.log("");
         console.log("      rICO block length:", rICOBlockLength);
 
-        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelistControllerAddress);
+        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelisterAddress);
         init.deployment.whitelister = Whitelister;
         console.log("      Whitelister:", Whitelister.address);
 
-        const Project = new project(init, rICO, rICOSettings.projectWalletAddress);
+        const Project = new project(init, rICO, rICOSettings.projectAddress);
         init.deployment.project = Project;
         console.log("      ProjectWallet:", Project.address);
         
@@ -103,10 +103,10 @@ module.exports = {
 
             const displayValues = async () => {
 
-                await participants[0].displayAllBalances();
+                await participants[0].displayBalances();
                 
-                // const byStage = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
-                // console.log(byStage);
+                // const stages = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
+                // console.log(stages);
 
                 const boughtToken = new helpers.BN( await rICOToken.methods.getUnlockedBalance(participants[0].address).call() );
                 const reservedToken = new helpers.BN( await rICOToken.methods.getLockedBalance(participants[0].address).call() );
@@ -116,14 +116,14 @@ module.exports = {
                 console.log("reservedTokens:          ", participants[0].toEth(reservedToken));
                 console.log("balanceOf:             ", participants[0].toEth(balanceOf));
 
-                const getReservedTokenAmount = new helpers.BN( await rICO.methods.getReservedTokenAmount(participants[0].address).call() );
-                console.log("getReservedTokenAmount:  ", participants[0].toEth(getReservedTokenAmount));
+                const currentReservedTokenAmount = new helpers.BN( await rICO.methods.currentReservedTokenAmount(participants[0].address).call() );
+                console.log("currentReservedTokenAmount:  ", participants[0].toEth(currentReservedTokenAmount));
 
-                const getReservedTokenAmount2 = new helpers.BN( await rICO.methods.getReservedTokenAmount(participants[0].address).call() );
-                console.log("getReservedTokenAmount2: ", participants[0].toEth(getReservedTokenAmount2));
+                const currentReservedTokenAmount2 = new helpers.BN( await rICO.methods.currentReservedTokenAmount(participants[0].address).call() );
+                console.log("currentReservedTokenAmount2: ", participants[0].toEth(currentReservedTokenAmount2));
 
-                const getCurrentUnlockPercentage = new helpers.BN( await rICO.methods.getCurrentUnlockPercentage().call() );
-                console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentUnlockPercentage));
+                const getCurrentGlobalUnlockRatio = new helpers.BN( await rICO.methods.getCurrentGlobalUnlockRatio().call() );
+                console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentGlobalUnlockRatio));
                 
             }
 
@@ -135,58 +135,39 @@ module.exports = {
 
             block = 15;
             await setBlock(block, rICO, deployment, helpers);
-
             participants[1].setBlock(block);
             await participants[1].executeAction('commitEntireBalance');
 
+            // participants[2].setBlock(block);
+            // await participants[2].executeAction('commitEntireBalance');
+
             block = 16;
             await setBlock(block, rICO, deployment, helpers);
-
             participants[1].setBlock(block);
             await participants[1].executeAction('whitelistApprove');
-
-            block = 17;
-            await setBlock(block, rICO, deployment, helpers);
-
-            participants[1].setBlock(block);
-            await participants[1].executeAction('sendHalfTokensBack');
-            await participants[1].displayAllBalances();
-
-            // block = 18;
-            // await setBlock(block, rICO, deployment, helpers);
-
-            // participants[1].setBlock(block);
-            // await participants[1].executeAction('commitHalfBalance');
+            // participants[2].setBlock(block);
+            // await participants[2].executeAction('whitelistApprove');
 
             block = 19;
             await setBlock(block, rICO, deployment, helpers);
-
             participants[1].setBlock(block);
-            await participants[1].displayAllBalances();
-            await participants[1].executeAction('commitEntireBalance', async () => {
-                await participants[1].displayAllBalances();
-            });
+            await participants[1].displayBalances();
 
-            // await participants[1].displayAllBalances();
-
-            /*
-            Error: VM Exception while processing transaction: revert SafeMath: subtraction overflow
-            */
+            await participants[1].executeAction('sendAllTokensBack');
+            await participants[1].displayBalances();
+            await Project.displayBalances();
+            await displayRicoBalances(helpers, rICO, rICOToken);
 
 
-            // await participants[1].executeAction('commitEntireBalance', async () => {
-            //     await participants[1].displayAllBalances();
-            // });
-   
-        
-            // block = 19;
+            // block = 69;
             // await setBlock(block, rICO, deployment, helpers);
-        
-            // participants[0].setBlock(block);
-            // await participants[0].displayAllBalances();
-            // await participants[0].executeAction('commitEntireBalance', async () => {
-            //     await participants[0].displayAllBalances();
-            // });
+            // participants[2].setBlock(block);
+            // await participants[2].displayBalances();
+            // await participants[2].executeAction('sendAllTokensBack');
+            // await participants[2].displayBalances();
+            // await Project.displayBalances();
+            // await displayRicoBalances(helpers, rICO, rICOToken);
+
 
         } catch(e) {
             console.log(e)
@@ -194,6 +175,42 @@ module.exports = {
         }
     }
 } 
+
+async function displayRicoBalances(helpers, rICO, rICOToken) {
+    
+    const realContractBalance = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
+    const realtokenSupply               = new helpers.BN(await rICOToken.methods.balanceOf(helpers.addresses.Rico).call());
+
+    const tokenSupply                   = new helpers.BN(await rICO.methods.tokenSupply().call());
+    const committedETH                  = new helpers.BN(await rICO.methods.committedETH().call());
+    const pendingETH                    = new helpers.BN(await rICO.methods.pendingETH().call());
+    const totalSentETH                  = new helpers.BN(await rICO.methods.totalSentETH().call());
+    const withdrawnETH                  = new helpers.BN(await rICO.methods.withdrawnETH().call());
+    const projectWithdrawCount          = new helpers.BN(await rICO.methods.projectWithdrawCount().call());
+    const projectWithdrawnETH           = new helpers.BN(await rICO.methods.projectWithdrawnETH().call());
+    const projectCurrentlyReservedETH   = new helpers.BN(await rICO.methods.projectCurrentlyReservedETH().call());
+    const projectTotalUnlockedETH       = new helpers.BN(await rICO.methods.projectTotalUnlockedETH().call());
+    const _projectLastBlock             = new helpers.BN(await rICO.methods._projectLastBlock().call());
+
+    console.log("");
+    console.log("    RICO Balances:                     ", helpers.addresses.Rico);
+    console.log("      Real ETH:                        ", helpers.utils.toEth(helpers, realContractBalance.toString()) + " eth");
+    console.log("      committedETH:                    ", helpers.utils.toEth(helpers, committedETH.toString()) + " eth");
+    console.log("      pendingETH:                      ", helpers.utils.toEth(helpers, pendingETH.toString()) + " eth");
+    console.log("      totalSentETH:                    ", helpers.utils.toEth(helpers, totalSentETH.toString()) + " eth");
+    console.log("      withdrawnETH:                    ", helpers.utils.toEth(helpers, withdrawnETH.toString()) + " eth");
+    console.log("      tokenSupply:                     ", helpers.utils.toEth(helpers, tokenSupply.toString()) + " tokens");
+    console.log("      REAL tokenSupply:                ", helpers.utils.toEth(helpers, realtokenSupply.toString()) + " tokens");
+    console.log("      Project Withdraw details");
+    console.log("      projectWithdrawCount:            ", helpers.utils.toEth(helpers, projectWithdrawCount.toString()));
+    console.log("      projectWithdrawnETH:             ", helpers.utils.toEth(helpers, projectWithdrawnETH.toString()) + " eth");
+    console.log("      projectCurrentlyReservedETH:     ", helpers.utils.toEth(helpers, projectCurrentlyReservedETH.toString()) + " eth");
+    console.log("      projectTotalUnlockedETH:         ", helpers.utils.toEth(helpers, projectTotalUnlockedETH.toString()) + " eth");
+    console.log("      _projectLastBlock:               ", _projectLastBlock.toString());
+
+
+
+}
 
 async function setBlock(block, rICO, deployment, helpers) {
     await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
@@ -212,7 +229,7 @@ async function display(rICO, helpers, Project) {
 
     committedETH = new helpers.BN( await rICO.methods.committedETH().call() );
     withdrawnETH = new helpers.BN( await rICO.methods.withdrawnETH().call() );
-    projectAllocatedETH = new helpers.BN( await rICO.methods.projectAllocatedETH().call() );
+    projectTotalUnlockedETH = new helpers.BN( await rICO.methods.projectTotalUnlockedETH().call() );
     projectWithdrawnETH = new helpers.BN( await rICO.methods.projectWithdrawnETH().call() );
     buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
     buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
@@ -221,10 +238,10 @@ async function display(rICO, helpers, Project) {
 
     const globalAvailable = committedETH
         .sub(withdrawnETH)
-        .sub(projectAllocatedETH);
+        .sub(projectTotalUnlockedETH);
 
     const unlocked = globalAvailable.mul(
-        helpers.utils.getCurrentUnlockPercentage(
+        helpers.utils.getCurrentGlobalUnlockRatio(
             helpers,
             _currentBlock,
             buyPhaseStartBlock,
@@ -235,10 +252,10 @@ async function display(rICO, helpers, Project) {
         new helpers.BN("10").pow( new helpers.BN("20"))
     );
 
-    const result = unlocked.add(projectAllocatedETH).sub(projectWithdrawnETH);
-    const getProjectAvailableEth =  await rICO.methods.getProjectAvailableEth().call() 
+    const result = unlocked.add(projectTotalUnlockedETH).sub(projectWithdrawnETH);
+    const getAvailableProjectETH =  await rICO.methods.getAvailableProjectETH().call()
 
-    console.log(" > getProjectAvailableEth: calc     ", Project.toEth(result) + " eth");
-    console.log(" > getProjectAvailableEth: unlocked ", Project.toEth(new helpers.BN( getProjectAvailableEth )) + " eth");
+    console.log(" > getAvailableProjectETH: calc     ", Project.toEth(result) + " eth");
+    console.log(" > getAvailableProjectETH: unlocked ", Project.toEth(new helpers.BN( getAvailableProjectETH )) + " eth");
 
 }

@@ -272,7 +272,7 @@ module.exports = {
     toFullToken(helpers, balance) {
         return helpers.web3util.fromWei(balance, "ether");
     },
-    getCurrentUnlockPercentage(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
+    getCurrentGlobalUnlockRatio(helpers, currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision) {
 
         currentBlock = new helpers.BN(currentBlock);
         BuyPhaseStartBlock = new helpers.BN(BuyPhaseStartBlock);
@@ -308,7 +308,7 @@ module.exports = {
                 // buy phase
                 const precision = new helpers.BN(20);
                 const unlocked = tokenAmount.mul(
-                    helpers.utils.getCurrentUnlockPercentage(
+                    helpers.utils.getCurrentGlobalUnlockRatio(
                         helpers,
                         currentBlock,
                         BuyPhaseStartBlock,
@@ -342,9 +342,9 @@ module.exports = {
     },
     async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
         const stageData = await contract.methods.stages(stageId).call();
-        let block = stageData.startBlock;
+        let block = Number(stageData.startBlock);
         if(end) {
-            block = stageData.endBlock;
+            block = Number(stageData.endBlock);
         }
 
         if(addToBlockNumber !== false) {
@@ -366,16 +366,16 @@ module.exports = {
         let returnedETH = await contract.methods.returnedETH().call();
         let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
-        let allocatedETH = await contract.methods.projectAllocatedETH().call();
+        let allocatedETH = await contract.methods.projectTotalUnlockedETH().call();
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
-        let ParticipantByAddress = await contract.methods.participantsByAddress(participant_address).call();
+        let ParticipantByAddress = await contract.methods.participants(participant_address).call();
         let ParticipantTotalStats = await contract.methods.participantAggregatedStats(participant_address).call();
 
         let StageCount = await contract.methods.stageCount().call();
-        const contributionsCount = ParticipantByAddress.contributionsCount;
-        const LockedBalance = await contract.methods.getReservedTokenAmount(participant_address).call();
+        const contributions = ParticipantByAddress.contributions;
+        const LockedBalance = await contract.methods.currentReservedTokenAmount(participant_address).call();
 
         let UnlockedBalance, BalanceOf;
         if(tokenContract !== null) {
@@ -394,7 +394,7 @@ module.exports = {
         console.log("Project ETH Withdrawn:    ", helpers.utils.toEth(helpers, projectWithdrawnETH.toString()) +" eth" );
 
         console.log("Contributions for address:", participant_address);
-        console.log("Count:                    ", contributionsCount.toString());
+        console.log("Count:                    ", contributions.toString());
         console.log("Total totalSentETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.totalSentETH.toString())   +" eth" );
         console.log("Total returnedETH:        ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedETH.toString())    +" eth" );
         console.log("Total committedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.committedETH.toString())    +" eth" );
@@ -457,8 +457,8 @@ module.exports = {
 
         const BuyPhaseEndBlock = parseInt(await contract.methods.buyPhaseEndBlock().call());
         const BuyPhaseStartBlock = parseInt(await contract.methods.buyPhaseStartBlock().call());
-        const maxLocked = new helpers.BN( await contract.methods.getReservedTokenAmount(_from).call() );
-        const ParticipantRecord = await contract.methods.participantsByAddress(_from).call();
+        const maxLocked = new helpers.BN( await contract.methods.currentReservedTokenAmount(_from).call() );
+        const ParticipantRecord = await contract.methods.participants(_from).call();
 
         if(maxLocked > 0) {
 
@@ -478,7 +478,7 @@ module.exports = {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            // projectAllocatedETH = projectAllocatedETH.sub(ParticipantRecord.allocatedETH);
+            // projectTotalUnlockedETH = projectTotalUnlockedETH.sub(ParticipantRecord.allocatedETH);
 
             if(RemainingTokenAmount.gt( new helpers.BN("0") )) {
 
@@ -532,7 +532,7 @@ module.exports = {
                         ReturnETHAmount = ReturnETHAmount.add(CurrentETHAmount);
                         
                         allocatedEthAmount = allocatedEthAmount.add(unlockedETHAmount);
-                        // participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
+                        // participantRecord.stages[stageId].allocatedETH = unlockedETHAmount;
 
                         // remove processed token amount from requested amount
                         RemainingTokenAmount = RemainingTokenAmount.sub(reservedTokensInStage);

@@ -4,7 +4,7 @@ const MAX_UINT256 = helpers.MAX_UINT256;
 const expect = helpers.expect
 
 const holder = accounts[10];
-const projectWalletAddress = holder;
+const projectAddress = holder;
 const participant_1 = accounts[4];
 const participant_2 = accounts[5];
 const participant_3 = accounts[6];
@@ -17,23 +17,23 @@ const blocksPerDay = 1000;
 
 const ApplicationEventTypes = {
     NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_NEW:1,
-    CONTRIBUTION_CANCEL:2,
-    PARTICIPANT_CANCEL:3,
-    COMMITMENT_ACCEPTED:4,
-    WHITELIST_APPROVE:5,
-    WHITELIST_REJECT:6,
-    PROJECT_WITHDRAW:7
+    CONTRIBUTION_ADDED:1,
+    CONTRIBUTION_CANCELED:2,
+    CONTRIBUTION_ACCEPTED:3,
+    WHITELIST_APPROVED:4,
+    WHITELIST_REJECTED:5,
+    PROJECT_WITHDRAWN:6
 }
 
 const TransferTypes = {
-    NOT_SET:0,
-    AUTOMATIC_RETURN:1,
-    WHITELIST_REJECT:2,
-    PARTICIPANT_CANCEL:3,
-    PARTICIPANT_WITHDRAW:4,
-    PROJECT_WITHDRAW:5
-}
+    NOT_SET: 0,
+    WHITELIST_REJECTED: 1,
+    CONTRIBUTION_CANCELED: 2,
+    CONTRIBUTION_ACCEPTED_OVERFLOW: 3,
+    PARTICIPANT_WITHDRAW: 4,
+    PARTICIPANT_WITHDRAW_OVERFLOW: 5,
+    PROJECT_WITHDRAWN: 6
+};
 
 
 const ERC777data = web3.utils.sha3('777TestData');
@@ -49,7 +49,7 @@ let snapshotsEnabled = true;
 let snapshots = [];
 
 const deployerAddress = accounts[0];
-const whitelistControllerAddress = accounts[1];
+const whitelisterAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -135,9 +135,9 @@ async function revertToFreshDeployment() {
 
 
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,       // address _tokenContractAddress
-            whitelistControllerAddress, // address _whitelistControllerAddress
-            projectWalletAddress,       // address _projectWalletAddress
+            TokenContractAddress,       // address _tokenAddress
+            whitelisterAddress, // address _whitelisterAddress
+            projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
             commitPhasePrice,           // uint256 _commitPhasePrice in wei
@@ -212,7 +212,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -220,7 +220,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -235,7 +235,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.currentReservedTokenAmount(participant_1).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -282,7 +282,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -306,7 +306,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
 
             let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
@@ -333,7 +333,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -341,7 +341,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -367,7 +367,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * (2 * commitPhasePrice);
             await helpers.web3Instance.eth.sendTransaction({
@@ -390,12 +390,12 @@ describe("Withdrawal Testing", function () {
             // jump to last block of phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1, true);
 
-            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("10000000000000000000");
         });
 
         it("Expect locked tokens to be 1.8 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.currentReservedTokenAmount(participant_1).call();
             expect(locked).to.be.equal("1800000000000000000");
         });
 
@@ -410,7 +410,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.currentReservedTokenAmount(participant_1).call();
             expect(locked).to.be.equal("0");
         });
 
@@ -441,7 +441,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -449,7 +449,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 900 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -475,7 +475,7 @@ describe("Withdrawal Testing", function () {
             // jump to phase 0
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
 
-            let ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 1 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -504,7 +504,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelistControllerAddress
+                from: whitelisterAddress
             });
         });
 
@@ -514,7 +514,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -553,7 +553,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -592,7 +592,7 @@ describe("Withdrawal Testing", function () {
             // jump to stage
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
 
-            const ParticipantByAddress = await ReversibleICOInstance.methods.participantsByAddress(participant_1).call();
+            const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
             const ContributionAmount = 2000 * (stage + 1) * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -629,7 +629,7 @@ describe("Withdrawal Testing", function () {
             // jump to last block of phase 1
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 5, true);
 
-            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentUnlockPercentage().call();
+            let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("50000000000000000000");
         });
 

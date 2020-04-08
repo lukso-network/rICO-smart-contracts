@@ -98,7 +98,7 @@ class Validator {
         );
     }
 
-    getCurrentUnlockPercentage() {
+    getCurrentGlobalUnlockRatio() {
         const currentBlock = new BN( this.getCurrentBlockNumber() );
         const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );
@@ -171,7 +171,7 @@ class Validator {
         return 0;
     }
 
-    getReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
+    currentReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
 
         if(_precision == null) {
             _precision = 20;
@@ -211,7 +211,7 @@ class Validator {
 
     getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
         return new BN(_tokenAmount).sub( 
-            this.getReservedTokenAmountAtBlock(
+            this.currentReservedTokenAmountAtBlock(
                 _tokenAmount,
                 _blockNumber,
                 precision

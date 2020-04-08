@@ -25,7 +25,7 @@ const solidity = {
 
 const Participant = {
     whitelisted: false,
-    contributionsCount: 0,
+    contributions: 0,
     totalSentETH: new BN("0"),  // Total amount of ETH received by the smart contract.
     returnedETH: new BN("0"),       // totalSentETH - committedETH
     committedETH: new BN("0"),      // lower than msg.value if maxCap already reached
@@ -34,7 +34,7 @@ const Participant = {
     pendingTokens: new BN("0"),    // total tokens bought in all stages
     boughtTokens: new BN("0"),      // total tokens already sent to the participant in all stages
     returnedTokens: new BN("0"),    // total tokens returned by participant to contract in all stages
-    byStage: [],
+    stages: [],
 }
 
 const ParticipantDetailsByStage = {
@@ -59,11 +59,11 @@ class Contract extends Validator {
     constructor(settings, currentBlock = 0) {
         super(settings, currentBlock);
 
-        this.participantsByAddress = {};
+        this.participants = {};
         this.participantsById = [];
         this.participantCount = 0;
 
-        this.projectAllocatedETH = new BN("0");
+        this.projectTotalUnlockedETH = new BN("0");
         this.projectWithdrawnETH = new BN("0");
         this.committedETH = new BN("0");
         this.withdrawnETH = new BN("0");
@@ -72,22 +72,22 @@ class Contract extends Validator {
 
         this.ApplicationEventTypes = {
             "NOT_SET": 0,
-            "CONTRIBUTION_NEW": 1,
-            "CONTRIBUTION_CANCEL": 2,
-            "PARTICIPANT_CANCEL": 3,
-            "COMMITMENT_ACCEPTED": 4,
-            "WHITELIST_APPROVE": 5,
-            "WHITELIST_REJECT": 6,
-            "PROJECT_WITHDRAW": 7
+            "CONTRIBUTION_ADDED": 1,
+            "CONTRIBUTION_CANCELED": 2,
+            "CONTRIBUTION_ACCEPTED": 3,
+            "WHITELIST_APPROVED": 4,
+            "WHITELIST_REJECTED": 5,
+            "PROJECT_WITHDRAWN": 6
         }
 
         this.TransferTypes = {
             "NOT_SET": 0,
-            "AUTOMATIC_RETURN": 1,
-            "WHITELIST_REJECT": 2,
-            "PARTICIPANT_CANCEL": 3,
+            "WHITELIST_REJECTED": 1,
+            "CONTRIBUTION_CANCELED": 2,
+            "CONTRIBUTION_ACCEPTED_OVERFLOW": 3,
             "PARTICIPANT_WITHDRAW": 4,
-            "PROJECT_WITHDRAW": 5
+            "PARTICIPANT_WITHDRAW_OVERFLOW": 5,
+            "PROJECT_WITHDRAWN": 6
         }
 
         this.contractAddress = "ricoContractAddress";
@@ -120,7 +120,7 @@ class Contract extends Validator {
         let participantRecord = this.getParticipantRecordByAddress(msg_sender);
 
         // Check if participant has previous contributions
-        if (participantRecord.contributionsCount == 0) {
+        if (participantRecord.contributions == 0) {
             // increase participant count
             this.participantCount++;
 
@@ -133,7 +133,7 @@ class Contract extends Validator {
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            this.acceptContributionsForAddress(msg_sender, this.ApplicationEventTypes.COMMITMENT_ACCEPTED);
+            this.acceptContributionsForAddress(msg_sender, this.ApplicationEventTypes.CONTRIBUTION_ACCEPTED);
         }
     }
 
@@ -152,12 +152,12 @@ class Contract extends Validator {
         const participantRecord = this.getParticipantRecordByAddress(_from);
 
         // Update participant's total stats
-        participantRecord.contributionsCount++;
+        participantRecord.contributions++;
         participantRecord.totalSentETH = participantRecord.totalSentETH.add(_receivedValue);
 
         // Update participant's per-stage stats
-        const byStage = participantRecord.byStage[currentStage];
-        byStage.totalSentETH = byStage.totalSentETH.add(_receivedValue);
+        const stages = participantRecord.stages[currentStage];
+        stages.totalSentETH = stages.totalSentETH.add(_receivedValue);
 
         // Get the equivalent amount in tokens
         const newTokenAmount = this.getTokenAmountForEthAtStage(
@@ -165,12 +165,12 @@ class Contract extends Validator {
         );
 
         // Update participant's reserved tokens
-        byStage.pendingTokens = byStage.pendingTokens.add(newTokenAmount);
+        stages.pendingTokens = stages.pendingTokens.add(newTokenAmount);
         participantRecord.pendingTokens = participantRecord.pendingTokens.add(newTokenAmount);
 
         this.ApplicationEvent(
-            this.ApplicationEventTypes.CONTRIBUTION_NEW,
-            participantRecord.contributionsCount,
+            this.ApplicationEventTypes.CONTRIBUTION_ADDED,
+            participantRecord.contributions,
             _from,
             _receivedValue
         );
@@ -185,36 +185,36 @@ class Contract extends Validator {
         for (let i = 0; i <= currentStage; i++) {
 
             const stageId = i;
-            const byStage = participantRecord.byStage[stageId];
+            const stages = participantRecord.stages[stageId];
             const processedTotals = participantRecord.committedETH.add(participantRecord.returnedETH);
 
             if (processedTotals.lt(participantRecord.totalSentETH)) {
 
                 // handle the case when we have reserved more tokens than globally available
-                participantRecord.pendingTokens = participantRecord.pendingTokens.sub(byStage.pendingTokens);
-                byStage.pendingTokens = 0;
+                participantRecord.pendingTokens = participantRecord.pendingTokens.sub(stages.pendingTokens);
+                stages.pendingTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
                 const maxAcceptableValue = this.availableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalSentETH - committedETH
-                let newAcceptedValue = byStage.totalSentETH.sub(byStage.committedETH);
+                let newAcceptedValue = stages.totalSentETH.sub(stages.committedETH);
                 let returnValue = new BN("0");
 
                 // if incomming value is higher than what we can accept,
                 // just accept the difference and return the rest
                 if (newAcceptedValue.gt(maxAcceptableValue)) {
                     newAcceptedValue = maxAcceptableValue;
-                    returnValue = byStage.totalSentETH
-                        .sub(byStage.returnedETH)
-                        .sub(byStage.committedETH)
-                        .sub(byStage.withdrawnETH)
+                    returnValue = stages.totalSentETH
+                        .sub(stages.returnedETH)
+                        .sub(stages.committedETH)
+                        .sub(stages.withdrawnETH)
                         .sub(newAcceptedValue);
 
                     // update return values
                     this.returnedETH = this.returnedETH.add(returnValue);
                     participantRecord.returnedETH = participantRecord.returnedETH.add(returnValue);
-                    byStage.returnedETH = returnValue;
+                    stages.returnedETH = returnValue;
                 }
 
                 if (newAcceptedValue.gt(new BN("0"))) {
@@ -222,7 +222,7 @@ class Contract extends Validator {
                     // update values by adding the new accepted amount
                     this.committedETH = this.committedETH.add(newAcceptedValue);
                     participantRecord.committedETH = participantRecord.committedETH.add(newAcceptedValue);
-                    byStage.committedETH = byStage.committedETH.add(newAcceptedValue);
+                    stages.committedETH = stages.committedETH.add(newAcceptedValue);
 
                     // calculate the equivalent token amount
                     const newTokenAmount = this.getTokenAmountForEthAtStage(
@@ -231,7 +231,7 @@ class Contract extends Validator {
 
                     // update participant's token amounts
                     participantRecord.boughtTokens = participantRecord.boughtTokens.add(newTokenAmount);
-                    byStage.boughtTokens = byStage.boughtTokens.add(newTokenAmount);
+                    stages.boughtTokens = stages.boughtTokens.add(newTokenAmount);
 
                     // allocate tokens to participant
                     this.IERC777().send(this.contractAddress, _from, newTokenAmount);
@@ -241,7 +241,7 @@ class Contract extends Validator {
                 // ... we must tranfer back the difference.
                 if (returnValue.gt(new BN("0"))) {
                     this.address(this.uint160(_from)).transfer(returnValue);
-                    this.TransferEvent(this.TransferTypes.AUTOMATIC_RETURN, _from, returnValue);
+                    this.TransferEvent(this.TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW, _from, returnValue);
                 }
 
                 this.ApplicationEvent(_eventType, stageId, _from, newAcceptedValue);
@@ -256,12 +256,12 @@ class Contract extends Validator {
         );
     }
 
-    getProjectAvailableEth() {
+    getAvailableProjectETH() {
 
         let remainingFromAllocation = new BN("0");
         // Calculate the amount of allocated ETH, not withdrawn yet
-        if (this.projectAllocatedETH.gt(this.projectWithdrawnETH)) {
-            remainingFromAllocation = projectAllocatedETH.sub(projectWithdrawnETH);
+        if (this.projectTotalUnlockedETH.gt(this.projectWithdrawnETH)) {
+            remainingFromAllocation = projectTotalUnlockedETH.sub(projectWithdrawnETH);
         }
 
         // Calculate ETH that is globally available:
@@ -273,7 +273,7 @@ class Contract extends Validator {
 
         // Multiply the available ETH with the percentage that belongs to the project now
         let unlocked = globalAvailable.mul(
-            getCurrentUnlockPercentage()
+            getCurrentGlobalUnlockRatio()
         ).div(10 ** 20);
 
         // Available = unlocked + projectNotWithdrawn
@@ -286,20 +286,20 @@ class Contract extends Validator {
         if (_approve) {
             // If participants are approved: whitelist them and accept their contributions
             participantRecord.whitelisted = true;
-            this.acceptContributionsForAddress(_address, this.ApplicationEventTypes.WHITELIST_APPROVE);
+            this.acceptContributionsForAddress(_address, this.ApplicationEventTypes.WHITELIST_APPROVED);
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
             participantRecord.whitelisted = false;
-            this.cancelContributionsForAddress(_address, 0, this.ApplicationEventTypes.WHITELIST_REJECT);
+            this.cancelContributionsForAddress(_address, 0, this.ApplicationEventTypes.WHITELIST_REJECTED);
         }
     }
 
-    getReservedTokenAmount(_address) {
+    currentReservedTokenAmount(_address) {
         const participantRecord = this.getParticipantRecordByAddress(_address);
 
         // Since we want to display token amounts even when they are not already
         // transferred to their accounts, we use reserved + bought
-        return this.getReservedTokenAmountAtBlock(
+        return this.currentReservedTokenAmountAtBlock(
             participantRecord.pendingTokens.add(participantRecord.boughtTokens),
             this.getCurrentBlockNumber()
         ).sub(participantRecord.returnedTokens);
@@ -323,7 +323,7 @@ class Contract extends Validator {
     }
 
     canWithdraw(_address) {
-        if (this.getReservedTokenAmount(_address).gt(new BN("0"))) {
+        if (this.currentReservedTokenAmount(_address).gt(new BN("0"))) {
             return true;
         }
         return false;
@@ -369,17 +369,17 @@ class Contract extends Validator {
             this.address(this.uint160(_from)).transfer(participantAvailableETH.add(new BN(_value)));
 
             let currentTransferEventType;
-            if (_eventType == this.ApplicationEventTypes.WHITELIST_REJECT) {
-                currentTransferEventType = this.TransferTypes.WHITELIST_REJECT;
-            } else if (_eventType == this.ApplicationEventTypes.PARTICIPANT_CANCEL) {
-                currentTransferEventType = this.TransferTypes.PARTICIPANT_CANCEL;
+            if (_eventType == this.ApplicationEventTypes.WHITELIST_REJECTED) {
+                currentTransferEventType = this.TransferTypes.WHITELIST_REJECTED;
+            } else if (_eventType == this.ApplicationEventTypes.CONTRIBUTION_CANCELED) {
+                currentTransferEventType = this.TransferTypes.CONTRIBUTION_CANCELED;
             }
 
             // event emission
             this.TransferEvent(currentTransferEventType, _from, participantAvailableETH);
             this.ApplicationEvent(
                 _eventType,
-                participantRecord.contributionsCount,
+                participantRecord.contributions,
                 _from,
                 participantAvailableETH
             );
@@ -405,7 +405,7 @@ class Contract extends Validator {
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
             let remainingTokenAmount = _returnedTokenAmount;
-            const maxLocked = this.getReservedTokenAmount(_from);
+            const maxLocked = this.currentReservedTokenAmount(_from);
             let returnTokenAmount;
             let allocatedEthAmount;
 
@@ -417,7 +417,7 @@ class Contract extends Validator {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            this.projectAllocatedETH = projectAllocatedETH.sub(participantRecord.allocatedETH);
+            this.projectTotalUnlockedETH = projectTotalUnlockedETH.sub(participantRecord.allocatedETH);
 
             if (remainingTokenAmount.gt(new BN("0"))) {
 
@@ -436,17 +436,17 @@ class Contract extends Validator {
                 for (let stageId = currentStageNumber; stageId >= 0; stageId--) {
 
                     // total participant tokens at the current stage i.e. reserved + bought - returned
-                    const totalInStage = participantRecord.byStage[stageId].pendingTokens
-                        .add(participantRecord.byStage[stageId].boughtTokens)
-                        .sub(participantRecord.byStage[stageId].returnedTokens);
+                    const totalInStage = participantRecord.stages[stageId].pendingTokens
+                        .add(participantRecord.stages[stageId].boughtTokens)
+                        .sub(participantRecord.stages[stageId].returnedTokens);
 
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
-                    let tokensInStage = getReservedTokenAmountAtBlock(
-                        participantRecord.byStage[stageId].pendingTokens.add(participantRecord.byStage[stageId].boughtTokens),
+                    let tokensInStage = currentReservedTokenAmountAtBlock(
+                        participantRecord.stages[stageId].pendingTokens.add(participantRecord.stages[stageId].boughtTokens),
                         currentBlockNumber
-                    ).sub(participantRecord.byStage[stageId].returnedTokens);
+                    ).sub(participantRecord.stages[stageId].returnedTokens);
 
                     // only try to process stages that the participant has actually reserved tokens.
                     if (tokensInStage.gt(new BN("0"))) {
@@ -460,11 +460,11 @@ class Contract extends Validator {
 
                         //increase the returned tokens counters accordingly
                         participantRecord.returnedTokens = participantRecord.returnedTokens.add(tokensInStage);
-                        participantRecord.byStage[stageId].returnedTokens = participantRecord.byStage[stageId].returnedTokens.add(tokensInStage);
+                        participantRecord.stages[stageId].returnedTokens = participantRecord.stages[stageId].returnedTokens.add(tokensInStage);
 
                         // increase the corresponding ETH counters
                         returnETHAmount = returnETHAmount.add(currentETHAmount);
-                        participantRecord.byStage[stageId].withdrawnETH = participantRecord.byStage[stageId].withdrawnETH.add(currentETHAmount);
+                        participantRecord.stages[stageId].withdrawnETH = participantRecord.stages[stageId].withdrawnETH.add(currentETHAmount);
 
                         // allocated to project
                         const unlockedETHAmount = getEthAmountForTokensAtStage(
@@ -473,7 +473,7 @@ class Contract extends Validator {
                         );
 
                         this.allocatedEthAmount = this.allocatedEthAmount.add(unlockedETHAmount);
-                        participantRecord.byStage[stageId].allocatedETH = unlockedETHAmount;
+                        participantRecord.stages[stageId].allocatedETH = unlockedETHAmount;
 
                         // remove processed token amount from requested amount
                         remainingTokenAmount = remainingTokenAmount.sub(tokensInStage);
@@ -488,7 +488,7 @@ class Contract extends Validator {
                 // return overflow tokens received
                 if (returnTokenAmount.gt(new BN("0"))) {
                     // send tokens back to participant
-                    IERC777(tokenContractAddress).send(_from, returnTokenAmount, null);
+                    IERC777(tokenAddress).send(_from, returnTokenAmount, null);
                 }
 
                 // increase participant's withdrawnETH counter
@@ -499,7 +499,7 @@ class Contract extends Validator {
 
                 // allocate remaining ETH to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
-                this.projectAllocatedETH = this.projectAllocatedETH.add(participantRecord.allocatedETH);
+                this.projectTotalUnlockedETH = this.projectTotalUnlockedETH.add(participantRecord.allocatedETH);
 
                 // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);
@@ -514,25 +514,25 @@ class Contract extends Validator {
     projectWithdraw(_ethAmount) {
 
         // Get project unlocked ETH (available for withdrawing)
-        const unlocked = this.getProjectAvailableEth();
+        const unlocked = this.getAvailableProjectETH();
 
         // Update stats:  number of project withdrawals, total amount withdrawn by the project
         this.projectWithdrawCount++;
         this.projectWithdrawnETH = this.projectWithdrawnETH.add(_ethAmount);
 
         // Transfer ETH to project wallet
-        address(uint160(projectWalletAddress)).transfer(_ethAmount);
+        address(uint160(projectAddress)).transfer(_ethAmount);
 
         // Event emission
         ApplicationEvent(
-            ApplicationEventTypes.PROJECT_WITHDRAW,
+            ApplicationEventTypes.PROJECT_WITHDRAWN,
             projectWithdrawCount,
-            projectWalletAddress,
+            projectAddress,
             _ethAmount
         );
         TransferEvent(
-            TransferTypes.PROJECT_WITHDRAW,
-            projectWalletAddress,
+            TransferTypes.PROJECT_WITHDRAWN,
+            projectAddress,
             _ethAmount
         );
     }
@@ -554,17 +554,17 @@ class Contract extends Validator {
     setupNewParticipant() {
         const variable = clone(Participant);
         for (let i = 0; i <= this.stageCount; i++) {
-            variable.byStage[i] = clone(ParticipantDetailsByStage);
+            variable.stages[i] = clone(ParticipantDetailsByStage);
         }
         return variable;
     }
 
     getParticipantRecordByAddress(_address) {
-        const record = this.participantsByAddress[_address];
+        const record = this.participants[_address];
         if (!record) {
-            this.participantsByAddress[_address] = this.setupNewParticipant();
+            this.participants[_address] = this.setupNewParticipant();
         }
-        return this.participantsByAddress[_address];
+        return this.participants[_address];
     }
 
     TransferEvent(_type, _address, _value) {

@@ -782,7 +782,7 @@ describe("Javascript Validator - Tests", function () {
             });
         });
         
-        describe("getReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow) ", function () {
+        describe("currentReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow) ", function () {
             let precisionPow, CustomSettingsValidator;
             
             const CustomSettings = {
@@ -809,7 +809,7 @@ describe("Javascript Validator - Tests", function () {
                     let _tokenAmount = 100;
                     it("should return 99", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock;
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "99" );
                     });
                 });
@@ -819,7 +819,7 @@ describe("Javascript Validator - Tests", function () {
                     it("should return 75", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.25 );
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "75" );
                     });
                 });
@@ -829,7 +829,7 @@ describe("Javascript Validator - Tests", function () {
                     it("should return 50", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.5 );
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "50" );
                     });
                 });
@@ -839,7 +839,7 @@ describe("Javascript Validator - Tests", function () {
                     it("should return 25", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).startBlock - 1;
                         const middleBlock = rangeStartblock + ( CustomSettingsValidator.buyPhaseBlockCount * 0.75 );
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, middleBlock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "25" );
                     });
                 });
@@ -848,7 +848,7 @@ describe("Javascript Validator - Tests", function () {
                     let _tokenAmount = 100;
                     it("should return 0", function() {
                         const rangeStartblock = CustomSettingsValidator.getStage(1).endBlock;
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, rangeStartblock, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "0" );
                     });
                 });
@@ -866,7 +866,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return full amount", function() {
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( _tokenAmount.toString() );
                     });
                 });
@@ -880,7 +880,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return 0", function() {
-                        let locked = CustomSettingsValidator.getReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow);
+                        let locked = CustomSettingsValidator.currentReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, precisionPow);
                         expect( locked.toString(), "Incorrect locked amount returned").is.equal( "0" );
                     });
                 });

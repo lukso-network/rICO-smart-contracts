@@ -336,8 +336,8 @@ describe("Gnosis Safe Integration", function () {
 
                 let settingsData = this.Rico.methods.init(
                     TokenContractAddress,            // address _TokenContractAddress
-                    whitelistControllerAddress,     // address _whitelistControllerAddress
-                    projectWalletAddress,           // address _projectWalletAddress
+                    whitelisterAddress,     // address _whitelisterAddress
+                    projectAddress,           // address _projectAddress
                     commitPhaseStartBlock,                     // uint256 _commitPhaseStartBlock
                     commitPhaseBlockCount,           // uint256 _commitPhaseBlockCount,
                     commitPhasePrice,                // uint256 _commitPhasePrice in wei
@@ -380,12 +380,12 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(TokenContractAddress);
 
                 expect(
-                    await this.ReversibleICO.methods.whitelistControllerAddress().call()
-                ).to.be.equal(whitelistControllerAddress);
+                    await this.ReversibleICO.methods.whitelisterAddress().call()
+                ).to.be.equal(whitelisterAddress);
 
                 expect(
-                    await this.ReversibleICO.methods.projectWalletAddress().call()
-                ).to.be.equal(projectWalletAddress);
+                    await this.ReversibleICO.methods.projectAddress().call()
+                ).to.be.equal(projectAddress);
 
                 expect(
                     await this.ReversibleICO.methods.BuyPhaseEndBlock().call()

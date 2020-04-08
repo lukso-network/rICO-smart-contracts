@@ -99,9 +99,9 @@ function shouldRunMod(_address, _testStage, _whitelisted = false) {
                 // tests
                 [
                     [
-                        "contributionsCount is 1", function () {
-                            const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                            expect(newParticipantRecord.contributionsCount).is.equal(1);
+                        "contributions is 1", function () {
+                            const newParticipantRecord = this.JSContract.participants[_address];
+                            expect(newParticipantRecord.contributions).is.equal(1);
                         }
                     ]
                 ]
@@ -112,9 +112,9 @@ function shouldRunMod(_address, _testStage, _whitelisted = false) {
                 // tests
                 [
                     [
-                        "contributionsCount is 1", function () {
-                            const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                            expect(newParticipantRecord.contributionsCount).is.equal(1);
+                        "contributions is 1", function () {
+                            const newParticipantRecord = this.JSContract.participants[_address];
+                            expect(newParticipantRecord.contributions).is.equal(1);
                         }
                     ],
                 ],
@@ -142,18 +142,18 @@ function shouldRunOrig(_address, _testStage, _whitelisted = false) {
 
         describe("ParticipantRecord", function () {
 
-            it("contributionsCount is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                expect(newParticipantRecord.contributionsCount).is.equal(1);
+            it("contributions is 1", function () {
+                const newParticipantRecord = this.JSContract.participants[_address];
+                expect(newParticipantRecord.contributions).is.equal(1);
             });
 
         });
 
         describe("ParticipantRecord 2", function () {
 
-            it("contributionsCount is 1", function () {
-                const newParticipantRecord = this.JSContract.participantsByAddress[_address];
-                expect(newParticipantRecord.contributionsCount).is.equal(1);
+            it("contributions is 1", function () {
+                const newParticipantRecord = this.JSContract.participants[_address];
+                expect(newParticipantRecord.contributions).is.equal(1);
             });
 
         });

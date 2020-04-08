@@ -18,13 +18,15 @@ module.exports = {
         const rICOSettings = { 
 
             ContractsDeployer: init.accounts[2],
-            whitelistControllerAddress: init.accounts[3],
-            projectWalletAddress: init.accounts[4],
+            whitelisterAddress: init.accounts[3],
+            projectAddress: init.accounts[4],
 
             blocksPerDay:    5,     // 6450;
             commitPhaseDays: 1,     // 22;
             StageDays:       2,     // 30;
             StageCount:     10,     // 12;
+            commitPhasePrice:   helpers.solidity.ether * 0.002,
+            StagePriceIncrease: helpers.solidity.ether * 0.0001,
         };
 
         helpers.utils.toLog(
@@ -36,8 +38,8 @@ module.exports = {
         init.deployment = {
             addresses: {
                 ContractsDeployer: null,
-                whitelistControllerAddress: null,
-                projectWalletAddress: null,
+                whitelisterAddress: null,
+                projectAddress: null,
             },
             contracts: {
                 rICOToken: null,
@@ -48,8 +50,6 @@ module.exports = {
         };
 
         const participants = await deployer.createParticipants(init, numberOfParticipants, participantTxBalance);
-        
-        // console.log(participants);
 
         helpers.utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -81,11 +81,11 @@ module.exports = {
         console.log("");
         console.log("      rICO block length:", rICOBlockLength);
 
-        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelistControllerAddress);
+        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelisterAddress);
         init.deployment.whitelister = Whitelister;
         console.log("      Whitelister:", Whitelister.address);
 
-        const Project = new project(init, rICO, rICOSettings.projectWalletAddress);
+        const Project = new project(init, rICO, rICOSettings.projectAddress);
         init.deployment.project = Project;
         console.log("      ProjectWallet:", Project.address);
         
@@ -206,7 +206,7 @@ async function display(rICO, helpers, Project) {
 
     committedETH = new helpers.BN( await rICO.methods.committedETH().call() );
     withdrawnETH = new helpers.BN( await rICO.methods.withdrawnETH().call() );
-    projectAllocatedETH = new helpers.BN( await rICO.methods.projectAllocatedETH().call() );
+    projectTotalUnlockedETH = new helpers.BN( await rICO.methods.projectTotalUnlockedETH().call() );
     projectWithdrawnETH = new helpers.BN( await rICO.methods.projectWithdrawnETH().call() );
     buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
     buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
@@ -215,10 +215,10 @@ async function display(rICO, helpers, Project) {
 
     const globalAvailable = committedETH
         .sub(withdrawnETH)
-        .sub(projectAllocatedETH);
+        .sub(projectTotalUnlockedETH);
 
     const unlocked = globalAvailable.mul(
-        helpers.utils.getCurrentUnlockPercentage(
+        helpers.utils.getCurrentGlobalUnlockRatio(
             helpers,
             _currentBlock,
             buyPhaseStartBlock,
@@ -229,10 +229,10 @@ async function display(rICO, helpers, Project) {
         new helpers.BN("10").pow( new helpers.BN("20"))
     );
 
-    const result = unlocked.add(projectAllocatedETH).sub(projectWithdrawnETH);
-    const getProjectAvailableEth =  await rICO.methods.getProjectAvailableEth().call() 
+    const result = unlocked.add(projectTotalUnlockedETH).sub(projectWithdrawnETH);
+    const getAvailableProjectETH =  await rICO.methods.getAvailableProjectETH().call()
 
-    console.log(" > getProjectAvailableEth: calc     ", Project.toEth(result) + " eth");
-    console.log(" > getProjectAvailableEth: unlocked ", Project.toEth(new helpers.BN( getProjectAvailableEth )) + " eth");
+    console.log(" > getAvailableProjectETH: calc     ", Project.toEth(result) + " eth");
+    console.log(" > getAvailableProjectETH: unlocked ", Project.toEth(new helpers.BN( getAvailableProjectETH )) + " eth");
 
 }

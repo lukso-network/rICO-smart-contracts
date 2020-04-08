@@ -83,8 +83,8 @@ class Project extends Actor {
     async getAvailableActions() {
         let actions = [];
 
-        const getProjectAvailableEth = new this.helpers.BN( await this.contract.methods.getProjectAvailableEth().call() );
-        if(getProjectAvailableEth.gt( new this.helpers.BN("0") )) {
+        const getAvailableProjectETH = new this.helpers.BN( await this.contract.methods.getAvailableProjectETH().call() );
+        if(getAvailableProjectETH.gt( new this.helpers.BN("0") )) {
             actions.push("withdrawFullAmount");
             actions.push("withdrawHalf");
         }
@@ -144,16 +144,17 @@ class Project extends Actor {
 
     // read balances from rICO and Token contract
     async readBalances() {
-        const getProjectAvailableEth = await this.contract.methods.getProjectAvailableEth().call() 
+        const getAvailableProjectETH = await this.contract.methods.getAvailableProjectETH().call()
         this.currentBalances.ETH = await this.helpers.utils.getBalance(this.helpers, this.address);
-        this.currentBalances.withdrawableETH = new this.helpers.BN( getProjectAvailableEth );
+        this.currentBalances.withdrawableETH = new this.helpers.BN( getAvailableProjectETH );
     }
     
     async displayBalances() {
         await this.readBalances();
-        console.log("    address:                         ", this.address);
-        console.log("    currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
-        console.log("    currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
+        console.log("");
+        console.log("    Project Wallet Balances:           ", this.address);
+        console.log("      currentBalances.ETH:             ", this.toEth(this.currentBalances.ETH) + " eth");
+        console.log("      currentBalances.withdrawableETH: ", this.toEth(this.currentBalances.withdrawableETH) + " eth");
     }
 
     getLastAction() {

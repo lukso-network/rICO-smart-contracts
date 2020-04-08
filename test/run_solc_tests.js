@@ -18,10 +18,12 @@ async function runTests(init) {
     // "3_ERC20Token",
     // "rework/phases",
     // "rework/methods/stages",
-    // "rework/methods/tokens/getReservedTokenAmount",
+    // "rework/methods/tokens/currentReservedTokenAmount",
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",
+    // "rework/flows/token_balances",
+    "rework/flows/random_tests",
 
     // // // these need to be reworked
     // "5_Cancel",
@@ -29,11 +31,8 @@ async function runTests(init) {
     // "5_Flows",
     // "10_ProjectWithdraw",
     
-    // "5_Flows",
-    "rework/flows/token_balances",
+    // "5_Flows","rework/flows/withdraw",
     // "rework/flows/withdraw",
-
-    // "rework/flows/whitelist",
 
     // "5_ProjectWithdraw",
     // "6_Gnosis-Safe",
