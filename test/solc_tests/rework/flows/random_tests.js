@@ -215,11 +215,11 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                 await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000})
                                     .then(async (receipt) => {
 
-                                        console.log('returnTokenAmount', returnTokenAmount.toString());
-                                        console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                        console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
-                                        console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
-                                        console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
+                                        // console.log('returnTokenAmount', returnTokenAmount.toString());
+                                        // console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                                        // console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                        // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
+                                        // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
 
                                         // update his balance

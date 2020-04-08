@@ -366,7 +366,7 @@ module.exports = {
         let returnedETH = await contract.methods.returnedETH().call();
         let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
-        let allocatedETH = await contract.methods.projectTotalUnlockedETH().call();
+        let allocatedETH = await contract.methods._projectTotalUnlockedETH().call();
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
@@ -478,7 +478,7 @@ module.exports = {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            // projectTotalUnlockedETH = projectTotalUnlockedETH.sub(ParticipantRecord.allocatedETH);
+            // _projectTotalUnlockedETH = _projectTotalUnlockedETH.sub(ParticipantRecord.allocatedETH);
 
             if(RemainingTokenAmount.gt( new helpers.BN("0") )) {
 

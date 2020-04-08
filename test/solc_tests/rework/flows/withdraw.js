@@ -2087,10 +2087,10 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("getAvailableProjectETH returns 20% of the stage 0 + stage 2 contribution before first return", async function () {
 
             const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
-            const projectTotalUnlockedETH = new BN( await ReversibleICOInstance.methods.projectTotalUnlockedETH().call() );
+            const _projectTotalUnlockedETH = new BN( await ReversibleICOInstance.methods._projectTotalUnlockedETH().call() );
 
             // console.log("ProjectAvailableEth:         ", ProjectAvailableEth.toString());
-            // console.log("projectTotalUnlockedETH:         ", projectTotalUnlockedETH.toString());
+            // console.log("_projectTotalUnlockedETH:         ", _projectTotalUnlockedETH.toString());
 
 
             const ContributionAmountInStage0 = priceInStage(0).mul(new BN(1500));

@@ -527,9 +527,9 @@ class Participant extends Actor {
         console.log("      committedEth:          ", this.toEth(record.committedEth) + " eth");
         console.log("      pendingEth:            ", this.toEth(record.pendingEth) + " eth");
         console.log("      totalReservedTokens:   ", this.toEth(record.totalReservedTokens) + " tokens");
-        console.log("      totalUnlockedTokens:   ", this.toEth(record.totalUnlockedTokens) + " tokens");
-        console.log("      currentReservedTokens: ", this.toEth(record.currentReservedTokens) + " tokens");
-        console.log("      lastBlock:             ", record.lastBlock.toString());
+        console.log("      _totalUnlockedTokens:   ", this.toEth(record._totalUnlockedTokens) + " tokens");
+        console.log("      _currentReservedTokens: ", this.toEth(record._currentReservedTokens) + " tokens");
+        console.log("      lastBlock:             ", record._lastBlock.toString());
 
     }
 
@@ -726,9 +726,9 @@ class Participant extends Actor {
         retVal.committedEth            = new BN(rec.committedEth);
         retVal.pendingEth              = new BN(rec.pendingEth);
         retVal.totalReservedTokens     = new BN(rec.totalReservedTokens);
-        retVal.totalUnlockedTokens     = new BN(rec.totalUnlockedTokens);
-        retVal.currentReservedTokens   = new BN(rec.currentReservedTokens);
-        retVal.lastBlock               = new BN(rec.lastBlock);
+        retVal._totalUnlockedTokens     = new BN(rec._totalUnlockedTokens);
+        retVal._currentReservedTokens   = new BN(rec._currentReservedTokens);
+        retVal._lastBlock               = new BN(rec._lastBlock);
         return retVal;
     }
 
@@ -756,7 +756,7 @@ class Participant extends Actor {
         // Calculate WITHIN the buy phase
         if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
 
-            const lastBlock = participantRecord.lastBlock;
+            const lastBlock = participantRecord._lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
                 lastBlock = buyPhaseStartBlock - 1;
             }
@@ -798,7 +798,7 @@ class Participant extends Actor {
         
         const ratio = await this.rICO.methods.calcUnlockAmount(
             participantStats.committedEth.toString(),
-            participantStats.lastBlock.toString()
+            participantStats._lastBlock.toString()
         ).call();
 
         const participantCommittedEth = participantStats.committedEth; //.sub(

@@ -68,16 +68,9 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectWithdrawCount;
     /// @dev Total amount of ETH withdrawn by the project
     uint256 public projectWithdrawnETH;
-    /// @dev Total amount of the current reserved ETH for the project by the participants contributions.
-    uint256 public projectCurrentlyReservedETH;
-    /// @dev Accumulated amount allocated to the project by participants.
-    uint256 public projectTotalUnlockedETH;
-    /// @dev Last block since the project has calculated the projectTotalUnlockedETH.
-    uint256 public _projectLastBlock;
 
     /// @dev Minimum amount of ETH accepted for a contribution. Everything lower than that will trigger a canceling of pending ETH.
     uint256 public minContribution = 0.001 ether;
-
 
     /*
      *   Commit phase (Stage 0)
@@ -103,6 +96,37 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public buyPhaseBlockCount;
 
 
+    mapping(uint8 => Stage) public stages;
+    uint8 public stageCount;
+    uint256 public stageBlockCount;
+
+    /// @dev Maps participants stats by their address.
+    mapping(address => Participant) public participants;
+    /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
+    mapping(uint256 => address) public participantsById; // TODO remove?
+    /// @dev Total number of rICO participants.
+    uint256 public participantCount;
+
+    //    uint256 public DEBUG1 = 9999;
+    //    uint256 public DEBUG2 = 9999;
+    //    uint256 public DEBUG3 = 9999;
+    //    uint256 public DEBUG4 = 9999;
+
+    /*
+    *   Internal Variables
+    */
+    /// @dev Total amount of the current reserved ETH for the project by the participants contributions.
+    uint256 internal _projectCurrentlyReservedETH;
+    /// @dev Accumulated amount allocated to the project by participants.
+    uint256 internal _projectTotalUnlockedETH;
+    /// @dev Last block since the project has calculated the _projectTotalUnlockedETH.
+    uint256 internal _projectLastBlock;
+
+
+    /*
+    *   Structs
+    */
+
     /*
      *   Stages
      *   Stage 0 = commit phase
@@ -114,15 +138,6 @@ contract ReversibleICO is IERC777Recipient {
         uint256 tokenPrice;
     }
 
-    mapping(uint8 => Stage) public stages;
-    uint8 public stageCount;
-    uint256 public stageBlockCount;
-
-    uint256 public DEBUG1 = 9999;
-    uint256 public DEBUG2 = 9999;
-    uint256 public DEBUG3 = 9999;
-    uint256 public DEBUG4 = 9999;
-
     /*
      * Participants
      */
@@ -130,13 +145,13 @@ contract ReversibleICO is IERC777Recipient {
         bool whitelisted;
         uint32 contributions;
         uint32 withdraws;
-
         uint256 totalReservedTokens;
-        uint256 totalUnlockedTokens;
-        uint256 currentReservedTokens;
         uint256 committedEth;
         uint256 pendingEth;
-        uint256 lastBlock;
+
+        uint256 _totalUnlockedTokens;
+        uint256 _currentReservedTokens;
+        uint256 _lastBlock;
 
         mapping(uint8 => ParticipantStageDetails) stages;
     }
@@ -144,14 +159,6 @@ contract ReversibleICO is IERC777Recipient {
     struct ParticipantStageDetails {
         uint256 pendingEth;
     }
-
-    /// @dev Maps participants stats by their address.
-    mapping(address => Participant) public participants;
-    /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
-    mapping(uint256 => address) public participantsById;
-    /// @dev Total number of rICO participants.
-    uint256 public participantCount;
-
 
     /*
      * Events
@@ -462,7 +469,7 @@ contract ReversibleICO is IERC777Recipient {
         calcProjectAllocation();
 
         // Get current allocated ETH to the project
-        uint256 availableForWithdraw = projectTotalUnlockedETH.sub(projectWithdrawnETH);
+        uint256 availableForWithdraw = _projectTotalUnlockedETH.sub(projectWithdrawnETH);
 
         require(_ethAmount <= availableForWithdraw, "Requested amount too big, not enough ETH available.");
 
@@ -509,9 +516,9 @@ contract ReversibleICO is IERC777Recipient {
     function getAvailableProjectETH() public view returns (uint256) {
 
         // calc from the last known point on
-        uint256 newlyUnlockedEth = calcUnlockAmount(projectCurrentlyReservedETH, _projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockAmount(_projectCurrentlyReservedETH, _projectLastBlock);
 
-        return projectTotalUnlockedETH
+        return _projectTotalUnlockedETH
             .add(newlyUnlockedEth)
             .sub(projectWithdrawnETH);
     }
@@ -755,12 +762,12 @@ contract ReversibleICO is IERC777Recipient {
     function currentReservedTokenAmount(address _participantAddress) public view returns (uint256) {
         Participant storage participantStats = participants[_participantAddress];
 
-        if(participantStats.currentReservedTokens == 0) {
+        if(participantStats._currentReservedTokens == 0) {
             return 0;
         }
 
-        return participantStats.currentReservedTokens.sub(
-            calcUnlockAmount(participantStats.currentReservedTokens, participantStats.lastBlock)
+        return participantStats._currentReservedTokens.sub(
+            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
         );
     }
 
@@ -771,8 +778,8 @@ contract ReversibleICO is IERC777Recipient {
     function currentUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
         Participant storage participantStats = participants[_participantAddress];
 
-        return participantStats.totalUnlockedTokens.add(
-            calcUnlockAmount(participantStats.currentReservedTokens, participantStats.lastBlock)
+        return participantStats._totalUnlockedTokens.add(
+            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
         );
     }
 
@@ -790,13 +797,13 @@ contract ReversibleICO is IERC777Recipient {
     function sanityCheckProject() internal view {
         // PROJECT: The sum of reserved + unlocked has to be equal the committedETH.
         require(
-            committedETH == projectCurrentlyReservedETH.add(projectTotalUnlockedETH),
+            committedETH == _projectCurrentlyReservedETH.add(_projectTotalUnlockedETH),
             'Project Sanity check failed! Reserved + Unlock must equal committedETH'
         );
 
         // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
         require(
-            address(this).balance == projectTotalUnlockedETH.add(projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
+            address(this).balance == _projectTotalUnlockedETH.add(_projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
             'Project sanity check failed! balance = Unlock + Reserved - Withdrawn'
         );
     }
@@ -808,11 +815,11 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         //        DEBUG1 = participantStats.totalReservedTokens;
-        //        DEBUG2 = participantStats.currentReservedTokens.add(participantStats.totalUnlockedTokens);
+        //        DEBUG2 = participantStats._currentReservedTokens.add(participantStats._totalUnlockedTokens);
 
         // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
         require(
-            participantStats.totalReservedTokens == participantStats.currentReservedTokens.add(participantStats.totalUnlockedTokens),
+            participantStats.totalReservedTokens == participantStats._currentReservedTokens.add(participantStats._totalUnlockedTokens),
             'Participant Sanity check failed! Reser. + Unlock must equal totalReser'
         );
     }
@@ -822,11 +829,11 @@ contract ReversibleICO is IERC777Recipient {
      */
     function calcProjectAllocation() internal {
 
-        uint256 newlyUnlockedEth = calcUnlockAmount(projectCurrentlyReservedETH, _projectLastBlock);
+        uint256 newlyUnlockedEth = calcUnlockAmount(_projectCurrentlyReservedETH, _projectLastBlock);
 
         // UPDATE GLOBAL STATS
-        projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(newlyUnlockedEth);
-        projectTotalUnlockedETH = projectTotalUnlockedETH.add(newlyUnlockedEth);
+        _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.sub(newlyUnlockedEth);
+        _projectTotalUnlockedETH = _projectTotalUnlockedETH.add(newlyUnlockedEth);
         _projectLastBlock = getCurrentBlockNumber();
 
         sanityCheckProject();
@@ -839,14 +846,14 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         // UPDATE the locked/unlocked ratio for this participant
-        participantStats.totalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
-        participantStats.currentReservedTokens = currentReservedTokenAmount(_participantAddress);
+        participantStats._totalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
+        participantStats._currentReservedTokens = currentReservedTokenAmount(_participantAddress);
 //        participantStats.committedEth = participantStats.committedEth.sub(
-//            calcUnlockAmount(participantStats.committedEth, participantStats.lastBlock)
+//            calcUnlockAmount(participantStats.committedEth, participantStats._lastBlock)
 //        );
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
-        participantStats.lastBlock = getCurrentBlockNumber();
+        participantStats._lastBlock = getCurrentBlockNumber();
 
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
@@ -894,18 +901,18 @@ contract ReversibleICO is IERC777Recipient {
         // Revert if there is no pending ETH contribution
         require(allPendingEth > 0, "Participant has no contributions to cancel.");
 
+        // UPDATE PARTICIPANT STAGES
+        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
+            ParticipantStageDetails storage stages = participantStats.stages[stageId];
+            stages.pendingEth = 0;
+        }
+
         // UPDATE PARTICIPANT STATS
         participantStats.pendingEth = 0;
 
         // UPDATE GLOBAL STATS
         canceledETH = canceledETH.add(allPendingEth);
         pendingETH = pendingETH.sub(allPendingEth);
-
-        // Update stages
-        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
-            ParticipantStageDetails storage stages = participantStats.stages[stageId];
-            stages.pendingEth = 0;
-        }
 
         // transfer ETH back to participant including received value
         address(uint160(_participantAddress)).transfer(allPendingEth.add(_value));
@@ -969,7 +976,7 @@ contract ReversibleICO is IERC777Recipient {
             totalNewTokens = totalNewTokens.add(newTokenAmount);
 
             // UPDATE PARTICIPANT STATS
-            participantStats.currentReservedTokens = participantStats.currentReservedTokens.add(newTokenAmount);
+            participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
             participantStats.totalReservedTokens = participantStats.totalReservedTokens.add(newTokenAmount);
             participantStats.committedEth = participantStats.committedEth.add(newlyCommittedEth);
             participantStats.pendingEth = participantStats.pendingEth.sub(stages.pendingEth);
@@ -980,7 +987,7 @@ contract ReversibleICO is IERC777Recipient {
             tokenSupply = tokenSupply.sub(newTokenAmount);
             pendingETH = pendingETH.sub(newlyCommittedEth);
             committedETH = committedETH.add(newlyCommittedEth);
-            projectCurrentlyReservedETH = projectCurrentlyReservedETH.add(newlyCommittedEth);
+            _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
 
             // Emit event
             emit ApplicationEvent(_eventType, uint32(stageId), _participantAddress, newlyCommittedEth);
@@ -1023,9 +1030,9 @@ contract ReversibleICO is IERC777Recipient {
         calcParticipantAllocation(_participantAddress);
 
         // Only allow reserved tokens be returned, return the overflow.
-        if (returnedTokenAmount > participantStats.currentReservedTokens) {
-            overflowingTokenAmount = returnedTokenAmount.sub(participantStats.currentReservedTokens);
-            returnedTokenAmount = participantStats.currentReservedTokens;
+        if (returnedTokenAmount > participantStats._currentReservedTokens) {
+            overflowingTokenAmount = returnedTokenAmount.sub(participantStats._currentReservedTokens);
+            returnedTokenAmount = participantStats._currentReservedTokens;
         }
 
 
@@ -1045,7 +1052,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE PARTICIPANT STATS
         participantStats.withdraws++;
-        participantStats.currentReservedTokens = participantStats.currentReservedTokens.sub(returnedTokenAmount);
+        participantStats._currentReservedTokens = participantStats._currentReservedTokens.sub(returnedTokenAmount);
         participantStats.totalReservedTokens = participantStats.totalReservedTokens.sub(returnedTokenAmount);
         participantStats.committedEth = participantStats.committedEth.sub(returnEthAmount);
 
@@ -1054,7 +1061,7 @@ contract ReversibleICO is IERC777Recipient {
         withdrawnETH = withdrawnETH.add(returnEthAmount);
         committedETH = committedETH.sub(returnEthAmount);
 
-        projectCurrentlyReservedETH = projectCurrentlyReservedETH.sub(returnEthAmount);
+        _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.sub(returnEthAmount);
 
 
         // SANITY CHECK
