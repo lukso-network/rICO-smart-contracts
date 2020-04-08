@@ -300,8 +300,8 @@ class Participant extends Actor {
         // console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
-        // const currentReservedTokenAmount = await this.rICO.methods.currentReservedTokenAmount(this.address).call();
-        // console.log("currentReservedTokenAmount               ", this.toEth(currentReservedTokenAmount), "tokens");
+        // const getParticipantReservedTokenAmount = await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call();
+        // console.log("getParticipantReservedTokenAmount               ", this.toEth(getParticipantReservedTokenAmount), "tokens");
         
 
         // const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
@@ -324,8 +324,8 @@ class Participant extends Actor {
 
         // const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
 
-        // const currentReservedTokenAmount = await this.rICO.methods.currentReservedTokenAmount(this.address).call();
-        // console.log("currentReservedTokenAmount        ", this.toEth(currentReservedTokenAmount), "tokens");
+        // const getParticipantReservedTokenAmount = await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call();
+        // console.log("getParticipantReservedTokenAmount        ", this.toEth(getParticipantReservedTokenAmount), "tokens");
 
         
 
@@ -794,7 +794,7 @@ class Participant extends Actor {
         };
 
         // UPDATE the locked/unlocked ratio for this participant
-        const participantReservedTokens = new BN( await this.rICO.methods.currentReservedTokenAmount(this.address).call() );
+        const participantReservedTokens = new BN( await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call() );
         
         const ratio = await this.rICO.methods.calcUnlockAmount(
             participantStats.committedEth.toString(),

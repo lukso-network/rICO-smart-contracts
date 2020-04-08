@@ -530,8 +530,8 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the token price at the specified stage id.
-     * @param _stageId the stageid number at which we want to retrieve the token price.
+     * @notice Returns the token price at the specified stage ID.
+     * @param _stageId the stage ID at which we want to retrieve the token price.
      */
     function getPriceAtStage(uint8 _stageId) public view returns (uint256) {
         if (_stageId <= stageCount) {
@@ -541,10 +541,10 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the amount of tokens that ETH would buy at a specific stage.
+     * @notice Returns the amount of tokens that given ETH would buy at a given stage.
      * @param _ethAmount The ETH amount in wei.
-     * @param _stageId The stage we are interested in.
-     * @return The token amount in its smallest unit
+     * @param _stageId the stage ID.
+     * @return The token amount in its smallest unit (token "wei")
      */
     function getTokenAmountForEthAtStage(uint256 _ethAmount, uint8 _stageId) public view returns (uint256) {
         return _ethAmount
@@ -553,9 +553,9 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the amount of ETH (in wei) that tokens are worth at a specified stage.
+     * @notice Returns the amount of ETH (in wei) for a given token amount at a given stage.
      * @param _tokenAmount The amount of token.
-     * @param _stageId The stage we are interested in.
+     * @param _stageId the stage ID.
      * @return The ETH amount in wei
      */
     function getEthAmountForTokensAtStage(uint256 _tokenAmount, uint8 _stageId) public view returns (uint256) {
@@ -564,56 +564,47 @@ contract ReversibleICO is IERC777Recipient {
             .div(10 ** 18);
     }
 
-    /*
-     * Participant view functions
-     */
-
     /**
-    * @notice Returns the participants current pending total ETH amount
+    * @notice Returns the participants current pending ETH in WEI.
     * @param _participantAddress The participant's address.
     */
     function getParticipantPendingETH(address _participantAddress) public view returns (uint256) {
-        //        Participant storage participantStats = participants[_participantAddress];
         return participants[_participantAddress].pendingEth;
     }
 
+
     /**
-     * @notice Returns TRUE if the participant has reserved tokens in the current stage.
+     * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function canWithdraw(address _participantAddress) public view returns (bool) {
-        if (currentReservedTokenAmount(_participantAddress) > 0) {
-            return true;
+    function getParticipantReservedTokenAmount(address _participantAddress) public view returns (uint256) {
+        Participant storage participantStats = participants[_participantAddress];
+
+        if(participantStats._currentReservedTokens == 0) {
+            return 0;
         }
-        return false;
+
+        return participantStats._currentReservedTokens.sub(
+            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
+        );
     }
 
     /**
-     * @notice Returns TRUE if participant has pending ETH.
+     * @notice Returns the participant's amount of locked tokens at the current block.
      * @param _participantAddress The participant's address.
      */
-    function hasPendingETH(address _participantAddress) public view returns (bool) {
-        if (getParticipantPendingETH(_participantAddress) > 0) {
-            return true;
-        }
-        return false;
-    }
+    function getParticipantUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
+        Participant storage participantStats = participants[_participantAddress];
 
-    /**
-     * @notice Returns the cancel modes for a participant.
-     * @param _participantAddress The participant's address.
-     * @return byEth Boolean
-     * @return byTokens Boolean
-     */
-    function getCancelModes(address _participantAddress) external view returns (bool byEth, bool byTokens) {
-        byTokens = canWithdraw(_participantAddress);
-        byEth = hasPendingETH(_participantAddress);
+        return participantStats._unlockedTokens.add(
+            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
+        );
     }
 
     // ------------------------------------------------------------------------------------------------
 
     /*
-     * Helper public view functions
+     * Core helper public view functions
      */
 
     /**
@@ -626,21 +617,12 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Returns the stage which a given block belongs to.
      * @param _blockNumber The block number.
+     * TODO check math
      */
     function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
 
-        // *NOTE: if selectedBlock is end block.. the participant will get the correct
-        //        stage now but their new transaction will end up in the
-        //        next block which changes the stage vs what they've seen..
-        //        resulting in a different purchase price.
-        //
-        // @TODO: decide how we want to handle this on the frontend,
-        //        contract should always display proper data.
-        //
-
         require(_blockNumber >= commitPhaseStartBlock && _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
 
-        // Return commit phase (stage 0)
         if (_blockNumber <= commitPhaseEndBlock) {
             return 0;
         }
@@ -654,24 +636,21 @@ contract ReversibleICO is IERC777Recipient {
         return uint8(stageID);
     }
 
-
     /**
-     * @notice Returns the contract's available ETH to commit at a certain stage.
-     * @param _stage the stage id.
+     * @notice Returns the contract's available ETH to reserve tokens at a given stage.
+     * @param _stageId the stage ID.
      * TODO we use such functions in the main commit calculations, are there chances of rounding errors?
      */
-    function availableEthAtStage(uint8 _stage) public view returns (uint256) {
-        // Multiply the number of tokens held by the contract with the token price
-        // at the specified stage and perform precision adjustments(div).
-        return IERC777(tokenAddress).balanceOf(address(this)).mul(
-            stages[_stage].tokenPrice
-        ).div(10 ** 18);
+    function availableEthAtStage(uint8 _stageId) public view returns (uint256) {
+        return getEthAmountForTokensAtStage(
+            IERC777(tokenAddress).balanceOf(address(this))
+            , _stageId);
     }
 
     /**
-     * @notice Calculates the unlocked amount of bought tokens (or ETH allocated to the project) beginning from the buy phase start to the current block.
+     * @notice Calculates the unlocked amount of bought tokens (or ETH allocated to the project) beginning from the buy phase start or last block to the current block.
      *
-     * This is the rICOs heart, the CORE of the distribution calculation!
+     * NOTE: This is the rICOs heart, the CORE of the distribution calculation!
      *
      * @return the unlocked amount of tokens or ETH.
      */
@@ -733,35 +712,6 @@ contract ReversibleICO is IERC777Recipient {
         }
         // Return nothing BEFORE the buy phase
         return 0;
-    }
-
-
-    /**
-     * @notice Returns the participant's amount of locked tokens at the current block.
-     * @param _participantAddress The participant's address.
-     */
-    function currentReservedTokenAmount(address _participantAddress) public view returns (uint256) {
-        Participant storage participantStats = participants[_participantAddress];
-
-        if(participantStats._currentReservedTokens == 0) {
-            return 0;
-        }
-
-        return participantStats._currentReservedTokens.sub(
-            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
-        );
-    }
-
-    /**
-     * @notice Returns the participant's amount of locked tokens at the current block.
-     * @param _participantAddress The participant's address.
-     */
-    function currentUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
-        Participant storage participantStats = participants[_participantAddress];
-
-        return participantStats._unlockedTokens.add(
-            calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
-        );
     }
 
 
@@ -827,8 +777,8 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         // UPDATE the locked/unlocked ratio for this participant
-        participantStats._unlockedTokens = currentUnlockedTokenAmount(_participantAddress);
-        participantStats._currentReservedTokens = currentReservedTokenAmount(_participantAddress);
+        participantStats._unlockedTokens = getParticipantUnlockedTokenAmount(_participantAddress);
+        participantStats._currentReservedTokens = getParticipantReservedTokenAmount(_participantAddress);
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats._lastBlock = getCurrentBlockNumber();

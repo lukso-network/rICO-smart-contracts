@@ -925,8 +925,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployingAddress });
-    let amount1 = await contract.methods.currentReservedTokenAmount(participant).call();
+    let tx1 = await contract.methods.getParticipantReservedTokenAmount(participant).send({from: deployingAddress });
+    let amount1 = await contract.methods.getParticipantReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
 

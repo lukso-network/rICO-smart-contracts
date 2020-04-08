@@ -204,7 +204,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
 
                         ( async function(){
-                            const maxTokens = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
+                            const maxTokens = await ReversibleICO.methods.getParticipantReservedTokenAmount(participant.address).call();
                             // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
@@ -341,12 +341,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
             });
             it(participant.address + ": reserved token balance should be 0", async function () {
-                const currentReservedTokenAmount = await ReversibleICO.methods.currentReservedTokenAmount(participant.address).call();
-                expect(currentReservedTokenAmount).to.be.equal("0");
+                const getParticipantReservedTokenAmount = await ReversibleICO.methods.getParticipantReservedTokenAmount(participant.address).call();
+                expect(getParticipantReservedTokenAmount).to.be.equal("0");
             });
             it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
-                const currentUnlockedTokenAmount = await ReversibleICO.methods.currentUnlockedTokenAmount(participant.address).call();
-                expect(currentUnlockedTokenAmount).to.be.equal(participant.tokenBalance.toString());
+                const getParticipantUnlockedTokenAmount = await ReversibleICO.methods.getParticipantUnlockedTokenAmount(participant.address).call();
+                expect(getParticipantUnlockedTokenAmount).to.be.equal(participant.tokenBalance.toString());
             });
 
             it(participant.address + ": compare price average, should be 0", async function () {

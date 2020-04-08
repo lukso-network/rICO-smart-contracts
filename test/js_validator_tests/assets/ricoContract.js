@@ -294,12 +294,12 @@ class Contract extends Validator {
         }
     }
 
-    currentReservedTokenAmount(_address) {
+    getParticipantReservedTokenAmount(_address) {
         const participantRecord = this.getParticipantRecordByAddress(_address);
 
         // Since we want to display token amounts even when they are not already
         // transferred to their accounts, we use reserved + bought
-        return this.currentReservedTokenAmountAtBlock(
+        return this.getParticipantReservedTokenAmountAtBlock(
             participantRecord.pendingTokens.add(participantRecord.boughtTokens),
             this.getCurrentBlockNumber()
         ).sub(participantRecord.returnedTokens);
@@ -323,7 +323,7 @@ class Contract extends Validator {
     }
 
     canWithdraw(_address) {
-        if (this.currentReservedTokenAmount(_address).gt(new BN("0"))) {
+        if (this.getParticipantReservedTokenAmount(_address).gt(new BN("0"))) {
             return true;
         }
         return false;
@@ -405,7 +405,7 @@ class Contract extends Validator {
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
             let remainingTokenAmount = _returnedTokenAmount;
-            const maxLocked = this.currentReservedTokenAmount(_from);
+            const maxLocked = this.getParticipantReservedTokenAmount(_from);
             let returnTokenAmount;
             let allocatedEthAmount;
 
@@ -443,7 +443,7 @@ class Contract extends Validator {
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
-                    let tokensInStage = currentReservedTokenAmountAtBlock(
+                    let tokensInStage = getParticipantReservedTokenAmountAtBlock(
                         participantRecord.stages[stageId].pendingTokens.add(participantRecord.stages[stageId].boughtTokens),
                         currentBlockNumber
                     ).sub(participantRecord.stages[stageId].returnedTokens);

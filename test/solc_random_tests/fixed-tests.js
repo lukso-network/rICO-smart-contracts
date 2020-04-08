@@ -116,11 +116,11 @@ module.exports = {
                 console.log("reservedTokens:          ", participants[0].toEth(reservedToken));
                 console.log("balanceOf:             ", participants[0].toEth(balanceOf));
 
-                const currentReservedTokenAmount = new helpers.BN( await rICO.methods.currentReservedTokenAmount(participants[0].address).call() );
-                console.log("currentReservedTokenAmount:  ", participants[0].toEth(currentReservedTokenAmount));
+                const getParticipantReservedTokenAmount = new helpers.BN( await rICO.methods.getParticipantReservedTokenAmount(participants[0].address).call() );
+                console.log("getParticipantReservedTokenAmount:  ", participants[0].toEth(getParticipantReservedTokenAmount));
 
-                const currentReservedTokenAmount2 = new helpers.BN( await rICO.methods.currentReservedTokenAmount(participants[0].address).call() );
-                console.log("currentReservedTokenAmount2: ", participants[0].toEth(currentReservedTokenAmount2));
+                const getParticipantReservedTokenAmount2 = new helpers.BN( await rICO.methods.getParticipantReservedTokenAmount(participants[0].address).call() );
+                console.log("getParticipantReservedTokenAmount2: ", participants[0].toEth(getParticipantReservedTokenAmount2));
 
                 const getCurrentGlobalUnlockRatio = new helpers.BN( await rICO.methods.getCurrentGlobalUnlockRatio().call() );
                 console.log("getCurrentUnlockPerc:  ", participants[0].toEth(getCurrentGlobalUnlockRatio));
