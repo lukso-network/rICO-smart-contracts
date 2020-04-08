@@ -138,7 +138,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1600000000000000000");
         });
 
@@ -186,7 +186,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("0");
         });
 
@@ -225,7 +225,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.8 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("800000000000000000");
         });
 
@@ -245,7 +245,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("600000000000000000");
         });
 
@@ -274,7 +274,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -294,7 +294,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.8 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("800000000000000000");
         });
 
@@ -323,7 +323,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -343,7 +343,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("600000000000000000");
         });
 
@@ -390,7 +390,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -414,7 +414,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.9 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("900000000000000000");
         });
 
@@ -433,7 +433,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.7 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("700000000000000000");
         });
 
@@ -452,7 +452,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("200000000000000000");
         });
 
@@ -491,7 +491,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("2000000000000000000");
         });
 
@@ -516,7 +516,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -535,7 +535,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.9 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("900000000000000000");
         });
 
@@ -554,7 +554,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.7 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("700000000000000000");
         });
 
@@ -573,7 +573,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("200000000000000000");
         });
 
@@ -618,7 +618,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 5 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("5000000000000000000");
         });
 
@@ -637,7 +637,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 4.5 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("4500000000000000000");
         });
 
@@ -657,7 +657,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 3.75 tokens (90%)", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("3750000000000000000");
         });
 
@@ -677,7 +677,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 2.5 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("2500000000000000000");
         });
 
@@ -696,7 +696,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.833333333333333333 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("833333333333333333");
         });
 
@@ -737,7 +737,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
         
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -763,7 +763,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("0");
         });
 
@@ -810,7 +810,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
         
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -831,7 +831,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.5 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("500000000000000000");
         });
 
@@ -882,7 +882,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
         
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -903,7 +903,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.000000000000000001 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1");
         });
 
@@ -940,7 +940,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
     });
 
 
-    describe("Check getParticipantPendingETH before and after whitelisting", async function () {
+    describe("Check getParticipantPendingEth before and after whitelisting", async function () {
 
         before(async () => {
             await revertToFreshDeployment();
@@ -962,7 +962,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Check participant available ETH", async function () {
-            const result = await this.ReversibleICO.methods.getParticipantPendingETH(TestParticipant).call();
+            const result = await this.ReversibleICO.methods.getParticipantPendingEth(TestParticipant).call();
             expect(new BN(result)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
         });
 
@@ -979,7 +979,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Check participant available ETH", async function () {
-            const result = await this.ReversibleICO.methods.getParticipantPendingETH(TestParticipant).call();
+            const result = await this.ReversibleICO.methods.getParticipantPendingEth(TestParticipant).call();
             expect(new BN(result)).to.be.bignumber.equal(new BN(0));
         });
     });
@@ -1055,7 +1055,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1600000000000000000");
         });
 
@@ -1103,7 +1103,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("0");
         });
 
@@ -1142,7 +1142,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.8 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("800000000000000000");
         });
 
@@ -1162,7 +1162,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("600000000000000000");
         });
 
@@ -1191,7 +1191,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1211,7 +1211,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.8 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("800000000000000000");
         });
 
@@ -1240,7 +1240,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1260,7 +1260,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.6 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("600000000000000000");
         });
 
@@ -1346,7 +1346,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("0");
         });
 
@@ -1407,7 +1407,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("200000000000000000");
         });
 
@@ -1463,7 +1463,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1501,7 +1501,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 0.8 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("800000000000000000");
         });
 
@@ -1572,7 +1572,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1610,7 +1610,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1100000000000000000");
         });
 
@@ -1680,7 +1680,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1717,7 +1717,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -1789,7 +1789,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.2 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1200000000000000000");
         });
 
@@ -1827,7 +1827,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1.1 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("900000000000000000");
         });
 
@@ -1956,7 +1956,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 2000 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("2000000000000000000000");
         });
 
@@ -1997,7 +1997,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 1500 tokens", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1500000000000000000000");
         });
 
@@ -2043,7 +2043,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to be 3500 tokens - 20% => 2800", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("2800000000000000000000");
         });
 
@@ -2111,7 +2111,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens to reduce by 500 ( 2800 - 500 => 2300 )", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("2300000000000000000000");
         });
 
@@ -2132,7 +2132,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens be 1150", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1150000000000000000000");
         });
 
@@ -2162,7 +2162,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens be 1950", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1950000000000000000000");
         });
 
@@ -2216,7 +2216,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens be 1450", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("1450000000000000000000");
         });
 
@@ -2246,7 +2246,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("Expect locked tokens be 0", async function () {
-            const locked = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(TestParticipant).call();
+            const locked = await this.ReversibleICO.methods.getParticipantReservedTokens(TestParticipant).call();
             expect(locked).to.be.equal("0");
         });
 

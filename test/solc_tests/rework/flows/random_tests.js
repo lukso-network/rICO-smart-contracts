@@ -151,9 +151,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                         ( async function(){
                             // WHITELIST
-                            let isWhitelisted = await ReversibleICO.methods.isWhitelisted(participant.address).call();
+                            let isParticipantWhitelisted = await ReversibleICO.methods.isParticipantWhitelisted(participant.address).call();
 
-                            if (!isWhitelisted) {
+                            if (!isParticipantWhitelisted) {
                                 await ReversibleICO.methods.whitelist(
                                     [participant.address],
                                     true
@@ -204,7 +204,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
 
                         ( async function(){
-                            const maxTokens = await ReversibleICO.methods.getParticipantReservedTokenAmount(participant.address).call();
+                            const maxTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
                             // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                             // calc random token amount
@@ -341,12 +341,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
             });
             it(participant.address + ": reserved token balance should be 0", async function () {
-                const getParticipantReservedTokenAmount = await ReversibleICO.methods.getParticipantReservedTokenAmount(participant.address).call();
-                expect(getParticipantReservedTokenAmount).to.be.equal("0");
+                const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
+                expect(getParticipantReservedTokens).to.be.equal("0");
             });
             it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
-                const getParticipantUnlockedTokenAmount = await ReversibleICO.methods.getParticipantUnlockedTokenAmount(participant.address).call();
-                expect(getParticipantUnlockedTokenAmount).to.be.equal(participant.tokenBalance.toString());
+                const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
+                expect(getParticipantUnlockedTokens).to.be.equal(participant.tokenBalance.toString());
             });
 
             it(participant.address + ": compare price average, should be 0", async function () {

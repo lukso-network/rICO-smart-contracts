@@ -18,7 +18,7 @@ contract ReversibleICOMock777 is ReversibleICOMock {
         balances[wallet] = _balance;
     }
 
-    function getParticipantReservedTokenAmount(address wallet) public view returns (uint256) {
+    function getParticipantReservedTokens(address wallet) public view returns (uint256) {
         return balances[wallet];
     }
 

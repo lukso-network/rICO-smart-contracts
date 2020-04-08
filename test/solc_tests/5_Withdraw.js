@@ -235,7 +235,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 1 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokens(participant_1).call();
             expect(locked).to.be.equal("1000000000000000000");
         });
 
@@ -269,7 +269,7 @@ describe("Withdrawal Testing", function () {
         });
     });
 
-    describe("Check getParticipantPendingETH before and after whitelisting", async function () {
+    describe("Check getParticipantPendingEth before and after whitelisting", async function () {
 
         before(async () => {
             await revertToFreshDeployment();
@@ -297,7 +297,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Check participant available ETH", async function () {
-            let result = await ReversibleICOInstance.methods.getParticipantPendingETH(participant_1).call();
+            let result = await ReversibleICOInstance.methods.getParticipantPendingEth(participant_1).call();
             expect(new BN(result)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
         });
 
@@ -314,7 +314,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Check participant available ETH", async function () {
-            let result = await ReversibleICOInstance.methods.getParticipantPendingETH(participant_1).call();
+            let result = await ReversibleICOInstance.methods.getParticipantPendingEth(participant_1).call();
             expect(new BN(result)).to.be.bignumber.equal(new BN(0));
         });
     });
@@ -395,7 +395,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 1.8 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokens(participant_1).call();
             expect(locked).to.be.equal("1800000000000000000");
         });
 
@@ -410,7 +410,7 @@ describe("Withdrawal Testing", function () {
         });
 
         it("Expect locked tokens to be 0 tokens", async function () {
-            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokenAmount(participant_1).call();
+            let locked = await ReversibleICOInstance.methods.getParticipantReservedTokens(participant_1).call();
             expect(locked).to.be.equal("0");
         });
 

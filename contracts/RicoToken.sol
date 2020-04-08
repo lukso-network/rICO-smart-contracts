@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./zeppelin/token/ERC777/ERC777.sol";
 
 interface ReversibleICO {
-    function getParticipantReservedTokenAmount(address) external view returns (uint256);
+    function getParticipantReservedTokens(address) external view returns (uint256);
 }
 
 contract RicoToken is ERC777 {
@@ -49,12 +49,12 @@ contract RicoToken is ERC777 {
     }
 
     function getLockedBalance(address _owner) public view returns(uint) {
-        return rICO.getParticipantReservedTokenAmount(_owner);
+        return rICO.getParticipantReservedTokens(_owner);
     }
 
     function getUnlockedBalance(address _owner) public view returns(uint) {
         uint256 balance = balanceOf(_owner);
-        uint256 locked = rICO.getParticipantReservedTokenAmount(_owner);
+        uint256 locked = rICO.getParticipantReservedTokens(_owner);
         if(balance > 0 && locked > 0 && balance >= locked) {
             return balance.sub(locked);
         }

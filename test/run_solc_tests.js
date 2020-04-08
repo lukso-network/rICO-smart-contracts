@@ -18,7 +18,7 @@ async function runTests(init) {
     // "3_ERC20Token",
     // "rework/phases",
     // "rework/methods/stages",
-    // "rework/methods/tokens/getParticipantReservedTokenAmount",
+    // "rework/methods/tokens/getParticipantReservedTokens",
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",

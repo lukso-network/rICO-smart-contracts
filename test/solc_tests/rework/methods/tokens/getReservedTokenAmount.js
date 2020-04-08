@@ -35,7 +35,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
     describe("Contract Methods", async function () {
 
-        describe("view getParticipantReservedTokenAmount(address)", async function () {
+        describe("view getParticipantReservedTokens(address)", async function () {
 
             const ContributionAmount = new helpers.BN("1").mul( helpers.solidity.etherBN );
             let BuyPhaseStartBlock, BuyPhaseBlockCount, BuyPhaseEndBlock;
@@ -89,39 +89,39 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
 
                     this.jsValidator.setBlockNumber(currentBlock);
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
 
-                    let getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    expect(getParticipantReservedTokenAmount).to.be.equal(ContractContributionTokens);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    let getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    expect(getParticipantReservedTokens).to.be.equal(ContractContributionTokens);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
 
                     // jump to stage 12 end block - 1
                     currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, 1);
                     this.jsValidator.setBlockNumber(currentBlock);
 
-                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
 
                     // jump to stage 12 start block
                     currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, 12);
                     this.jsValidator.setBlockNumber(currentBlock);
 
-                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
 
                     // jump to stage 12 end block + 1
                     currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, 12, false, 1);
                     this.jsValidator.setBlockNumber(currentBlock);
 
-                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
                 });
 
             });
@@ -140,12 +140,12 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ParticipantTotalStats = await this.ReversibleICO.methods.participantAggregatedStats(participantAddress).call();
                     const ContractContributionTokens = ParticipantTotalStats.reservedTokens;
 
-                    const getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
+                    const getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
-                    expect(getParticipantReservedTokenAmount).to.be.equal(ContractContributionTokens);
+                    expect(getParticipantReservedTokens).to.be.equal(ContractContributionTokens);
 
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
                 });
 
 
@@ -161,10 +161,10 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    const validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
+                    const getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    const validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
 
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
                 });
 
                 it("Returns proper amount at stage 1 start_block + 1", async function () {
@@ -179,9 +179,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    const validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    const getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    const validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
                 });
 
                 it("Returns proper amount at stage 6 end_block - 1", async function () {
@@ -195,9 +195,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    const getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
 
                 });
 
@@ -212,9 +212,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    const getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
+                    const getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
 
                 });
 
@@ -229,10 +229,10 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    let getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    let getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
                 });
 
                 it("Returns 0 locked tokens after BuyPhaseEndBlock", async function () {
@@ -246,10 +246,10 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     let ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    let getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    let getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    let validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
 
                     currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, stageId, true, 1000);
                     this.jsValidator.setBlockNumber(currentBlock);
@@ -258,10 +258,10 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     ContractContributionTokens = ParticipantsTotalStats.reservedTokens;
                     expect(parseInt(ContractContributionTokens)).to.be.above(0);
 
-                    getParticipantReservedTokenAmount = await this.ReversibleICO.methods.getParticipantReservedTokenAmount(participantAddress).call();
-                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokenAmount(participantAddress);
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal(validatorTokenAmount.toString());
-                    expect(getParticipantReservedTokenAmount.toString()).to.be.equal("0");
+                    getParticipantReservedTokens = await this.ReversibleICO.methods.getParticipantReservedTokens(participantAddress).call();
+                    validatorTokenAmount = this.jsValidator.getParticipantReservedTokens(participantAddress);
+                    expect(getParticipantReservedTokens.toString()).to.be.equal(validatorTokenAmount.toString());
+                    expect(getParticipantReservedTokens.toString()).to.be.equal("0");
                 });
                 
             });

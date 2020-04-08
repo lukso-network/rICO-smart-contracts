@@ -171,7 +171,7 @@ class Validator {
         return 0;
     }
 
-    getParticipantReservedTokenAmountAtBlock(_tokenAmount, _blockNumber, _precision = null) {
+    getParticipantReservedTokensAtBlock(_tokenAmount, _blockNumber, _precision = null) {
 
         if(_precision == null) {
             _precision = 20;
@@ -211,7 +211,7 @@ class Validator {
 
     getUnockedTokensForBoughtAmountAtBlock(_tokenAmount, _blockNumber, precision) {
         return new BN(_tokenAmount).sub( 
-            this.getParticipantReservedTokenAmountAtBlock(
+            this.getParticipantReservedTokensAtBlock(
                 _tokenAmount,
                 _blockNumber,
                 precision
@@ -219,7 +219,7 @@ class Validator {
         );
     }
 
-    availableEthAtStageForTokenBalance(_contractTokenBalance, _stage) {
+    committableEthAtStageForTokenBalance(_contractTokenBalance, _stage) {
         // Multiply the number of tokens held by the contract with the token price
         // at the specified stage and perform precision adjustments(div).
         return _contractTokenBalance.mul(

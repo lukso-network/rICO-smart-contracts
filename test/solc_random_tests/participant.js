@@ -232,7 +232,7 @@ class Participant extends Actor {
         );
 
         // contract processes and returns overflow amount
-        const maxAcceptableValue = new BN( await this.rICO.methods.availableEthAtStage(currentStage).call() );
+        const maxAcceptableValue = new BN( await this.rICO.methods.committableEthAtStage(currentStage).call() );
         let acceptedValue ;
 
         if(ETH.gt(maxAcceptableValue)) {
@@ -244,8 +244,8 @@ class Participant extends Actor {
         // const unlockPercentage = this.getCurrentGlobalUnlockRatio();
         const unlockPercentage = new BN(await this.getMyUnlockRatio());
 
-        const isWhitelisted = await this.rICO.methods.isWhitelisted(this.address).call();
-        if(isWhitelisted) {
+        const isParticipantWhitelisted = await this.rICO.methods.isParticipantWhitelisted(this.address).call();
+        if(isParticipantWhitelisted) {
 
             this.expectedBalances.ETH = this.currentBalances.ETH.sub(acceptedValue) ;
 
@@ -300,8 +300,8 @@ class Participant extends Actor {
         // console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
-        // const getParticipantReservedTokenAmount = await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call();
-        // console.log("getParticipantReservedTokenAmount               ", this.toEth(getParticipantReservedTokenAmount), "tokens");
+        // const getParticipantReservedTokens = await this.rICO.methods.getParticipantReservedTokens(this.address).call();
+        // console.log("getParticipantReservedTokens               ", this.toEth(getParticipantReservedTokens), "tokens");
         
 
         // const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
@@ -324,8 +324,8 @@ class Participant extends Actor {
 
         // const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
 
-        // const getParticipantReservedTokenAmount = await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call();
-        // console.log("getParticipantReservedTokenAmount        ", this.toEth(getParticipantReservedTokenAmount), "tokens");
+        // const getParticipantReservedTokens = await this.rICO.methods.getParticipantReservedTokens(this.address).call();
+        // console.log("getParticipantReservedTokens        ", this.toEth(getParticipantReservedTokens), "tokens");
 
         
 
@@ -398,7 +398,7 @@ class Participant extends Actor {
 
 
         const currentStage = await this.rICO.methods.getCurrentStage().call();
-        const maxAcceptableValue = new BN( await this.rICO.methods.availableEthAtStage(currentStage).call() );
+        const maxAcceptableValue = new BN( await this.rICO.methods.committableEthAtStage(currentStage).call() );
 
         let acceptedValue ;
 
@@ -794,9 +794,9 @@ class Participant extends Actor {
         };
 
         // UPDATE the locked/unlocked ratio for this participant
-        const participantReservedTokens = new BN( await this.rICO.methods.getParticipantReservedTokenAmount(this.address).call() );
+        const participantReservedTokens = new BN( await this.rICO.methods.getParticipantReservedTokens(this.address).call() );
         
-        const ratio = await this.rICO.methods.calcUnlockAmount(
+        const ratio = await this.rICO.methods.calcUnlockedAmount(
             participantStats.committedEth.toString(),
             participantStats._lastBlock.toString()
         ).call();

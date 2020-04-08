@@ -1577,8 +1577,8 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.getParticipantReservedTokenAmount(participant).send({from: deployingAddress });
-    let amount1 = await contract.methods.getParticipantReservedTokenAmount(participant).call();
+    let tx1 = await contract.methods.getParticipantReservedTokens(participant).send({from: deployingAddress });
+    let amount1 = await contract.methods.getParticipantReservedTokens(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");
 
@@ -1599,7 +1599,7 @@ async function displayTokensForParticipantAtStage(start, blocks, contract, deplo
 
 async function displayContractStats(contract, TokenContractInstance) {
 
-    let maxEth = await contract.methods.availableEthAtStage().call();
+    let maxEth = await contract.methods.committableEthAtStage().call();
     let totalSentETH = await contract.methods.totalSentETH().call();
     let returnedETH = await contract.methods.returnedETH().call();
     let committedETH = await contract.methods.committedETH().call();

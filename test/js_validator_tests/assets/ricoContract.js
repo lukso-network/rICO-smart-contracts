@@ -195,7 +195,7 @@ class Contract extends Validator {
                 stages.pendingTokens = 0;
 
                 // the maximum amount is equal to the total available ETH at the current stage
-                const maxAcceptableValue = this.availableEthAtStage(currentStage);
+                const maxAcceptableValue = this.committableEthAtStage(currentStage);
 
                 // the per stage accepted amount: totalSentETH - committedETH
                 let newAcceptedValue = stages.totalSentETH.sub(stages.committedETH);
@@ -249,8 +249,8 @@ class Contract extends Validator {
         }
     }
 
-    availableEthAtStage(_stage) {
-        return this.availableEthAtStageForTokenBalance(
+    committableEthAtStage(_stage) {
+        return this.committableEthAtStageForTokenBalance(
             this.IERC777().balanceOf(this.contractAddress),
             _stage
         );
@@ -294,12 +294,12 @@ class Contract extends Validator {
         }
     }
 
-    getParticipantReservedTokenAmount(_address) {
+    getParticipantReservedTokens(_address) {
         const participantRecord = this.getParticipantRecordByAddress(_address);
 
         // Since we want to display token amounts even when they are not already
         // transferred to their accounts, we use reserved + bought
-        return this.getParticipantReservedTokenAmountAtBlock(
+        return this.getParticipantReservedTokensAtBlock(
             participantRecord.pendingTokens.add(participantRecord.boughtTokens),
             this.getCurrentBlockNumber()
         ).sub(participantRecord.returnedTokens);
@@ -323,21 +323,21 @@ class Contract extends Validator {
     }
 
     canWithdraw(_address) {
-        if (this.getParticipantReservedTokenAmount(_address).gt(new BN("0"))) {
+        if (this.getParticipantReservedTokens(_address).gt(new BN("0"))) {
             return true;
         }
         return false;
     }
 
     hasPendingETH(_address) {
-        const participantAvailableETH = this.getParticipantPendingETH(_address);
+        const participantAvailableETH = this.getParticipantPendingEth(_address);
         if(participantAvailableETH > 0) {
             return true;
         }
         return false;
     }
 
-    getParticipantPendingETH(_from) {
+    getParticipantPendingEth(_from) {
         const participantRecord = this.getParticipantRecordByAddress(_from);
         return participantRecord.committedETH.sub(participantRecord.withdrawnETH);
     }
@@ -405,7 +405,7 @@ class Contract extends Validator {
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount
             let remainingTokenAmount = _returnedTokenAmount;
-            const maxLocked = this.getParticipantReservedTokenAmount(_from);
+            const maxLocked = this.getParticipantReservedTokens(_from);
             let returnTokenAmount;
             let allocatedEthAmount;
 
@@ -443,7 +443,7 @@ class Contract extends Validator {
                     // calculate how many tokens are actually locked at this stage...
                     // ...(at the current block number) and use only those for returning.
                     // reserved + bought - returned (at currentStage & currentBlock)
-                    let tokensInStage = getParticipantReservedTokenAmountAtBlock(
+                    let tokensInStage = getParticipantReservedTokensAtBlock(
                         participantRecord.stages[stageId].pendingTokens.add(participantRecord.stages[stageId].boughtTokens),
                         currentBlockNumber
                     ).sub(participantRecord.stages[stageId].returnedTokens);

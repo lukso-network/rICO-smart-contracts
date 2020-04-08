@@ -18,11 +18,11 @@ contract WhitelistedRole is WhitelistAdminRole {
     Roles.Role private _whitelisteds;
 
     modifier onlyWhitelisted() {
-        require(isWhitelisted(msg.sender), "WhitelistedRole: caller does not have the Whitelisted role");
+        require(isParticipantWhitelisted(msg.sender), "WhitelistedRole: caller does not have the Whitelisted role");
         _;
     }
 
-    function isWhitelisted(address account) public view returns (bool) {
+    function isParticipantWhitelisted(address account) public view returns (bool) {
         return _whitelisteds.has(account);
     }
 
