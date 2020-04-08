@@ -133,7 +133,7 @@ class Contract extends Validator {
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            this.acceptContributionsForAddress(msg_sender, this.ApplicationEventTypes.CONTRIBUTION_ACCEPTED);
+            this.acceptContributions(msg_sender, this.ApplicationEventTypes.CONTRIBUTION_ACCEPTED);
         }
     }
 
@@ -176,7 +176,7 @@ class Contract extends Validator {
         );
     }
 
-    acceptContributionsForAddress(_from, _eventType) {
+    acceptContributions(_from, _eventType) {
 
         
         const participantRecord = this.getParticipantRecordByAddress(_from);
@@ -286,7 +286,7 @@ class Contract extends Validator {
         if (_approve) {
             // If participants are approved: whitelist them and accept their contributions
             participantRecord.whitelisted = true;
-            this.acceptContributionsForAddress(_address, this.ApplicationEventTypes.WHITELIST_APPROVED);
+            this.acceptContributions(_address, this.ApplicationEventTypes.WHITELIST_APPROVED);
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
             participantRecord.whitelisted = false;

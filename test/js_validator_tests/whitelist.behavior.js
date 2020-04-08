@@ -64,7 +64,7 @@ function shouldHaveValidStateAfterWhitelistMode(_address, _testStage, _accept) {
 
 function shouldHaveValidStateAfterAcceptContributionsForAddress(_address, _testStage, _accept) {
 
-    describe("acceptContributionsForAddress()", function () {
+    describe("acceptContributions()", function () {
 
         let oldParticipantRecord, newParticipantRecord, oldStateParticipantAvailableETH, newStateParticipantAvailableETH;
 

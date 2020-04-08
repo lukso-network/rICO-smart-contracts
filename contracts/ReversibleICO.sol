@@ -382,7 +382,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // If whitelisted, process the contribution automatically
         if (participantStats.whitelisted == true) {
-            acceptContributionsForAddress(msg.sender);
+            acceptContributions(msg.sender);
         }
     }
 
@@ -426,7 +426,7 @@ contract ReversibleICO is IERC777Recipient {
                 }
 
                 // accept any pending ETH
-                acceptContributionsForAddress(participantAddress);
+                acceptContributions(participantAddress);
 
             } else {
                 emit ApplicationEvent(uint8(ApplicationEventTypes.WHITELIST_REJECTED), getCurrentStage(), participantAddress, 0);
@@ -840,7 +840,7 @@ contract ReversibleICO is IERC777Recipient {
     * @notice Accept a participant's contribution.
     * @param _participantAddress Participant's address.
     */
-    function acceptContributionsForAddress(address _participantAddress)
+    function acceptContributions(address _participantAddress)
     internal
     isInitialized
     isNotFrozen
