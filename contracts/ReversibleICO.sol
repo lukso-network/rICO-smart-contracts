@@ -796,7 +796,11 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Cancels any participant's pending ETH contributions.
      * Pending is any ETH from participants that are not whitelisted yet.
      */
-    function cancelPendingContributions(address _participantAddress, uint256 _sentValue) internal {
+    function cancelPendingContributions(address _participantAddress, uint256 _sentValue)
+    internal
+    isInitialized
+    isNotFrozen
+    {
         Participant storage participantStats = participants[_participantAddress];
         uint256 pendingEth = participantStats.pendingEth;
 
@@ -836,7 +840,12 @@ contract ReversibleICO is IERC777Recipient {
     * @notice Accept a participant's contribution.
     * @param _participantAddress Participant's address.
     */
-    function acceptContributionsForAddress(address _participantAddress) internal {
+    function acceptContributionsForAddress(address _participantAddress)
+    internal
+    isInitialized
+    isNotFrozen
+    isRunning
+    {
         Participant storage participantStats = participants[_participantAddress];
 
         // Fail silently if no ETH are pending
@@ -927,6 +936,8 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     isRunning
     {
+        require(_returnedTokenAmount > 0, 'You can not withdraw without tokens.');
+
         Participant storage participantStats = participants[_participantAddress];
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
