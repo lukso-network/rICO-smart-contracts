@@ -926,9 +926,9 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("TotalReservedTokens equals returnedTokens ( since we returned everything )", async function () {
             const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-            const totalReservedTokens = result.stageTotalReservedTokens;
+            const reservedTokens = result.stageTotalReservedTokens;
             const returnedTokens = result.stageReturnedTokens;
-            expect(totalReservedTokens).to.be.equal(returnedTokens, "TotalReservedTokens does not match returnedTokens");
+            expect(reservedTokens).to.be.equal(returnedTokens, "TotalReservedTokens does not match returnedTokens");
         });
 
         it.skip("committedETH equals withdrawnETH ( since we returned everything )", async function () {
@@ -2087,10 +2087,10 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("getAvailableProjectETH returns 20% of the stage 0 + stage 2 contribution before first return", async function () {
 
             const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
-            const _projectTotalUnlockedETH = new BN( await ReversibleICOInstance.methods._projectTotalUnlockedETH().call() );
+            const _projectUnlockedETH = new BN( await ReversibleICOInstance.methods._projectUnlockedETH().call() );
 
             // console.log("ProjectAvailableEth:         ", ProjectAvailableEth.toString());
-            // console.log("_projectTotalUnlockedETH:         ", _projectTotalUnlockedETH.toString());
+            // console.log("_projectUnlockedETH:         ", _projectUnlockedETH.toString());
 
 
             const ContributionAmountInStage0 = priceInStage(0).mul(new BN(1500));

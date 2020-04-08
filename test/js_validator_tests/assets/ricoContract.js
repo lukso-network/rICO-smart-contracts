@@ -63,7 +63,7 @@ class Contract extends Validator {
         this.participantsById = [];
         this.participantCount = 0;
 
-        this._projectTotalUnlockedETH = new BN("0");
+        this._projectUnlockedETH = new BN("0");
         this.projectWithdrawnETH = new BN("0");
         this.committedETH = new BN("0");
         this.withdrawnETH = new BN("0");
@@ -260,8 +260,8 @@ class Contract extends Validator {
 
         let remainingFromAllocation = new BN("0");
         // Calculate the amount of allocated ETH, not withdrawn yet
-        if (this._projectTotalUnlockedETH.gt(this.projectWithdrawnETH)) {
-            remainingFromAllocation = _projectTotalUnlockedETH.sub(projectWithdrawnETH);
+        if (this._projectUnlockedETH.gt(this.projectWithdrawnETH)) {
+            remainingFromAllocation = _projectUnlockedETH.sub(projectWithdrawnETH);
         }
 
         // Calculate ETH that is globally available:
@@ -417,7 +417,7 @@ class Contract extends Validator {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            this._projectTotalUnlockedETH = _projectTotalUnlockedETH.sub(participantRecord.allocatedETH);
+            this._projectUnlockedETH = _projectUnlockedETH.sub(participantRecord.allocatedETH);
 
             if (remainingTokenAmount.gt(new BN("0"))) {
 
@@ -499,7 +499,7 @@ class Contract extends Validator {
 
                 // allocate remaining ETH to project directly
                 participantRecord.allocatedETH = allocatedEthAmount;
-                this._projectTotalUnlockedETH = this._projectTotalUnlockedETH.add(participantRecord.allocatedETH);
+                this._projectUnlockedETH = this._projectUnlockedETH.add(participantRecord.allocatedETH);
 
                 // transfer ETH back to participant
                 address(uint160(_from)).transfer(returnETHAmount);

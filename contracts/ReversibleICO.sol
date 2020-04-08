@@ -58,8 +58,6 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public committedETH;
     /// @dev Total amount of ETH currently pending to be whitelisted.
     uint256 public pendingETH;
-    /// @dev Accumulated amount of ETH received by the smart contract.
-    uint256 public totalSentETH;
     /// @dev Accumulated amount of ETH returned from canceled pending ETH.
     uint256 public canceledETH;
     /// @dev Accumulated amount of ETH withdrawn by participants.
@@ -71,6 +69,17 @@ contract ReversibleICO is IERC777Recipient {
 
     /// @dev Minimum amount of ETH accepted for a contribution. Everything lower than that will trigger a canceling of pending ETH.
     uint256 public minContribution = 0.001 ether;
+
+    mapping(uint8 => Stage) public stages;
+    uint256 public stageBlockCount;
+    uint8 public stageCount;
+
+    /// @dev Maps participants stats by their address.
+    mapping(address => Participant) public participants;
+    /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
+    mapping(uint256 => address) public participantsById; // TODO remove?
+    /// @dev Total number of rICO participants.
+    uint256 public participantCount;
 
     /*
      *   Commit phase (Stage 0)
@@ -95,18 +104,6 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev The duration of the buy phase in blocks.
     uint256 public buyPhaseBlockCount;
 
-
-    mapping(uint8 => Stage) public stages;
-    uint8 public stageCount;
-    uint256 public stageBlockCount;
-
-    /// @dev Maps participants stats by their address.
-    mapping(address => Participant) public participants;
-    /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
-    mapping(uint256 => address) public participantsById; // TODO remove?
-    /// @dev Total number of rICO participants.
-    uint256 public participantCount;
-
     //    uint256 public DEBUG1 = 9999;
     //    uint256 public DEBUG2 = 9999;
     //    uint256 public DEBUG3 = 9999;
@@ -118,8 +115,8 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev Total amount of the current reserved ETH for the project by the participants contributions.
     uint256 internal _projectCurrentlyReservedETH;
     /// @dev Accumulated amount allocated to the project by participants.
-    uint256 internal _projectTotalUnlockedETH;
-    /// @dev Last block since the project has calculated the _projectTotalUnlockedETH.
+    uint256 internal _projectUnlockedETH;
+    /// @dev Last block since the project has calculated the _projectUnlockedETH.
     uint256 internal _projectLastBlock;
 
 
@@ -145,12 +142,12 @@ contract ReversibleICO is IERC777Recipient {
         bool whitelisted;
         uint32 contributions;
         uint32 withdraws;
-        uint256 totalReservedTokens;
+        uint256 reservedTokens;
         uint256 committedEth;
         uint256 pendingEth;
 
-        uint256 _totalUnlockedTokens;
         uint256 _currentReservedTokens;
+        uint256 _unlockedTokens;
         uint256 _lastBlock;
 
         mapping(uint8 => ParticipantStageDetails) stages;
@@ -197,7 +194,6 @@ contract ReversibleICO is IERC777Recipient {
     }
 
 
-
     // ------------------------------------------------------------------------------------------------
 
     /// @notice Constructor sets the deployer and defines ERC777TokensRecipient interface support.
@@ -209,14 +205,14 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
      * @param _tokenAddress The address of the ERC777 rICO token contract.
-     * @param _whitelisterAddress The address of the controller handling whitelisting.
-     * @param _projectAddress The project wallet that can withdraw the contributions.
-     * @param _commitPhaseStartBlock The block in which the commit phase starts.
+     * @param _whitelisterAddress The address handling whitelisting.
+     * @param _projectAddress The project wallet that can withdraw ETH contributions.
+     * @param _commitPhaseStartBlock The block at which the commit phase starts.
      * @param _commitPhaseBlockCount The duration of the commit phase in blocks.
-     * @param _commitPhasePrice The initial token price (in wei) during the commit phase.
-     * @param _stageCount The number of the rICO stages.
+     * @param _commitPhasePrice The initial token price (in WEI per token) during the commit phase.
+     * @param _stageCount The number of the rICO stages, excluding the commit phase (Stage 0).
      * @param _stageBlockCount The duration of each stage in blocks.
-     * @param _stagePriceIncrease A factor used to increase the token price at each subsequent stage.
+     * @param _stagePriceIncrease A factor used to increase the token price from the _commitPhasePrice at each subsequent stage. The increase already happens in the first stage too.
      */
     function init(
         address _tokenAddress,
@@ -283,9 +279,6 @@ contract ReversibleICO is IERC777Recipient {
         // The duration of buyPhase in blocks
         buyPhaseBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
 
-        // UPDATE global stats
-        //        projectWithdrawnBlock = buyPhaseStartBlock;
-
         // The contract is now initialized
         initialized = true;
     }
@@ -297,19 +290,18 @@ contract ReversibleICO is IERC777Recipient {
      */
 
     /**
-     * @notice FALLBACK function: depending on the amount received it commits or it cancels contributions.
+     * @notice FALLBACK function: If the amount sent is smaller than `minContribution` it cancels all pending contributions.
      */
     function()
     external
     payable
     isInitialized
     isNotFrozen
-    isRunning
     {
-        require(msg.value > minContribution, 'To contribute, call the commit() function and send ETH along.');
+        require(msg.value < minContribution, 'To contribute, call the commit() function and send ETH along.');
 
-        // Participant cancels commitment during commit phase (Stage 0) OR if they've not been whitelisted yet.
-        cancel(msg.sender, msg.value);
+        // Participant cancels pending contributions.
+        cancelPendingContributions(msg.sender, msg.value);
     }
 
     /**
@@ -329,16 +321,16 @@ contract ReversibleICO is IERC777Recipient {
     isInitialized
     isNotFrozen
     {
-        // rICO should only receive tokens from the rICO Token Tracker.
-        // Transactions from any other sender should revert
-        require(msg.sender == tokenAddress, "Invalid token sent.");
+        // rICO should only receive tokens from the rICO token contract.
+        // Transactions from any other token contract revert
+        require(msg.sender == tokenAddress, "Invalid token contract sent tokens.");
 
-        // 1 - project wallet adds tokens to the sale
+        // Project wallet adds tokens to the sale
         if (_from == projectAddress) {
-            // Save the token amount allocated to the rICO address
+            // increase the supply
             tokenSupply = tokenSupply.add(_amount);
 
-            // 2 - rICO contributor sends tokens back
+            // rICO participant sends tokens back
         } else {
             withdraw(_from, _amount);
         }
@@ -346,78 +338,61 @@ contract ReversibleICO is IERC777Recipient {
 
 
     /**
-     * @notice External wrapper for commit() so that a participant can call it directly.
+     * @notice Allows a participant to reserve tokens by committing ETH as contributions.
      */
     function commit()
-    public
+    external
     payable
-    {
-        // Reject contributions lower than the minimum amount
-        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
-        // Call internal commit() for processing the contribution
-        commit(msg.sender, msg.value);
-    }
-
-
-    /**
-     * @notice Commits a participant's ETH.
-     */
-    function commit(address _sender, uint256 _value)
-    internal
     isInitialized
     isNotFrozen
     isRunning
     {
-
-        // UPDATE global STATS
-        totalSentETH = totalSentETH.add(_value);
+        // Reject contributions lower than the minimum amount
+        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
 
         // Participant initial state record
-        Participant storage participantRecord = participants[_sender];
+        Participant storage participantStats = participants[msg.sender];
+        ParticipantStageDetails storage byStage = participantStats.stages[getCurrentStage()];
 
         // Check if participant already exists
-        if (participantRecord.contributions == 0) {
+        if (participantStats.contributions == 0) {
             // Identify the participants by their Id
-            participantsById[participantCount] = _sender;
+            participantsById[participantCount] = msg.sender;
             // Increase participant count
             participantCount++;
         }
 
-        // Record contribution into current stage totals for the participant
-        addPendingContribution(_sender, _value);
+        // UPDATE PARTICIPANT STATS
+        participantStats.contributions++;
+        participantStats.pendingEth = participantStats.pendingEth.add(msg.value);
+        byStage.pendingEth = byStage.pendingEth.add(msg.value);
+
+        // UPDATE GLOBAL STATS
+        pendingETH = pendingETH.add(msg.value);
+
+        emit ApplicationEvent(
+            uint8(ApplicationEventTypes.CONTRIBUTION_ADDED),
+            uint32(participantStats.contributions),
+            msg.sender,
+            msg.value
+        );
 
         // If whitelisted, process the contribution automatically
-        if (participantRecord.whitelisted == true) {
-            acceptContributionsForAddress(_sender, uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED));
+        if (participantStats.whitelisted == true) {
+            acceptContributionsForAddress(msg.sender);
         }
     }
 
     /**
-     * @notice External wrapper for cancel() so that a participant can call it directly.
+     * @notice Allows a participant to cancel pending contributions
      */
     function cancel()
-    public
+    external
     payable
-    {
-        // Call internal cancel() for processing the request
-        cancel(msg.sender, msg.value);
-    }
-
-    /**
-     * @notice Cancels any participant's pending ETH commitment.
-     * Pending is any ETH from participants that are not whitelisted yet.
-     */
-    function cancel(address _sender, uint256 _value)
-    internal
     isInitialized
     isNotFrozen
-    isRunning
     {
-        // Participant must have pending ETH ...
-        require(hasPendingETH(_sender), "Participant has no pending contributions.");
-
-        // Cancel participant's contribution.
-        cancelContributionsForAddress(_sender, _value, uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED));
+        cancelPendingContributions(msg.sender, msg.value);
     }
 
     /**
@@ -427,30 +402,35 @@ contract ReversibleICO is IERC777Recipient {
      */
     function whitelist(address[] calldata _addresses, bool _approve)
     external
+    onlyWhitelister
     isInitialized
     isNotFrozen
-    onlyWhitelistController
+    isRunning
     {
         // Revert if the provided list is empty
-        require(_addresses.length > 0, "No addresses to whitelist given.");
+        require(_addresses.length > 0, "No addresses given to whitelist.");
 
         for (uint256 i = 0; i < _addresses.length; i++) {
             address participantAddress = _addresses[i];
 
-            Participant storage participantRecord = participants[participantAddress];
+            Participant storage participantStats = participants[participantAddress];
 
             if (_approve) {
-                if (!participantRecord.whitelisted) {
+                if (!participantStats.whitelisted) {
                     // If participants are approved: whitelist them and accept their contributions
-                    participantRecord.whitelisted = true;
-                    acceptContributionsForAddress(participantAddress, uint8(ApplicationEventTypes.WHITELIST_APPROVED));
+                    participantStats.whitelisted = true;
+                    emit ApplicationEvent(uint8(ApplicationEventTypes.WHITELIST_APPROVED), getCurrentStage(), participantAddress, 0);
                 }
+
+                // accept any pending ETH
+                acceptContributionsForAddress(participantAddress);
+
             } else {
-                // Decline participant and cancel their contributions, if they have pending ETH.
-                if (hasPendingETH(participantAddress)) {
-                    cancelContributionsForAddress(participantAddress, 0, uint8(ApplicationEventTypes.WHITELIST_REJECTED));
-                }
-                participantRecord.whitelisted = false;
+                emit ApplicationEvent(uint8(ApplicationEventTypes.WHITELIST_REJECTED), getCurrentStage(), participantAddress, 0);
+                participantStats.whitelisted = false;
+
+                // Cancel participants pending contributions.
+                cancelPendingContributions(participantAddress, 0);
             }
         }
     }
@@ -458,20 +438,20 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Allows for the project to withdraw ETH.
      * @param _ethAmount The ETH amount in wei.
+     * // TODO add isNotFrozen?
      */
     function projectWithdraw(uint256 _ethAmount)
     external
+    onlyProject
     isInitialized
     {
-        require(msg.sender == projectAddress, "Only project wallet address.");
-
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
 
         // Get current allocated ETH to the project
-        uint256 availableForWithdraw = _projectTotalUnlockedETH.sub(projectWithdrawnETH);
+        uint256 availableForWithdraw = _projectUnlockedETH.sub(projectWithdrawnETH);
 
-        require(_ethAmount <= availableForWithdraw, "Requested amount too big, not enough ETH available.");
+        require(_ethAmount <= availableForWithdraw, "Requested amount too high, not enough ETH unlocked.");
 
         // UPDATE global STATS
         projectWithdrawCount++;
@@ -518,7 +498,7 @@ contract ReversibleICO is IERC777Recipient {
         // calc from the last known point on
         uint256 newlyUnlockedEth = calcUnlockAmount(_projectCurrentlyReservedETH, _projectLastBlock);
 
-        return _projectTotalUnlockedETH
+        return _projectUnlockedETH
             .add(newlyUnlockedEth)
             .sub(projectWithdrawnETH);
     }
@@ -684,7 +664,7 @@ contract ReversibleICO is IERC777Recipient {
         // at the specified stage and perform precision adjustments(div).
         return IERC777(tokenAddress).balanceOf(address(this)).mul(
             stages[_stage].tokenPrice
-        ).div(10 ** 18); // should we use 10 ** 20?
+        ).div(10 ** 18);
     }
 
     /**
@@ -778,7 +758,7 @@ contract ReversibleICO is IERC777Recipient {
     function currentUnlockedTokenAmount(address _participantAddress) public view returns (uint256) {
         Participant storage participantStats = participants[_participantAddress];
 
-        return participantStats._totalUnlockedTokens.add(
+        return participantStats._unlockedTokens.add(
             calcUnlockAmount(participantStats._currentReservedTokens, participantStats._lastBlock)
         );
     }
@@ -797,13 +777,13 @@ contract ReversibleICO is IERC777Recipient {
     function sanityCheckProject() internal view {
         // PROJECT: The sum of reserved + unlocked has to be equal the committedETH.
         require(
-            committedETH == _projectCurrentlyReservedETH.add(_projectTotalUnlockedETH),
+            committedETH == _projectCurrentlyReservedETH.add(_projectUnlockedETH),
             'Project Sanity check failed! Reserved + Unlock must equal committedETH'
         );
 
         // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
         require(
-            address(this).balance == _projectTotalUnlockedETH.add(_projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
+            address(this).balance == _projectUnlockedETH.add(_projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
             'Project sanity check failed! balance = Unlock + Reserved - Withdrawn'
         );
     }
@@ -814,12 +794,12 @@ contract ReversibleICO is IERC777Recipient {
     function sanityCheckParticipant(address _participantAddress) internal view {
         Participant storage participantStats = participants[_participantAddress];
 
-        //        DEBUG1 = participantStats.totalReservedTokens;
-        //        DEBUG2 = participantStats._currentReservedTokens.add(participantStats._totalUnlockedTokens);
+        //        DEBUG1 = participantStats.reservedTokens;
+        //        DEBUG2 = participantStats._currentReservedTokens.add(participantStats._unlockedTokens);
 
         // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
         require(
-            participantStats.totalReservedTokens == participantStats._currentReservedTokens.add(participantStats._totalUnlockedTokens),
+            participantStats.reservedTokens == participantStats._currentReservedTokens.add(participantStats._unlockedTokens),
             'Participant Sanity check failed! Reser. + Unlock must equal totalReser'
         );
     }
@@ -833,7 +813,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE GLOBAL STATS
         _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.sub(newlyUnlockedEth);
-        _projectTotalUnlockedETH = _projectTotalUnlockedETH.add(newlyUnlockedEth);
+        _projectUnlockedETH = _projectUnlockedETH.add(newlyUnlockedEth);
         _projectLastBlock = getCurrentBlockNumber();
 
         sanityCheckProject();
@@ -846,11 +826,8 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         // UPDATE the locked/unlocked ratio for this participant
-        participantStats._totalUnlockedTokens = currentUnlockedTokenAmount(_participantAddress);
+        participantStats._unlockedTokens = currentUnlockedTokenAmount(_participantAddress);
         participantStats._currentReservedTokens = currentReservedTokenAmount(_participantAddress);
-//        participantStats.committedEth = participantStats.committedEth.sub(
-//            calcUnlockAmount(participantStats.committedEth, participantStats._lastBlock)
-//        );
 
         // RESET BLOCKNUMBER: Reset the ratio calculations to start from this point in time.
         participantStats._lastBlock = getCurrentBlockNumber();
@@ -859,47 +836,19 @@ contract ReversibleICO is IERC777Recipient {
         calcProjectAllocation();
     }
 
+
     /**
-     * @notice Records a new contribution.
-     * @param _from Participant's address.
-     * @param _receivedValue The amount contributed.
+     * @notice Cancels any participant's pending ETH contributions.
+     * Pending is any ETH from participants that are not whitelisted yet.
      */
-    function addPendingContribution(address _from, uint256 _receivedValue) private {
-
-        uint8 currentStage = getCurrentStage();
-
-        Participant storage participantStats = participants[_from];
-        ParticipantStageDetails storage stages = participantStats.stages[currentStage];
-
-        // UPDATE PARTICIPANT STATS
-        participantStats.contributions++;
-        participantStats.pendingEth = participantStats.pendingEth.add(_receivedValue);
-        stages.pendingEth = stages.pendingEth.add(_receivedValue);
-
-        // UPDATE GLOBAL STATS
-        pendingETH = pendingETH.add(_receivedValue);
-
-        emit ApplicationEvent(
-            uint8(ApplicationEventTypes.CONTRIBUTION_ADDED),
-            uint32(participantStats.contributions),
-            _from,
-            _receivedValue
-        );
-    }
-
-    /**
-    * @notice Cancels all of the participant's contributions so far.
-    * @param _participantAddress Participant's address
-    * @param _value the ETH amount sent with the transaction, to return
-    * @param _eventType Reason for canceling: {WHITELIST_REJECTED, CONTRIBUTION_CANCELED}
-    */
-    function cancelContributionsForAddress(address _participantAddress, uint256 _value, uint8 _eventType) internal {
+    function cancelPendingContributions(address _participantAddress, uint256 _sentValue) internal {
         Participant storage participantStats = participants[_participantAddress];
+        uint256 pendingEth = participantStats.pendingEth;
 
-        uint256 allPendingEth = participantStats.pendingEth;
-
-        // Revert if there is no pending ETH contribution
-        require(allPendingEth > 0, "Participant has no contributions to cancel.");
+        //Fail silently if no ETH are pending
+        if(pendingEth == 0) {
+            return;
+        }
 
         // UPDATE PARTICIPANT STAGES
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
@@ -911,38 +860,38 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.pendingEth = 0;
 
         // UPDATE GLOBAL STATS
-        canceledETH = canceledETH.add(allPendingEth);
-        pendingETH = pendingETH.sub(allPendingEth);
+        canceledETH = canceledETH.add(pendingEth);
+        pendingETH = pendingETH.sub(pendingEth);
 
         // transfer ETH back to participant including received value
-        address(uint160(_participantAddress)).transfer(allPendingEth.add(_value));
+        address(uint160(_participantAddress)).transfer(pendingEth.add(_sentValue));
 
         // event emission
-        emit TransferEvent(_eventType, _participantAddress, allPendingEth);
+        emit TransferEvent(uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED), _participantAddress, pendingEth);
         emit ApplicationEvent(
-            _eventType,
+            uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED),
             uint32(participantStats.contributions),
             _participantAddress,
-            allPendingEth
+            pendingEth
         );
     }
+
 
     /**
     * @notice Accept a participant's contribution.
     * @param _participantAddress Participant's address.
-    * @param _eventType Can be either WHITELIST_APPROVED or CONTRIBUTION_ACCEPTED.
     */
-    function acceptContributionsForAddress(address _participantAddress, uint8 _eventType) internal {
+    function acceptContributionsForAddress(address _participantAddress) internal {
         Participant storage participantStats = participants[_participantAddress];
+
+        // Fail silently if no ETH are pending
+        if (participantStats.pendingEth == 0) {
+            return;
+        }
 
         uint8 currentStage = getCurrentStage();
         uint256 totalReturnETH;
         uint256 totalNewTokens;
-
-        // stop if no ETH are pending
-        if (participantStats.pendingEth == 0) {
-            return;
-        }
 
         calcParticipantAllocation(_participantAddress);
 
@@ -977,7 +926,7 @@ contract ReversibleICO is IERC777Recipient {
 
             // UPDATE PARTICIPANT STATS
             participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
-            participantStats.totalReservedTokens = participantStats.totalReservedTokens.add(newTokenAmount);
+            participantStats.reservedTokens = participantStats.reservedTokens.add(newTokenAmount);
             participantStats.committedEth = participantStats.committedEth.add(newlyCommittedEth);
             participantStats.pendingEth = participantStats.pendingEth.sub(stages.pendingEth);
 
@@ -990,7 +939,7 @@ contract ReversibleICO is IERC777Recipient {
             _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
 
             // Emit event
-            emit ApplicationEvent(_eventType, uint32(stageId), _participantAddress, newlyCommittedEth);
+            emit ApplicationEvent(uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED), uint32(stageId), _participantAddress, newlyCommittedEth);
         }
 
         // SANITY CHECK
@@ -1019,6 +968,8 @@ contract ReversibleICO is IERC777Recipient {
      */
     function withdraw(address _participantAddress, uint256 _returnedTokenAmount)
     internal
+    isInitialized
+    isNotFrozen
     isRunning
     {
         Participant storage participantStats = participants[_participantAddress];
@@ -1045,7 +996,7 @@ contract ReversibleICO is IERC777Recipient {
         } else {
             returnEthAmount = participantStats.committedEth.mul(
                 returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.totalReservedTokens)
+                .div(participantStats.reservedTokens)
             ).div(10 ** 20);
         }
 
@@ -1053,7 +1004,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE PARTICIPANT STATS
         participantStats.withdraws++;
         participantStats._currentReservedTokens = participantStats._currentReservedTokens.sub(returnedTokenAmount);
-        participantStats.totalReservedTokens = participantStats.totalReservedTokens.sub(returnedTokenAmount);
+        participantStats.reservedTokens = participantStats.reservedTokens.sub(returnedTokenAmount);
         participantStats.committedEth = participantStats.committedEth.sub(returnEthAmount);
 
         // UPDATE global STATS
@@ -1087,6 +1038,14 @@ contract ReversibleICO is IERC777Recipient {
      */
 
     /**
+     * @notice Checks if the sender is the project.
+     */
+    modifier onlyProject() {
+        require(msg.sender == projectAddress, "Only the project can call this method.");
+        _;
+    }
+
+    /**
      * @notice Checks if the sender is the deployer.
      */
     modifier onlyDeployer() {
@@ -1097,7 +1056,7 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Checks if the sender is the whitelist controller.
      */
-    modifier onlyWhitelistController() {
+    modifier onlyWhitelister() {
         require(msg.sender == whitelisterAddress, "Only the whitelist controller can call this method.");
         _;
     }
@@ -1122,7 +1081,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice @dev Requires the contract to be not frozen.
      */
     modifier isNotFrozen() {
-        require(frozen == false, "Contract can not be frozen.");
+        require(frozen == false, "Contract frozen!");
         _;
     }
 

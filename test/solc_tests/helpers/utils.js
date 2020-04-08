@@ -366,7 +366,7 @@ module.exports = {
         let returnedETH = await contract.methods.returnedETH().call();
         let committedETH = await contract.methods.committedETH().call();
         let withdrawnETH = await contract.methods.withdrawnETH().call();
-        let allocatedETH = await contract.methods._projectTotalUnlockedETH().call();
+        let allocatedETH = await contract.methods._projectUnlockedETH().call();
         let projectWithdrawnETH = await contract.methods.projectWithdrawnETH().call();
         let ContractBalance = await helpers.utils.getBalance(helpers, contract.receipt.contractAddress);
 
@@ -401,7 +401,7 @@ module.exports = {
         console.log("Total withdrawnETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.withdrawnETH.toString())   +" eth" );
         console.log("Total allocatedETH:       ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedETH.toString())   +" eth" );
         console.log("Total pendingTokens:      ", helpers.utils.toEth(helpers, ParticipantTotalStats.pendingTokens.toString()) +" tokens" );
-        console.log("Total totalReservedTokens:", helpers.utils.toEth(helpers, ParticipantTotalStats.totalReservedTokens.toString())   +" tokens" );
+        console.log("Total reservedTokens:", helpers.utils.toEth(helpers, ParticipantTotalStats.reservedTokens.toString())   +" tokens" );
         console.log("Total returnedTokens:     ", helpers.utils.toEth(helpers, ParticipantTotalStats.returnedTokens.toString()) +" tokens" );
         console.log("Total allocatedTokens:    ", helpers.utils.toEth(helpers, ParticipantTotalStats.allocatedTokens.toString()) +" tokens" );
         console.log("Locked Token Balance:     ", helpers.utils.toEth(helpers, LockedBalance.toString()) +" tokens" );
@@ -420,7 +420,7 @@ module.exports = {
             console.log("-------------------------------------------");
             console.log("stageId:           ", i);
             console.log("totalSentETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stagetotalSentETH.toString() )   +" eth" );
-            console.log("totalReservedTokens: ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageTotalReservedTokens.toString() )   +" tokens" );
+            console.log("reservedTokens: ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageTotalReservedTokens.toString() )   +" tokens" );
             console.log("returnedETH:         ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageReturnedETH.toString() )    +" eth" );
             console.log("committedETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageCommittedETH.toString() )    +" eth" );
             console.log("withdrawnETH:        ", helpers.utils.toEth(helpers,ParticipantStageDetails.stageWithdrawnETH.toString() )   +" eth" );
@@ -478,7 +478,7 @@ module.exports = {
             }
 
             // decrease the total allocated ETH by the equivalent participant's allocated amount
-            // _projectTotalUnlockedETH = _projectTotalUnlockedETH.sub(ParticipantRecord.allocatedETH);
+            // _projectUnlockedETH = _projectUnlockedETH.sub(ParticipantRecord.allocatedETH);
 
             if(RemainingTokenAmount.gt( new helpers.BN("0") )) {
 

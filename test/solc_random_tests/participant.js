@@ -526,8 +526,8 @@ class Participant extends Actor {
         console.log("    User Record:             ", this.address);
         console.log("      committedEth:          ", this.toEth(record.committedEth) + " eth");
         console.log("      pendingEth:            ", this.toEth(record.pendingEth) + " eth");
-        console.log("      totalReservedTokens:   ", this.toEth(record.totalReservedTokens) + " tokens");
-        console.log("      _totalUnlockedTokens:   ", this.toEth(record._totalUnlockedTokens) + " tokens");
+        console.log("      reservedTokens:   ", this.toEth(record.reservedTokens) + " tokens");
+        console.log("      _unlockedTokens:   ", this.toEth(record._unlockedTokens) + " tokens");
         console.log("      _currentReservedTokens: ", this.toEth(record._currentReservedTokens) + " tokens");
         console.log("      lastBlock:             ", record._lastBlock.toString());
 
@@ -725,8 +725,8 @@ class Participant extends Actor {
         const retVal = {};
         retVal.committedEth            = new BN(rec.committedEth);
         retVal.pendingEth              = new BN(rec.pendingEth);
-        retVal.totalReservedTokens     = new BN(rec.totalReservedTokens);
-        retVal._totalUnlockedTokens     = new BN(rec._totalUnlockedTokens);
+        retVal.reservedTokens     = new BN(rec.reservedTokens);
+        retVal._unlockedTokens     = new BN(rec._unlockedTokens);
         retVal._currentReservedTokens   = new BN(rec._currentReservedTokens);
         retVal._lastBlock               = new BN(rec._lastBlock);
         return retVal;
@@ -819,7 +819,7 @@ class Participant extends Actor {
         } else {
             returnEthAmount = participantCommittedEth.mul(
                 returnedTokenAmount.mul(new BN(10).pow(new BN(20))).div(
-                    participantStats.totalReservedTokens
+                    participantStats.reservedTokens
                 )
             ).div(new BN(10).pow( new BN(20)));
         }

@@ -137,8 +137,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
 
@@ -175,8 +175,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
 
@@ -215,8 +215,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
 
@@ -244,8 +244,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.allocatedETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
 
@@ -284,8 +284,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("2000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
             // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
@@ -321,8 +321,8 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 .to.be.bignumber.equal(tokenToEth(1, stageId), "aggregated.withdrawnETH mismatch");
             expect(new BN(aggregated["pendingTokens"]))
                 .to.be.bignumber.equal(new BN("0"), "aggregated.pendingTokens mismatch");
-            expect(new BN(aggregated["totalReservedTokens"]))
-                .to.be.bignumber.equal(new BN("3000000000000000000"), "aggregated.totalReservedTokens mismatch");
+            expect(new BN(aggregated["reservedTokens"]))
+                .to.be.bignumber.equal(new BN("3000000000000000000"), "aggregated.reservedTokens mismatch");
             expect(new BN(aggregated["returnedTokens"]))
                 .to.be.bignumber.equal(new BN("1000000000000000000"), "aggregated.returnedTokens mismatch");
             // allocated needs to be 0 since we're in stage 0.. where we don't allocate.
@@ -363,7 +363,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
             // 1 in stage 0
             const withdrawnETH = tokenToEth(1, 0)
             const pendingTokens = new BN("0");
-            const totalReservedTokens = new BN("4000000000000000000");
+            const reservedTokens = new BN("4000000000000000000");
             const returnedTokens = new BN("1000000000000000000");
 
             const allocatedETH = new BN("0");
@@ -373,7 +373,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
             expect(new BN(aggregated.committedETH)).to.be.bignumber.equal(committedETH);
             expect(new BN(aggregated.withdrawnETH)).to.be.bignumber.equal(withdrawnETH);
             expect(new BN(aggregated.pendingTokens)).to.be.bignumber.equal(pendingTokens);
-            expect(new BN(aggregated.totalReservedTokens)).to.be.bignumber.equal(totalReservedTokens);
+            expect(new BN(aggregated.reservedTokens)).to.be.bignumber.equal(reservedTokens);
             expect(new BN(aggregated.returnedTokens)).to.be.bignumber.equal(returnedTokens);
 
             // allocated needs to be 0 since we haven't used withdrawn in this stage yet

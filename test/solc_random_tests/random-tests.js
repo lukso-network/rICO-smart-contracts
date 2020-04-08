@@ -206,7 +206,7 @@ async function display(rICO, helpers, Project) {
 
     committedETH = new helpers.BN( await rICO.methods.committedETH().call() );
     withdrawnETH = new helpers.BN( await rICO.methods.withdrawnETH().call() );
-    _projectTotalUnlockedETH = new helpers.BN( await rICO.methods._projectTotalUnlockedETH().call() );
+    _projectUnlockedETH = new helpers.BN( await rICO.methods._projectUnlockedETH().call() );
     projectWithdrawnETH = new helpers.BN( await rICO.methods.projectWithdrawnETH().call() );
     buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
     buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
@@ -215,7 +215,7 @@ async function display(rICO, helpers, Project) {
 
     const globalAvailable = committedETH
         .sub(withdrawnETH)
-        .sub(_projectTotalUnlockedETH);
+        .sub(_projectUnlockedETH);
 
     const unlocked = globalAvailable.mul(
         helpers.utils.getCurrentGlobalUnlockRatio(
@@ -229,7 +229,7 @@ async function display(rICO, helpers, Project) {
         new helpers.BN("10").pow( new helpers.BN("20"))
     );
 
-    const result = unlocked.add(_projectTotalUnlockedETH).sub(projectWithdrawnETH);
+    const result = unlocked.add(_projectUnlockedETH).sub(projectWithdrawnETH);
     const getAvailableProjectETH =  await rICO.methods.getAvailableProjectETH().call()
 
     console.log(" > getAvailableProjectETH: calc     ", Project.toEth(result) + " eth");
