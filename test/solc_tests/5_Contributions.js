@@ -48,8 +48,8 @@ let SnapShotKey = "ContributionsTestInit";
 let snapshotsEnabled = true;
 let snapshots = [];
 
-const deployerAddress = accounts[0];
-const whitelisterAddress = accounts[1];
+const deployingAddress = accounts[0];
+const whitelistingAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -136,7 +136,7 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _tokenAddress
-            whitelisterAddress, // address _whitelisterAddress
+            whitelistingAddress, // address _whitelistingAddress
             projectAddress,          // address _projectAddress
             commitPhaseStartBlock,                 // uint256 _StartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -145,7 +145,7 @@ async function revertToFreshDeployment() {
             StageBlockCount,            // uint256 _stageBlockCount
             StagePriceIncrease          // uint256 _stagePriceIncrease in wei
         ).send({
-            from: deployerAddress,  // deployer
+            from: deployingAddress,  // deployer
             gas: 3000000
         });
 
@@ -207,7 +207,7 @@ describe("Contribution Testing", function () {
                 helpers.utils.resetAccountNonceCache(helpers);
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
             });
 
             it("value >= rico.minContribution results in a new contribution", async function () {
@@ -245,7 +245,7 @@ describe("Contribution Testing", function () {
                     [participant_1],
                     true
                 ).send({
-                    from: whitelisterAddress
+                    from: whitelistingAddress
                 });
 
                 await helpers.web3Instance.eth.sendTransaction({

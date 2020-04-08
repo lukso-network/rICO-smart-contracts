@@ -9,9 +9,9 @@ const { BN, web3, constants } = require("openzeppelin-test-helpers");
 class TokenContract {
 
     // set the defaults
-    constructor(_initialSupply, _deployerAddress) {
+    constructor(_initialSupply, _deployingAddress) {
         this.balances = {};
-        this.balances[_deployerAddress] = new BN(_initialSupply);
+        this.balances[_deployingAddress] = new BN(_initialSupply);
     }
 
     balanceOf(_address) {

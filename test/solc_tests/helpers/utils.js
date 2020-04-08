@@ -340,7 +340,7 @@ module.exports = {
             new helpers.BN(tokenPrice)
         );
     },
-    async jumpToContractStage ( contract, deployerAddress, stageId, end = false, addToBlockNumber = false ) {
+    async jumpToContractStage ( contract, deployingAddress, stageId, end = false, addToBlockNumber = false ) {
         const stageData = await contract.methods.stages(stageId).call();
         let block = Number(stageData.startBlock);
         if(end) {
@@ -354,7 +354,7 @@ module.exports = {
         await contract.methods.jumpToBlockNumber(
             block
         ).send({
-            from: deployerAddress, gas: 100000
+            from: deployingAddress, gas: 100000
         });
 
         return block;

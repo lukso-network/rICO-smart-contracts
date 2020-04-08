@@ -104,7 +104,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
 
             await ReversibleICOInstance.methods.init(
                 TokenContractAddress,       // address _TokenContractAddress
-                whitelisterAddress, // address _whitelisterAddress
+                whitelistingAddress, // address _whitelistingAddress
                 projectAddress,       // address _projectAddress
                 commitPhaseStartBlock,      // uint256 _commitPhaseStartBlock
                 commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
@@ -113,7 +113,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
                 stageBlockCount,            // uint256 _StageBlockCount
                 stagePriceIncrease          // uint256 _StagePriceIncrease in wei
             ).send({
-                from: deployerAddress,  // deployer
+                from: deployingAddress,  // deployer
                 gas: 3000000
             });
         }

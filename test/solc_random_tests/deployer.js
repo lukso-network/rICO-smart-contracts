@@ -13,7 +13,7 @@ module.exports = {
         const expect = helpers.expect;
 
         const ContractsDeployer = settings.ContractsDeployer;
-        const whitelisterAddress = settings.whitelisterAddress;
+        const whitelistingAddress = settings.whitelistingAddress;
         const projectAddress = settings.projectAddress;
         const blocksPerDay = settings.blocksPerDay // 6450;
         const commitPhaseDays = settings.commitPhaseDays // 22;
@@ -83,7 +83,7 @@ module.exports = {
 
         await rICO.methods.init(
             helpers.addresses.Token,     // address _tokenAddress
-            whitelisterAddress,  // address _whitelisterAddress
+            whitelistingAddress,  // address _whitelistingAddress
             projectAddress,        // address _projectAddress
             commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -124,7 +124,7 @@ module.exports = {
         return {
             addresses: {
                 ContractsDeployer: ContractsDeployer,
-                whitelisterAddress: whitelisterAddress,
+                whitelistingAddress: whitelistingAddress,
                 projectAddress: projectAddress,
             },
             contracts: {
@@ -270,7 +270,7 @@ module.exports = {
         const ReversibleICO = await helpers.utils.deployNewContractInstance(
             helpers, "ReversibleICOMock", {from: ContractsDeployer}
         );
-        expect(await ReversibleICO.methods.deployerAddress().call()).to.be.equal(ContractsDeployer);
+        expect(await ReversibleICO.methods.deployingAddress().call()).to.be.equal(ContractsDeployer);
         helpers.addresses.Rico = ReversibleICO.receipt.contractAddress;
 
         expect(await ReversibleICO.methods.initialized().call()).to.be.equal(false);

@@ -91,17 +91,17 @@ class Contract extends Validator {
         }
 
         this.contractAddress = "ricoContractAddress";
-        this.deployerAddress = "deployerAddress";
+        this.deployingAddress = "deployingAddress";
 
         this.TokenContractInstance = new TokenContract(
             settings.token.supply,
-            this.deployerAddress
+            this.deployingAddress
         );
 
         this.BalanceContractInstance = new BalanceContract();
 
         this.TokenContractInstance.send(
-            this.deployerAddress,
+            this.deployingAddress,
             this.contractAddress,
             settings.token.sale,
         );

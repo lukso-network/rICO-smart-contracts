@@ -46,8 +46,8 @@ let errorMessage;
 let snapshotsEnabled = true;
 let snapshots = [];
 
-const deployerAddress = accounts[0];
-const whitelisterAddress = accounts[1];
+const deployingAddress = accounts[0];
+const whitelistingAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -145,7 +145,7 @@ async function doFreshDeployment(name) {
 
     await ReversibleICOInstance.methods.init(
         TokenContractAddress,        // address _TokenContractAddress
-        whitelisterAddress, // address _whitelisterAddress
+        whitelistingAddress, // address _whitelistingAddress
         projectAddress,          // address _projectAddress
         commitPhaseStartBlock,                 // uint256 _StartBlock
         commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -154,7 +154,7 @@ async function doFreshDeployment(name) {
         StageBlockCount,            // uint256 _StageBlockCount
         StagePriceIncrease          // uint256 _StagePriceIncrease in wei
     ).send({
-        from: deployerAddress,  // deployer
+        from: deployingAddress,  // deployer
         gas: 3000000
     });
 
@@ -220,7 +220,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("validated", async function () {
@@ -242,7 +242,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployingAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -281,7 +281,7 @@ describe("Website States", function () {
         before(async () => {
             helpers.utils.resetAccountNonceCache(helpers);
             Instances = await doFreshDeployment(name);
-            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage (Instances.ReversibleICOInstance, deployingAddress, 0);
             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
             let newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -295,7 +295,7 @@ describe("Website States", function () {
                 [participant_1],
                 true,
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 

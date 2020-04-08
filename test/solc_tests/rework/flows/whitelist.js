@@ -14,8 +14,8 @@ const testKey = "WhitelistTests";
 
 describe("ReversibleICO - Whitelist Testing", function () {
 
-    const deployerAddress = accounts[0];
-    const whitelisterAddress = accounts[1];
+    const deployingAddress = accounts[0];
+    const whitelistingAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -32,7 +32,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
         // jump to phase 0
-        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(setup.settings, parseInt( currentBlock, 10));
     });
 
@@ -93,7 +93,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
@@ -153,7 +153,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 false
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
@@ -298,7 +298,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
@@ -334,7 +334,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Jump to stage 1 and buy 1 token", async function () {
             const stageId = 1;
 
-            const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 1);
+            const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 1);
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({

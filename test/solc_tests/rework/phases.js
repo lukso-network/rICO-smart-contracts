@@ -13,8 +13,8 @@ const testKey = "PhaseTests";
 
 describe("ReversibleICO - Phases", function () {
 
-    const deployerAddress = accounts[0];
-    const whitelisterAddress = accounts[1];
+    const deployingAddress = accounts[0];
+    const whitelistingAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress, currentBlock;
     let TokenContractInstance;
 
@@ -38,8 +38,8 @@ describe("ReversibleICO - Phases", function () {
             expect(this.ReversibleICO.receipt.gasUsed).to.be.below(helpers.networkConfig.gas);
         });
 
-        it("Property deployerAddress should be " + deployerAddress, async function () {
-            expect(await this.ReversibleICO.methods.deployerAddress().call()).to.be.equal(deployerAddress);
+        it("Property deployingAddress should be " + deployingAddress, async function () {
+            expect(await this.ReversibleICO.methods.deployingAddress().call()).to.be.equal(deployingAddress);
         });
 
         it("Property initialized should be false", async function () {
@@ -54,8 +54,8 @@ describe("ReversibleICO - Phases", function () {
             expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
-        it("Property whitelisterAddress should be address(0x0)", async function () {
-            expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
+        it("Property whitelistingAddress should be address(0x0)", async function () {
+            expect(await this.ReversibleICO.methods.whitelistingAddress().call()).to.be.equal("0x0000000000000000000000000000000000000000");
         });
 
     });
@@ -91,8 +91,8 @@ describe("ReversibleICO - Phases", function () {
                 expect(await this.ReversibleICO.methods.tokenAddress().call()).to.be.equal(TokenContractAddress);
             });
 
-            it("Property whitelisterAddress should be " + whitelisterAddress, async function () {
-                expect(await this.ReversibleICO.methods.whitelisterAddress().call()).to.be.equal(whitelisterAddress);
+            it("Property whitelistingAddress should be " + whitelistingAddress, async function () {
+                expect(await this.ReversibleICO.methods.whitelistingAddress().call()).to.be.equal(whitelistingAddress);
             });
 
             it("Property projectAddress should be " + projectAddress, async function () {
@@ -244,8 +244,8 @@ describe("ReversibleICO - Phases", function () {
         /*
         before(async function () {
             // jump to commit start
-            // await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 0 );
-            await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployerAddress, 1 );
+            // await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployingAddress, 0 );
+            await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployingAddress, 1 );
         });
         */
     });

@@ -14,8 +14,8 @@ const testKey = "WithdrawTests";
 
 describe("ReversibleICO - Withdraw Testing", function () {
 
-    const deployerAddress = accounts[0];
-    const whitelisterAddress = accounts[1];
+    const deployingAddress = accounts[0];
+    const whitelistingAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -47,7 +47,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
         // jump to phase 0
-        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     }
 
@@ -62,7 +62,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
         // jump to phase 0
-        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     });
 
@@ -77,13 +77,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("2 - Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
@@ -165,13 +165,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("2 - Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
@@ -252,13 +252,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("2 - Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("0");
@@ -362,7 +362,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Buy 2 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
 
             const ContributionAmount = 2 * commitPhasePrice;
             await helpers.web3Instance.eth.sendTransaction({
@@ -386,7 +386,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
@@ -419,13 +419,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("1 - Buy 1 tokens in stage 0", async function () {
             const stageId = 0;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
             // enough for 1 token
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
@@ -444,7 +444,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("2 - Buy 1 tokens in stage 1", async function () {
             const stageId = 1;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
             let ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
             expect(ParticipantByAddress.contributions).to.be.equal("1");
@@ -469,7 +469,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("3 - Jump to stage 1 end block (10 % unlocked)", async function () {
             const stageId = 1;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             const unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("10000000000000000000");
@@ -552,7 +552,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("5 - Buy 1 tokens in stage 2 end (20%)", async function () {
             const stageId = 2;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("20000000000000000000");
@@ -596,7 +596,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         
         it("6 - Buy 1 tokens in stage 4 end (40%)", async function () {
             const stageId = 4;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("40000000000000000000");
@@ -639,7 +639,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("7 - Buy 1 tokens in stage 5 end (50%)", async function () {
             const stageId = 5;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("50000000000000000000");
@@ -733,7 +733,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("8 - A - Return full locked balance of 1.5", async function () {
             const stageId = 5;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
@@ -798,7 +798,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("9 - Buy 1 tokens in stage 8 end (80%)", async function () {
             const stageId = 8;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             let unlockPercentage = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("80000000000000000000");
@@ -897,7 +897,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("8 - B - Return full locked balance of last stage - 0.5", async function () {
             const stageId = 5;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
@@ -1009,7 +1009,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("8 - B - Return 0.1 tokens bought at stage 5 end (50%)", async function () {
             const stageId = 5;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             ParticipantBalanceBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
@@ -1068,7 +1068,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         });
 
         it("move to stage 8 end", async function () {
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 8, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 8, true);
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
         });
@@ -1087,13 +1087,13 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("Buy 900 tokens in stage 0", async function () {
             const stageId = 0;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(900));
             await helpers.web3Instance.eth.sendTransaction({
@@ -1117,7 +1117,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Buy 1 tokens in stage 0", async function () {
             const stageId = 0;
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(1));
             await helpers.web3Instance.eth.sendTransaction({
@@ -1145,7 +1145,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 [TestParticipant],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
@@ -1153,7 +1153,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 0;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
             await helpers.web3Instance.eth.sendTransaction({
@@ -1220,7 +1220,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 1;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             const ParticipantByAddress = await this.ReversibleICO.methods.participants(TestParticipant).call();
 
@@ -1300,7 +1300,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 5;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
             const ContributionAmount = priceInStage(stageId).mul(new BN(2000));
             await helpers.web3Instance.eth.sendTransaction({
@@ -1338,7 +1338,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Jump to end of phase 5 (50 % unlocked)", async function () {
             // jump to last block of stage 5
-            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 5, true);
+            currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 5, true);
         });
         
         it("Expect Unlock percentage to be 50%", async function () {

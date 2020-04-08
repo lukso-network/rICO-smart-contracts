@@ -47,8 +47,8 @@ const anyone = '0x0000000000000000000000000000000000000001';
 let errorMessage;
 
 
-const deployerAddress = accounts[0];
-const whitelisterAddress = accounts[1];
+const deployingAddress = accounts[0];
+const whitelistingAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -150,7 +150,7 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
-            whitelisterAddress, // address _whitelisterAddress
+            whitelistingAddress, // address _whitelistingAddress
             projectAddress,          // address _projectAddress
             commitPhaseStartBlock,                 // uint256 _StartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -159,7 +159,7 @@ async function revertToFreshDeployment() {
             StageBlockCount,            // uint256 _StageBlockCount
             StagePriceIncrease          // uint256 _StagePriceIncrease in wei
         ).send({
-            from: deployerAddress,  // deployer
+            from: deployingAddress,  // deployer
             gas: 3000000
         });
 
@@ -224,7 +224,7 @@ describe("Flow Testing", function () {
                 TestReversibleICO = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOMock");
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployingAddress, 0);
             });
 
             describe("token sender is projectAddress", async function () {
@@ -255,7 +255,7 @@ describe("Flow Testing", function () {
                 });
             });
 
-            describe("token sender is deployerAddress", async function () {
+            describe("token sender is deployingAddress", async function () {
 
                 it("transaction reverts \"Contract must be initialized.\"", async function () {
 
@@ -269,9 +269,9 @@ describe("Flow Testing", function () {
                         new BN("10").pow(new BN("18"))
                     ).toString();
 
-                    // transfer 100 tokens to deployerAddress
+                    // transfer 100 tokens to deployingAddress
                     await TokenContractInstance.methods.send(
-                        deployerAddress,
+                        deployingAddress,
                         testAmount,
                         ERC777data
                     ).send({
@@ -281,13 +281,13 @@ describe("Flow Testing", function () {
 
                     await helpers.assertInvalidOpcode( async () => {
 
-                        // deployerAddress transfers 100 tokens to rico before it is initialised.
+                        // deployingAddress transfers 100 tokens to rico before it is initialised.
                         await TokenContractInstance.methods.send(
                             TestReversibleICO.receipt.contractAddress,
                             testAmount,
                             ERC777data
                         ).send({
-                            from: deployerAddress,
+                            from: deployingAddress,
                             gas: 100000
                         });
 
@@ -355,7 +355,7 @@ describe("Flow Testing", function () {
 
                 await TestReversibleICO.methods.init(
                     TestTokenContractAddress,    // address _TokenContractAddress
-                    whitelisterAddress, // address _whitelisterAddress
+                    whitelistingAddress, // address _whitelistingAddress
                     projectAddress,       // address _projectAddress
                     commitPhaseStartBlock,                 // uint256 _StartBlock
                     commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -364,12 +364,12 @@ describe("Flow Testing", function () {
                     StageBlockCount,            // uint256 _StageBlockCount
                     StagePriceIncrease          // uint256 _StagePriceIncrease in wei
                 ).send({
-                    from: deployerAddress,  // deployer
+                    from: deployingAddress,  // deployer
                     gas: 3000000
                 });
 
                 // jump to contract start
-                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (TestReversibleICO, deployingAddress, 0);
             });
 
             describe("using configured token", async function () {
@@ -406,7 +406,7 @@ describe("Flow Testing", function () {
                     });
                 });
 
-                describe("token sender is deployerAddress ", async function () {
+                describe("token sender is deployingAddress ", async function () {
 
                     it("transaction reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
 
@@ -418,9 +418,9 @@ describe("Flow Testing", function () {
                             new BN("10").pow(new BN("18"))
                         ).toString();
 
-                        // transfer 100 tokens to deployerAddress
+                        // transfer 100 tokens to deployingAddress
                         await TestTokenContract.methods.send(
-                            deployerAddress,
+                            deployingAddress,
                             testAmount,
                             ERC777data
                         ).send({
@@ -430,13 +430,13 @@ describe("Flow Testing", function () {
 
                         await helpers.assertInvalidOpcode( async () => {
 
-                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            // deployingAddress transfers 100 tokens to rico after it is initialised.
                             await TestTokenContract.methods.send(
                                 TestReversibleICOAddress,
                                 testAmount,
                                 ERC777data
                             ).send({
-                                from: deployerAddress,
+                                from: deployingAddress,
                                 gas: 100000
                             });
 
@@ -480,7 +480,7 @@ describe("Flow Testing", function () {
                     });
                 });
 
-                describe("token sender is deployerAddress ", async function () {
+                describe("token sender is deployingAddress ", async function () {
 
                     it("transaction reverts \"Invalid token sent.\"", async function () {
 
@@ -492,9 +492,9 @@ describe("Flow Testing", function () {
                             new BN("10").pow(new BN("18"))
                         ).toString();
 
-                        // transfer 100 tokens to deployerAddress
+                        // transfer 100 tokens to deployingAddress
                         await TokenContractInstance.methods.send(
-                            deployerAddress,
+                            deployingAddress,
                             testAmount,
                             ERC777data
                         ).send({
@@ -504,13 +504,13 @@ describe("Flow Testing", function () {
 
                         await helpers.assertInvalidOpcode( async () => {
 
-                            // deployerAddress transfers 100 tokens to rico after it is initialised.
+                            // deployingAddress transfers 100 tokens to rico after it is initialised.
                             await TokenContractInstance.methods.send(
                                 TestReversibleICOAddress,
                                 testAmount,
                                 ERC777data
                             ).send({
-                                from: deployerAddress,
+                                from: deployingAddress,
                                 gas: 100000
                             });
 
@@ -530,7 +530,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
                 });
 
                 it("getCancelModes() returns (false, false)", async function () {
@@ -589,7 +589,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -658,7 +658,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -674,7 +674,7 @@ describe("Flow Testing", function () {
                         [participant_1],
                         true,
                     ).send({
-                        from: whitelisterAddress
+                        from: whitelistingAddress
                     });
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
@@ -818,7 +818,7 @@ describe("Flow Testing", function () {
 
                 before(async () => {
                     await revertToFreshDeployment();
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                     const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -834,11 +834,11 @@ describe("Flow Testing", function () {
                         [TestParticipantAddress],
                         true,
                     ).send({
-                        from: whitelisterAddress
+                        from: whitelistingAddress
                     });
 
                     // beginning of stage 1 + 1 block
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 1, false, 1);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: TestParticipantAddress,
@@ -848,7 +848,7 @@ describe("Flow Testing", function () {
                     });
 
                     // end of stage 6
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 6, true, 0);
 
                     newContributionTx = await helpers.web3Instance.eth.sendTransaction({
                         from: TestParticipantAddress,
@@ -1480,7 +1480,7 @@ describe("Flow Testing", function () {
         //         const TestParticipantAddress = participant_1;
         //         before(async () => {
         //             await revertToFreshDeployment();
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
         //             const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
@@ -1496,10 +1496,10 @@ describe("Flow Testing", function () {
         //                 [TestParticipantAddress],
         //                 true,
         //             ).send({
-        //                 from: whitelisterAddress
+        //                 from: whitelistingAddress
         //             });
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 1, false, 1);
 
         //             newContributionTx = await helpers.web3Instance.eth.sendTransaction({
         //                 from: TestParticipantAddress,
@@ -1508,7 +1508,7 @@ describe("Flow Testing", function () {
         //                 gasPrice: helpers.networkConfig.gasPrice
         //             });
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 6, true, 0);
+        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 6, true, 0);
 
         //             newContributionTx = await helpers.web3Instance.eth.sendTransaction({
         //                 from: TestParticipantAddress,
@@ -1519,7 +1519,7 @@ describe("Flow Testing", function () {
 
         //             helpers.utils.resetAccountNonceCache(helpers);
 
-        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 12, true, 1);
+        //             currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 12, true, 1);
         //         });
 
         //         it("getCancelModes() returns (false, false)", async function () {
@@ -1569,15 +1569,15 @@ describe("Flow Testing", function () {
 
 });
 
-async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
-    let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployerAddress, stage, end, after );
+async function displayTokensForParticipantAtStage(start, blocks, contract, deployingAddress, participant, stage, end = false, after = false) {
+    let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployingAddress, stage, end, after );
 
     let ParticipantsByAddress = await contract.methods.ParticipantsByAddress(participant).call();
     let totalTokens = ParticipantsByAddress.token_amount;
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployerAddress });
+    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployingAddress });
     let amount1 = await contract.methods.currentReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");

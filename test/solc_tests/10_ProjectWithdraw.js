@@ -51,8 +51,8 @@ let SnapShotKey = "FlowTestInit";
 let snapshotsEnabled = true;
 let snapshots = [];
 
-const deployerAddress = accounts[0];
-const whitelisterAddress = accounts[1];
+const deployingAddress = accounts[0];
+const whitelistingAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, StageCount,
@@ -139,7 +139,7 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _TokenContractAddress
-            whitelisterAddress, // address _whitelisterAddress
+            whitelistingAddress, // address _whitelistingAddress
             projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
@@ -148,7 +148,7 @@ async function revertToFreshDeployment() {
             StageBlockCount,            // uint256 _StageBlockCount
             StagePriceIncrease          // uint256 _StagePriceIncrease in wei
         ).send({
-            from: deployerAddress,  // deployer
+            from: deployingAddress,  // deployer
             gas: 3000000
         });
 
@@ -214,7 +214,7 @@ async function whitelist(address) {
         [address],
         true,
     ).send({
-        from: whitelisterAddress
+        from: whitelistingAddress
     });
 }
 
@@ -234,12 +234,12 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 // await whitelist(participant_1);
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 1, false, 1);
                 helpers.utils.resetAccountNonceCache(helpers);
 
             });
@@ -248,7 +248,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     const stage = 0;
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, stage, true, 0);
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
@@ -264,7 +264,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
 
                     currentBlock = middleBlock;
@@ -285,7 +285,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -309,12 +309,12 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 await commitFundsFromAddress(participant_1, ContributionAmount);
                 await whitelist(participant_1);
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 1, false, 1);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 1, false, 1);
                 helpers.utils.resetAccountNonceCache(helpers);
 
             });
@@ -323,7 +323,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     const stage = 0;
-                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, stage, true, 0);
+                    currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, stage, true, 0);
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
@@ -339,7 +339,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
 
                     currentBlock = middleBlock;
@@ -362,7 +362,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -387,7 +387,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
@@ -396,7 +396,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 // contribution 2
@@ -426,7 +426,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -450,7 +450,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
@@ -459,7 +459,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 // project withdraw
@@ -492,7 +492,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -513,7 +513,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -539,7 +539,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount); // 100 ETH
@@ -548,7 +548,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 const ReturnTokenAmount = new BN(
@@ -599,7 +599,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -627,7 +627,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
@@ -636,7 +636,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 const ReturnTokenAmount = new BN(
@@ -709,7 +709,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -732,7 +732,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
@@ -741,7 +741,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 // project withdraw
@@ -781,7 +781,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -801,7 +801,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -825,7 +825,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 await revertToFreshDeployment();
 
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployerAddress, 0);
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
 
                 // contribution 1
                 await commitFundsFromAddress(participant_1, ContributionAmount);
@@ -834,7 +834,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployerAddress, gas: 100000
+                    from: deployingAddress, gas: 100000
                 });
 
                 // project withdraw
@@ -874,7 +874,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -894,7 +894,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployerAddress, gas: 100000
+                        from: deployingAddress, gas: 100000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -917,15 +917,15 @@ describe("ProjectWithdraw Testing", function () {
 
 });
 
-async function displayTokensForParticipantAtStage(start, blocks, contract, deployerAddress, participant, stage, end = false, after = false) {
-    let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployerAddress, stage, end, after );
+async function displayTokensForParticipantAtStage(start, blocks, contract, deployingAddress, participant, stage, end = false, after = false) {
+    let currentBlock = await helpers.utils.jumpToContractStage ( contract, deployingAddress, stage, end, after );
 
     let ParticipantsByAddress = await contract.methods.ParticipantsByAddress(participant).call();
     let totalTokens = ParticipantsByAddress.token_amount;
 
     let diffBlock = (currentBlock - start);
 
-    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployerAddress });
+    let tx1 = await contract.methods.currentReservedTokenAmount(participant).send({from: deployingAddress });
     let amount1 = await contract.methods.currentReservedTokenAmount(participant).call();
 
     console.log("stage ["+stage+"] ( "+ diffBlock + " )");

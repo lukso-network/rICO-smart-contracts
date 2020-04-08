@@ -3,8 +3,8 @@ global.BN = helpers.BN;
 global.MAX_UINT256 = helpers.MAX_UINT256;
 global.expect = helpers.expect
 
-global.deployerAddress = accounts[0];
-global.whitelisterAddress = accounts[1];
+global.deployingAddress = accounts[0];
+global.whitelistingAddress = accounts[1];
 
 global.holder = accounts[10];
 global.projectAddress = holder;

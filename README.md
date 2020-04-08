@@ -9,34 +9,49 @@ The rICO tries to solve that by keeping investors in control of their funds over
 
 The rICO is set in stages that can be defined in the `init` function.
 
-**Stage 0** is seen as the **"commit phase"**: In this period no ETH from the contract moves to the project, investors can commit or reverse their commitment by sending back the tokens.
+**Stage 0** is seen as the **"commit phase"**: In this period no ETH buys tokens, and no ETH is allocated to the project, 
+investors can commit or reverse their commitment by sending back the tokens.
 
-**Stage 1-x** is called **"buy phase"**, this is where the committed ETH gradually buy the token over time. ETH that already bought tokens is withdrawable by the project. While ETH that is just committed, can be withdrawn by any investor at any point in time, by sending back tokens to the rICO smart contract.
+**Stage 1-x** is called **"buy phase"**, this is where the committed ETH gradually buys the token over time. 
+ETH that already bought tokens is withdrawable by the project. 
+While ETH that is just committed and "reserved" tokens, can be withdrawn by any investor at any point in time, 
+by sending back reserved tokens to the rICO smart contract.
 
-Each stage can also have a price increase, so that committing early is rewarded.
+Each stage has a price increase, so that committing early is rewarded.
 The scheme looks a little bit as follows:
 
 ![alt text](https://github.com/lukso-network/rICO-smart-contracts/raw/master/rICO-diagram.png "rICO Diagram")
 
+### How do I reserve tokens?
+
+To reserve tokens at any stage, call the `commit()` function and send the amount of ETH along that you want to reserve tokens with.
+
 ### What happens if somebody commits during stage 1-x
 
-Committing during stage 1-x means that a percentage of the ETH committed will automatically buy tokens according to the current point in time. So instantly only *part* of the ETH can be withdrawn by sending back tokens.
-The time passing is for every investor the same, so late comers buy as much tokens at a certain point in time, as early adopters.
+Committing during stage 1-x means that the rICO period of buying of tokens over time is shorter, 
+as the period starts for everyone at the point in time of their commitment.
 
-### Why do I get the full balance of tokens, if I have not bought them yet?
+E.g. if you come in at month 3 of 10, your rICO will take place over 7 months and end with everyone else.
 
-This is done so that normal token wallets can function as an interface to reverse a commitment.
-You will see the full token balance on your address, but will only be able to move the amount you have actually bough at this point in time.
+### Why do I see the full balance of tokens, if I have not bought them yet?
 
-While in reverse you will only be able to send back the amount of tokens that you still have committed ETH for. Should you send a higher balance than what you can withdraw in ETH you will only return the amount matching your unbought token balance.
+This is done so that normal token wallets can function as an interface to the rICO.
+You will see the full token balance at your address, but will only be able to move the amount you have actually bough by this point in time.
+
+While in reverse you will only be able to send back the amount of tokens that you still have reserved. 
+Should you send a higher reserved token balance you will only return the amount of ETH matching your reserved token balance, 
+and get the rest tokens returned automatically.
 
 ### What is the pending state?
 
-When you commit ETH your address needs to be whitelisted first. This is done by the project by calling `whitelistApproveOrReject()` on the rICO smart contract. Should your address be rejected, then you will recevie your committed ETH back. Should it be approved you will see your full token balance.
+When you commit ETH your address needs to be whitelisted first. 
+This is done by the projects whitelisting address by calling `whitelist(address[], bool)` on the rICO smart contract. 
+Should your address be rejected, you will receive your committed ETH back. Should it be approved you will see your full token balance at your committing address.
 
-### What if i want to withdraw ETH while my address is pending?
+### What if I want to withdraw ETH while my address is pending?
 
-This can be done by sending an ETH transaction with 0 value, or smaller than `minContribution` (default 0.001 ether) to the rICo smart contract address. This will trigger a cancel of the pending commitment.
+This can be done by sending an ETH transaction with 0 value, or smaller than `minContribution` (default 0.001 ether) to the rICO smart contract address.
+Or call the `cancel()` function. This will trigger a cancel of all pending ETH.
 
 ## Development
 
@@ -65,7 +80,7 @@ npm run test
 ### Running Tests
 
 ```bash
-npm test
+npm run test-solc
 ```
 
 ### Merging contracts for deployment

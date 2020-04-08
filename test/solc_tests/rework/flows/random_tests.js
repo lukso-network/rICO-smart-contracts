@@ -14,8 +14,8 @@ const testKey = "WithdrawTokenTests";
 
 describe("ReversibleICO - Withdraw Token Balance", function () {
 
-    const deployerAddress = accounts[0];
-    const whitelisterAddress = accounts[1];
+    const deployingAddress = accounts[0];
+    const whitelistingAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
     let ReversibleICO;
@@ -79,7 +79,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         RICOContractAddress = ReversibleICO.receipt.contractAddress;
 
 
-        const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployerAddress, 0);
+        const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     }
 
@@ -94,7 +94,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         RICOContractAddress = ReversibleICO.receipt.contractAddress;
 
 
-        // const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployerAddress, 0);
+        // const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
 
     });
@@ -106,7 +106,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             // helpers.utils.resetAccountNonceCache(helpers);
 
             await ReversibleICO.methods.jumpToBlockNumber(commitPhaseStartBlock).send({
-                from: deployerAddress,
+                from: deployingAddress,
                 gas: 100000
             });
 
@@ -158,7 +158,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     [participant.address],
                                     true
                                 ).send({
-                                    from: whitelisterAddress
+                                    from: whitelistingAddress
                                 });
                             }
 
@@ -272,7 +272,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
             it("Jump to the next block: "+ blockNumber, async function () {
                 // jump to the next block
                 await ReversibleICO.methods.jumpToBlockNumber(blockNumber).send({
-                    from: deployerAddress,
+                    from: deployingAddress,
                     gas: 100000
                 });
 

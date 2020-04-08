@@ -14,8 +14,8 @@ const testKey = "TokenCommitTests";
 
 describe("ReversibleICO - Methods - Tokens", function () {
 
-    const deployerAddress = accounts[0];
-    const whitelisterAddress = accounts[1];
+    const deployingAddress = accounts[0];
+    const whitelistingAddress = accounts[1];
     let TokenContractAddress, RICOContractAddress;
     let TokenContractInstance;
 
@@ -42,7 +42,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
-        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, 0);
+        const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     });
 
@@ -56,7 +56,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
             whitelistTx = await this.ReversibleICO.methods.whitelist(
                 [TestParticipant], true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
 
             await saveSnapshot(testSnapshotKey);
@@ -75,7 +75,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = 0;
 
                     // jump to stage
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -94,7 +94,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = 1;
 
                     // jump to stage
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -113,7 +113,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const tokensToBuy = 1;
 
                     // jump to stage
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -132,7 +132,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const tokensToBuy = 1;
 
                     // jump to stage
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -161,7 +161,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = customTestSettings.rico.stageCount;
 
                     // jump to stage 
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -180,7 +180,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = 1;
 
                     // jump to stage 1
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({
@@ -199,7 +199,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                     const stageId = 1;
 
                     // jump to stage 1
-                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployerAddress, stageId);
+                    currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
                     await helpers.web3Instance.eth.sendTransaction({

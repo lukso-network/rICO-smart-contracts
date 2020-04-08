@@ -257,7 +257,7 @@ describe("Gnosis Safe Integration", function () {
 
             it("returns the correct deployer for Rico", async function () {
                 expect(
-                    await this.Rico.methods.deployerAddress().call()
+                    await this.Rico.methods.deployingAddress().call()
                 ).to.be.equal(
                     this.addresses.GnosisSafe
                 );
@@ -336,7 +336,7 @@ describe("Gnosis Safe Integration", function () {
 
                 let settingsData = this.Rico.methods.init(
                     TokenContractAddress,            // address _TokenContractAddress
-                    whitelisterAddress,     // address _whitelisterAddress
+                    whitelistingAddress,     // address _whitelistingAddress
                     projectAddress,           // address _projectAddress
                     commitPhaseStartBlock,                     // uint256 _commitPhaseStartBlock
                     commitPhaseBlockCount,           // uint256 _commitPhaseBlockCount,
@@ -380,8 +380,8 @@ describe("Gnosis Safe Integration", function () {
                 ).to.be.equal(TokenContractAddress);
 
                 expect(
-                    await this.ReversibleICO.methods.whitelisterAddress().call()
-                ).to.be.equal(whitelisterAddress);
+                    await this.ReversibleICO.methods.whitelistingAddress().call()
+                ).to.be.equal(whitelistingAddress);
 
                 expect(
                     await this.ReversibleICO.methods.projectAddress().call()

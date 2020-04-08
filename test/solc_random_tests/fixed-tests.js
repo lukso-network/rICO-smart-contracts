@@ -18,7 +18,7 @@ module.exports = {
         const rICOSettings = { 
 
             ContractsDeployer: init.accounts[2],
-            whitelisterAddress: init.accounts[3],
+            whitelistingAddress: init.accounts[3],
             projectAddress: init.accounts[4],
 
             blocksPerDay:    5,     // 6450;
@@ -38,7 +38,7 @@ module.exports = {
         init.deployment = {
             addresses: {
                 ContractsDeployer: null,
-                whitelisterAddress: null,
+                whitelistingAddress: null,
                 projectAddress: null,
             },
             contracts: {
@@ -81,7 +81,7 @@ module.exports = {
         console.log("");
         console.log("      rICO block length:", rICOBlockLength);
 
-        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelisterAddress);
+        const Whitelister = new whitelister(init, rICO, rICOSettings.whitelistingAddress);
         init.deployment.whitelister = Whitelister;
         console.log("      Whitelister:", Whitelister.address);
 

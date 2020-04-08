@@ -39,14 +39,14 @@ contract ReversibleICO is IERC777Recipient {
     /*
      *   Addresses
      */
-    /// @dev Only the deployer is allowed to initialize the contract.
-    address public deployerAddress;
+    /// @dev Only the deploying address is allowed to initialize the contract.
+    address public deployingAddress;
     /// @dev The rICO token contract address.
     address public tokenAddress;
     /// @dev The address of wallet of the project running the rICO.
     address public projectAddress;
     /// @dev Only the whitelist controller can whitelist addresses.
-    address public whitelisterAddress;
+    address public whitelistingAddress;
 
 
     /*
@@ -198,14 +198,14 @@ contract ReversibleICO is IERC777Recipient {
 
     /// @notice Constructor sets the deployer and defines ERC777TokensRecipient interface support.
     constructor() public {
-        deployerAddress = msg.sender;
+        deployingAddress = msg.sender;
         ERC1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
     /**
      * @notice Initializes the contract. Only the deployer (set in the constructor) can call this method.
      * @param _tokenAddress The address of the ERC777 rICO token contract.
-     * @param _whitelisterAddress The address handling whitelisting.
+     * @param _whitelistingAddress The address handling whitelisting.
      * @param _projectAddress The project wallet that can withdraw ETH contributions.
      * @param _commitPhaseStartBlock The block at which the commit phase starts.
      * @param _commitPhaseBlockCount The duration of the commit phase in blocks.
@@ -216,7 +216,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function init(
         address _tokenAddress,
-        address _whitelisterAddress,
+        address _whitelistingAddress,
         address _projectAddress,
         uint256 _commitPhaseStartBlock,
         uint256 _commitPhaseBlockCount,
@@ -226,7 +226,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 _stagePriceIncrease
     )
     public
-    onlyDeployer
+    onlyDeployingAddress
     isNotInitialized
     {
 
@@ -234,7 +234,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Assign address variables
         tokenAddress = _tokenAddress;
-        whitelisterAddress = _whitelisterAddress;
+        whitelistingAddress = _whitelistingAddress;
         projectAddress = _projectAddress;
 
         // UPDATE global STATS
@@ -402,7 +402,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function whitelist(address[] calldata _addresses, bool _approve)
     external
-    onlyWhitelister
+    onlyWhitelistingAddress
     isInitialized
     isNotFrozen
     isRunning
@@ -442,7 +442,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function projectWithdraw(uint256 _ethAmount)
     external
-    onlyProject
+    onlyProjectAddress
     isInitialized
     {
         // UPDATE the locked/unlocked ratio for the project
@@ -484,14 +484,15 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns TRUE if the participant is whitelisted, otherwise FALSE.
      * @param _address the participant's address.
      * @return Boolean
+     * TODO remove? use participants(address).whitelisted
      */
     function isWhitelisted(address _address) public view returns (bool) {
         return participants[_address].whitelisted;
     }
 
     /**
-     * @notice Returns project's current available ETH and unlocked ETH amount.
-     * @return uint256 The unlocked amount available to the project for withdraw.
+     * @notice Returns project's current available unlocked ETH reduced by what was already withdrawn.
+     * @return uint256 The amount of ETH available to the project for withdraw.
      */
     function getAvailableProjectETH() public view returns (uint256) {
 
@@ -1040,7 +1041,7 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Checks if the sender is the project.
      */
-    modifier onlyProject() {
+    modifier onlyProjectAddress() {
         require(msg.sender == projectAddress, "Only the project can call this method.");
         _;
     }
@@ -1048,16 +1049,16 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Checks if the sender is the deployer.
      */
-    modifier onlyDeployer() {
-        require(msg.sender == deployerAddress, "Only the deployer can call this method.");
+    modifier onlyDeployingAddress() {
+        require(msg.sender == deployingAddress, "Only the deployer can call this method.");
         _;
     }
 
     /**
      * @notice Checks if the sender is the whitelist controller.
      */
-    modifier onlyWhitelister() {
-        require(msg.sender == whitelisterAddress, "Only the whitelist controller can call this method.");
+    modifier onlyWhitelistingAddress() {
+        require(msg.sender == whitelistingAddress, "Only the whitelist controller can call this method.");
         _;
     }
 

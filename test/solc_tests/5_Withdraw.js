@@ -48,8 +48,8 @@ let SnapShotKey = "ContributionsTestInit";
 let snapshotsEnabled = true;
 let snapshots = [];
 
-const deployerAddress = accounts[0];
-const whitelisterAddress = accounts[1];
+const deployingAddress = accounts[0];
+const whitelistingAddress = accounts[1];
 
 let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlock,
     commitPhaseStartBlock, commitPhaseBlockCount, commitPhasePrice, commitPhaseEndBlock, StageCount,
@@ -136,7 +136,7 @@ async function revertToFreshDeployment() {
 
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,       // address _tokenAddress
-            whitelisterAddress, // address _whitelisterAddress
+            whitelistingAddress, // address _whitelistingAddress
             projectAddress,       // address _projectAddress
             commitPhaseStartBlock,      // uint256 _StartBlock
             commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
@@ -145,7 +145,7 @@ async function revertToFreshDeployment() {
             StageBlockCount,            // uint256 _stageBlockCount
             StagePriceIncrease          // uint256 _stagePriceIncrease in wei
         ).send({
-            from: deployerAddress,  // deployer
+            from: deployingAddress,  // deployer
             gas: 3000000
         });
 
@@ -204,7 +204,7 @@ describe("Withdrawal Testing", function () {
             await revertToFreshDeployment();
             helpers.utils.resetAccountNonceCache(helpers);
             // jump to contract start
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("Whitelist buyer", async function () {
@@ -212,13 +212,13 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -275,12 +275,12 @@ describe("Withdrawal Testing", function () {
             await revertToFreshDeployment();
             helpers.utils.resetAccountNonceCache(helpers);
             // jump to contract start
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("Buy 2 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -306,7 +306,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
 
             let balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
@@ -325,7 +325,7 @@ describe("Withdrawal Testing", function () {
             await revertToFreshDeployment();
             helpers.utils.resetAccountNonceCache(helpers);
             // jump to contract start
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("Whitelist buyer", async function () {
@@ -333,13 +333,13 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -365,7 +365,7 @@ describe("Withdrawal Testing", function () {
             console.log("balance before:    ", balance.toString());
 
             // jump to phase 1
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 1);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -388,7 +388,7 @@ describe("Withdrawal Testing", function () {
 
         it("Jump to phase 2 (10 % unlocked)", async function () {
             // jump to last block of phase 1
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 1, true);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 1, true);
 
             let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("10000000000000000000");
@@ -433,7 +433,7 @@ describe("Withdrawal Testing", function () {
             await revertToFreshDeployment();
             helpers.utils.resetAccountNonceCache(helpers);
             // jump to contract start
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("Whitelist buyer", async function () {
@@ -441,13 +441,13 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
         it("Buy 900 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -473,7 +473,7 @@ describe("Withdrawal Testing", function () {
 
         it("Buy 1 tokens in phase 0", async function () {
             // jump to phase 0
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
 
             let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -496,7 +496,7 @@ describe("Withdrawal Testing", function () {
             await revertToFreshDeployment();
             helpers.utils.resetAccountNonceCache(helpers);
             // jump to contract start
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 0);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 0);
         });
 
         it("Whitelist buyer", async function () {
@@ -504,7 +504,7 @@ describe("Withdrawal Testing", function () {
                 [participant_1],
                 true
             ).send({
-                from: whitelisterAddress
+                from: whitelistingAddress
             });
         });
 
@@ -512,7 +512,7 @@ describe("Withdrawal Testing", function () {
             const stage = 0;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, stage);
 
             const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -551,7 +551,7 @@ describe("Withdrawal Testing", function () {
             const stage = 1;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, stage);
 
             const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -590,7 +590,7 @@ describe("Withdrawal Testing", function () {
             const stage = 5;
 
             // jump to stage
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, stage);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, stage);
 
             const ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
 
@@ -627,7 +627,7 @@ describe("Withdrawal Testing", function () {
 
         it("Jump to end of phase 5 (50 % unlocked)", async function () {
             // jump to last block of phase 1
-            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployerAddress, 5, true);
+            currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 5, true);
 
             let unlockPercentage = await ReversibleICOInstance.methods.getCurrentGlobalUnlockRatio().call();
             expect(unlockPercentage).to.be.equal("50000000000000000000");
