@@ -16,7 +16,8 @@ contract ReversibleICOMock is ReversibleICO {
 
     // required so we can override when running tests
     function getCurrentBlockNumber() public view returns (uint256) {
-        return currentBlockNumber;
+        return currentBlockNumber
+        .sub(frozenPeriod); // make sure we deduct any frozenPeriod from calculations;
     }
 
     function increaseCurrentBlockNumber(uint256 _num) public {

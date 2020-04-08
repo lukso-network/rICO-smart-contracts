@@ -114,12 +114,34 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         // iterate over all phases
         //commitPhaseStartBlock
-        for (let blockNumber = commitPhaseStartBlock; blockNumber < buyPhaseEndBlock; blockNumber++) {
+        for (let blockNumber = commitPhaseStartBlock; blockNumber < buyPhaseEndBlock + 11 /* add frozen period */; blockNumber++) {
 
             console.log('Current Block: ', blockNumber);
 
-            // go over every participant
-            for (let i = 0; i < numberOfParticipants; i++) {
+            if(blockNumber == 22) {
+                it("Freeze contract at block "+ blockNumber, async function () {
+                    // freeze contract in the middle
+                    await ReversibleICO.methods.freeze().send({
+                        from: projectAddress,
+                        gas: 1000000
+                    });
+                });
+            }
+
+            if(blockNumber == 33) {
+                it("Unfreeze contract at block "+ blockNumber, async function () {
+                    // freeze contract in the middle
+                    await ReversibleICO.methods.unfreeze().send({
+                        from: projectAddress,
+                        gas: 1000000
+                    });
+                });
+            }
+
+            if(blockNumber < 22 || blockNumber > 33) {
+
+                // go over every participant
+                for (let i = 0; i < numberOfParticipants; i++) {
                 let participant = participants[i];
 
                 // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
@@ -159,7 +181,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     true
                                 ).send({
                                     from: whitelistingAddress
-                                });
+                                }).catch(done);
                             }
 
                             // calc random token amount
@@ -255,17 +277,29 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                 // PROJECT WITHDRAW
                 if(task === 3) {
-                    it(project.address +" Project: Withdraws ETH", async function () {
-                        const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+                    it(project.address +" Project: Withdraws ETH", function (done) {
 
-                        // withdraw everything the project can at that point in time
-                        await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
-                            from: project.address,
-                            gas: 1000000
-                        });
-                        project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+                        ( async function(){
+                            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+
+                            // withdraw everything the project can at that point in time
+                            await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
+                                from: project.address,
+                                gas: 1000000
+                            }).then(() => {
+
+                                project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+
+                                done();
+                            }, (error) => {
+                                helpers.utils.resetAccountNonceCache(helpers);
+                                done(error);
+                            });
+                        })();
                     });
                 }
+
+            }
 
             }
 

@@ -32,8 +32,10 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev It is set to TRUE after the deployer initializes the contract.
     bool public initialized;
 
-    /// @dev The contract can be automatically frozen in case of inconsistencies.
+    /// @dev Security guard. The freezer address can the freeze the contract and move its funds in case of emergency.
     bool public frozen;
+    uint256 public frozenPeriod;
+    uint256 public freezeStart;
 
 
     /*
@@ -47,6 +49,8 @@ contract ReversibleICO is IERC777Recipient {
     address public projectAddress;
     /// @dev Only the whitelist controller can whitelist addresses.
     address public whitelistingAddress;
+    /// @dev Only the freezer address controller can call the freeze functions.
+    address public freezerAddress;
 
 
     /*
@@ -235,6 +239,7 @@ contract ReversibleICO is IERC777Recipient {
         // Assign address variables
         tokenAddress = _tokenAddress;
         whitelistingAddress = _whitelistingAddress;
+        freezerAddress = _projectAddress; // TODO change, here only for testing
         projectAddress = _projectAddress;
 
         // UPDATE global STATS
@@ -441,12 +446,12 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Allows for the project to withdraw ETH.
      * @param _ethAmount The ETH amount in wei.
-     * // TODO add isNotFrozen?
      */
     function projectWithdraw(uint256 _ethAmount)
     external
     onlyProjectAddress
     isInitialized
+    isNotFrozen
     {
         // UPDATE the locked/unlocked ratio for the project
         calcProjectAllocation();
@@ -477,6 +482,67 @@ contract ReversibleICO is IERC777Recipient {
         );
     }
 
+    /*
+    * Security functions.
+    * If the rICO runs fine the freezer address can be set to 0x0, for the beginning its good to have a safe guard.
+    */
+
+    /**
+     * @notice Sets the freeze address to 0x0
+     */
+    function removeFreezerAddress()
+    external
+    onlyProjectAddress
+    onlyFreezerAddress
+    {
+        freezerAddress = address(0);
+    }
+
+    /**
+     * @notice Freezes the rICO in case of emergency.
+     */
+    function freeze()
+    external
+    onlyProjectAddress
+    onlyFreezerAddress
+    isNotFrozen
+    {
+        frozen = true;
+        freezeStart = getCurrentBlockNumber();
+    }
+
+    /**
+     * @notice Un-freezes the rICO.
+     */
+    function unfreeze()
+    external
+    onlyProjectAddress
+    onlyFreezerAddress
+    isFrozen
+    {
+        uint256 currentBlock = getCurrentBlockNumber();
+
+        frozen = false;
+        frozenPeriod = frozenPeriod.add(
+            currentBlock.sub(freezeStart)
+        );
+    }
+
+    /**
+     * @notice Moves the funds to a safe place, in case of emergency. Only possible, when the the rICO is frozen.
+     */
+    function rescueFunds()
+    external
+    onlyFreezerAddress
+    isFrozen
+    {
+        // sent all ETH from the contract to the project
+        address(uint160(projectAddress)).transfer(address(this).balance);
+
+        // solium-disable-next-line security/no-send
+        // sent all tokens from the contract to the project
+        IERC777(tokenAddress).send(projectAddress, IERC777(tokenAddress).balanceOf(address(this)), "");
+    }
 
     /*
      * Public view functions
@@ -651,7 +717,8 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns the current block number: required in order to override when running tests.
      */
     function getCurrentBlockNumber() public view returns (uint256) {
-        return block.number;
+        return uint256(block.number)
+        .sub(frozenPeriod); // make sure we deduct any frozenPeriod from calculations
     }
 
     /**
@@ -1026,6 +1093,14 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
+     * @notice Checks if the sender is the freezer controller address.
+     */
+    modifier onlyFreezerAddress() {
+        require(msg.sender == freezerAddress, "Only the whitelist controller can call this method.");
+        _;
+    }
+
+    /**
      * @notice Requires the contract to have been initialized.
      */
     modifier isInitialized() {
@@ -1037,15 +1112,23 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Requires the contract to NOT have been initialized,
      */
     modifier isNotInitialized() {
-        require(initialized == false, "Contract is already initialized.");
+        require(initialized == false, "Contract can not be initialized.");
         _;
     }
 
     /**
-     * @notice @dev Requires the contract to be not frozen.
+     * @notice @dev Requires the contract to be frozen.
+     */
+    modifier isFrozen() {
+        require(frozen == true, "rICO has to be frozen!");
+        _;
+    }
+
+    /**
+     * @notice @dev Requires the contract not to be frozen.
      */
     modifier isNotFrozen() {
-        require(frozen == false, "Contract frozen!");
+        require(frozen == false, "rICO is frozen!");
         _;
     }
 
