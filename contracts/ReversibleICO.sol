@@ -49,8 +49,10 @@ contract ReversibleICO is IERC777Recipient {
     address public projectAddress;
     /// @dev Only the whitelist controller can whitelist addresses.
     address public whitelistingAddress;
-    /// @dev Only the freezer address controller can call the freeze functions.
+    /// @dev Only the freezer address can call the freeze functions.
     address public freezerAddress;
+    /// @dev Only the rescuer address can move funds if the rICO is frozen.
+    address public rescuerAddress;
 
 
     /*
@@ -239,8 +241,9 @@ contract ReversibleICO is IERC777Recipient {
         // Assign address variables
         tokenAddress = _tokenAddress;
         whitelistingAddress = _whitelistingAddress;
-        freezerAddress = _projectAddress; // TODO change, here only for testing
         projectAddress = _projectAddress;
+        freezerAddress = _projectAddress; // TODO change, here only for testing
+        rescuerAddress = _projectAddress; // TODO change, here only for testing
 
         // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;
@@ -465,9 +468,6 @@ contract ReversibleICO is IERC777Recipient {
         projectWithdrawCount++;
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
 
-        // Transfer ETH to project wallet
-        address(uint160(projectAddress)).transfer(_ethAmount);
-
         // Event emission
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.PROJECT_WITHDRAWN),
@@ -480,6 +480,9 @@ contract ReversibleICO is IERC777Recipient {
             projectAddress,
             _ethAmount
         );
+
+        // Transfer ETH to project wallet
+        address(uint160(projectAddress)).transfer(_ethAmount);
     }
 
     /*
@@ -531,17 +534,20 @@ contract ReversibleICO is IERC777Recipient {
     /**
      * @notice Moves the funds to a safe place, in case of emergency. Only possible, when the the rICO is frozen.
      */
-    function rescueFunds()
+    function rescueFunds(address _to)
     external
-    onlyFreezerAddress
+    onlyRescuerAddress
     isFrozen
     {
-        // sent all ETH from the contract to the project
-        address(uint160(projectAddress)).transfer(address(this).balance);
+        uint256 tokenBalance = IERC777(tokenAddress).balanceOf(address(this));
+        uint256 ethBalance = address(this).balance;
 
+        // sent all tokens from the contract to the _to address
         // solium-disable-next-line security/no-send
-        // sent all tokens from the contract to the project
-        IERC777(tokenAddress).send(projectAddress, IERC777(tokenAddress).balanceOf(address(this)), "");
+        IERC777(tokenAddress).send(_to, tokenBalance, "");
+
+        // sent all ETH from the contract to the _to address
+        address(uint160(_to)).transfer(ethBalance);
     }
 
     /*
@@ -889,9 +895,6 @@ contract ReversibleICO is IERC777Recipient {
         canceledETH = canceledETH.add(pendingEth);
         pendingETH = pendingETH.sub(pendingEth);
 
-        // transfer ETH back to participant including received value
-        address(uint160(_participantAddress)).transfer(pendingEth.add(_sentValue));
-
         // event emission
         emit TransferEvent(uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED), _participantAddress, pendingEth);
         emit ApplicationEvent(
@@ -900,6 +903,9 @@ contract ReversibleICO is IERC777Recipient {
             _participantAddress,
             pendingEth
         );
+
+        // transfer ETH back to participant including received value
+        address(uint160(_participantAddress)).transfer(pendingEth.add(_sentValue));
     }
 
 
@@ -982,8 +988,9 @@ contract ReversibleICO is IERC777Recipient {
             // UPDATE global STATS
             withdrawnETH = withdrawnETH.add(totalReturnETH);
 
-            address(uint160(_participantAddress)).transfer(totalReturnETH);
             emit TransferEvent(uint8(TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW), _participantAddress, totalReturnETH);
+
+            address(uint160(_participantAddress)).transfer(totalReturnETH);
         }
 
         // Transfer tokens to the participant
@@ -1054,14 +1061,16 @@ contract ReversibleICO is IERC777Recipient {
         if (overflowingTokenAmount > 0) {
             // send tokens back to participant
             bytes memory data;
+
             // solium-disable-next-line security/no-send
             IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
             emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
         }
 
+        emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
+
         // Return ETH back to participant
         address(uint160(_participantAddress)).transfer(returnEthAmount);
-        emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
     }
 
     /*
@@ -1096,7 +1105,15 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Checks if the sender is the freezer controller address.
      */
     modifier onlyFreezerAddress() {
-        require(msg.sender == freezerAddress, "Only the whitelist controller can call this method.");
+        require(msg.sender == freezerAddress, "Only the freezer address can call this method.");
+        _;
+    }
+
+    /**
+     * @notice Checks if the sender is the freezer controller address.
+     */
+    modifier onlyRescuerAddress() {
+        require(msg.sender == rescuerAddress, "Only the rescuer address can call this method.");
         _;
     }
 
