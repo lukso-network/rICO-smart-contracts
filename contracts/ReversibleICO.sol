@@ -490,23 +490,12 @@ contract ReversibleICO is IERC777Recipient {
     * If the rICO runs fine the freezer address can be set to 0x0, for the beginning its good to have a safe guard.
     */
 
-    /**
-     * @notice Sets the freeze address to 0x0
-     */
-    function removeFreezerAddress()
-    external
-    onlyProjectAddress
-    onlyFreezerAddress
-    {
-        freezerAddress = address(0);
-    }
 
     /**
      * @notice Freezes the rICO in case of emergency.
      */
     function freeze()
     external
-    onlyProjectAddress
     onlyFreezerAddress
     isNotFrozen
     {
@@ -519,7 +508,6 @@ contract ReversibleICO is IERC777Recipient {
      */
     function unfreeze()
     external
-    onlyProjectAddress
     onlyFreezerAddress
     isFrozen
     {
@@ -532,9 +520,21 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
+     * @notice Sets the freeze address to 0x0
+     */
+    function disableEscapeHatch()
+    external
+    onlyFreezerAddress
+    isNotFrozen
+    {
+        freezerAddress = address(0);
+        rescuerAddress = address(0);
+    }
+
+    /**
      * @notice Moves the funds to a safe place, in case of emergency. Only possible, when the the rICO is frozen.
      */
-    function rescueFunds(address _to)
+    function escapeHatch(address _to)
     external
     onlyRescuerAddress
     isFrozen
@@ -549,6 +549,7 @@ contract ReversibleICO is IERC777Recipient {
         // sent all ETH from the contract to the _to address
         address(uint160(_to)).transfer(ethBalance);
     }
+
 
     /*
      * Public view functions
