@@ -867,6 +867,10 @@ contract ReversibleICO is IERC777Recipient {
 
         // transfer ETH back to participant including received value
         address(uint160(_participantAddress)).transfer(pendingEth.add(_sentValue));
+
+        // SANITY check
+        sanityCheckParticipant(_participantAddress);
+        sanityCheckProject();
     }
 
 
@@ -940,9 +944,6 @@ contract ReversibleICO is IERC777Recipient {
             emit ApplicationEvent(uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED), uint32(stageId), _participantAddress, newlyCommittedEth);
         }
 
-        // SANITY CHECK
-        sanityCheckParticipant(_participantAddress);
-
         // Return what couldn't be accepted
         if (totalReturnETH > 0) {
 
@@ -957,6 +958,10 @@ contract ReversibleICO is IERC777Recipient {
         // Transfer tokens to the participant
         // solium-disable-next-line security/no-send
         IERC777(tokenAddress).send(_participantAddress, totalNewTokens, "");
+
+        // SANITY CHECK
+        sanityCheckParticipant(_participantAddress);
+        sanityCheckProject();
     }
 
 
@@ -1014,9 +1019,6 @@ contract ReversibleICO is IERC777Recipient {
 
         _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.sub(returnEthAmount);
 
-        // SANITY CHECK
-        sanityCheckParticipant(_participantAddress);
-
 
         // Return overflowing tokens received
         if (overflowingTokenAmount > 0) {
@@ -1032,6 +1034,10 @@ contract ReversibleICO is IERC777Recipient {
 
         // Return ETH back to participant
         address(uint160(_participantAddress)).transfer(returnEthAmount);
+
+        // SANITY CHECK
+        sanityCheckParticipant(_participantAddress);
+        sanityCheckProject();
     }
 
     /*
