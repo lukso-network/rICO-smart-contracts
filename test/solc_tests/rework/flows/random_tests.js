@@ -26,7 +26,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
-    customTestSettings.rico.blocksPerDay = 3;
+    customTestSettings.rico.blocksPerDay = 30;
     customTestSettings.rico.commitPhaseDays = 2;
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
@@ -174,8 +174,9 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                         ( async function(){
                             // WHITELIST
                             let particip = await ReversibleICO.methods.participants(participant.address).call();
+                            let stage = await ReversibleICO.methods.getCurrentStage().call();
 
-                            if (!particip.whitelisted && particip.contributions > 1) {
+                            if (!particip.whitelisted && stage == 2) {//particip.contributions > 6) {
                                 await ReversibleICO.methods.whitelist(
                                     [participant.address],
                                     true
@@ -415,7 +416,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 });
 
 
-                console.log('Participant Stats ', await ReversibleICO.methods.participants(participant.address).call());
+                console.log('Participant Stats: '+ participant.address, await ReversibleICO.methods.participants(participant.address).call());
 
                 console.log('-------');
                 if(participant.pricesPaid.length)

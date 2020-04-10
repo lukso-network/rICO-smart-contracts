@@ -88,5 +88,19 @@ npm run test-solc
 ```bash
 npm run merge-contracts
 ```
-
 Outputs the merged contracts in `./contracts-merged`
+
+
+### Gas costs
+
+- Contribution before whitelisting: ~60-130k GAS (first contribution is more expensive ~130k GAS)
+- Contribution after whitelisting: ~190k GAS
+- Project Withdraw: ~70k GAS
+- Whitelisting: ~200k-650k GAS (with max 9 stages) (depends in how much stages were contributions)
+
+
+## Main Contributors
+
+- Micky Socaci <micky@binarzone.com>
+- Fabian Vogelsteller <@frozeman>
+- Marjorie Hernandez <marjorie@lukso.io>

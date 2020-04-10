@@ -653,14 +653,16 @@ contract ReversibleICO is IERC777Recipient {
     */
     function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
 
-        require(_blockNumber >= commitPhaseStartBlock && _blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
+        uint256 blockNumber = _blockNumber.sub(frozenPeriod); // adjust the block by the frozen period
 
-        if (_blockNumber <= commitPhaseEndBlock) {
+        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
+
+        if (blockNumber <= commitPhaseEndBlock) {
             return 0;
         }
 
         // This is the number of blocks starting from the first stage.
-        uint256 distance = _blockNumber - (commitPhaseEndBlock + 1);
+        uint256 distance = blockNumber - (commitPhaseEndBlock + 1);
         // Get the stageId (1..stageCount), commitPhase is stage 0
         // e.g. distance = 5, stageBlockCount = 5, stageID = 2
         uint256 stageID = 1 + (distance / stageBlockCount);
