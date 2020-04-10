@@ -485,11 +485,11 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(projectAddress)).transfer(_ethAmount);
     }
 
+
     /*
     * Security functions.
     * If the rICO runs fine the freezer address can be set to 0x0, for the beginning its good to have a safe guard.
     */
-
 
     /**
      * @notice Freezes the rICO in case of emergency.
@@ -539,7 +539,7 @@ contract ReversibleICO is IERC777Recipient {
     onlyRescuerAddress
     isFrozen
     {
-        require(getCurrentBlockNumber() == freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.')
+        require(getCurrentBlockNumber() == freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
 
         uint256 tokenBalance = IERC777(tokenAddress).balanceOf(address(this));
         uint256 ethBalance = address(this).balance;
@@ -576,30 +576,9 @@ contract ReversibleICO is IERC777Recipient {
      * @return uint256 The amount of ETH available to the project for withdraw.
      */
     function getAvailableProjectETH() public view returns (uint256) {
-
         return getUnlockedProjectETH()
             .sub(projectWithdrawnETH);
     }
-
-    /**
-     * @notice Returns TRUE if the participant is whitelisted, otherwise FALSE.
-     * @param _address the participant's address.
-     * @return Boolean
-     * TODO remove? use participants(address).whitelisted
-     */
-    function isParticipantWhitelisted(address _address) public view returns (bool) {
-        return participants[_address].whitelisted;
-    }
-
-
-    /**
-    * @notice Returns the participants current pending ETH in WEI.
-    * @param _participantAddress The participant's address.
-    */
-    function getParticipantPendingEth(address _participantAddress) public view returns (uint256) {
-        return participants[_participantAddress].pendingEth;
-    }
-
 
     /**
      * @notice Returns the participant's amount of locked tokens at the current block.
@@ -618,7 +597,9 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the participant's amount of locked tokens at the current block.
+     * @notice Returns the participant's amount of unlocked tokens at the current block.
+     * This function is used for internal sanity checks.
+     * Note: this value can differ from the actual unlocked token balance of the participant, if he received tokens from other sources than the rICO.
      * @param _participantAddress The participant's address.
      */
     function getParticipantUnlockedTokens(address _participantAddress) public view returns (uint256) {
@@ -771,31 +752,6 @@ contract ReversibleICO is IERC777Recipient {
         // Return nothing BEFORE the buy phase
         return 0;
     }
-
-
-    // TODO remove
-    function getCurrentGlobalUnlockRatio() public view returns (uint256) {
-        uint256 currentBlock = getCurrentBlockNumber();
-
-        if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
-            // number of blocks ( ie: start=5/end=10 => 10 - 5 + 1 => 6 )
-            uint256 totalBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
-
-            // get the number of blocks that have "elapsed" since the start block
-            // add 1 since start block needs to return higher than 0
-            uint256 passedBlocks = currentBlock.sub(buyPhaseStartBlock).add(1);
-
-            return passedBlocks.mul(10 ** 20)
-            .div(totalBlockCount);
-
-            // Return everything AFTER the buy phase
-        } else if (currentBlock > buyPhaseEndBlock) {
-            return uint256(1).mul(10 ** 20);
-        }
-        // Return nothing BEFORE the buy phase
-        return 0;
-    }
-
 
     /*
      * Internal functions

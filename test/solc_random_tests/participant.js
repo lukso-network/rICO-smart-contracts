@@ -244,8 +244,8 @@ class Participant extends Actor {
         // const unlockPercentage = this.getCurrentGlobalUnlockRatio();
         const unlockPercentage = new BN(await this.getMyUnlockRatio());
 
-        const isParticipantWhitelisted = await this.rICO.methods.isParticipantWhitelisted(this.address).call();
-        if(isParticipantWhitelisted) {
+        const partici = await this.rICO.methods.participants(this.address).call();
+        if(partici.whitelisted) {
 
             this.expectedBalances.ETH = this.currentBalances.ETH.sub(acceptedValue) ;
 

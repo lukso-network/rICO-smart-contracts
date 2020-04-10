@@ -173,14 +173,20 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
                         ( async function(){
                             // WHITELIST
-                            let isParticipantWhitelisted = await ReversibleICO.methods.isParticipantWhitelisted(participant.address).call();
+                            let particip = await ReversibleICO.methods.participants(participant.address).call();
 
-                            if (!isParticipantWhitelisted) {
+                            if (!particip.whitelisted && particip.contributions > 1) {
                                 await ReversibleICO.methods.whitelist(
                                     [participant.address],
                                     true
                                 ).send({
                                     from: whitelistingAddress
+                                }).then((receipt) => {
+
+                                    particip.whitelisted = true;
+
+                                    console.log('---> Whitelisting: ', receipt.gasUsed + ' GAS');
+
                                 }).catch(done);
                             }
 
@@ -198,7 +204,11 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                     value: ContributionAmount.toString(),
                                     data: '0x3c7a3aff', // commit()
                                     gasPrice: helpers.networkConfig.gasPrice
-                                }).then(() => {
+                                }).then((receipt) => {
+
+                                    let text = (particip.whitelisted) ? 'with auto accepting :': ':';
+
+                                    console.log('---> Contribution '+ text, receipt.gasUsed + ' GAS');
 
                                     // update his balance
                                     participant.pricesPaid.push(new BN(currentPrice));
@@ -243,6 +253,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                                         // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
                                         // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
+                                        console.log('---> Withdraw: ', receipt.gasUsed + ' GAS');
+
 
                                         // update his balance
                                         participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);
@@ -286,7 +298,10 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                             await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
                                 from: project.address,
                                 gas: 1000000
-                            }).then(() => {
+                            }).then((receipt) => {
+
+                                console.log('---> Project withdraw: ', receipt.gasUsed + ' GAS');
+
 
                                 project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
 
@@ -379,6 +394,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
                 expect(getParticipantReservedTokens).to.be.equal("0");
             });
             it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
+                // const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
+                // expect(participant.tokenBalance.sub(getParticipantReservedTokens).toString()).to.be.equal(participant.tokenBalance.toString());
                 const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
                 expect(getParticipantUnlockedTokens).to.be.equal(participant.tokenBalance.toString());
             });

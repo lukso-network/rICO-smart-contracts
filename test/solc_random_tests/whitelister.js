@@ -15,12 +15,14 @@ class Whitelister {
 
     async approve(address) {
         await this.callWhitelistMethod(address, true);
-        this.expect( await this.contract.methods.isParticipantWhitelisted(address).call(), true, "Address should be whitelisted.");
+        let partci = await this.contract.methods.participants(address).call();
+        this.expect(partci.whitelisted, true, "Address should be whitelisted.");
     }
 
     async reject(address) {
         await this.callWhitelistMethod(address, false);
-        this.expect( await this.contract.methods.isParticipantWhitelisted(address).call(), false, "Address should not be whitelisted.");
+        let partci = await this.contract.methods.participants(address).call();
+        this.expect(partci.whitelisted, false, "Address should not be whitelisted.");
     }
 
     async callWhitelistMethod(address, mode) {
