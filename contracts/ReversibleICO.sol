@@ -677,7 +677,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function committableEthAtStage(uint8 _stageId) public view returns (uint256) {
         return getEthAmountForTokensAtStage(
-            IERC777(tokenAddress).balanceOf(address(this))
+            tokenSupply // instead of IERC777(tokenAddress).balanceOf(address(this)), as we need to deduct it BEFORE we sent everything
         , _stageId);
     }
 
@@ -906,7 +906,7 @@ contract ReversibleICO is IERC777Recipient {
                 continue;
             }
 
-            uint256 maxCommittableEth = committableEthAtStage(currentStage);
+            uint256 maxCommittableEth = committableEthAtStage(stageId);
             uint256 newlyCommittedEth = stages.pendingEth;
             uint256 returnEth = 0;
 
