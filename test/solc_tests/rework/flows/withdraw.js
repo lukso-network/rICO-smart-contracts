@@ -101,6 +101,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -116,6 +117,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -213,6 +215,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -262,6 +265,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -311,6 +315,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -385,6 +390,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
         });
@@ -486,6 +492,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
         });
@@ -607,6 +614,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -731,6 +739,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -805,6 +814,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
         });
@@ -847,7 +857,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         // it("committedETH equals withdrawnETH times 2", async function () {
         //     const result = await this.ReversibleICO.methods.getParticipantDetailsByStage(TestParticipant, 0).call();
-        //     const committedETH = result.committedEth;
+        //     const committedETH = result.committedETH;
         //     const withdrawnETH = new BN(result.stageWithdrawnETH).mul( new BN(2) );
         //     expect(committedETH).to.be.equal(withdrawnETH.toString(), "committedETH does not match withdrawnETH");
         // });
@@ -877,6 +887,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
         });
@@ -954,6 +965,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount,
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -963,7 +975,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Check participant available ETH", async function () {
             const partici = await this.ReversibleICO.methods.participants(TestParticipant).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
         });
 
         it("Whitelist buyer", async function () {
@@ -980,7 +992,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Check participant available ETH", async function () {
             const partici = await this.ReversibleICO.methods.participants(TestParticipant).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(0));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(0));
         });
     });
 
@@ -1018,6 +1030,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1033,6 +1046,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1130,6 +1144,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1179,6 +1194,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1228,6 +1244,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1388,6 +1405,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1877,6 +1895,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1900,6 +1919,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -1935,6 +1955,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -2017,6 +2038,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -2149,6 +2171,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
                 from: TestParticipant,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 

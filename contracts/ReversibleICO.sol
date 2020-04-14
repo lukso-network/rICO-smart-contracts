@@ -110,10 +110,10 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev The duration of the buy phase in blocks.
     uint256 public buyPhaseBlockCount;
 
-    //    uint256 public DEBUG1 = 9999;
-    //    uint256 public DEBUG2 = 9999;
-    //    uint256 public DEBUG3 = 9999;
-    //    uint256 public DEBUG4 = 9999;
+//    uint256 public DEBUG1 = 9999;
+//    uint256 public DEBUG2 = 9999;
+//    uint256 public DEBUG3 = 9999;
+//    uint256 public DEBUG4 = 9999;
 
     /*
     *   Internal Variables
@@ -149,8 +149,8 @@ contract ReversibleICO is IERC777Recipient {
         uint32 contributions;
         uint32 withdraws;
         uint256 reservedTokens;
-        uint256 committedEth;
-        uint256 pendingEth;
+        uint256 committedETH;
+        uint256 pendingETH;
 
         uint256 _currentReservedTokens;
         uint256 _unlockedTokens;
@@ -160,7 +160,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     struct ParticipantStageDetails {
-        uint256 pendingEth;
+        uint256 pendingETH;
     }
 
     /*
@@ -375,8 +375,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE PARTICIPANT STATS
         participantStats.contributions++;
-        participantStats.pendingEth = participantStats.pendingEth.add(msg.value);
-        byStage.pendingEth = byStage.pendingEth.add(msg.value);
+        participantStats.pendingETH = participantStats.pendingETH.add(msg.value);
+        byStage.pendingETH = byStage.pendingETH.add(msg.value);
 
         // UPDATE GLOBAL STATS
         pendingETH = pendingETH.add(msg.value);
@@ -771,6 +771,10 @@ contract ReversibleICO is IERC777Recipient {
             'Project Sanity check failed! Reserved + Unlock must equal committedETH'
         );
 
+//        DEBUG1 = address(this).balance;
+//        DEBUG2 = _projectCurrentlyReservedETH;
+//        DEBUG3 = pendingETH;
+
         // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
         require(
             address(this).balance == _projectUnlockedETH.add(_projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
@@ -836,37 +840,41 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     {
         Participant storage participantStats = participants[_participantAddress];
-        uint256 pendingEth = participantStats.pendingEth;
+        uint256 participantPendingEth = participantStats.pendingETH;
 
         //Fail silently if no ETH are pending
-        if(pendingEth == 0) {
+        if(participantPendingEth == 0) {
+            // sent at least back what he contributed
+            if(_sentValue > 0) {
+                address(uint160(_participantAddress)).transfer(_sentValue);
+            }
             return;
         }
 
         // UPDATE PARTICIPANT STAGES
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
             ParticipantStageDetails storage stages = participantStats.stages[stageId];
-            stages.pendingEth = 0;
+            stages.pendingETH = 0;
         }
 
         // UPDATE PARTICIPANT STATS
-        participantStats.pendingEth = 0;
+        participantStats.pendingETH = 0;
 
         // UPDATE GLOBAL STATS
-        canceledETH = canceledETH.add(pendingEth);
-        pendingETH = pendingETH.sub(pendingEth);
+        canceledETH = canceledETH.add(participantPendingEth);
+        pendingETH = pendingETH.sub(participantPendingEth);
 
         // event emission
-        emit TransferEvent(uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED), _participantAddress, pendingEth);
+        emit TransferEvent(uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED), _participantAddress, participantPendingEth);
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED),
             uint32(participantStats.contributions),
             _participantAddress,
-            pendingEth
+            participantPendingEth
         );
 
         // transfer ETH back to participant including received value
-        address(uint160(_participantAddress)).transfer(pendingEth.add(_sentValue));
+        address(uint160(_participantAddress)).transfer(participantPendingEth.add(_sentValue));
 
         // SANITY check
         sanityCheckParticipant(_participantAddress);
@@ -887,7 +895,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         // Fail silently if no ETH are pending
-        if (participantStats.pendingEth == 0) {
+        if (participantStats.pendingETH == 0) {
             return;
         }
 
@@ -902,12 +910,12 @@ contract ReversibleICO is IERC777Recipient {
             ParticipantStageDetails storage stages = participantStats.stages[stageId];
 
             // skip if not ETH is pending
-            if (stages.pendingEth == 0) {
+            if (stages.pendingETH == 0) {
                 continue;
             }
 
             uint256 maxCommittableEth = committableEthAtStage(stageId);
-            uint256 newlyCommittedEth = stages.pendingEth;
+            uint256 newlyCommittedEth = stages.pendingETH;
             uint256 returnEth = 0;
 
             // If incoming value is higher than what we can accept,
@@ -929,14 +937,14 @@ contract ReversibleICO is IERC777Recipient {
             // UPDATE PARTICIPANT STATS
             participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
             participantStats.reservedTokens = participantStats.reservedTokens.add(newTokenAmount);
-            participantStats.committedEth = participantStats.committedEth.add(newlyCommittedEth);
-            participantStats.pendingEth = participantStats.pendingEth.sub(stages.pendingEth);
+            participantStats.committedETH = participantStats.committedETH.add(newlyCommittedEth);
+            participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittedEth).sub(returnEth);
 
-            stages.pendingEth = stages.pendingEth.sub(stages.pendingEth);
+            stages.pendingETH = stages.pendingETH.sub(newlyCommittedEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
             tokenSupply = tokenSupply.sub(newTokenAmount);
-            pendingETH = pendingETH.sub(newlyCommittedEth);
+            pendingETH = pendingETH.sub(newlyCommittedEth).sub(returnEth);
             committedETH = committedETH.add(newlyCommittedEth);
             _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
 
@@ -951,7 +959,6 @@ contract ReversibleICO is IERC777Recipient {
             withdrawnETH = withdrawnETH.add(totalReturnETH);
 
             emit TransferEvent(uint8(TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW), _participantAddress, totalReturnETH);
-
             address(uint160(_participantAddress)).transfer(totalReturnETH);
         }
 
@@ -976,9 +983,11 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     isRunning
     {
-        require(_returnedTokenAmount > 0, 'You can not withdraw without tokens.');
 
         Participant storage participantStats = participants[_participantAddress];
+
+        require(_returnedTokenAmount > 0, 'You can not withdraw without tokens.');
+        require(participantStats._currentReservedTokens > 0, 'You can not withdraw, you have no locked tokens.');
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
         uint256 overflowingTokenAmount;
@@ -999,7 +1008,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // For any other stage, calculate the avg price of all contributions
         } else {
-            returnEthAmount = participantStats.committedEth.mul(
+            returnEthAmount = participantStats.committedETH.mul(
                 returnedTokenAmount.mul(10 ** 20)
                 .div(participantStats.reservedTokens)
             ).div(10 ** 20);
@@ -1010,7 +1019,7 @@ contract ReversibleICO is IERC777Recipient {
         participantStats.withdraws++;
         participantStats._currentReservedTokens = participantStats._currentReservedTokens.sub(returnedTokenAmount);
         participantStats.reservedTokens = participantStats.reservedTokens.sub(returnedTokenAmount);
-        participantStats.committedEth = participantStats.committedEth.sub(returnEthAmount);
+        participantStats.committedETH = participantStats.committedETH.sub(returnEthAmount);
 
         // UPDATE global STATS
         tokenSupply = tokenSupply.add(returnedTokenAmount);
@@ -1025,9 +1034,9 @@ contract ReversibleICO is IERC777Recipient {
             // send tokens back to participant
             bytes memory data;
 
+            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
             // solium-disable-next-line security/no-send
             IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
-            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
         }
 
         emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
@@ -1121,7 +1130,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     modifier isRunning() {
         uint256 blockNumber = getCurrentBlockNumber();
-        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Current block number outside the rICO range.");
+        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Current block is outside the rICO period.");
         _;
     }
 }

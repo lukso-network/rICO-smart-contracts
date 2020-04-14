@@ -392,7 +392,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 let stageId = 0;
                 // jump to stage commit start block - 1
                 let currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, stageId);
-                let contractRatio = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
+                let contractRatio = await this.ReversibleICO.methods.calcUnlockedAmount('100000000000000000000',0).call();
 
                 this.jsValidator.setBlockNumber(currentBlock);
                 let calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
@@ -402,7 +402,7 @@ describe("ReversibleICO - Methods - Stages", function () {
 
                 stageId = 1;
                 currentBlock = await helpers.utils.jumpToContractStage (this.ReversibleICO, deployingAddress, stageId, false, -1);
-                contractRatio = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
+                contractRatio = await this.ReversibleICO.methods.calcUnlockedAmount('100000000000000000000',0).call();
                 
                 this.jsValidator.setBlockNumber(currentBlock);
                 calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
@@ -416,7 +416,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 const stageId = 1;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployingAddress, stageId, false, 1 );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
+                const contractRatio = await this.ReversibleICO.methods.calcUnlockedAmount('100000000000000000000',0).call();
                 this.jsValidator.setBlockNumber(currentBlock);
                 const calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
 
@@ -428,7 +428,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployingAddress, stageId, true, - 1 );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
+                const contractRatio = await this.ReversibleICO.methods.calcUnlockedAmount('100000000000000000000',0).call();
 
                 this.jsValidator.setBlockNumber(currentBlock);
                 const calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
@@ -446,7 +446,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 const stageId = 12;
                 // jump to stage 1 start_block exactly
                 const currentBlock = await helpers.utils.jumpToContractStage ( this.ReversibleICO, deployingAddress, stageId, true, 1 );
-                const contractRatio = await this.ReversibleICO.methods.getCurrentGlobalUnlockRatio().call();
+                const contractRatio = await this.ReversibleICO.methods.calcUnlockedAmount('100000000000000000000',0).call();
                 this.jsValidator.setBlockNumber(currentBlock);
                 const calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
                 expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );

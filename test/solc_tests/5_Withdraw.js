@@ -298,7 +298,7 @@ describe("Withdrawal Testing", function () {
 
         it("Check participant available ETH", async function () {
             let partici = await ReversibleICOInstance.methods.participants(participant_1).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
         });
 
         it("Whitelist buyer", async function () {
@@ -315,7 +315,7 @@ describe("Withdrawal Testing", function () {
 
         it("Check participant available ETH", async function () {
             let partici = await ReversibleICOInstance.methods.participants(participant_1).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(0));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(0));
         });
     });
 

@@ -204,6 +204,7 @@ async function commitFundsFromAddress(address, amount) {
         from: address,
         to: ReversibleICOInstance.receipt.contractAddress,
         value: amount.toString(),
+        data: '0x3c7a3aff', // commit()
         gasPrice: helpers.networkConfig.gasPrice
     });
 }
@@ -410,13 +411,13 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                 it("returns 100 eth ( half of both contributions )", async function () {
+                 it("should be 50 eth ( half of the first contribution , 0 of the second )", async function () {
 
                      const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new BN("100").mul( helpers.solidity.etherBN ).toString()
+                        new BN("50").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -576,13 +577,13 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("returns 50 eth ( allocated by withdraw )", async function () {
 
-                    console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
-                    console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
-                    console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
-                    console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
-                    console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
-                    console.log('DEBUG2 ', await ReversibleICOInstance.methods.DEBUG2().call());
-                    console.log('DEBUG3 ', await ReversibleICOInstance.methods.DEBUG3().call());
+                    // console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
+                    // console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
+                    // console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
+                    // console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());
+                    // console.log('DEBUG1 ', await ReversibleICOInstance.methods.DEBUG1().call());
+                    // console.log('DEBUG2 ', await ReversibleICOInstance.methods.DEBUG2().call());
+                    // console.log('DEBUG3 ', await ReversibleICOInstance.methods.DEBUG3().call());
 
 
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
@@ -764,12 +765,12 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                it("returns 50 eth ( 0 from first, half of the second contribution )", async function () {
+                it("should be 0 eth ( 0 from first, 0 of the second contribution )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new BN("50").mul( helpers.solidity.etherBN ).toString()
+                        new BN("0").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -786,12 +787,12 @@ describe("ProjectWithdraw Testing", function () {
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
-                it("returns 100 eth ( 25 from first, 75 from second )", async function () {
+                it("should be 75 eth ( 25 from first, 50 from second )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new BN("100").mul( helpers.solidity.etherBN ).toString()
+                        new BN("75").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -857,12 +858,12 @@ describe("ProjectWithdraw Testing", function () {
 
             describe("- contract at 50% of the buy phase", async function () {
 
-                it("returns 75 eth ( 25 from first, half of the second contribution )", async function () {
+                it("should be 25 eth ( 25 from first, 0 from the second contribution )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new BN("75").mul( helpers.solidity.etherBN ).toString()
+                        new BN("25").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 
@@ -879,12 +880,12 @@ describe("ProjectWithdraw Testing", function () {
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
 
-                it("returns 125 eth ( 50 from first, 75 from second )", async function () {
+                it("should be 100 eth ( 50 from first, 50 from second )", async function () {
                     const ProjectAvailableEth = new BN( await ReversibleICOInstance.methods.getAvailableProjectETH().call() );
                     expect(
                         ProjectAvailableEth.toString()
                     ).to.equal(
-                        new BN("125").mul( helpers.solidity.etherBN ).toString()
+                        new BN("100").mul( helpers.solidity.etherBN ).toString()
                     );
                 });
 

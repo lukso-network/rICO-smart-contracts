@@ -13,30 +13,26 @@ async function runTests(init) {
   const tests = [
     "external/SafeMath",
     "1_ERC1820",
+    "2_ERC777_Token",
+    "3_ERC20Token",
+    "5_Cancel",
+    "5_Contributions",
+    "5_Flows",
+    "5_ProjectWithdraw",
+    "6_Gnosis-Safe",
+    "7_Website",
+    "10_ProjectWithdraw",
+    "rework/phases",
+    "rework/methods/stages",
+    "rework/flows/token_balances",
+    "rework/flows/random_tests",
 
-    // "2_ERC777_Token",
-    // "3_ERC20Token",
-    // "rework/phases",
-    // "rework/methods/stages",
+
+    // Needs fixing
     // "rework/methods/tokens/getParticipantReservedTokens",
     // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",
-    // "rework/flows/token_balances",
-    "rework/flows/random_tests",
-
-    // // // these need to be reworked
-    // "5_Cancel",
-    // "5_Contributions",
-    // "5_Flows",
-    // "10_ProjectWithdraw",
-    
-    // "5_Flows","rework/flows/withdraw",
-    // "rework/flows/withdraw",
-
-    // "5_ProjectWithdraw",
-    // "6_Gnosis-Safe",
-    // "7_Website",
 
   ];
 

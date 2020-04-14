@@ -198,7 +198,7 @@ describe("Contribution Testing", function () {
         await revertToFreshDeployment();
     });
 
-    describe("transaction () => fallback method", async function () {
+    describe("transaction commit()", async function () {
 
         describe("contract in commit phase", async function () {
 
@@ -210,17 +210,236 @@ describe("Contribution Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
             });
 
-            it("value >= rico.minContribution results in a new contribution", async function () {
+            it("higher than available tokens should result in partial refund", async function () {
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
+                const ContributionAmount = new helpers.BN("100000").mul( helpers.solidity.etherBN );
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+
+                let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                    [participant_1],
+                    true
+                ).send({
+                    from: whitelistingAddress
+                });
+
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_1);
+                // should get the overflow back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).sub(ContributionAmount)
+                        .add(new helpers.BN('70000000000000000000000')).toString() // 70000 ETH could not be committed
+                );
+
+            });
+
+            it("after, everything on top should result in a full refund", async function () {
+
+                const totalSupply = await ReversibleICOInstance.methods.tokenSupply().call();
+
+                expect(totalSupply).to.equal('0');
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
+                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_1);
+                // should get everything back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).toString()
+                );
+
+            });
+
+            it("even after time passed, everything on top should result in a full refund", async function () {
+
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 3);
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
+                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_1);
+                // should get everything back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).toString()
+                );
+
+            });
+
+            it("even after the project withdrew, everything on top should result in a full refund", async function () {
+
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
+                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+
+                // project withdraw
+                await ReversibleICOInstance.methods.projectWithdraw('10000000000').send({
+                    from: projectAddress,
+                    gas: 1000000
+                });
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_1);
+                // should get everything back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).toString()
+                );
+
+            });
+
+            it("a second participant should also result in a full refund", async function () {
+
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_2);
+                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_2,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                    [participant_2],
+                    true
+                ).send({
+                    from: whitelistingAddress
+                });
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_2);
+                // should get everything back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).toString()
+                );
+
+            });
+
+            it("and a third participant should also result in a full refund", async function () {
+
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
+
+                const InitialBalance = await helpers.utils.getBalance(helpers, participant_3);
+                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+
+                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_3,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
+                    new helpers.BN(helpers.networkConfig.gasPrice)
+                );
+
+                const balanceBeforeWhitelist =  await helpers.utils.getBalance(helpers, participant_3);
+                // should get everything back
+                expect(
+                    balanceBeforeWhitelist.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).sub(ContributionAmount).toString()
+                );
+
+                let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                    [participant_3],
+                    true
+                ).send({
+                    from: whitelistingAddress
+                });
+
+                const balanceNow =  await helpers.utils.getBalance(helpers, participant_3);
+                // should get everything back
+                expect(
+                    balanceNow.toString()
+                ).to.equal(
+                    InitialBalance.sub(ContributionTxCost).toString()
+                );
+
+            });
+        });
+
+
+        describe("contract in commit phase", async function () {
+
+            before(async () => {
+                await revertToFreshDeployment();
+                helpers.utils.resetAccountNonceCache(helpers);
+
+                // jump to contract start
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
+            });
+
+            it("transactions to commit() result in contributions", async function () {
 
                 let contributionCount = 0;
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
                 const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
+
                 await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
                     to: ReversibleICOInstance.receipt.contractAddress,
                     value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;
@@ -229,6 +448,7 @@ describe("Contribution Testing", function () {
                     from: participant_1,
                     to: ReversibleICOInstance.receipt.contractAddress,
                     value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;
@@ -237,6 +457,85 @@ describe("Contribution Testing", function () {
                     from: participant_1,
                     to: ReversibleICOInstance.receipt.contractAddress,
                     value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                contributionCount++;
+
+                let whitelistTx = await ReversibleICOInstance.methods.whitelist(
+                    [participant_1],
+                    true
+                ).send({
+                    from: whitelistingAddress
+                });
+
+                // console.log('DEBUG 1', await ReversibleICOInstance.methods.DEBUG1().call());
+                // console.log('DEBUG 2', await ReversibleICOInstance.methods.DEBUG2().call());
+                // console.log('DEBUG 3', await ReversibleICOInstance.methods.DEBUG3().call());
+                // console.log('DEBUG 4', await ReversibleICOInstance.methods.DEBUG4().call());
+
+                await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                contributionCount++;
+
+                ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const afterContributions = ParticipantByAddress.contributions;
+
+                expect(
+                    afterContributions.toString()
+                ).to.be.equal(
+                    (parseInt(initialContributions) + contributionCount).toString()
+                );
+
+            });
+        });
+
+        describe("contract in buy phase", async function () {
+
+            before(async () => {
+                await revertToFreshDeployment();
+                helpers.utils.resetAccountNonceCache(helpers);
+
+                // jump to contract start
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
+            });
+
+            it("transactions to commit() result in contributions", async function () {
+
+                let contributionCount = 0;
+                let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
+                const initialContributions = ParticipantByAddress.contributions;
+
+                const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
+
+                await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                contributionCount++;
+
+                await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
+                    gasPrice: helpers.networkConfig.gasPrice
+                });
+                contributionCount++;
+
+                await helpers.web3Instance.eth.sendTransaction({
+                    from: participant_1,
+                    to: ReversibleICOInstance.receipt.contractAddress,
+                    value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;
@@ -252,6 +551,7 @@ describe("Contribution Testing", function () {
                     from: participant_1,
                     to: ReversibleICOInstance.receipt.contractAddress,
                     value: ContributionAmount.toString(),
+                    data: '0x3c7a3aff', // commit()
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 contributionCount++;

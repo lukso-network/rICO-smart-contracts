@@ -100,7 +100,7 @@ class Validator {
 
     getCurrentGlobalUnlockRatio() {
         const currentBlock = new BN( this.getCurrentBlockNumber() );
-        const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock );
+        const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock - 1 );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );
         const precision = new BN(20);
         return this.getUnlockPercentage(currentBlock, BuyPhaseStartBlock, BuyPhaseEndBlock, precision);
@@ -120,8 +120,8 @@ class Validator {
         // currentBlock >= startBlock && currentBlock <= endBlock
         if(currentBlock.gte(startBlock) && currentBlock.lte(endBlock))
         {
-            const blockCount = endBlock.sub(startBlock).add( new BN(1) );
-            const passedBlocks = currentBlock.sub(startBlock).add( new BN(1) ); // add 1 since start block needs to return higher than 0
+            const blockCount = endBlock.sub(startBlock);
+            const passedBlocks = currentBlock.sub(startBlock);
             
             return passedBlocks.mul(
                 new BN(10).pow(precision)

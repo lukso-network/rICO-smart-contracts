@@ -408,7 +408,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is deployingAddress ", async function () {
 
-                    it("transaction reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                    it("transaction reverts \"You can not withdraw, you have no locked tokens.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -440,7 +440,7 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "Withdraw not possible. Participant has no locked tokens.");
+                        }, "You can not withdraw, you have no locked tokens.");
 
                     });
 
@@ -452,7 +452,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is projectAddress", async function () {
 
-                    it("transaction reverts \"Invalid token sent.\"", async function () {
+                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
 
                         helpers.utils.resetAccountNonceCache(helpers);
 
@@ -475,14 +475,14 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "Invalid token sent.");
+                        }, "Invalid token contract sent tokens.");
 
                     });
                 });
 
                 describe("token sender is deployingAddress ", async function () {
 
-                    it("transaction reverts \"Invalid token sent.\"", async function () {
+                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -514,7 +514,7 @@ describe("Flow Testing", function () {
                                 gas: 100000
                             });
 
-                        }, "Invalid token sent.");
+                        }, "Invalid token contract sent tokens.");
 
                     });
 
@@ -533,13 +533,14 @@ describe("Flow Testing", function () {
                     currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
                 });
 
-                it("getCancelModes() returns (false, false)", async function () {
-                    let CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
-                    expect(CancelStates[0]).to.be.equal(false);
-                    expect(CancelStates[1]).to.be.equal(false);
+                it("Participant should have pendingEth = 0 and contributions = 0", async function () {
+                    let participant = await ReversibleICOInstance.methods.participants(participant_1).call();
+
+                    expect(participant.contributions).to.equal('0');
+                    expect(participant.pendingETH).to.equal('0');
                 });
 
-                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending tokens to Rico reverts \"You can not withdraw, you have no locked tokens.\"", async function () {
 
                     // our participant somehow got some tokens that they then attempt to send for withdraw
 
@@ -580,7 +581,7 @@ describe("Flow Testing", function () {
                             gas: 500000
                         });
 
-                    }, "Withdraw not possible. Participant has no locked tokens.");
+                    }, "You can not withdraw, you have no locked tokens.");
 
                 });
             });
@@ -597,17 +598,19 @@ describe("Flow Testing", function () {
                         from: participant_1,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                 });
 
-                it("getCancelModes() returns (true, false)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
-                    expect(CancelStates[0]).to.be.equal(true);
-                    expect(CancelStates[1]).to.be.equal(false);
+                it("Participant should have pendingEth = n and contributions = 1", async function () {
+                    let participant = await ReversibleICOInstance.methods.participants(participant_1).call();
+
+                    expect(participant.pendingETH).to.equal('1000000000000000000000');
+                    expect(participant.contributions).to.equal('1');
                 });
 
-                it("sending tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                it("sending tokens to Rico reverts \"You can not withdraw, you have no locked tokens.\"", async function () {
 
                     // our participant somehow got some tokens that they then attempt to send for withdraw
 
@@ -648,7 +651,7 @@ describe("Flow Testing", function () {
                             gas: 500000
                         });
 
-                    }, "Withdraw not possible. Participant has no locked tokens.");
+                    }, "You can not withdraw, you have no locked tokens.");
 
                 });
             });
@@ -666,6 +669,7 @@ describe("Flow Testing", function () {
                         from: participant_1,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -681,15 +685,17 @@ describe("Flow Testing", function () {
                         from: participant_1,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
                 });
 
-                it("getCancelModes() returns (false, true)", async function () {
-                    const CancelStates = await ReversibleICOInstance.methods.getCancelModes(participant_1).call();
-                    expect(CancelStates[0]).to.be.equal(false);
-                    expect(CancelStates[1]).to.be.equal(true);
+                it("Participant should have pendingEth = 0 and contributions = 2", async function () {
+                    let participant = await ReversibleICOInstance.methods.participants(participant_1).call();
+
+                    expect(participant.pendingETH).to.equal('0');
+                    expect(participant.contributions).to.equal('2');
                 });
 
 
@@ -771,6 +777,7 @@ describe("Flow Testing", function () {
                     /*
                     * Validation
                     */
+
                     // ETH: validate participant eth balances
                     let ParticipantBalanceAfterValidation = ParticipantBalanceBefore
                         // subtract transaction cost
@@ -826,6 +833,7 @@ describe("Flow Testing", function () {
                         from: TestParticipantAddress,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -844,6 +852,7 @@ describe("Flow Testing", function () {
                         from: TestParticipantAddress,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -854,6 +863,7 @@ describe("Flow Testing", function () {
                         from: TestParticipantAddress,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -889,17 +899,13 @@ describe("Flow Testing", function () {
                         );
                     });
 
-                    it("getCancelModes -> byEth returns false", async function () {
-                        const CancelStates = await ReversibleICOInstance.methods.getCancelModes(TestParticipantAddress).call();
-                        expect(CancelStates[0]).to.be.equal(false);
-                        expect(CancelStates.byEth).to.be.equal(false);
+                    it("Participant should have pendingEth = 0 and contributions = 3", async function () {
+                        let participant = await ReversibleICOInstance.methods.participants(participant_1).call();
+
+                        expect(participant.pendingETH).to.equal('0');
+                        expect(participant.contributions).to.equal('3');
                     });
 
-                    it("getCancelModes -> byTokens returns true", async function () {
-                        const CancelStates = await ReversibleICOInstance.methods.getCancelModes(TestParticipantAddress).call();
-                        expect(CancelStates[1]).to.be.equal(true);
-                        expect(CancelStates.byTokens).to.be.equal(true);
-                    });
 
                     it("Saving participant and contract values before transaction.. ", async function () {
 
@@ -934,24 +940,19 @@ describe("Flow Testing", function () {
                             )
                         ).to.be.bignumber.equal( ParticipantTokenBalanceBefore );
 
-
-
                     });
 
-                    it("calculating amounts for withdraw", async function () {
+
+                    it("withdraw calculation - ETH is 0.847913862718707930 ETH", async function () {
+
                         // calculate how much eth we should be receiving for the tokens we're sending
                         withdrawCalculatedBefore = await helpers.utils.getAvailableEthAndTokensForWithdraw(
                             helpers, ReversibleICOInstance, TestParticipantAddress, ReturnTokenAmount
                         );
-                    });
 
-                    it("withdraw calculation - ETH is 1 ETH or 0.999999999999999999 ETH", async function () {
-                        // accounting for price rounding errors
-                        if( withdrawCalculatedBefore.eth.lt(OneEthAmount) ) {
-                            expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(OneEthAmount.sub( new helpers.BN("1") ));
-                        } else {
-                            expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal(OneEthAmount);
-                        }
+                        // console.log(await ReversibleICOInstance.methods.getCurrentStage().call());
+
+                        expect(withdrawCalculatedBefore.eth).to.be.bignumber.equal('847913862718707930');
                     });
 
                     it("withdraw calculation - withdrawn_tokens equals one ETH worth of tokens ", async function () {
@@ -962,25 +963,6 @@ describe("Flow Testing", function () {
                             OneEthAmount,
                             stageId
                         );
-                        
-                        // const ethAmountForTokensAtStage = await helpers.utils.getEthAmountForTokensAtStage(
-                        //     helpers,
-                        //     ReversibleICOInstance,
-                        //     withdrawCalculatedBefore.withdrawn_tokens,
-                        //     stageId
-                        // );
-
-                        // const tokenAmountForEthAtStage = await helpers.utils.getTokenAmountForEthAtStage(
-                        //     helpers, 
-                        //     ReversibleICOInstance,
-                        //     ethAmountForTokensAtStage,
-                        //     stageId
-                        // );
-
-                        // console.log("withdrawCalculatedBefore.withdrawn_tokens: ", withdrawCalculatedBefore.withdrawn_tokens.toString());
-                        // console.log("ethAmountForTokensAtStage:                 ", ethAmountForTokensAtStage.toString());
-                        // console.log("tokenAmountForEthAtStage:                  ", tokenAmountForEthAtStage.toString());
-                        // console.log("tokenAmountForOneEthAtStage:               ", tokenAmountForOneEthAtStage.toString());
 
                         expect(withdrawCalculatedBefore.withdrawn_tokens).to.be.bignumber.equal(tokenAmountForOneEthAtStage);
                     });
@@ -1070,14 +1052,14 @@ describe("Flow Testing", function () {
                             .sub(withdrawCalculatedBefore.withdrawn_tokens);
 
 
-                        console.log("ParticipantTokenBalanceBefore:               ", ParticipantTokenBalanceBefore.toString());
-                        console.log("ParticipantTokenBalanceAfter:                ", ParticipantTokenBalanceAfter.toString());
-
-                        console.log("ParticipantreservedTokenBalanceBefore:          ", ParticipantreservedTokenBalanceBefore.toString());
-                        console.log("withdrawCalculatedBefore.withdrawn_tokens:       ", withdrawCalculatedBefore.withdrawn_tokens.toString());
-                        console.log("ParticipantreservedTokenBalanceAfterValidation: ", ParticipantreservedTokenBalanceAfterValidation.toString());
-                        console.log("ParticipantreservedTokenBalanceAfter:           ", ParticipantreservedTokenBalanceAfter.toString());
-
+                        // console.log("ParticipantTokenBalanceBefore:               ", ParticipantTokenBalanceBefore.toString());
+                        // console.log("ParticipantTokenBalanceAfter:                ", ParticipantTokenBalanceAfter.toString());
+                        //
+                        // console.log("ParticipantreservedTokenBalanceBefore:          ", ParticipantreservedTokenBalanceBefore.toString());
+                        // console.log("withdrawCalculatedBefore.withdrawn_tokens:       ", withdrawCalculatedBefore.withdrawn_tokens.toString());
+                        // console.log("ParticipantreservedTokenBalanceAfterValidation: ", ParticipantreservedTokenBalanceAfterValidation.toString());
+                        // console.log("ParticipantreservedTokenBalanceAfter:           ", ParticipantreservedTokenBalanceAfter.toString());
+                        //
 
                         // await helpers.utils.displayContributions(helpers, ReversibleICOInstance, TestParticipantAddress, 7 );
 
@@ -1255,6 +1237,7 @@ describe("Flow Testing", function () {
                 //             from: TestParticipantAddress,
                 //             to: ReversibleICOInstance.receipt.contractAddress,
                 //             value: ContributionAmount.toString(),
+                //             data: '0x3c7a3aff', // commit()
                 //             gasPrice: helpers.networkConfig.gasPrice
                 //         });
 
@@ -1435,9 +1418,9 @@ describe("Flow Testing", function () {
                 //     });
                 // });
 
-                // describe("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                // describe("sending unlocked tokens to Rico reverts \"You can not withdraw, you have no locked tokens.\"", async function () {
 
-                //     it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Participant has no locked tokens.\"", async function () {
+                //     it("sending unlocked tokens to Rico reverts \"You can not withdraw, you have no locked tokens.\"", async function () {
 
                 //         const ReturnTokenAmount = new BN(
                 //             await TokenContractInstance.methods.balanceOf(TestParticipantAddress).call()
@@ -1467,7 +1450,7 @@ describe("Flow Testing", function () {
                 //                 gas: 1000000,
                 //                 gasPrice: helpers.networkConfig.gasPrice
                 //             });
-                //         }, "Withdraw not possible. Participant has no locked tokens.");
+                //         }, "You can not withdraw, you have no locked tokens.");
 
                 //     });
                 // });
@@ -1488,6 +1471,7 @@ describe("Flow Testing", function () {
         //                 from: TestParticipantAddress,
         //                 to: ReversibleICOInstance.receipt.contractAddress,
         //                 value: ContributionAmount.toString(),
+        //                 data: '0x3c7a3aff', // commit()
         //                 gasPrice: helpers.networkConfig.gasPrice
         //             });
 
@@ -1505,6 +1489,7 @@ describe("Flow Testing", function () {
         //                 from: TestParticipantAddress,
         //                 to: ReversibleICOInstance.receipt.contractAddress,
         //                 value: ContributionAmount.toString(),
+        //                 data: '0x3c7a3aff', // commit()
         //                 gasPrice: helpers.networkConfig.gasPrice
         //             });
 
@@ -1514,6 +1499,7 @@ describe("Flow Testing", function () {
         //                 from: TestParticipantAddress,
         //                 to: ReversibleICOInstance.receipt.contractAddress,
         //                 value: ContributionAmount.toString(),
+        //                 data: '0x3c7a3aff', // commit()
         //                 gasPrice: helpers.networkConfig.gasPrice
         //             });
 
@@ -1523,9 +1509,10 @@ describe("Flow Testing", function () {
         //         });
 
         //         it("getCancelModes() returns (false, false)", async function () {
-        //             const CancelStates = await ReversibleICOInstance.methods.getCancelModes(TestParticipantAddress).call();
-        //             expect(CancelStates[0]).to.be.equal(false);
-        //             expect(CancelStates[1]).to.be.equal(false);
+        //                                let participant = await ReversibleICOInstance.methods.participants(participant_1).call();
+        //
+        //                     expect(participant.pendingETH).to.equal('0');
+        //                     expect(participant.contributions).to.equal('0');
         //         });
 
         //         it("sending unlocked tokens to Rico reverts \"Withdraw not possible. Buy phase ended.\"", async function () {

@@ -249,6 +249,7 @@ describe("Website States", function () {
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
         });
@@ -288,6 +289,7 @@ describe("Website States", function () {
                 from: participant_1,
                 to: ReversibleICOInstance.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 

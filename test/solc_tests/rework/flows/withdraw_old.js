@@ -378,7 +378,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Check participant available ETH", async function () {
             const partici = await this.ReversibleICO.methods.participants(TestParticipant).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(2).mul(new BN(commitPhasePrice)));
         });
 
         it("Whitelist buyer", async function () {
@@ -395,7 +395,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Check participant available ETH", async function () {
             const partici = await this.ReversibleICO.methods.participants(TestParticipant).call();
-            expect(new BN(partici.pendingEth)).to.be.bignumber.equal(new BN(0));
+            expect(new BN(partici.pendingETH)).to.be.bignumber.equal(new BN(0));
         });
     });
 

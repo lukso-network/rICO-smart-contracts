@@ -338,7 +338,7 @@ class Participant extends Actor {
         const participantRecord = await this.getParticipantRecord();
         const pendingEth = participantRecord.totalSentETH
             .sub(participantRecord.returnedETH)
-            .sub(participantRecord.committedEth);
+            .sub(participantRecord.committedETH);
         
         // expected balance includes value stored in contract that has not been procesed.
         this.expectedBalances.ETH = this.currentBalances.ETH.add(pendingEth);
@@ -402,7 +402,7 @@ class Participant extends Actor {
 
         let acceptedValue ;
 
-        const claimableEth = participantRecord.committedEth.add(participantRecord.pendingEth);
+        const claimableEth = participantRecord.committedETH.add(participantRecord.pendingETH);
 
         if(claimableEth.gt(maxAcceptableValue)) {
             acceptedValue = maxAcceptableValue;
@@ -524,8 +524,8 @@ class Participant extends Actor {
 
         // const aggregatedStats = await this.rICO.methods.participantAggregatedStats(this.address).call(); 
         console.log("    User Record:             ", this.address);
-        console.log("      committedEth:          ", this.toEth(record.committedEth) + " eth");
-        console.log("      pendingEth:            ", this.toEth(record.pendingEth) + " eth");
+        console.log("      committedEth:          ", this.toEth(record.committedETH) + " eth");
+        console.log("      pendingEth:            ", this.toEth(record.pendingETH) + " eth");
         console.log("      reservedTokens:   ", this.toEth(record.reservedTokens) + " tokens");
         console.log("      _unlockedTokens:   ", this.toEth(record._unlockedTokens) + " tokens");
         console.log("      _currentReservedTokens: ", this.toEth(record._currentReservedTokens) + " tokens");
@@ -723,8 +723,8 @@ class Participant extends Actor {
         const rec = await this.rICO.methods.participants(this.address).call();
   
         const retVal = {};
-        retVal.committedEth            = new BN(rec.committedEth);
-        retVal.pendingEth              = new BN(rec.pendingEth);
+        retVal.committedETH            = new BN(rec.committedETH);
+        retVal.pendingETH              = new BN(rec.pendingETH);
         retVal.reservedTokens     = new BN(rec.reservedTokens);
         retVal._unlockedTokens     = new BN(rec._unlockedTokens);
         retVal._currentReservedTokens   = new BN(rec._currentReservedTokens);
@@ -797,11 +797,11 @@ class Participant extends Actor {
         const participantReservedTokens = new BN( await this.rICO.methods.getParticipantReservedTokens(this.address).call() );
         
         const ratio = await this.rICO.methods.calcUnlockedAmount(
-            participantStats.committedEth.toString(),
+            participantStats.committedETH.toString(),
             participantStats._lastBlock.toString()
         ).call();
 
-        const participantCommittedEth = participantStats.committedEth; //.sub(
+        const participantCommittedEth = participantStats.committedETH; //.sub(
         //     new BN( ratio )
         // );
 
