@@ -208,4 +208,4 @@ module.exports = {
     doFreshDeployment,
     saveSnapshot,
     restoreFromSnapshot
-}
+};
