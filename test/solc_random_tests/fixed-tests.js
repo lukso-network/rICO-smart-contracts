@@ -184,29 +184,23 @@ async function displayRicoBalances(helpers, rICO, rICOToken) {
     const tokenSupply                   = new helpers.BN(await rICO.methods.tokenSupply().call());
     const committedETH                  = new helpers.BN(await rICO.methods.committedETH().call());
     const pendingETH                    = new helpers.BN(await rICO.methods.pendingETH().call());
-    const totalSentETH                  = new helpers.BN(await rICO.methods.totalSentETH().call());
     const withdrawnETH                  = new helpers.BN(await rICO.methods.withdrawnETH().call());
     const projectWithdrawCount          = new helpers.BN(await rICO.methods.projectWithdrawCount().call());
     const projectWithdrawnETH           = new helpers.BN(await rICO.methods.projectWithdrawnETH().call());
-    const _projectCurrentlyReservedETH   = new helpers.BN(await rICO.methods._projectCurrentlyReservedETH().call());
-    const _projectUnlockedETH       = new helpers.BN(await rICO.methods._projectUnlockedETH().call());
-    const _projectLastBlock             = new helpers.BN(await rICO.methods._projectLastBlock().call());
+    const getUnlockedProjectETH       = new helpers.BN(await rICO.methods.getUnlockedProjectETH().call());
 
     console.log("");
     console.log("    RICO Balances:                     ", helpers.addresses.Rico);
     console.log("      Real ETH:                        ", helpers.utils.toEth(helpers, realContractBalance.toString()) + " eth");
     console.log("      committedETH:                    ", helpers.utils.toEth(helpers, committedETH.toString()) + " eth");
     console.log("      pendingETH:                      ", helpers.utils.toEth(helpers, pendingETH.toString()) + " eth");
-    console.log("      totalSentETH:                    ", helpers.utils.toEth(helpers, totalSentETH.toString()) + " eth");
     console.log("      withdrawnETH:                    ", helpers.utils.toEth(helpers, withdrawnETH.toString()) + " eth");
     console.log("      tokenSupply:                     ", helpers.utils.toEth(helpers, tokenSupply.toString()) + " tokens");
     console.log("      REAL tokenSupply:                ", helpers.utils.toEth(helpers, realtokenSupply.toString()) + " tokens");
     console.log("      Project Withdraw details");
     console.log("      projectWithdrawCount:            ", helpers.utils.toEth(helpers, projectWithdrawCount.toString()));
     console.log("      projectWithdrawnETH:             ", helpers.utils.toEth(helpers, projectWithdrawnETH.toString()) + " eth");
-    console.log("      _projectCurrentlyReservedETH:     ", helpers.utils.toEth(helpers, _projectCurrentlyReservedETH.toString()) + " eth");
-    console.log("      _projectUnlockedETH:         ", helpers.utils.toEth(helpers, _projectUnlockedETH.toString()) + " eth");
-    console.log("      _projectLastBlock:               ", _projectLastBlock.toString());
+    console.log("      getUnlockedProjectETH:         ", helpers.utils.toEth(helpers, getUnlockedProjectETH.toString()) + " eth");
 
 
 

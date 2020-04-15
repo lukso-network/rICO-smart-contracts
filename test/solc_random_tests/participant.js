@@ -119,19 +119,19 @@ class Participant extends Actor {
             }
         }
 
-        const cancelModes = await this.rICO.methods.getCancelModes(this.address).call();
+        const partici = await this.rICO.methods.participants(this.address).call();
 
         if(canCommit) {
             actions.push("commitEntireBalance");
             actions.push("commitHalfBalance");
         }
 
-        if(cancelModes.byEth) {
+        if(partici.pendingETH > 0) {
             actions.push("withdrawByETH");
             // actions.push("withdrawByETH_half"); // only full eth withdraw available.
         }
 
-        if(cancelModes.byTokens) {
+        if(partici.committedETH > 0) {
             actions.push("sendAllTokensBack");
             actions.push("sendHalfTokensBack");
         }
