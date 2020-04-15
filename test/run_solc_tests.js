@@ -17,6 +17,8 @@ async function runTests(init) {
     "rework/flows/random_tests",
     "rework/phases",
     "rework/methods/stages",
+    "rework/methods/tokens/getReservedTokenAmount",
+    "rework/methods/tokens/buyTokens",
     "2_ERC777_Token",
     "3_ERC20Token",
     "5_Cancel",
@@ -28,11 +30,7 @@ async function runTests(init) {
     "10_ProjectWithdraw",
 
 
-
-
     // Needs fixing
-    // "rework/methods/tokens/getParticipantReservedTokens",
-    // "rework/methods/tokens/buyTokens",
     // "rework/flows/whitelist",
     // "rework/flows/withdraw",
 

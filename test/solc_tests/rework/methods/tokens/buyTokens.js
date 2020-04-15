@@ -82,6 +82,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     
@@ -101,6 +102,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     
@@ -120,6 +122,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     
@@ -139,6 +142,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     
@@ -158,9 +162,9 @@ describe("ReversibleICO - Methods - Tokens", function () {
 
                 it("1 - Buy 1 token in stage 0 - should have 1 token", async function () {
                     const tokensToBuy = 1;
-                    const stageId = customTestSettings.rico.stageCount;
+                    const stageId = 0;
 
-                    // jump to stage 
+                    // jump to stage
                     currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId);
 
                     const ContributionAmount = priceInStage(stageId).mul(new BN(tokensToBuy));
@@ -168,6 +172,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     
@@ -187,9 +192,10 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
-                    
+
                     let balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
                     expect(new BN(balance)).to.be.bignumber.equal(oneToken.mul(new BN(2)));
                 });
@@ -206,6 +212,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
                         from: TestParticipant,
                         to: this.ReversibleICO.receipt.contractAddress,
                         value: ContributionAmount.toString(),
+                        data: '0x3c7a3aff', // commit()
                         gasPrice: helpers.networkConfig.gasPrice
                     });
                     

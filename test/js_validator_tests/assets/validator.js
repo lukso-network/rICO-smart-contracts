@@ -109,7 +109,7 @@ class Validator {
     getUnlockPercentage(_currentBlock, _startBlock, _endBlock, _precision) {
 
         const currentBlock = new BN( _currentBlock );
-        const startBlock = new BN( _startBlock );
+        const startBlock = new BN( _startBlock - 1 ); // adjust the period
         const endBlock   = new BN( _endBlock );
         const precision   = new BN( _precision );
 
@@ -120,9 +120,9 @@ class Validator {
         // currentBlock >= startBlock && currentBlock <= endBlock
         if(currentBlock.gte(startBlock) && currentBlock.lte(endBlock))
         {
-            const blockCount = endBlock.sub(startBlock);
             const passedBlocks = currentBlock.sub(startBlock);
-            
+            const blockCount = endBlock.sub(startBlock);
+
             return passedBlocks.mul(
                 new BN(10).pow(precision)
             ).div(blockCount);

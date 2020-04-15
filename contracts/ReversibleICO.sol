@@ -733,7 +733,7 @@ contract ReversibleICO is IERC777Recipient {
             // security/no-assign-params: "calcUnlockedAmount": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock - 1; // We need to reduce it by 1, as the startBlock is alwasy already IN the period.
+                lastBlock = buyPhaseStartBlock.sub(1); // We need to reduce it by 1, as the startBlock is alwasy already IN the period.
             }
 
             // get the number of blocks that have "elapsed" since the last block

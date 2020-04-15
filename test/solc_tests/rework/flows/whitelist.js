@@ -60,6 +60,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -81,6 +82,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -106,6 +108,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -126,7 +129,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, participant_1, 2 );
 
             const stageId = 0;
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(3, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -164,7 +167,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Check aggregated state (should not change)", async function () {
             const stageId = 0;
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(3, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -194,6 +197,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -204,7 +208,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Check aggregated state", async function () {
             const stageId = 0;
 
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(4, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -233,7 +237,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Check aggregated state", async function () {
             const stageId = 0;
 
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(4, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -263,6 +267,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -273,7 +278,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Check aggregated state", async function () {
             const stageId = 0;
 
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(5, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -310,7 +315,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Check aggregated state", async function () {
             const stageId = 0;
 
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
             expect(new BN(aggregated["totalSentETH"]))
                 .to.be.bignumber.equal(tokenToEth(5, stageId), "aggregated.totalSentETH mismatch");
             expect(new BN(aggregated["returnedETH"]))
@@ -341,6 +346,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
                 from: participant_1,
                 to: this.ReversibleICO.receipt.contractAddress,
                 value: ContributionAmount.toString(),
+                data: '0x3c7a3aff', // commit()
                 gasPrice: helpers.networkConfig.gasPrice
             });
 
@@ -352,7 +358,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
         it("Check aggregated state", async function () {
             const stageId = 1;
 
-            const aggregated = await this.ReversibleICO.methods.participantAggregatedStats(participant_1).call();
+            const aggregated = await this.ReversibleICO.methods.participants(participant_1).call();
 
             // 5 in stage 0, 1 in stage 1
             const receivedEth = tokenToEth(5, 0).add(tokenToEth(1, 1));
