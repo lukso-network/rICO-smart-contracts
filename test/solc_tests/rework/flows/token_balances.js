@@ -29,7 +29,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     const commitPhasePrice = helpers.solidity.ether * 0.002;
     const TestParticipant = participant_1;
 
-    priceInStage = (_stageId) => {
+    function priceInStage(_stageId) {
         // commitPhasePrice + stage * stagePriceIncrease
         return new BN(customTestSettings.rico.commitPhasePrice).add(
             new BN(_stageId).mul(

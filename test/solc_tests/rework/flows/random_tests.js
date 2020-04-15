@@ -10,9 +10,9 @@ const {
     restoreFromSnapshot,
 } = require('../includes/deployment');
 
-const testKey = "WithdrawTokenTests";
+const testKey = "RandomWithdrawTokenTests";
 
-describe("ReversibleICO - Withdraw Token Balance", function () {
+describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
     const deployingAddress = accounts[0];
     const whitelistingAddress = accounts[1];
@@ -57,7 +57,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         // participants[i].weiBalance = getRandomInt(numberOfParticipants) * 1000000000000000000;
     }
 
-    priceInStage = (_stageId) => {
+    function priceInStage(_stageId) {
         // commitPhasePrice + stage * stagePriceIncrease
         return new BN(customTestSettings.rico.commitPhasePrice).add(
             new BN(_stageId).mul(

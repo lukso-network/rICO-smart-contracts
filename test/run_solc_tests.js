@@ -10,10 +10,11 @@ const setup = require("./init.js");
 
 async function runTests(init) {
 
+
   const tests = [
     "external/SafeMath",
     "1_ERC1820",
-    // "rework/flows/token_balances",
+    "rework/flows/token_balances",
     "rework/flows/random_tests",
     // "rework/phases",
     // "rework/methods/stages",
