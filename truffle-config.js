@@ -84,16 +84,16 @@ module.exports = {
           mnemonic,
           "http://127.0.0.1:8545/",
           0,
-          11,
+          21,
           false
         );
       },
       // host: "127.0.0.1",     // Localhost (default: none)
       // port: 8545,            // Standard Ethereum port (default: none)
-      network_id: "*", // Any network (default: none),
+      network_id: "*",          // Any network (default: none),
       // skipDryRun: true       // Skip dry run before migrations? (default: false for public nets )
-      gas: 6700000, // 6.7m .. should be around 8m these days
-      gasPrice: 10000000000 // 10 gwei (in wei) (default: 100 gwei)
+      gas: 6700000,             // 6.7m .. should be around 8m these days
+      gasPrice: 10000000000     // 10 gwei (in wei) (default: 100 gwei)
     },
     coverage: {
       provider: function() {
@@ -101,7 +101,7 @@ module.exports = {
           mnemonic,
           "http://127.0.0.1:6545/",
           0,
-          11,
+          21,
           false
         );
       },

@@ -1,5 +1,7 @@
 
 function requiresERC1820Instance() {
+    console.log(helpers.utils.colors.red, " >>>>>>>>>  requiresERC1820Instance !", helpers.utils.colors.none);
+
     // test requires ERC1820.instance
     if (helpers.ERC1820.instance == false) {
         console.log(helpers.utils.colors.red, "  Error: ERC1820.instance not found, please make sure to run it first.", helpers.utils.colors.none);
@@ -45,7 +47,7 @@ async function deployRICOContract() {
 
 async function doFreshDeployment(testKey, phase = 0, settings = null ) {
 
-    requiresERC1820Instance();
+    // requiresERC1820Instance();
     const snapShotKey = testKey+"_Phase_"+phase;
 
     // TestRPC EVM Snapshots allow us to save and restore snapshots at any block
@@ -179,28 +181,34 @@ async function saveSnapshot(_key, log = true) {
 }
 
 async function restoreFromSnapshot(_key, log = true) {
-    if(_key == "") {
-        throw "Restore key cannot be null";
-    }
 
-    // restoring from a snapshot purges all later snapshots in testrpc, we do the same
-    for (const [key, value] of Object.entries(snapshots)) {
-        if(value > snapshots[_key]) {
-            dropped[key] = value;
-            delete(snapshots[key]);
+    if(snapshotsEnabled) {
+
+        if(_key == "") {
+            throw "Restore key cannot be null";
         }
-    }
 
-    if(log) {
-        console.log(helpers.utils.colors.light_cyan, "    * EVM snapshot["+_key+"] restored", helpers.utils.colors.none);
+        // restoring from a snapshot purges all later snapshots in testrpc, we do the same
+        for (const [key, value] of Object.entries(snapshots)) {
+            if(value > snapshots[_key]) {
+                dropped[key] = value;
+                delete(snapshots[key]);
+            }
+        }
+
+        if(log) {
+            console.log(helpers.utils.colors.light_cyan, "    * EVM snapshot["+_key+"] restored", helpers.utils.colors.none);
+        }
+
+        // restore snapshot
+        await helpers.web3.evm.revert(snapshots[_key]);
+        // save again because whomever wrote test rpc had the impression no one would ever restore twice.. WHY?!
+        // @TODO: not having to do this would speed up testing.. so a PR for this to ganache would be nice.
+        snapshots[_key] = await helpers.web3.evm.snapshot();
+        // reset account nonces..
+        helpers.utils.resetAccountNonceCache(helpers);
+
     }
-    // restore snapshot
-    await helpers.web3.evm.revert(snapshots[_key]);
-    // save again because whomever wrote test rpc had the impression no one would ever restore twice.. WHY?!
-    // @TODO: not having to do this would speed up testing.. so a PR for this to ganache would be nice.
-    snapshots[_key] = await helpers.web3.evm.snapshot();
-    // reset account nonces..
-    helpers.utils.resetAccountNonceCache(helpers);
 }
 
 module.exports = {

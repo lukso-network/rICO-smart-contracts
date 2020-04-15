@@ -15,6 +15,8 @@ echo "--------------------------------------------------------------------"
 
 node test/run_solc_tests.js $1 $2 $3 $4
 
+# node test/run_solc_random_test.js $1 $2 $3 $4
+
 #if [[ "$1" = "all" ]]; then
 #  ./node_modules/.bin/truffle test --network development
 #else

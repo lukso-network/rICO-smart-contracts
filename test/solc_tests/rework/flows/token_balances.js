@@ -46,14 +46,13 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
-
         const currentBlock = await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, 0);
         this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     }
 
     before(async function () {
         requiresERC1820Instance();
-        await restoreFromSnapshot("ERC1820_ready");
+        // await restoreFromSnapshot("ERC1820_ready");
 
         const contracts = await doFreshDeployment(testKey, 2, customTestSettings);
         this.ReversibleICO = contracts.ReversibleICOInstance;
