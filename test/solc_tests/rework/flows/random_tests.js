@@ -78,9 +78,6 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = ReversibleICO.receipt.contractAddress;
 
-
-        const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployingAddress, 0);
-        this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
     }
 
     before(async function () {
@@ -93,16 +90,12 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
         RICOContractAddress = ReversibleICO.receipt.contractAddress;
 
-
-        // const currentBlock = await helpers.utils.jumpToContractStage(ReversibleICO, deployingAddress, 0);
-        this.jsValidator = new validatorHelper(customTestSettings, parseInt( currentBlock, 10));
-
     });
 
     describe("randomly contribute and exit", async function () {
 
         before(async () => {
-            await revertToFreshDeployment();
+            // await revertToFreshDeployment();
             // helpers.utils.resetAccountNonceCache(helpers);
 
             await ReversibleICO.methods.jumpToBlockNumber(commitPhaseStartBlock).send({

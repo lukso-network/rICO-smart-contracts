@@ -728,12 +728,12 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // Calculate WITHIN the buy phase
-        if (currentBlock >= buyPhaseStartBlock && currentBlock <= buyPhaseEndBlock) {
+        if (currentBlock >= buyPhaseStartBlock && currentBlock < buyPhaseEndBlock) {
 
             // security/no-assign-params: "calcUnlockedAmount": Avoid assigning to function parameters.
             uint256 lastBlock = _lastBlock;
             if(lastBlock < buyPhaseStartBlock) {
-                lastBlock = buyPhaseStartBlock.sub(1); // We need to reduce it by 1, as the startBlock is alwasy already IN the period.
+                lastBlock = buyPhaseStartBlock.sub(1); // We need to reduce it by 1, as the startBlock is always already IN the period.
             }
 
             // get the number of blocks that have "elapsed" since the last block
@@ -748,7 +748,7 @@ contract ReversibleICO is IERC777Recipient {
             ).div(10 ** 20);
 
             // Return everything AFTER the buy phase
-        } else if (currentBlock > buyPhaseEndBlock) {
+        } else if (currentBlock >= buyPhaseEndBlock) {
             return _amount;
         }
         // Return nothing BEFORE the buy phase
@@ -987,7 +987,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
 
         require(_returnedTokenAmount > 0, 'You can not withdraw without tokens.');
-        require(participantStats._currentReservedTokens > 0, 'You can not withdraw, you have no locked tokens.');
+        require(participantStats._currentReservedTokens > 0 && participantStats.reservedTokens > 0, 'You can not withdraw, you have no locked tokens.');
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
         uint256 overflowingTokenAmount;
