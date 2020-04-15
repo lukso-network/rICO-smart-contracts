@@ -615,8 +615,13 @@ contract ReversibleICO is IERC777Recipient {
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
-        uint blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
-        return getStageAtBlock(blockNumber);
+        uint blockNumber;
+        if (frozen) {
+            blockNumber = freezeStart;
+        } else {
+            blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
+        }
+    return getStageAtBlock(blockNumber);
     }
 
     /**
@@ -624,7 +629,12 @@ contract ReversibleICO is IERC777Recipient {
      * @return The current ETH price in wei.
      */
     function getCurrentPrice() public view returns (uint256) {
-        uint blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
+        uint blockNumber;
+        if (frozen) {
+            blockNumber = freezeStart;
+        } else {
+            blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
+        }
         return getPriceAtBlock(blockNumber);
     }
 
