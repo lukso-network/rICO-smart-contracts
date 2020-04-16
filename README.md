@@ -80,6 +80,9 @@ npm run test
 ### Running Tests
 
 ```bash
+npm test
+
+// or to run seperately
 npm run test-solc
 ```
 

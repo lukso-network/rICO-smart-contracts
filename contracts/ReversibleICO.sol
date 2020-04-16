@@ -186,7 +186,11 @@ contract ReversibleICO is IERC777Recipient {
         CONTRIBUTION_ACCEPTED, // 3
         WHITELIST_APPROVED, // 4
         WHITELIST_REJECTED, // 5
-        PROJECT_WITHDRAWN // 6
+        PROJECT_WITHDRAWN, // 6
+        FROZEN_FREEZE, // 7
+        FROZEN_UNFREEZE, // 8
+        FROZEN_DISBALEHATCH, // 9
+        FROZEN_ESCAPEHATCH // 10
     }
 
     enum TransferTypes {
@@ -196,7 +200,9 @@ contract ReversibleICO is IERC777Recipient {
         CONTRIBUTION_ACCEPTED_OVERFLOW, // 3 not accepted ETH
         PARTICIPANT_WITHDRAW, // 4
         PARTICIPANT_WITHDRAW_OVERFLOW, // 5 not returnable tokens
-        PROJECT_WITHDRAWN // 6
+        PROJECT_WITHDRAWN, // 6
+        FROZEN_ESCAPEHATCH_TOKEN, // 7
+        FROZEN_ESCAPEHATCH_ETH // 8
     }
 
 
@@ -501,6 +507,9 @@ contract ReversibleICO is IERC777Recipient {
     {
         frozen = true;
         freezeStart = getCurrentBlockNumber();
+
+        // Emit event
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_FREEZE), uint32(getCurrentStage()), freezerAddress, getCurrentBlockNumber());
     }
 
     /**
@@ -517,6 +526,9 @@ contract ReversibleICO is IERC777Recipient {
         frozenPeriod = frozenPeriod.add(
             currentBlock.sub(freezeStart)
         );
+
+        // Emit event
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_UNFREEZE), uint32(getCurrentStage()), freezerAddress, currentBlock);
     }
 
     /**
@@ -529,6 +541,9 @@ contract ReversibleICO is IERC777Recipient {
     {
         freezerAddress = address(0);
         rescuerAddress = address(0);
+
+        // Emit event
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_DISBALEHATCH), uint32(getCurrentStage()), freezerAddress, getCurrentBlockNumber());
     }
 
     /**
@@ -550,6 +565,11 @@ contract ReversibleICO is IERC777Recipient {
 
         // sent all ETH from the contract to the _to address
         address(uint160(_to)).transfer(ethBalance);
+
+        // Emit event
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_ESCAPEHATCH), uint32(getCurrentStage()), _to, getCurrentBlockNumber());
+        emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_TOKEN), _to, tokenBalance);
+        emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_ETH), _to, ethBalance);
     }
 
 
@@ -854,7 +874,7 @@ contract ReversibleICO is IERC777Recipient {
         Participant storage participantStats = participants[_participantAddress];
         uint256 participantPendingEth = participantStats.pendingETH;
 
-        //Fail silently if no ETH are pending
+        // Fail silently if no ETH are pending
         if(participantPendingEth == 0) {
             // sent at least back what he contributed
             if(_sentValue > 0) {
@@ -865,8 +885,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE PARTICIPANT STAGES
         for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
-            ParticipantStageDetails storage stages = participantStats.stages[stageId];
-            stages.pendingETH = 0;
+            ParticipantStageDetails storage byStage = participantStats.stages[stageId];
+            byStage.pendingETH = 0;
         }
 
         // UPDATE PARTICIPANT STATS
@@ -877,7 +897,11 @@ contract ReversibleICO is IERC777Recipient {
         pendingETH = pendingETH.sub(participantPendingEth);
 
         // event emission
-        emit TransferEvent(uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED), _participantAddress, participantPendingEth);
+        emit TransferEvent(
+            uint8(TransferTypes.CONTRIBUTION_CANCELED),
+            _participantAddress,
+            participantPendingEth
+        );
         emit ApplicationEvent(
             uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED),
             uint32(participantStats.contributions),
@@ -912,8 +936,8 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         uint8 currentStage = getCurrentStage();
-        uint256 totalReturnETH;
-        uint256 totalNewTokens;
+        uint256 totalRefundedETH;
+        uint256 totalNewReservedTokens;
 
         calcParticipantAllocation(_participantAddress);
 
@@ -936,7 +960,7 @@ contract ReversibleICO is IERC777Recipient {
                 returnEth = newlyCommittedEth.sub(maxCommittableEth);
                 newlyCommittedEth = maxCommittableEth;
 
-                totalReturnETH = totalReturnETH.add(returnEth);
+                totalRefundedETH = totalRefundedETH.add(returnEth);
             }
 
             // convert ETH to TOKENS
@@ -944,7 +968,7 @@ contract ReversibleICO is IERC777Recipient {
                 newlyCommittedEth, stageId
             );
 
-            totalNewTokens = totalNewTokens.add(newTokenAmount);
+            totalNewReservedTokens = totalNewReservedTokens.add(newTokenAmount);
 
             // UPDATE PARTICIPANT STATS
             participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
@@ -964,19 +988,15 @@ contract ReversibleICO is IERC777Recipient {
             emit ApplicationEvent(uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED), uint32(stageId), _participantAddress, newlyCommittedEth);
         }
 
-        // Return what couldn't be accepted
-        if (totalReturnETH > 0) {
-
-            // UPDATE global STATS
-            withdrawnETH = withdrawnETH.add(totalReturnETH);
-
-            emit TransferEvent(uint8(TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW), _participantAddress, totalReturnETH);
-            address(uint160(_participantAddress)).transfer(totalReturnETH);
+        // Refund what couldn't be accepted
+        if (totalRefundedETH > 0) {
+            emit TransferEvent(uint8(TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW), _participantAddress, totalRefundedETH);
+            address(uint160(_participantAddress)).transfer(totalRefundedETH);
         }
 
         // Transfer tokens to the participant
         // solium-disable-next-line security/no-send
-        IERC777(tokenAddress).send(_participantAddress, totalNewTokens, "");
+        IERC777(tokenAddress).send(_participantAddress, totalNewReservedTokens, "");
 
         // SANITY CHECK
         sanityCheckParticipant(_participantAddress);
