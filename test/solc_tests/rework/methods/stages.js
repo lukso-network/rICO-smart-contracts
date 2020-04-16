@@ -420,8 +420,8 @@ describe("ReversibleICO - Methods - Stages", function () {
                 this.jsValidator.setBlockNumber(currentBlock);
                 const calculatedRatio = this.jsValidator.getCurrentGlobalUnlockRatio();
 
-                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
                 expect( calculatedRatio.toNumber() ).to.be.above( 0 );
+                expect( contractRatio.toString() ).to.be.equal( calculatedRatio.toString() );
             });
 
             it("Returns lower than max (99%) at BuyPhaseEndBlock - 1", async function () {

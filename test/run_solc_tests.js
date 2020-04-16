@@ -12,12 +12,12 @@ async function runTests(init) {
 
 
   const tests = [
-    "external/SafeMath",
+    // "external/SafeMath",
     "1_ERC1820",
     "rework/flows/token_balances",
     "rework/flows/random_tests",
     "rework/phases",
-    // "rework/methods/stages",
+    "rework/methods/stages",
     "rework/methods/tokens/getReservedTokenAmount",
     "rework/methods/tokens/buyTokens",
     "2_ERC777_Token",

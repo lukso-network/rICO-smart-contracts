@@ -109,7 +109,7 @@ class Validator {
     getUnlockPercentage(_currentBlock, _startBlock, _endBlock, _precision) {
 
         const currentBlock = new BN( _currentBlock );
-        const startBlock = new BN( _startBlock - 1 ); // adjust the period
+        const startBlock = new BN( _startBlock );
         const endBlock   = new BN( _endBlock );
         const precision   = new BN( _precision );
 
@@ -117,8 +117,8 @@ class Validator {
             throw "Precision should be higher than 1 and lower than 20";
         }
 
-        // currentBlock >= startBlock && currentBlock <= endBlock
-        if(currentBlock.gte(startBlock) && currentBlock.lte(endBlock))
+        // currentBlock >= startBlock && currentBlock < endBlock
+        if(currentBlock.gte(startBlock) && currentBlock.lt(endBlock))
         {
             const passedBlocks = currentBlock.sub(startBlock);
             const blockCount = endBlock.sub(startBlock);
@@ -127,7 +127,7 @@ class Validator {
                 new BN(10).pow(precision)
             ).div(blockCount);
             
-        } else if (currentBlock.gt(endBlock)) {
+        } else if (currentBlock.gte(endBlock)) {
             return new BN(10).pow(precision);
         } else {
             // lower than or equal to start block
@@ -190,7 +190,7 @@ class Validator {
 
                 const percentage = this.getUnlockPercentage(
                     _blockNumber,
-                    this.buyPhaseStartBlock,
+                    this.buyPhaseStartBlock - 1,  // adjust the period
                     this.buyPhaseEndBlock,
                     _precision
                 );
