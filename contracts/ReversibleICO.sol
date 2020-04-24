@@ -58,7 +58,9 @@ contract ReversibleICO is IERC777Recipient {
     /*
      *   Public Variables
      */
-    /// @dev Total amount tokens available to be bought.
+    /// @dev Total amount tokens initially available to be bought, increases if the project adds more.
+    uint256 public initialTokenSupply;
+    /// @dev Total amount tokens currently available to be bought.
     uint256 public tokenSupply;
     /// @dev Total amount of ETH currently accepted as a commitment to buy tokens (excluding pendingETH).
     uint256 public committedETH;
@@ -347,6 +349,7 @@ contract ReversibleICO is IERC777Recipient {
         if (_from == projectAddress) {
             // increase the supply
             tokenSupply = tokenSupply.add(_amount);
+            initialTokenSupply = initialTokenSupply.add(_amount);
 
             // rICO participant sends tokens back
         } else {
