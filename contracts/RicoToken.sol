@@ -9,53 +9,69 @@ interface ReversibleICO {
 contract RicoToken is ERC777 {
 
     ReversibleICO public rICO;
-    address public manager;
+
     bool public frozen; // default: false
     bool public initialized; // default: false
+    
+    // addresses
+    address public managerAddress; // should be same as freezer address in rICO
+    address public rescuerAddress; // should be same as rescuerAddress address in rICO
+
+    // ------------------------------------------------------------------------------------------------
 
     constructor(
-        uint256 _initialSupply,
         address[] memory _defaultOperators
     )
-        ERC777("LYXe Token", "LYXe", _defaultOperators)
-        public
+    ERC777("LYXe Token", "LYXe", _defaultOperators)
+    public
     {
-        _mint(msg.sender, msg.sender, _initialSupply, "", "");
-        manager = msg.sender;
-        frozen = true;
+        managerAddress = msg.sender;
     }
 
-    // since rico affects balances, changing the rico address
-    // once setup should not be possible.
-    function setup(address _rICO)
-        public
-        requireNotInitialized
-        onlyManager
+    // Init the rICO token and attach it to the rICO
+    function init(
+        address _ricoAddress,
+        address _rescuerAddress,
+        address _projectAddress,
+        uint256 _initialSupply
+    )
+    public
+    isNotInitialized
+    onlyManagerAddress
     {
-        rICO = ReversibleICO(_rICO);
-        frozen = false;
+        _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
+        
+        rICO = ReversibleICO(_ricoAddress);
+        rescuerAddress = _rescuerAddress;
+        
         initialized = true;
-    }
-
-    // new method for updating the rico address in case of rICO address update
-
-
-    function changeManager(address _newManager) public onlyManager {
-        manager = _newManager;
-    }
-
-    function removeManager() public onlyManager {
-        manager = address(0);
     }
 
 
     // *** SECURITY functions
-    function freeze() public onlyManager {
+    function removeManager()
+    public
+    onlyManagerAddress
+    isNotFrozen
+    {
+        managerAddress = address(0);
+    }
+
+    function freeze() public onlyManagerAddress {
         frozen = true;
     }
 
-    function unfreeze() public onlyManager {
+    function unfreeze() public onlyManagerAddress {
         frozen = false;
+    }
+
+    // The rICO address can only be changed when the contract is frozen
+    function changeRICO(address _ricoAddress)
+    public
+    onlyRescuerAddress
+    isFrozen
+    {
+        rICO = ReversibleICO(_ricoAddress);
     }
 
     // *** Public functions
@@ -84,9 +100,9 @@ contract RicoToken is ERC777 {
         bytes memory _data,
         bytes memory _operatorData
     )
-        internal
-        requireNotFrozen
-//        requireInitialized
+    internal
+    isNotFrozen
+    isInitialized
     {
         require(_amount <= getUnlockedBalance(_from), "Burning failed: Insufficient funds");
         ERC777._burn(_operator, _from, _amount, _data, _operatorData);
@@ -102,9 +118,9 @@ contract RicoToken is ERC777 {
         bytes memory _userData,
         bytes memory _operatorData
     )
-        internal
-        requireNotFrozen
-        requireInitialized
+    internal
+    isNotFrozen
+    isInitialized
     {
 
         if(_to == address(rICO)) {
@@ -121,24 +137,33 @@ contract RicoToken is ERC777 {
 
     // *** Modifiers
 
-    modifier onlyManager() {
-        require(msg.sender == manager, "Only manager can call this method");
+    modifier onlyManagerAddress() {
+        require(msg.sender == managerAddress, "Only manager address can call this method");
+        _;
+    }
+    
+    modifier onlyRescuerAddress() {
+        require(msg.sender == rescuerAddress, "Only the rescuer address can call this method.");
         _;
     }
 
-    modifier requireInitialized() {
+    modifier isInitialized() {
         require(initialized == true, "Contract must be initialized.");
         _;
     }
 
-    modifier requireNotInitialized() {
+    modifier isNotInitialized() {
         require(initialized == false, "Contract is already initialized.");
         _;
     }
 
-    modifier requireNotFrozen() {
-        require(frozen == false, "Token contract is frozen!");
+    modifier isFrozen() {
+        require(frozen == true, "Token contract not frozen.");
         _;
     }
 
+    modifier isNotFrozen() {
+        require(frozen == false, "Token contract is frozen!");
+        _;
+    }
 }

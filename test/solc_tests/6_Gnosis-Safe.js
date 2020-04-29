@@ -93,7 +93,6 @@ describe("Gnosis Safe Integration", function () {
             helpers.addresses.CreateCall = this.CreateCall.receipt.contractAddress;
 
             const deploymentDataToken = await generateDeploymentCode("RicoToken", [
-                setup.settings.token.supply.toString(),
                 []
             ]);
             const deploymentDataRico = await generateDeploymentCode(

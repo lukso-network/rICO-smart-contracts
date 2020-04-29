@@ -88,7 +88,6 @@ async function revertToFreshDeployment() {
             helpers, "RicoToken", {
                 from: holder,
                 arguments: [
-                    setup.settings.token.supply.toString(),
                     defaultOperators
                 ],
                 gas: 6500000,
@@ -112,8 +111,10 @@ async function revertToFreshDeployment() {
         console.log("      Contract Address:", ReversibleICOAddress);
         console.log("");
 
-        await TokenContractInstance.methods.setup(
-            ReversibleICOAddress
+        await TokenContractInstance.methods.init(
+            ReversibleICOAddress,
+            holder, holder,
+            setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
         });

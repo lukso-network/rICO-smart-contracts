@@ -30,7 +30,6 @@ async function deployTokenContract() {
        {
             from: holder,
             arguments: [
-                setup.settings.token.supply.toString(),
                 defaultOperators = [], // accounts[0] maybe
             ],
             gas: 6500000,
@@ -73,8 +72,10 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
         ReversibleICOReceipt = RICOContract.receipt;
 
         // Setup token contract by adding RICO address
-        await TokenContractInstance.methods.setup(
-            ReversibleICOAddress
+        await TokenContractInstance.methods.init(
+            ReversibleICOAddress,
+            holder, holder,
+            setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
         });

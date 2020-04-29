@@ -67,7 +67,7 @@ describe("ReversibleICO", function () {
             "RicoToken",
             {
                 from: holder,
-                arguments: [setup.settings.token.supply.toString(), []],
+                arguments: [[]],
                 gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }
@@ -75,8 +75,10 @@ describe("ReversibleICO", function () {
 
         TokenContractAddress = TokenContractInstance.receipt.contractAddress;
 
-        await TokenContractInstance.methods.setup(
-            helpers.addresses.Rico
+        await TokenContractInstance.methods.init(
+            helpers.addresses.Rico,
+            holder, holder,
+            setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
         });

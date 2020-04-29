@@ -56,8 +56,11 @@ module.exports = {
          */
         // Add rICO contract into token contract
         const rICOToken = await helpers.utils.getContractInstance(helpers, "RicoToken", helpers.addresses.Token);
-        await rICOToken.methods.setup(
-            helpers.addresses.Rico
+        await rICOToken.methods.init(
+            helpers.addresses.Rico,
+            ContractsDeployer,
+            ContractsDeployer,
+            init.setup.settings.token.supply.toString()
         ).send({
             from: ContractsDeployer,  // initial token supply holder
         });
@@ -233,7 +236,7 @@ module.exports = {
             "RicoToken",
             {
                 from: ContractsDeployer,
-                arguments: [init.setup.settings.token.supply.toString(), defaultOperators],
+                arguments: [defaultOperators],
                 gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }

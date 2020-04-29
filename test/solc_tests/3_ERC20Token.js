@@ -40,14 +40,18 @@ describe("ERC777 - ERC20 Token compatibility", function () {
         HST = await helpers.utils.deployNewContractInstance(helpers, "RicoToken", {
             from: creator,
             arguments: [
-                mintedSupply.toString(),
                 [] // defaultOperators
             ],
             gas: 6000000,
             gasPrice: helpers.solidity.gwei * 10
         });
 
-        await HST.methods.setup(_ricoAddress).send({ from: creator });
+        await HST.methods.init(
+            _ricoAddress,
+            creator,
+            creator,
+            setup.settings.token.supply.toString()
+        ).send({ from: creator });
         await saveSnapshot(testKey);
     });
 
