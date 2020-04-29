@@ -160,7 +160,7 @@ describe("ERC777 - RICO Token", async function () {
                         await this.RicoToken.methods
                             .changeManager(accounts[1])
                             .send({ from: accounts[1], gas: 100000 });
-                    }, "onlyManager: Only manager can call this method");
+                    }, "Only manager can call this method");
                 });
                 it("Allows manager to transfer", async function () {
                     await this.RicoToken.methods
@@ -224,7 +224,7 @@ describe("ERC777 - RICO Token", async function () {
             context("Should correctly set the frozen status", function () {
                 it("to true", async function () {
                     await this.RicoToken.methods
-                        .setFrozen(true)
+                        .freeze()
                         .send({ from: newManager, gas: 100000 });
                     expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
                         true
@@ -233,7 +233,7 @@ describe("ERC777 - RICO Token", async function () {
 
                 it("to false", async function () {
                     await this.RicoToken.methods
-                        .setFrozen(false)
+                        .unfreeze()
                         .send({ from: newManager, gas: 100000 });
                     expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
                         false
@@ -243,9 +243,9 @@ describe("ERC777 - RICO Token", async function () {
                 it("Fails if non-manager calls freeze", async function () {
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
-                            .setFrozen(false)
+                            .unfreeze()
                             .send({ from: accounts[3], gas: 100000 });
-                    }, "onlyManager: Only manager can call this method");
+                    }, "Only manager can call this method");
                 });
             });
 
@@ -253,20 +253,20 @@ describe("ERC777 - RICO Token", async function () {
 
                 it("Blocks transfers", async function () {
                     await this.RicoToken.methods
-                        .setFrozen(true)
+                        .freeze()
                         .send({ from: newManager, gas: 100000 });
 
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
                             .transfer(accounts[1], "1")
                             .send({ from: holder, gas: 1000000 });
-                    }, "requireNotFrozen: Contract must not be frozen");
+                    }, "requireNotFrozen: Token contract is frozen!");
                 });
 
 
                 it("Blocks burns", async function () {
                     await this.RicoToken.methods
-                        .setFrozen(true)
+                        .freeze()
                         .send({ from: newManager, gas: 100000 });
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods.burn("1", "0x").send({ from: holder, gas: 100000 });
@@ -275,7 +275,7 @@ describe("ERC777 - RICO Token", async function () {
 
                 it("Re-allows transfer when unfrozen", async function () {
                     await this.RicoToken.methods
-                        .setFrozen(false)
+                        .unfreeze()
                         .send({ from: newManager, gas: 100000 });
                     await this.RicoToken.methods
                         .transfer(accounts[5], 10000)
@@ -324,7 +324,7 @@ describe("ERC777 - RICO Token", async function () {
                             await this.RicoToken.methods
                                 .transfer(accounts[1], amt.toString())
                                 .send({ from: holder, gas: 100000 });
-                        }, "getUnlockedBalance: Insufficient funds");
+                        }, "Sending failed: Insufficient funds");
                     });
 
                     it("should be able to transfer whole balance to RICO", async function () {
@@ -380,7 +380,7 @@ describe("ERC777 - RICO Token", async function () {
                             await this.RicoToken.methods
                                 .transfer(_ricoAddress, amt.toString())
                                 .send({ from: accounts[0], gas: 100000 });
-                        }, "getUnlockedBalance: Insufficient funds");
+                        }, "Sending failed: Insufficient funds");
                     });
                 }
             );
@@ -460,7 +460,7 @@ describe("ERC777 - RICO Token", async function () {
                     await this.RicoToken.methods
                         .burn(locked.add( new BN(1)).toString(), ERC777data)
                         .send({ from: accounts[3], gas: 100000 });
-                }, "getUnlockedBalance: Insufficient funds");
+                }, "Burning: Insufficient funds");
 
             });
         });
@@ -481,7 +481,7 @@ describe("ERC777 - RICO Token", async function () {
                 );
 
                 await testToken.methods
-                    .setFrozen(false)
+                    .unfreeze()
                     .send({ from: holder, gas: 100000 });
 
                 await helpers.assertInvalidOpcode(async () => {

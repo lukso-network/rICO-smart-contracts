@@ -17,7 +17,7 @@ contract RicoToken is ERC777 {
         uint256 _initialSupply,
         address[] memory _defaultOperators
     )
-        ERC777("LYXeToken", "LYXe", _defaultOperators)
+        ERC777("LYXe Token", "LYXe", _defaultOperators)
         public
     {
         _mint(msg.sender, msg.sender, _initialSupply, "", "");
@@ -44,24 +44,39 @@ contract RicoToken is ERC777 {
         manager = _newManager;
     }
 
-    function setFrozen(bool _status) public onlyManager {
-        frozen = _status;
+    function removeManager() public onlyManager {
+        manager = address(0);
     }
 
-    function getLockedBalance(address _owner) public view returns(uint) {
+
+    // *** SECURITY functions
+    function freeze() public onlyManager {
+        frozen = true;
+    }
+
+    function unfreeze() public onlyManager {
+        frozen = false;
+    }
+
+    // *** Public functions
+    function getLockedBalance(address _owner) public view returns(uint256) {
         return rICO.getParticipantReservedTokens(_owner);
     }
 
-    function getUnlockedBalance(address _owner) public view returns(uint) {
+    function getUnlockedBalance(address _owner) public view returns(uint256) {
         uint256 balance = balanceOf(_owner);
         uint256 locked = rICO.getParticipantReservedTokens(_owner);
+
         if(balance > 0 && locked > 0 && balance >= locked) {
             return balance.sub(locked);
         }
         return balance;
     }
 
-    // We should override burn as well. So users can't burn locked amounts
+
+    // *** Internal functions
+
+    // We override burn as well. So users can not burn locked tokens.
     function _burn(
         address _operator,
         address _from,
@@ -71,13 +86,14 @@ contract RicoToken is ERC777 {
     )
         internal
         requireNotFrozen
+//        requireInitialized
     {
-        require(_amount <= getUnlockedBalance(_from), "getUnlockedBalance: Insufficient funds");
+        require(_amount <= getUnlockedBalance(_from), "Burning: Insufficient funds");
         ERC777._burn(_operator, _from, _amount, _data, _operatorData);
     }
 
     // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
-    // ricoAddress can receive any amount for withdraw functionality
+    // The rico address can receive any amount for withdraw functionality
     function _move(
         address _operator,
         address _from,
@@ -93,17 +109,20 @@ contract RicoToken is ERC777 {
 
         if(_to == address(rICO)) {
             // full balance can be sent back to rico
-            require(_amount <= balanceOf(_from), "getUnlockedBalance: Insufficient funds");
+            require(_amount <= balanceOf(_from), "Sending failed: Insufficient funds");
         } else {
             // for every other address limit to unlocked balance
-            require(_amount <= getUnlockedBalance(_from), "getUnlockedBalance: Insufficient funds");
+            require(_amount <= getUnlockedBalance(_from), "Sending failed: Insufficient funds");
         }
 
         ERC777._move(_operator, _from, _to, _amount, _userData, _operatorData);
     }
 
+
+    // *** Modifiers
+
     modifier onlyManager() {
-        require(msg.sender == manager, "onlyManager: Only manager can call this method");
+        require(msg.sender == manager, "Only manager can call this method");
         _;
     }
 
@@ -118,7 +137,7 @@ contract RicoToken is ERC777 {
     }
 
     modifier requireNotFrozen() {
-        require(frozen == false, "requireNotFrozen: Contract must not be frozen");
+        require(frozen == false, "requireNotFrozen: Token contract is frozen!");
         _;
     }
 

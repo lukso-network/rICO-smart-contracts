@@ -16,7 +16,7 @@ module.exports = {
             stagePriceIncrease: ether * 0.0001      // uint256 _StagePriceIncrease in wei
         },
         token: {
-            name: "LYXeToken",
+            name: "LYXe Token",
             symbol: "LYXe",
             decimals: tokenDecimals,
             supply: new BN(100) // 100 milion
