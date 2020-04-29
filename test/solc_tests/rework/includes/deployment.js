@@ -128,7 +128,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
                 web3.utils.sha3('777TestData')
             ).send({
                 from: holder,  // initial token supply holder
-                gas: 100000
+                gas: 200000
             });
 
             expect(

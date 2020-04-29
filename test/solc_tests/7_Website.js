@@ -165,7 +165,7 @@ async function doFreshDeployment(name) {
         ERC777data
     ).send({
         from: holder,  // initial token supply holder
-        gas: 100000
+        gas: 200000
     });
 
     expect(

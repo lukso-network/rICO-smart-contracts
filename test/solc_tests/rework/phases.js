@@ -207,7 +207,7 @@ describe("ReversibleICO - Phases", function () {
                 ERC777data
             ).send({
                 from: holder,  // initial token supply holder
-                gas: 100000
+                gas: 200000
             });
         });
 

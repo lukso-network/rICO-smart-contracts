@@ -156,7 +156,7 @@ async function revertToFreshDeployment() {
             ERC777data
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         expect(
@@ -313,7 +313,7 @@ describe("Contribution Testing", function () {
                 // project withdraw
                 await ReversibleICOInstance.methods.projectWithdraw('10000000000').send({
                     from: projectAddress,
-                    gas: 1000000
+                    gas: 2000000
                 });
 
                 const ContributionTx = await helpers.web3Instance.eth.sendTransaction({

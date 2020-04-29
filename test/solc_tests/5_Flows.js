@@ -170,7 +170,7 @@ async function revertToFreshDeployment() {
             ERC777data
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         expect(
@@ -247,7 +247,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: projectAddress,
-                            gas: 100000
+                            gas: 200000
                         });
 
                     }, "Contract must be initialized.");
@@ -276,7 +276,7 @@ describe("Flow Testing", function () {
                         ERC777data
                     ).send({
                         from: holder,
-                        gas: 100000
+                        gas: 200000
                     });
 
                     await helpers.assertInvalidOpcode( async () => {
@@ -288,7 +288,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: deployingAddress,
-                            gas: 100000
+                            gas: 200000
                         });
 
                     }, "Contract must be initialized.");
@@ -394,7 +394,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: projectAddress,
-                            gas: 100000
+                            gas: 200000
                         });
 
                         expect(
@@ -425,7 +425,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: holder,
-                            gas: 100000
+                            gas: 200000
                         });
 
                         await helpers.assertInvalidOpcode( async () => {
@@ -437,7 +437,7 @@ describe("Flow Testing", function () {
                                 ERC777data
                             ).send({
                                 from: deployingAddress,
-                                gas: 100000
+                                gas: 200000
                             });
 
                         }, "You can not withdraw, you have no locked tokens.");
@@ -472,7 +472,7 @@ describe("Flow Testing", function () {
                                 ERC777data
                             ).send({
                                 from: projectAddress,
-                                gas: 100000
+                                gas: 200000
                             });
 
                         }, "Invalid token contract sent tokens.");
@@ -499,7 +499,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: holder,
-                            gas: 100000
+                            gas: 200000
                         });
 
                         await helpers.assertInvalidOpcode( async () => {
@@ -511,7 +511,7 @@ describe("Flow Testing", function () {
                                 ERC777data
                             ).send({
                                 from: deployingAddress,
-                                gas: 100000
+                                gas: 200000
                             });
 
                         }, "Invalid token contract sent tokens.");
@@ -556,7 +556,7 @@ describe("Flow Testing", function () {
                         ERC777data
                     ).send({
                         from: holder,
-                        gas: 100000
+                        gas: 200000
                     });
 
                     const ParticipantTokenBalance = new BN(
@@ -626,7 +626,7 @@ describe("Flow Testing", function () {
                         ERC777data
                     ).send({
                         from: holder,
-                        gas: 100000
+                        gas: 200000
                     });
 
                     const ParticipantTokenBalance = new BN(
@@ -750,7 +750,7 @@ describe("Flow Testing", function () {
                         ERC777data
                     ).send({
                         from: TestParticipantAddress,
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -975,7 +975,7 @@ describe("Flow Testing", function () {
                             ERC777data
                         ).send({
                             from: TestParticipantAddress,
-                            gas: 1000000,
+                            gas: 2000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
 
@@ -1141,7 +1141,7 @@ describe("Flow Testing", function () {
                 //             ERC777data
                 //         ).send({
                 //             from: TestParticipantAddress,
-                //             gas: 1000000,
+                //             gas: 2000000,
                 //             gasPrice: helpers.networkConfig.gasPrice
                 //         });
 
@@ -1351,7 +1351,7 @@ describe("Flow Testing", function () {
                 //             ERC777data
                 //         ).send({
                 //             from: TestParticipantAddress,
-                //             gas: 1000000,
+                //             gas: 2000000,
                 //             gasPrice: helpers.networkConfig.gasPrice
                 //         });
 
@@ -1447,7 +1447,7 @@ describe("Flow Testing", function () {
                 //                 ERC777data
                 //             ).send({
                 //                 from: TestParticipantAddress,
-                //                 gas: 1000000,
+                //                 gas: 2000000,
                 //                 gasPrice: helpers.networkConfig.gasPrice
                 //             });
                 //         }, "You can not withdraw, you have no locked tokens.");
@@ -1543,7 +1543,7 @@ describe("Flow Testing", function () {
         //                     ERC777data
         //                 ).send({
         //                     from: TestParticipantAddress,
-        //                     gas: 1000000,
+        //                     gas: 2000000,
         //                     gasPrice: helpers.networkConfig.gasPrice
         //                 });
         //             }, "Withdraw not possible. Buy phase ended.");

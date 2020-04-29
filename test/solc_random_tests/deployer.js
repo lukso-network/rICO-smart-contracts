@@ -108,7 +108,7 @@ module.exports = {
             ERC777data
         ).send({
             from: ContractsDeployer,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
         
         // send sale supply to rico
@@ -118,7 +118,7 @@ module.exports = {
             ERC777data
         ).send({
             from: projectAddress,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         return {

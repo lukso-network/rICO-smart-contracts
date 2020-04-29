@@ -54,7 +54,7 @@ describe("ERC777 - RICO Token", async function () {
 
             await this.RicoToken.methods
                 .setup(_ricoAddress)
-                .send({ from: holder, gas: 100000 });
+                .send({ from: holder, gas: 200000 });
 
             console.log(
                 "      Gas used for deployment:",
@@ -159,13 +159,13 @@ describe("ERC777 - RICO Token", async function () {
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
                             .changeManager(accounts[1])
-                            .send({ from: accounts[1], gas: 100000 });
+                            .send({ from: accounts[1], gas: 200000 });
                     }, "Only manager can call this method");
                 });
                 it("Allows manager to transfer", async function () {
                     await this.RicoToken.methods
                         .changeManager(newManager)
-                        .send({ from: holder, gas: 100000 });
+                        .send({ from: holder, gas: 200000 });
                     expect(await this.RicoToken.methods.manager().call()).to.be.equal(
                         newManager
                     );
@@ -202,7 +202,7 @@ describe("ERC777 - RICO Token", async function () {
                 it("returns their locked balance when calling `getLockedBalance` ", async function () {
                     await this.ReversibleICOMock777.methods
                         .setreservedTokenAmount(holder, lockedAmount)
-                        .send({ from: holder, gas: 100000 });
+                        .send({ from: holder, gas: 200000 });
                     expect(
                         await this.RicoToken.methods.getLockedBalance(holder).call()
                     ).to.be.equal(lockedAmount.toString());
@@ -210,7 +210,7 @@ describe("ERC777 - RICO Token", async function () {
                 it("returns their unlocked balance when calling `getUnlockedBalance` ", async function () {
                     await this.ReversibleICOMock777.methods
                         .setreservedTokenAmount(holder, lockedAmount)
-                        .send({ from: accounts[0], gas: 100000 });
+                        .send({ from: accounts[0], gas: 200000 });
                     expect(
                         await this.RicoToken.methods.getUnlockedBalance(holder).call()
                     ).to.be.equal(
@@ -225,7 +225,7 @@ describe("ERC777 - RICO Token", async function () {
                 it("to true", async function () {
                     await this.RicoToken.methods
                         .freeze()
-                        .send({ from: newManager, gas: 100000 });
+                        .send({ from: newManager, gas: 200000 });
                     expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
                         true
                     );
@@ -234,7 +234,7 @@ describe("ERC777 - RICO Token", async function () {
                 it("to false", async function () {
                     await this.RicoToken.methods
                         .unfreeze()
-                        .send({ from: newManager, gas: 100000 });
+                        .send({ from: newManager, gas: 200000 });
                     expect(await this.RicoToken.methods.frozen().call()).to.be.equal(
                         false
                     );
@@ -244,7 +244,7 @@ describe("ERC777 - RICO Token", async function () {
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
                             .unfreeze()
-                            .send({ from: accounts[3], gas: 100000 });
+                            .send({ from: accounts[3], gas: 200000 });
                     }, "Only manager can call this method");
                 });
             });
@@ -254,32 +254,32 @@ describe("ERC777 - RICO Token", async function () {
                 it("Blocks transfers", async function () {
                     await this.RicoToken.methods
                         .freeze()
-                        .send({ from: newManager, gas: 100000 });
+                        .send({ from: newManager, gas: 200000 });
 
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
                             .transfer(accounts[1], "1")
-                            .send({ from: holder, gas: 1000000 });
-                    }, "requireNotFrozen: Token contract is frozen!");
+                            .send({ from: holder, gas: 2000000 });
+                    }, "Token contract is frozen!");
                 });
 
 
                 it("Blocks burns", async function () {
                     await this.RicoToken.methods
                         .freeze()
-                        .send({ from: newManager, gas: 100000 });
+                        .send({ from: newManager, gas: 200000 });
                     await helpers.assertInvalidOpcode(async () => {
-                        await this.RicoToken.methods.burn("1", "0x").send({ from: holder, gas: 100000 });
+                        await this.RicoToken.methods.burn("1", "0x").send({ from: holder, gas: 200000 });
                     }, "revert");
                 });
 
                 it("Re-allows transfer when unfrozen", async function () {
                     await this.RicoToken.methods
                         .unfreeze()
-                        .send({ from: newManager, gas: 100000 });
+                        .send({ from: newManager, gas: 200000 });
                     await this.RicoToken.methods
                         .transfer(accounts[5], 10000)
-                        .send({ from: holder, gas: 100000});
+                        .send({ from: holder, gas: 200000});
 
                     const balance = await this.RicoToken.methods
                         .balanceOf(accounts[5])
@@ -298,11 +298,11 @@ describe("ERC777 - RICO Token", async function () {
                     it("should transfer if amount is unlocked", async function () {
                         await this.ReversibleICOMock777.methods
                             .setreservedTokenAmount(holder, lockedAmount)
-                            .send({ from: accounts[0], gas: 100000 });
+                            .send({ from: accounts[0], gas: 200000 });
 
                         await this.RicoToken.methods
                             .transfer(accounts[1], 10000)
-                            .send({ from: holder, gas: 100000 });
+                            .send({ from: holder, gas: 200000 });
 
                         const balance = await this.RicoToken.methods
                             .balanceOf(accounts[1])
@@ -318,12 +318,12 @@ describe("ERC777 - RICO Token", async function () {
 
                         await this.ReversibleICOMock777.methods
                             .setreservedTokenAmount(holder, amt.toString())
-                            .send({ from: accounts[0], gas: 100000 });
+                            .send({ from: accounts[0], gas: 200000 });
 
                         await helpers.assertInvalidOpcode(async () => {
                             await this.RicoToken.methods
                                 .transfer(accounts[1], amt.toString())
-                                .send({ from: holder, gas: 100000 });
+                                .send({ from: holder, gas: 200000 });
                         }, "Sending failed: Insufficient funds");
                     });
 
@@ -332,7 +332,7 @@ describe("ERC777 - RICO Token", async function () {
                         let locked = new BN("10000");
                         await this.RicoToken.methods
                             .transfer(accounts[0], locked.toString())
-                            .send({ from: accounts[1], gas: 100000 });
+                            .send({ from: accounts[1], gas: 200000 });
 
                         // lock half
                         await this.ReversibleICOMock777.methods
@@ -340,7 +340,7 @@ describe("ERC777 - RICO Token", async function () {
                                 accounts[0],
                                 locked.div(new BN("2")).toString()
                             )
-                            .send({ from: accounts[0], gas: 100000 });
+                            .send({ from: accounts[0], gas: 200000 });
 
                         let balance = new BN(await this.RicoToken.methods.balanceOf(accounts[0]).call());
 
@@ -349,7 +349,7 @@ describe("ERC777 - RICO Token", async function () {
                                 _ricoAddress,
                                 balance.toString()
                             )
-                            .send({ from: accounts[0], gas: 100000 });
+                            .send({ from: accounts[0], gas: 200000 });
 
                         balance = await this.RicoToken.methods
                             .balanceOf(accounts[0])
@@ -367,7 +367,7 @@ describe("ERC777 - RICO Token", async function () {
 
                         await this.RicoToken.methods
                             .transfer(accounts[0], locked.toString())
-                            .send({ from: holder, gas: 100000 });
+                            .send({ from: holder, gas: 200000 });
 
                         await this.ReversibleICOMock777.methods
                             .setreservedTokenAmount(holder, locked.toString())
@@ -379,7 +379,7 @@ describe("ERC777 - RICO Token", async function () {
                         await helpers.assertInvalidOpcode(async () => {
                             await this.RicoToken.methods
                                 .transfer(_ricoAddress, amt.toString())
-                                .send({ from: accounts[0], gas: 100000 });
+                                .send({ from: accounts[0], gas: 200000 });
                         }, "Sending failed: Insufficient funds");
                     });
                 }
@@ -407,14 +407,14 @@ describe("ERC777 - RICO Token", async function () {
                     await helpers.assertInvalidOpcode(async () => {
                         await this.RicoToken.methods
                             .send(EmptyReceiver.receipt.contractAddress, 1, ERC777data)
-                            .send({ from: holder, gas: 100000 });
+                            .send({ from: holder, gas: 200000 });
                     }, "ERC777: token recipient contract has no implementer for ERC777TokensRecipient");
                 });
 
                 it("ERC20 - transfer() works ", async function(){
                     await this.RicoToken.methods
                     .transfer(EmptyReceiver.receipt.contractAddress, 1)
-                    .send({ from: holder, gas: 100000 });
+                    .send({ from: holder, gas: 200000 });
                 });
             });
 
@@ -422,13 +422,13 @@ describe("ERC777 - RICO Token", async function () {
                 it("ERC777 - send() works", async function(){
                     await this.RicoToken.methods
                         .send(accounts[5], 1, ERC777data)
-                        .send({ from: holder, gas: 100000 });
+                        .send({ from: holder, gas: 200000 });
                 });
 
                 it("ERC20 - transfer() works", async function(){
                     await this.RicoToken.methods
                     .transfer(accounts[5], 1)
-                    .send({ from: holder, gas: 100000 });
+                    .send({ from: holder, gas: 200000 });
                 });
             });
         });
@@ -444,23 +444,23 @@ describe("ERC777 - RICO Token", async function () {
 
                 await this.RicoToken.methods
                     .transfer(accounts[3], amount.toString())
-                    .send({ from: holder, gas: 100000 });
+                    .send({ from: holder, gas: 200000 });
 
                 await this.ReversibleICOMock777.methods
                     .setreservedTokenAmount(accounts[3], locked.toString())
-                    .send({ from: holder, gas: 100000 });
+                    .send({ from: holder, gas: 200000 });
 
                 await this.RicoToken.methods
                     .burn(1, ERC777data)
-                    .send({ from: accounts[3], gas: 100000 });
+                    .send({ from: accounts[3], gas: 200000 });
             });
 
             it("throws if amount is not unlocked", async function() {
                 await helpers.assertInvalidOpcode(async () => {
                     await this.RicoToken.methods
                         .burn(locked.add( new BN(1)).toString(), ERC777data)
-                        .send({ from: accounts[3], gas: 100000 });
-                }, "Burning: Insufficient funds");
+                        .send({ from: accounts[3], gas: 200000 });
+                }, "Burning failed: Insufficient funds");
 
             });
         });
@@ -482,7 +482,7 @@ describe("ERC777 - RICO Token", async function () {
 
                 await testToken.methods
                     .unfreeze()
-                    .send({ from: holder, gas: 100000 });
+                    .send({ from: holder, gas: 200000 });
 
                 await helpers.assertInvalidOpcode(async () => {
                     await testToken.methods
@@ -496,7 +496,7 @@ describe("ERC777 - RICO Token", async function () {
                 await helpers.assertInvalidOpcode(async () => {
                     await this.RicoToken.methods
                         .setup(_ricoAddress)
-                        .send({ from: holder, gas: 100000 });
+                        .send({ from: holder, gas: 200000 });
                 }, "Contract is already initialized.");
 
             });

@@ -221,7 +221,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("3 - Return 1 token", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
 
             // console.log('DEBUG 1', await this.ReversibleICO.methods.DEBUG1().call());
             // console.log('DEBUG 2', await this.ReversibleICO.methods.DEBUG2().call());
@@ -371,7 +371,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 3 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0.3 tokens", async function () {
@@ -516,7 +516,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 60 token", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "60000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 40 tokens", async function () {
@@ -662,7 +662,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 10 token", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "10000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 40 tokens", async function () {
@@ -806,7 +806,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 3 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0.3 tokens", async function () {
@@ -1003,7 +1003,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 3 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0.3 tokens", async function () {
@@ -1200,7 +1200,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
         it("4 - Return 3 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "3000000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0.3 tokens", async function () {
@@ -1292,7 +1292,7 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
 
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 5, TokenContractInstance );
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "100000000000000000" )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
             // await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 5, TokenContractInstance );
         });
 

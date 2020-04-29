@@ -277,7 +277,7 @@ describe("ReversibleICO", function () {
                 ERC777data
             ).send({
                 from: holder,  // initial token supply holder
-                gas: 100000
+                gas: 200000
             });
         });
 
@@ -367,7 +367,7 @@ describe("ReversibleICO", function () {
                     await this.ReversibleICO.methods.jumpToBlockNumber(
                         stageData.startBlock - 1
                     ).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     await this.ReversibleICO.methods.getCurrentStage().call();
                 }, "Block outside of rICO period.");
@@ -379,7 +379,7 @@ describe("ReversibleICO", function () {
                     await this.ReversibleICO.methods.jumpToBlockNumber(
                         stageData.endBlock + 1
                     ).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     await this.ReversibleICO.methods.getCurrentStage().call();
                 }, "Block outside of rICO period.");
@@ -506,7 +506,7 @@ describe("ReversibleICO", function () {
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.endBlock + 1
                 ).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
                 await helpers.assertInvalidOpcode( async () => {
                     await this.ReversibleICO.methods.getCurrentPrice().call();

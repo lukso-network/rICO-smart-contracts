@@ -88,7 +88,7 @@ contract RicoToken is ERC777 {
         requireNotFrozen
 //        requireInitialized
     {
-        require(_amount <= getUnlockedBalance(_from), "Burning: Insufficient funds");
+        require(_amount <= getUnlockedBalance(_from), "Burning failed: Insufficient funds");
         ERC777._burn(_operator, _from, _amount, _data, _operatorData);
     }
 
@@ -137,7 +137,7 @@ contract RicoToken is ERC777 {
     }
 
     modifier requireNotFrozen() {
-        require(frozen == false, "requireNotFrozen: Token contract is frozen!");
+        require(frozen == false, "Token contract is frozen!");
         _;
     }
 

@@ -114,7 +114,7 @@ describe("ERC777 - ERC20 Token compatibility", function () {
         await helpers.assertInvalidOpcode(async () => {
             await HST.methods
                 .transfer(accounts[1], amt.toString())
-                .send({ from: creator, gas: 100000 });
+                .send({ from: creator, gas: 200000 });
         }, "revert");
     });
 

@@ -70,7 +70,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Participant cancels", async function () {
             await this.ReversibleICO.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Buy 1 token before whitelisting", async function () {
@@ -118,7 +118,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Withdraw 1 tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1000000000000000000")
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
 
             const balance = await TokenContractInstance.methods.balanceOf(participant_1).call();
             expect(balance).to.be.equal("1000000000000000000");
@@ -231,7 +231,7 @@ describe("ReversibleICO - Whitelist Testing", function () {
 
         it("Participant cancels", async function () {
             await this.ReversibleICO.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Check aggregated state", async function () {

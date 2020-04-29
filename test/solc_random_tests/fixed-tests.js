@@ -207,7 +207,7 @@ async function displayRicoBalances(helpers, rICO, rICOToken) {
 }
 
 async function setBlock(block, rICO, deployment, helpers) {
-    await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 100000});
+    await rICO.methods.jumpToBlockNumber(block).send({from: deployment.addresses.ContractsDeployer, gas: 200000});
     const currentStage = await rICO.methods.getCurrentStage().call();
     const currentAvailableEthForPurchase = await rICO.methods.committableEthAtStage(currentStage).call();
 

@@ -114,7 +114,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                     await this.ReversibleICO.methods.jumpToBlockNumber(
                         stageData.startBlock - 1
                     ).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     await this.ReversibleICO.methods.getCurrentStage().call();
                 }, "Block outside of rICO period.");
@@ -126,7 +126,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                     await this.ReversibleICO.methods.jumpToBlockNumber(
                         stageData.endBlock + 1
                     ).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     await this.ReversibleICO.methods.getCurrentStage().call();
                 }, "Block outside of rICO period.");
@@ -253,7 +253,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 await this.ReversibleICO.methods.jumpToBlockNumber(
                     stageData.endBlock + 1
                 ).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
                 await helpers.assertInvalidOpcode( async () => {
                     await this.ReversibleICO.methods.getCurrentPrice().call();

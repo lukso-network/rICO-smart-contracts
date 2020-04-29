@@ -100,7 +100,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
             await ReversibleICO.methods.jumpToBlockNumber(commitPhaseStartBlock).send({
                 from: deployingAddress,
-                gas: 100000
+                gas: 200000
             });
 
         });
@@ -116,7 +116,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                     // freeze contract in the middle
                     await ReversibleICO.methods.freeze().send({
                         from: projectAddress,
-                        gas: 1000000
+                        gas: 2000000
                     });
                 });
             }
@@ -126,7 +126,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                     // freeze contract in the middle
                     await ReversibleICO.methods.unfreeze().send({
                         from: projectAddress,
-                        gas: 1000000
+                        gas: 2000000
                     });
                 });
             }
@@ -238,7 +238,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                             if(returnTokenAmount.toString() > '0') {
 
-                                await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 1000000})
+                                await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 2000000})
                                     .then(async (receipt) => {
 
                                         // console.log('returnTokenAmount', returnTokenAmount.toString());
@@ -291,7 +291,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                             // withdraw everything the project can at that point in time
                             await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
                                 from: project.address,
-                                gas: 1000000
+                                gas: 2000000
                             }).then((receipt) => {
 
                                 console.log('---> Project withdraw: ', receipt.gasUsed + ' GAS');
@@ -316,7 +316,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                 // jump to the next block
                 await ReversibleICO.methods.jumpToBlockNumber(blockNumber).send({
                     from: deployingAddress,
-                    gas: 100000
+                    gas: 200000
                 });
 
                 const stage = await ReversibleICO.methods.getCurrentStage().call();

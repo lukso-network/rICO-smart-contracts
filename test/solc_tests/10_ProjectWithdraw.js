@@ -163,7 +163,7 @@ async function revertToFreshDeployment() {
             ERC777data
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         expect(
@@ -265,7 +265,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
 
                     currentBlock = middleBlock;
@@ -286,7 +286,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -340,7 +340,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
 
                     currentBlock = middleBlock;
@@ -363,7 +363,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -397,7 +397,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 // contribution 2
@@ -427,7 +427,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -460,7 +460,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 // project withdraw
@@ -493,7 +493,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -514,7 +514,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -549,7 +549,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 const ReturnTokenAmount = new BN(
@@ -563,7 +563,7 @@ describe("ProjectWithdraw Testing", function () {
                     ERC777data
                 ).send({
                     from: participant_1,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
@@ -600,7 +600,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -637,7 +637,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 const ReturnTokenAmount = new BN(
@@ -651,7 +651,7 @@ describe("ProjectWithdraw Testing", function () {
                     ERC777data
                 ).send({
                     from: participant_1,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
@@ -710,7 +710,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -742,7 +742,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 // project withdraw
@@ -782,7 +782,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -802,7 +802,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -835,7 +835,7 @@ describe("ProjectWithdraw Testing", function () {
                 // jump to middle block
                 const middleBlock = buyPhaseStartBlock + Math.floor((buyPhaseEndBlock - buyPhaseStartBlock) / 2);
                 await ReversibleICOInstance.methods.jumpToBlockNumber(middleBlock).send({
-                    from: deployingAddress, gas: 100000
+                    from: deployingAddress, gas: 200000
                 });
 
                 // project withdraw
@@ -875,7 +875,7 @@ describe("ProjectWithdraw Testing", function () {
                 before(async () => {
                     const ThreeFourthsTheWayThere = buyPhaseStartBlock + Math.floor(((buyPhaseEndBlock - buyPhaseStartBlock) / 4) * 3);
                     await ReversibleICOInstance.methods.jumpToBlockNumber(ThreeFourthsTheWayThere).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });
@@ -895,7 +895,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 before(async () => {
                     await ReversibleICOInstance.methods.jumpToBlockNumber(buyPhaseEndBlock).send({
-                        from: deployingAddress, gas: 100000
+                        from: deployingAddress, gas: 200000
                     });
                     helpers.utils.resetAccountNonceCache(helpers);
                 });

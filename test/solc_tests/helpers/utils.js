@@ -354,7 +354,7 @@ module.exports = {
         await contract.methods.jumpToBlockNumber(
             block
         ).send({
-            from: deployingAddress, gas: 100000
+            from: deployingAddress, gas: 200000
         });
 
         return block;

@@ -126,7 +126,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("3 - Return all tokens ", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, balance )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0 tokens", async function () {
@@ -214,7 +214,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("3 - Return half tokens ", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, new BN(balance).div( new BN(2) ).toString() )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect locked tokens to be 0.5 tokens", async function () {
@@ -301,7 +301,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("3 - Return all tokens - 1 ", async function () {
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, new BN(balance).sub( new BN(1) ).toString() )
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect locked tokens to be 0.000000000000000001 tokens", async function () {
@@ -321,7 +321,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Return last token", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1")
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("0");
         });
@@ -494,7 +494,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
         it("4 - Return all tokens", async function () {
 
             await TokenContractInstance.methods.transfer(RICOContractAddress, "2000000000000000000")
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
         });
 
         it("Expect balance to be 0.2 tokens (10 %)", async function () {
@@ -540,7 +540,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             helpers.utils.resetAccountNonceCache(helpers);
             await helpers.assertInvalidOpcode(async () => {
                 await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "1")
-                    .send({ from: TestParticipant, gas: 1000000 });
+                    .send({ from: TestParticipant, gas: 2000000 });
             }, "revert Withdraw not possible. Participant has no locked tokens.");
         });
 
@@ -741,7 +741,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "1500000000000000000")
                 .send({
                     from: TestParticipant,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice
                  });
 
@@ -907,7 +907,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "500000000000000000")
                 .send({
                     from: TestParticipant,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice
                  });
 
@@ -1016,7 +1016,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             returnTx = await TokenContractInstance.methods.transfer(RICOContractAddress, "100000000000000000")
                 .send({
                     from: TestParticipant,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice
                 });
 
@@ -1109,7 +1109,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
 
         it("Withdraw all tokens", async function () {
             await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "900000000000000000000")
-                .send({ from: TestParticipant, gas: 1000000 });
+                .send({ from: TestParticipant, gas: 2000000 });
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("0");
@@ -1190,7 +1190,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
             const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+                .send({ from: TestParticipant, gas: 2000000, gasPrice: helpers.networkConfig.gasPrice });
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("1500000000000000000000");
@@ -1264,7 +1264,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
 
             const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+                .send({ from: TestParticipant, gas: 2000000, gasPrice: helpers.networkConfig.gasPrice });
 
             console.log("after");
             await helpers.utils.displayContributions(helpers, this.ReversibleICO, TestParticipant, 6 );
@@ -1325,7 +1325,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const ethBefore = await helpers.utils.getBalance(helpers, TestParticipant);
 
             const tx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, "500000000000000000000")
-                .send({ from: TestParticipant, gas: 1000000, gasPrice: helpers.networkConfig.gasPrice });
+                .send({ from: TestParticipant, gas: 2000000, gasPrice: helpers.networkConfig.gasPrice });
 
             const balance = await TokenContractInstance.methods.balanceOf(TestParticipant).call();
             expect(balance).to.be.equal("4500000000000000000000");
@@ -1356,7 +1356,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             this.withdrawTx = await TokenContractInstance.methods.transfer(this.ReversibleICO.receipt.contractAddress, balance)
                 .send({ 
                     from: TestParticipant,
-                    gas: 1000000,
+                    gas: 2000000,
                     gasPrice: helpers.networkConfig.gasPrice 
                 });
         });

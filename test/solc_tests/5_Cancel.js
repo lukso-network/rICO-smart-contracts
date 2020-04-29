@@ -158,7 +158,7 @@ async function revertToFreshDeployment() {
             ERC777data
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         expect(
@@ -587,7 +587,7 @@ describe("Testing canceling", function () {
 
                     await TestReversibleICO.methods.cancel().send({
                         from: participant_1,  // initial token supply holder
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -606,7 +606,7 @@ describe("Testing canceling", function () {
 
                     await TestReversibleICO.methods.cancel().send({
                         from: participant_1,  // initial token supply holder
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice,
                         value: ContributionAmount.toString(), // amount will be refunded
                     });
@@ -643,7 +643,7 @@ describe("Testing canceling", function () {
 
         it("Participant cancels", async function () {
             await ReversibleICOInstance.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Whitelisting buyer should be successful", async function () {
@@ -679,7 +679,7 @@ describe("Testing canceling", function () {
 
         it("Participant cancels", async function () {
             await ReversibleICOInstance.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Participant aggregated state should match", async function () {
@@ -731,7 +731,7 @@ describe("Testing canceling", function () {
             currentBlock = await helpers.utils.jumpToContractStage(ReversibleICOInstance, deployingAddress, 5);
 
             await ReversibleICOInstance.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Participant aggregated state should match", async function () {
@@ -774,7 +774,7 @@ describe("Testing canceling", function () {
 
         it("Participant cancels", async function () {
             await ReversibleICOInstance.methods.cancel()
-                .send({ from: participant_1, gas: 1000000 });
+                .send({ from: participant_1, gas: 2000000 });
         });
 
         it("Participant gets whitelisted", async function () {

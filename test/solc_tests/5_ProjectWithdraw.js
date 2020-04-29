@@ -154,7 +154,7 @@ async function revertToFreshDeployment() {
             ERC777data
         ).send({
             from: holder,  // initial token supply holder
-            gas: 100000
+            gas: 200000
         });
 
         expect(
@@ -222,7 +222,7 @@ describe("ProjectWithdraw Testing", function () {
                     await helpers.assertInvalidOpcode( async function () {
                         await TestReversibleICO.methods.projectWithdraw( 1 ).send({
                             from: projectAddress,
-                            gas: 100000
+                            gas: 200000
                         });
                     }, "Contract must be initialized.");
 
@@ -241,7 +241,7 @@ describe("ProjectWithdraw Testing", function () {
                     await helpers.assertInvalidOpcode( async function () {
                         await TestReversibleICO.methods.projectWithdraw( 1 ).send({
                             from: deployingAddress,
-                            gas: 100000
+                            gas: 200000
                         });
                     }, "Contract must be initialized.");
 
@@ -265,7 +265,7 @@ describe("ProjectWithdraw Testing", function () {
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectAddress,
-                                gas: 100000
+                                gas: 200000
                             });
                         }, "Requested amount too big, not enough unlocked ETH available.");
 
@@ -279,7 +279,7 @@ describe("ProjectWithdraw Testing", function () {
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: deployingAddress,
-                                gas: 100000
+                                gas: 200000
                             });
                         }, "Only project wallet address.");
 
@@ -310,7 +310,7 @@ describe("ProjectWithdraw Testing", function () {
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectAddress,
-                                gas: 100000
+                                gas: 200000
                             });
                         }, "Requested amount too big, not enough unlocked ETH available.");
 
@@ -350,7 +350,7 @@ describe("ProjectWithdraw Testing", function () {
                         await helpers.assertInvalidOpcode( async function () {
                             await ReversibleICOInstance.methods.projectWithdraw( 1 ).send({
                                 from: projectAddress,
-                                gas: 100000
+                                gas: 200000
                             });
                         }, "Requested amount too big, not enough unlocked ETH available.");
 
@@ -498,7 +498,7 @@ describe("ProjectWithdraw Testing", function () {
                             ERC777data
                         ).send({
                             from: participant_1,
-                            gas: 1000000,
+                            gas: 2000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
                         console.log("after withdrawTx" );
@@ -590,7 +590,7 @@ describe("ProjectWithdraw Testing", function () {
                             ERC777data
                         ).send({
                             from: participant_2,
-                            gas: 1000000,
+                            gas: 2000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
 
@@ -802,7 +802,7 @@ describe("ProjectWithdraw Testing", function () {
                         ERC777data
                     ).send({
                         from: TestParticipantAddress,
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -924,7 +924,7 @@ describe("ProjectWithdraw Testing", function () {
                         ERC777data
                     ).send({
                         from: TestParticipantAddress,
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -1125,7 +1125,7 @@ describe("ProjectWithdraw Testing", function () {
                         ERC777data
                     ).send({
                         from: TestParticipantAddress,
-                        gas: 1000000,
+                        gas: 2000000,
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 
@@ -1217,7 +1217,7 @@ describe("ProjectWithdraw Testing", function () {
                             ERC777data
                         ).send({
                             from: TestParticipantAddress,
-                            gas: 1000000,
+                            gas: 2000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
                     }, "Withdraw not possible. Participant has no locked tokens.");
@@ -1310,7 +1310,7 @@ describe("ProjectWithdraw Testing", function () {
                             ERC777data
                         ).send({
                             from: TestParticipantAddress,
-                            gas: 1000000,
+                            gas: 2000000,
                             gasPrice: helpers.networkConfig.gasPrice
                         });
                     }, "Withdraw not possible. Participant has no locked tokens.");
