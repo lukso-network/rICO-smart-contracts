@@ -8,7 +8,7 @@ const {
     doFreshDeployment,
     saveSnapshot,
     restoreFromSnapshot,
-} = require('../includes/deployment');
+} = require('./includes/deployment');
 
 const testKey = "RandomWithdrawTokenTests";
 
