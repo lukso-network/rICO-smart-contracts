@@ -82,8 +82,11 @@ npm run test
 ```bash
 npm test
 
-// or to run seperately
+// or to run the solc tests
 npm run test-solc
+
+// to only run the random tests
+npm run test-random-standalone
 ```
 
 ### Merging contracts for deployment

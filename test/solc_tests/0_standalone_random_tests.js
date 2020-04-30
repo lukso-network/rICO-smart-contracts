@@ -1,7 +1,7 @@
 const {
     validatorHelper,
     clone
-} = require('../includes/setup');
+} = require('./includes/setup');
 
 const {
     requiresERC1820Instance,
