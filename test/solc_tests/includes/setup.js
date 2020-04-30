@@ -45,7 +45,7 @@ function clone(_what) {
     return _.cloneDeep(_what);
 }
 
-const validatorHelper = require("../../../js_validator_tests/assets/ricoContract.js");
+const validatorHelper = require("../../js_validator_tests/assets/ricoContract.js");
 
 module.exports = {
     validatorHelper,
