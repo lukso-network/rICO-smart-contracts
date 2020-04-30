@@ -14,12 +14,12 @@ let _ricoAddress;
 
 const {
     validatorHelper
-} = require('./rework/includes/setup');
+} = require('./includes/setup');
 
 const {
     requiresERC1820Instance,
     restoreFromSnapshot
-} = require('./rework/includes/deployment');
+} = require('./includes/deployment');
 
 describe("ERC777 - RICO Token", async function () {
     before(async function () {

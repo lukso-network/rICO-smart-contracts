@@ -59,14 +59,14 @@ let TokenContractAddress, ReversibleICOAddress, stageValidation = [], currentBlo
 const {
     validatorHelper,
     clone
-} = require('./rework/includes/setup');
+} = require('./includes/setup');
 
 const {
     requiresERC1820Instance,
     doFreshDeployment,
     saveSnapshot,
     restoreFromSnapshot,
-} = require('./rework/includes/deployment');
+} = require('./includes/deployment');
 
 const testKey = "FlowTestInit";
 const SnapShotKey = testKey;

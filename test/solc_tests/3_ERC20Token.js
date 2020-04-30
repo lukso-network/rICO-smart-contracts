@@ -7,13 +7,13 @@ const creator = accounts[10];
 
 const {
     validatorHelper
-} = require('./rework/includes/setup');
+} = require('./includes/setup');
 
 const {
     requiresERC1820Instance,
     restoreFromSnapshot,
     saveSnapshot,
-} = require('./rework/includes/deployment');
+} = require('./includes/deployment');
 
 const testKey = "ERC777CompatTests";
 

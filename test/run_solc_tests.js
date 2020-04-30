@@ -14,15 +14,16 @@ async function runTests(init) {
   const tests = [
     "external/SafeMath",
     "1_ERC1820",
-    "rework/flows/token_balances",
-    "rework/flows/random_tests",
-    "rework/phases",
-    "rework/methods/stages",
-    "rework/methods/tokens/getReservedTokenAmount",
-    "rework/methods/tokens/buyTokens",
+    "flows/token_balances",
+    "flows/random_tests", // Most important
+    "phases",
+    "methods/stages",
+    "methods/tokens/getReservedTokenAmount",
+    "methods/tokens/buyTokens",
     "2_ERC777_Token",
     "3_ERC20Token",
     // "4_ReversibleICO",
+    // "4-1_ReversibleICO",
     "5_Cancel",
     "5_Contributions",
     "5_Flows",
@@ -33,8 +34,8 @@ async function runTests(init) {
 
 
     // Needs fixing
-    // "rework/flows/whitelist",
-    // "rework/flows/withdraw",
+    // "flows/whitelist",
+    // "flows/withdraw",
   ];
 
   init.helpers.utils.toLog(

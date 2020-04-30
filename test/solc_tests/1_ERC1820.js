@@ -5,11 +5,11 @@ const expect = helpers.expect
 
 const {
     validatorHelper
-} = require('./rework/includes/setup');
+} = require('./includes/setup');
 
 const {
     saveSnapshot,
-} = require('./rework/includes/deployment');
+} = require('./includes/deployment');
 
 describe("ERC1820 - Token Registry", function () {
 
