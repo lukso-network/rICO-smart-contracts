@@ -152,6 +152,8 @@ async function revertToFreshDeployment() {
         await ReversibleICOInstance.methods.init(
             TokenContractAddress,        // address _TokenContractAddress
             whitelistingAddress, // address _whitelistingAddress
+            projectAddress,        // address _freezerAddress
+            projectAddress,        // address _rescuerAddress
             projectAddress,          // address _projectAddress
             commitPhaseStartBlock,                 // uint256 _StartBlock
             commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
@@ -358,6 +360,8 @@ describe("Flow Testing", function () {
                 await TestReversibleICO.methods.init(
                     TestTokenContractAddress,    // address _TokenContractAddress
                     whitelistingAddress, // address _whitelistingAddress
+                    projectAddress,        // address _freezerAddress
+                    projectAddress,        // address _rescuerAddress
                     projectAddress,       // address _projectAddress
                     commitPhaseStartBlock,                 // uint256 _StartBlock
                     commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,

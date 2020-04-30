@@ -231,6 +231,8 @@ contract ReversibleICO is IERC777Recipient {
     function init(
         address _tokenAddress,
         address _whitelistingAddress,
+        address _freezerAddress,
+        address _rescuerAddress,
         address _projectAddress,
         uint256 _commitPhaseStartBlock,
         uint256 _commitPhaseBlockCount,
@@ -243,15 +245,19 @@ contract ReversibleICO is IERC777Recipient {
     onlyDeployingAddress
     isNotInitialized
     {
-
+        require(_tokenAddress != address(0));
+        require(_whitelistingAddress != address(0));
+        require(_freezerAddress != address(0));
+        require(_rescuerAddress != address(0));
+        require(_projectAddress != address(0));
         require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
         tokenAddress = _tokenAddress;
         whitelistingAddress = _whitelistingAddress;
+        freezerAddress = _freezerAddress;
+        rescuerAddress = _rescuerAddress;
         projectAddress = _projectAddress;
-        freezerAddress = _projectAddress; // TODO change, here only for testing
-        rescuerAddress = _projectAddress; // TODO change, here only for testing
 
         // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;

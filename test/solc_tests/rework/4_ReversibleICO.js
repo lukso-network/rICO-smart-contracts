@@ -103,6 +103,8 @@ describe("ReversibleICO", function () {
             await this.ReversibleICO.methods.init(
                 TokenContractAddress,        // address _tokenAddress
                 whitelistingAddress, // address _whitelistingAddress
+                projectAddress,        // address _freezerAddress
+                projectAddress,        // address _rescuerAddress
                 projectAddress,       // address _projectAddress
                 commitPhaseStartBlock,                 // uint256 _commitPhaseStartBlock
                 commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,

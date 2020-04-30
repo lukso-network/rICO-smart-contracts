@@ -106,6 +106,8 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
             await ReversibleICOInstance.methods.init(
                 TokenContractAddress,       // address _TokenContractAddress
                 whitelistingAddress, // address _whitelistingAddress
+                projectAddress,        // address _freezerAddress
+                projectAddress,        // address _rescuerAddress
                 projectAddress,       // address _projectAddress
                 commitPhaseStartBlock,      // uint256 _commitPhaseStartBlock
                 commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
