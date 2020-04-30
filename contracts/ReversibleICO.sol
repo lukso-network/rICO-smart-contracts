@@ -112,11 +112,6 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev The duration of the buy phase in blocks.
     uint256 public buyPhaseBlockCount;
 
-//    uint256 public DEBUG1 = 9999;
-//    uint256 public DEBUG2 = 9999;
-//    uint256 public DEBUG3 = 9999;
-//    uint256 public DEBUG4 = 9999;
-
     /*
     *   Internal Variables
     */
@@ -694,8 +689,10 @@ contract ReversibleICO is IERC777Recipient {
     */
     function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
 
-        uint256 blockNumber = _blockNumber.sub(frozenPeriod); // adjust the block by the frozen period
+        // remove the frozen period from the given block, as it is assumed to be a real block number (not adjusted)
+        uint256 blockNumber = _blockNumber.sub(frozenPeriod);
 
+        // check that we are within the rICO period
         require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
 
         if (blockNumber <= commitPhaseEndBlock) {
@@ -819,10 +816,6 @@ contract ReversibleICO is IERC777Recipient {
             'Project Sanity check failed! Reserved + Unlock must equal committedETH'
         );
 
-//        DEBUG1 = address(this).balance;
-//        DEBUG2 = _projectCurrentlyReservedETH;
-//        DEBUG3 = pendingETH;
-
         // PROJECT: The ETH in the rICO has to be the total of unlocked + reserved - withdraw
         require(
             address(this).balance == _projectUnlockedETH.add(_projectCurrentlyReservedETH).add(pendingETH).sub(projectWithdrawnETH),
@@ -835,9 +828,6 @@ contract ReversibleICO is IERC777Recipient {
     */
     function sanityCheckParticipant(address _participantAddress) internal view {
         Participant storage participantStats = participants[_participantAddress];
-
-        //        DEBUG1 = participantStats.reservedTokens;
-        //        DEBUG2 = participantStats._currentReservedTokens.add(participantStats._unlockedTokens);
 
         // PARTICIPANT: The sum of reserved + unlocked has to be equal the totalReserved.
         require(

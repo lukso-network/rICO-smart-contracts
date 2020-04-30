@@ -13,45 +13,64 @@ The rICO is set in stages that can be defined in the `init` function.
 investors can commit or reverse their commitment by sending back the tokens.
 
 **Stage 1-x** is called **"buy phase"**, this is where the committed ETH gradually buys the token over time. 
-ETH that already bought tokens is withdrawable by the project. 
-While ETH that is just committed and "reserved" tokens, can be withdrawn by any investor at any point in time, 
-by sending back reserved tokens to the rICO smart contract.
+ETH that already bought tokens is available to the project for withdraw.
 
-Each stage has a price increase, so that committing early is rewarded.
+Tokens that are still "reserved" (meaning they haven't been unlocked for the participant),
+can be returned to withdraw their corresponding ETH by any investor at any point in time.
+
+**Each stage has a price increase, so that committing early is rewarded.**
 The scheme looks a little bit as follows:
 
 ![alt text](https://github.com/lukso-network/rICO-smart-contracts/raw/master/rICO-diagram.png "rICO Diagram")
 
 ### How do I reserve tokens?
 
-To reserve tokens at any stage, call the `commit()` function and send the amount of ETH along that you want to reserve tokens with.
+To reserve tokens at any stage, call the `commit()` function and send the amount of ETH along for which you want to reserve tokens with.
 
 ### What happens if somebody commits during stage 1-x
 
-Committing during stage 1-x means that the rICO period of buying of tokens over time is shorter, 
-as the period starts for everyone at the point in time of their commitment.
+Committing during stage 1-x means that the rICO period of buying of tokens over time is shorter for yourself, 
+as the period starts for everyone at the point in time of *their* commitment.
 
-E.g. if you come in at month 3 of 10, your rICO will take place over 7 months and end with everyone else.
+E.g. If you come in at month 3 of 10, your rICO will take place over 7 months and end with everyone else.
 
 ### Why do I see the full balance of tokens, if I have not bought them yet?
 
 This is done so that normal token wallets can function as an interface to the rICO.
-You will see the full token balance at your address, but will only be able to move the amount you have actually bough by this point in time.
+You will see the full token balance at your address, but will only be able to move the amount you have actually bought by the current point in time.
 
-While in reverse you will only be able to send back the amount of tokens that you still have reserved. 
-Should you send a higher reserved token balance you will only return the amount of ETH matching your reserved token balance, 
+While in reverse you will only be able to send back the amount of tokens that you have still reserved. 
+Should you send a higher than reserved token balance you will only return the amount of ETH matching your total reserved token balance, 
 and get the rest tokens returned automatically.
 
 ### What is the pending state?
 
 When you commit ETH your address needs to be whitelisted first. 
 This is done by the projects whitelisting address by calling `whitelist(address[], bool)` on the rICO smart contract. 
-Should your address be rejected, you will receive your committed ETH back. Should it be approved you will see your full token balance at your committing address.
+Should your address be rejected (the project calling `whitelist([0xyouraddress], false)`), you will receive your committed ETH back.
+Should it be approved you will see your full token balance at your committing address.
 
-### What if I want to withdraw ETH while my address is pending?
+### What if I want to withdraw ETH while my address is still pending?
 
 This can be done by sending an ETH transaction with 0 value, or smaller than `minContribution` (default 0.001 ether) to the rICO smart contract address.
-Or call the `cancel()` function. This will trigger a cancel of all pending ETH.
+Or call the `cancel()` function directly. This will trigger a cancel of all your pending ETH.
+
+## Security Measurements
+
+The rICO as well as the token contract was audited by (ConsenSys Diligence)[https://github.com/ConsenSys] in April 2020.
+No severe issues were found. Find the audit report here: TODO add
+ 
+### Escape hatch
+The current version includes a security escape hatch in case of malfunction.
+The security is split between two entities:
+
+- The `freezerAddress`, who can *freeze* the rICO as well as the token contract, to prevent any interaction with it. (The rICO freezer can be different from the token freezer)
+- The `rescuerAddress`, who should be held by an escrow company, only to be used in the severe case of emergency. (The rICO rescuer can be different from the token rescuer)
+It can *when frozen* move the tokens of the rICO and ETH funds to another address (e.g. return contract, or updated rICO contract).
+It can also point the token contract to another rICO contract, but only *when the token contract is frozen* as well.
+
+The `freezerAddress` has the ability to to deactivate the freeze function in both token, and rICO contract, should the contracts deemed fully secure.
+This will deactivate the ability to rescue funds or freeze the contracts all together.
 
 ## Development
 
