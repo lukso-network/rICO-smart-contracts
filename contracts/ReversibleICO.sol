@@ -237,7 +237,7 @@ contract ReversibleICO is IERC777Recipient {
         uint256 _commitPhaseStartBlock,
         uint256 _commitPhaseBlockCount,
         uint256 _commitPhasePrice,
-        uint8 _stageCount,
+        uint8 _stageCount, // Its not recommended to choose more than 50 stages! (9 stages require ~650k GAS when whitelisting contributions, the whitelisting function could run out of gas with a high number of stages, preventing accepting contributions)
         uint256 _stageBlockCount,
         uint256 _stagePriceIncrease
     )
@@ -282,15 +282,15 @@ contract ReversibleICO is IERC777Recipient {
         // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
             // Get i-th stage
-            Stage storage stageN = stages[i];
+            Stage storage byStage = stages[i];
             // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
-            stageN.startBlock = uint128(previousStageEndBlock.add(1));
+            byStage.startBlock = uint128(previousStageEndBlock.add(1));
             // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
-            stageN.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
+            byStage.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
             // Store the current stage endBlock in order to update the next one
-            previousStageEndBlock = stageN.endBlock;
+            previousStageEndBlock = byStage.endBlock;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            stageN.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            byStage.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
         }
 
         // UPDATE global STATS
@@ -515,10 +515,10 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     {
         frozen = true;
-        freezeStart = getCurrentBlockNumber();
+        freezeStart = getCurrentEffectiveBlockNumber();
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_FREEZE), uint32(getCurrentStage()), freezerAddress, getCurrentBlockNumber());
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_FREEZE), uint32(getCurrentStage()), freezerAddress, getCurrentEffectiveBlockNumber());
     }
 
     /**
@@ -529,7 +529,7 @@ contract ReversibleICO is IERC777Recipient {
     onlyFreezerAddress
     isFrozen
     {
-        uint256 currentBlock = getCurrentBlockNumber();
+        uint256 currentBlock = getCurrentEffectiveBlockNumber();
 
         frozen = false;
         frozenPeriod = frozenPeriod.add(
@@ -552,7 +552,7 @@ contract ReversibleICO is IERC777Recipient {
         rescuerAddress = address(0);
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_DISBALEHATCH), uint32(getCurrentStage()), freezerAddress, getCurrentBlockNumber());
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_DISBALEHATCH), uint32(getCurrentStage()), freezerAddress, getCurrentEffectiveBlockNumber());
     }
 
     /**
@@ -563,7 +563,7 @@ contract ReversibleICO is IERC777Recipient {
     onlyRescuerAddress
     isFrozen
     {
-        require(getCurrentBlockNumber() == freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
+        require(getCurrentEffectiveBlockNumber() == freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
 
         uint256 tokenBalance = IERC777(tokenAddress).balanceOf(address(this));
         uint256 ethBalance = address(this).balance;
@@ -576,7 +576,7 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(_to)).transfer(ethBalance);
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_ESCAPEHATCH), uint32(getCurrentStage()), _to, getCurrentBlockNumber());
+        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_ESCAPEHATCH), uint32(getCurrentStage()), _to, getCurrentEffectiveBlockNumber());
         emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_TOKEN), _to, tokenBalance);
         emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_ETH), _to, ethBalance);
     }
@@ -648,9 +648,9 @@ contract ReversibleICO is IERC777Recipient {
         if (frozen) {
             blockNumber = freezeStart;
         } else {
-            blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
+            blockNumber = getCurrentBlockNumber(); // frozenPeriod is deducted in getStageAtBlock()
         }
-    return getStageAtBlock(blockNumber);
+        return getStageAtBlock(blockNumber);
     }
 
     /**
@@ -662,7 +662,7 @@ contract ReversibleICO is IERC777Recipient {
         if (frozen) {
             blockNumber = freezeStart;
         } else {
-            blockNumber = getCurrentBlockNumber().add(frozenPeriod); // we add the frozenPeriod here, as we deduct it in getStageAtBlock()
+            blockNumber = getCurrentBlockNumber(); // frozenPeriod is deducted in getStageAtBlock()
         }
         return getPriceAtBlock(blockNumber);
     }
@@ -750,6 +750,13 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Returns the current block number: required in order to override when running tests.
      */
     function getCurrentBlockNumber() public view returns (uint256) {
+        return uint256(block.number);
+    }
+
+    /**
+     * @notice Returns the current block number - the frozen period: required in order to override when running tests.
+     */
+    function getCurrentEffectiveBlockNumber() public view returns (uint256) {
         return uint256(block.number)
         .sub(frozenPeriod); // make sure we deduct any frozenPeriod from calculations
     }
@@ -762,7 +769,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function calcUnlockedAmount(uint256 _amount, uint256 _lastBlock) public view returns (uint256) {
 
-        uint256 currentBlock = getCurrentBlockNumber();
+        uint256 currentBlock = getCurrentEffectiveBlockNumber();
 
         if(_amount == 0) {
             return 0;
@@ -849,7 +856,7 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE GLOBAL STATS
         _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.sub(newlyUnlockedEth);
         _projectUnlockedETH = _projectUnlockedETH.add(newlyUnlockedEth);
-        _projectLastBlock = getCurrentBlockNumber();
+        _projectLastBlock = getCurrentEffectiveBlockNumber();
 
         sanityCheckProject();
     }
@@ -865,7 +872,7 @@ contract ReversibleICO is IERC777Recipient {
         participantStats._currentReservedTokens = getParticipantReservedTokens(_participantAddress);
 
         // RESET BLOCK NUMBER: Force the unlock calculations to start from this point in time.
-        participantStats._lastBlock = getCurrentBlockNumber();
+        participantStats._lastBlock = getCurrentEffectiveBlockNumber();
 
         // UPDATE the locked/unlocked ratio for the project as well
         calcProjectAllocation();
@@ -952,15 +959,15 @@ contract ReversibleICO is IERC777Recipient {
 
         // Iterate over all stages and their pending contributions
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
-            ParticipantStageDetails storage stages = participantStats.stages[stageId];
+            ParticipantStageDetails storage byStage = participantStats.stages[stageId];
 
             // skip if not ETH is pending
-            if (stages.pendingETH == 0) {
+            if (byStage.pendingETH == 0) {
                 continue;
             }
 
             uint256 maxCommittableEth = committableEthAtStage(stageId);
-            uint256 newlyCommittedEth = stages.pendingETH;
+            uint256 newlyCommittedEth = byStage.pendingETH;
             uint256 returnEth = 0;
 
             // If incoming value is higher than what we can accept,
@@ -985,7 +992,7 @@ contract ReversibleICO is IERC777Recipient {
             participantStats.committedETH = participantStats.committedETH.add(newlyCommittedEth);
             participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittedEth).sub(returnEth);
 
-            stages.pendingETH = stages.pendingETH.sub(newlyCommittedEth).sub(returnEth);
+            byStage.pendingETH = byStage.pendingETH.sub(newlyCommittedEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
             tokenSupply = tokenSupply.sub(newTokenAmount);
@@ -1170,7 +1177,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Checks if the rICO is running.
      */
     modifier isRunning() {
-        uint256 blockNumber = getCurrentBlockNumber();
+        uint256 blockNumber = getCurrentEffectiveBlockNumber();
         require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Current block is outside the rICO period.");
         _;
     }

@@ -296,7 +296,7 @@ describe("Gnosis Safe Integration", function () {
                 
                 const blocksPerDay = 6450;
                 currentBlock = await this.ReversibleICO.methods
-                    .getCurrentBlockNumber()
+                    .getCurrentEffectiveBlockNumber()
                     .call();
 
                 // starts in one day

@@ -59,6 +59,7 @@ module.exports = {
         await rICOToken.methods.init(
             helpers.addresses.Rico,
             ContractsDeployer,
+            ContractsDeployer
             ContractsDeployer,
             init.setup.settings.token.supply.toString()
         ).send({

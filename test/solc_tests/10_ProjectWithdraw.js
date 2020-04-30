@@ -113,7 +113,7 @@ async function revertToFreshDeployment() {
 
         await TokenContractInstance.methods.init(
             ReversibleICOAddress,
-            holder, holder,
+            holder, holder, holder,
             setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
@@ -124,7 +124,7 @@ async function revertToFreshDeployment() {
         /*
         *   Add RICO Settings
         */
-        currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
+        currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
         // starts in one day + 1, so the stages are even and end on nice numbers
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay + 1;
@@ -580,7 +580,7 @@ describe("ProjectWithdraw Testing", function () {
 
                 it("returns 50 eth ( allocated by withdraw )", async function () {
 
-                    // console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentBlockNumber().call());
+                    // console.log('CurrentBlockNumber ', await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call());
                     // console.log('buyPhaseStartBlock ', await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
                     // console.log('buyPhaseEndBlock ', await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
                     // console.log('committedETH ', await ReversibleICOInstance.methods.committedETH().call());

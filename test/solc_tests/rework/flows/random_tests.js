@@ -329,7 +329,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
         console.log('Number of Participants: ', numberOfParticipants);
 
         it("rICO should be finished", async function () {
-            const blockNumber = await ReversibleICO.methods.getCurrentBlockNumber().call();
+            const blockNumber = await ReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
             const buyPhaseEndBlock = await ReversibleICO.methods.buyPhaseEndBlock().call();
             expect(blockNumber).to.be.equal(buyPhaseEndBlock);
         });

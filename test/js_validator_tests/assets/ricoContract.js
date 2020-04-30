@@ -301,7 +301,7 @@ class Contract extends Validator {
         // transferred to their accounts, we use reserved + bought
         return this.getParticipantReservedTokensAtBlock(
             participantRecord.pendingTokens.add(participantRecord.boughtTokens),
-            this.getCurrentBlockNumber()
+            this.getCurrentEffectiveBlockNumber()
         ).sub(participantRecord.returnedTokens);
     }
 
@@ -400,7 +400,7 @@ class Contract extends Validator {
         // This is needed otherwise participants that can call cancel() and bypass!
         if (participantRecord.whitelisted == true) {
 
-            const currentBlockNumber = getCurrentBlockNumber();
+            const currentBlockNumber = getCurrentEffectiveBlockNumber();
 
             // Contributors can send more tokens than they have locked,
             // thus make sure we only try to return for said amount

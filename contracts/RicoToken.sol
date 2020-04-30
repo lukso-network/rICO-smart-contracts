@@ -14,7 +14,8 @@ contract RicoToken is ERC777 {
     bool public initialized; // default: false
     
     // addresses
-    address public managerAddress; // should be same as freezer address in rICO
+    address public deployingAddress;
+    address public freezerAddress; // should be same as freezer address in rICO
     address public rescuerAddress; // should be same as rescuerAddress address in rICO
 
     // ------------------------------------------------------------------------------------------------
@@ -25,53 +26,60 @@ contract RicoToken is ERC777 {
     ERC777("LYXe Token", "LYXe", _defaultOperators)
     public
     {
-        managerAddress = msg.sender;
+        deployingAddress = msg.sender;
     }
 
     // Init the rICO token and attach it to the rICO
     function init(
         address _ricoAddress,
+        address _freezerAddress,
         address _rescuerAddress,
         address _projectAddress,
         uint256 _initialSupply
     )
     public
     isNotInitialized
-    onlyManagerAddress
+    onlyDeployingAddress
     {
-        _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
-        
+        require(_ricoAddress != address(0));
+        require(_freezerAddress != address(0));
+        require(_rescuerAddress != address(0));
+        require(_projectAddress != address(0));
+
         rICO = ReversibleICO(_ricoAddress);
+        freezerAddress = _freezerAddress;
         rescuerAddress = _rescuerAddress;
-        
+
+        _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
+
         initialized = true;
     }
 
 
     // *** SECURITY functions
-    function removeManager()
+    function removeFreezer()
     public
-    onlyManagerAddress
+    onlyFreezerAddress
     isNotFrozen
     {
-        managerAddress = address(0);
+        freezerAddress = address(0);
     }
 
-    function freeze() public onlyManagerAddress {
+    function freeze() public onlyFreezerAddress {
         frozen = true;
     }
 
-    function unfreeze() public onlyManagerAddress {
+    function unfreeze() public onlyFreezerAddress {
         frozen = false;
     }
 
     // The rICO address can only be changed when the contract is frozen
-    function changeRICO(address _ricoAddress)
+    function changeRICO(address _newRicoAddress)
     public
     onlyRescuerAddress
     isFrozen
     {
-        rICO = ReversibleICO(_ricoAddress);
+        rICO = ReversibleICO(_newRicoAddress);
     }
 
     // *** Public functions
@@ -136,32 +144,57 @@ contract RicoToken is ERC777 {
 
 
     // *** Modifiers
-
-    modifier onlyManagerAddress() {
-        require(msg.sender == managerAddress, "Only manager address can call this method");
+    /**
+     * @notice Checks if the sender is the deployer.
+     */
+    modifier onlyDeployingAddress() {
+        require(msg.sender == deployingAddress, "Only the deployer can call this method.");
         _;
     }
-    
+
+    /**
+     * @notice Checks if the sender is the freezer controller address.
+     */
+    modifier onlyFreezerAddress() {
+        require(msg.sender == freezerAddress, "Only the freezer address can call this method.");
+        _;
+    }
+
+    /**
+     * @notice Checks if the sender is the freezer controller address.
+     */
     modifier onlyRescuerAddress() {
         require(msg.sender == rescuerAddress, "Only the rescuer address can call this method.");
         _;
     }
 
+    /**
+     * @notice Requires the contract to have been initialized.
+     */
     modifier isInitialized() {
         require(initialized == true, "Contract must be initialized.");
         _;
     }
 
+    /**
+     * @notice Requires the contract to NOT have been initialized,
+     */
     modifier isNotInitialized() {
         require(initialized == false, "Contract is already initialized.");
         _;
     }
 
+    /**
+     * @notice @dev Requires the contract to be frozen.
+     */
     modifier isFrozen() {
         require(frozen == true, "Token contract not frozen.");
         _;
     }
 
+    /**
+     * @notice @dev Requires the contract not to be frozen.
+     */
     modifier isNotFrozen() {
         require(frozen == false, "Token contract is frozen!");
         _;

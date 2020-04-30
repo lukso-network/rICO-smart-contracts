@@ -210,7 +210,7 @@ async function display(rICO, helpers, Project) {
     projectWithdrawnETH = new helpers.BN( await rICO.methods.projectWithdrawnETH().call() );
     buyPhaseStartBlock = await rICO.methods.buyPhaseStartBlock().call();
     buyPhaseEndBlock = await rICO.methods.buyPhaseEndBlock().call();
-    _currentBlock = await rICO.methods.getCurrentBlockNumber().call();
+    _currentBlock = await rICO.methods.getCurrentEffectiveBlockNumber().call();
 
 
     const globalAvailable = committedETH

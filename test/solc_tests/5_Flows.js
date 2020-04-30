@@ -123,7 +123,7 @@ async function revertToFreshDeployment() {
 
         await TokenContractInstance.methods.init(
             ReversibleICOAddress,
-            holder, holder,
+            holder, holder, holder,
             setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
@@ -132,7 +132,7 @@ async function revertToFreshDeployment() {
         /*
         *   Add RICO Settings
         */
-        currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
+        currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
         // starts in one day
         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
@@ -330,7 +330,7 @@ describe("Flow Testing", function () {
 
                 await TestTokenContract.methods.init(
                     TestReversibleICOAddress,
-                    holder, holder,
+                    holder, holder, holder,
             setup.settings.token.supply.toString()
                 ).send({
                     from: holder,  // initial token supply holder
@@ -339,7 +339,7 @@ describe("Flow Testing", function () {
                 /*
                 *   Add RICO Settings
                 */
-                currentBlock = await TestReversibleICO.methods.getCurrentBlockNumber().call();
+                currentBlock = await TestReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
 
                 // starts in one day
                 commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;

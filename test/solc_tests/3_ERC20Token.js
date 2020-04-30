@@ -50,6 +50,7 @@ describe("ERC777 - ERC20 Token compatibility", function () {
             _ricoAddress,
             creator,
             creator,
+            creator,
             setup.settings.token.supply.toString()
         ).send({ from: creator });
         await saveSnapshot(testKey);

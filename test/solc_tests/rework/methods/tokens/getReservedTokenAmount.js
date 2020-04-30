@@ -29,7 +29,7 @@ describe("ReversibleICO - Methods - Tokens", function () {
         RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
         this.jsValidator = new validatorHelper(setup.settings, 
-            parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10)
+            parseInt( await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call(), 10)
         );
     });
 

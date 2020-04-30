@@ -322,7 +322,7 @@ class Participant extends Actor {
         // console.log("stages1.pendingTokens            ", this.toEth(stages1.stagePendingTokens), "tokens");
 
 
-        // const blockNumber = await this.rICO.methods.getCurrentBlockNumber().call();
+        // const blockNumber = await this.rICO.methods.getCurrentEffectiveBlockNumber().call();
 
         // const getParticipantReservedTokens = await this.rICO.methods.getParticipantReservedTokens(this.address).call();
         // console.log("getParticipantReservedTokens        ", this.toEth(getParticipantReservedTokens), "tokens");
@@ -748,7 +748,7 @@ class Participant extends Actor {
 
 
     async getMyUnlockRatio() {
-        const currentBlock = await this.rICO.methods.getCurrentBlockNumber().call();
+        const currentBlock = await this.rICO.methods.getCurrentEffectiveBlockNumber().call();
         const buyPhaseStartBlock = this.startAndEndBlocks.buyPhaseStartBlock;
         const buyPhaseEndBlock = this.startAndEndBlocks.buyPhaseEndBlock;
         const participantRecord = await this.getParticipantRecord();

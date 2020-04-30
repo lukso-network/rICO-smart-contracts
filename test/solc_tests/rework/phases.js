@@ -73,7 +73,7 @@ describe("ReversibleICO - Phases", function () {
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
             RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
-            currentBlock = parseInt( await this.ReversibleICO.methods.getCurrentBlockNumber().call(), 10);
+            currentBlock = parseInt( await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call(), 10);
             this.jsValidator = new validatorHelper(setup.settings, currentBlock);
         });
 

@@ -101,6 +101,12 @@ Outputs the merged contracts in `./contracts-merged`
 - Project Withdraw: ~70k GAS
 - Whitelisting: ~200k-650k GAS (with max 9 stages) (depends in how much stages were contributions)
 
+**NOTE** Its not recommended to choose more than 50 stages!
+9 stages require ~650k GAS when whitelisting contributions,
+the whitelisting function could run out of gas with a high number of stages, preventing accepting contributions.
+
+Test before using the `/test/solc_tests/flows/random_tests.js`
+
 
 ## Main Contributors
 

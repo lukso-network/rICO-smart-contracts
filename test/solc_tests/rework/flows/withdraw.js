@@ -128,7 +128,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 2;
             await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
-            console.log('currentBlock ', await this.ReversibleICO.methods.getCurrentBlockNumber().call());
+            console.log('currentBlock ', await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call());
             console.log('buyPhaseStartBlock ', await this.ReversibleICO.methods.buyPhaseStartBlock().call());
             console.log('buyPhaseEndBlock ', await this.ReversibleICO.methods.buyPhaseEndBlock().call());
             console.log('buyPhaseBlockCount ', await this.ReversibleICO.methods.buyPhaseBlockCount().call());
@@ -1057,7 +1057,7 @@ describe("ReversibleICO - Withdraw Testing", function () {
             const stageId = 2;
             await helpers.utils.jumpToContractStage(this.ReversibleICO, deployingAddress, stageId, true);
 
-            console.log('currentBlock ', await this.ReversibleICO.methods.getCurrentBlockNumber().call());
+            console.log('currentBlock ', await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call());
             console.log('buyPhaseStartBlock ', await this.ReversibleICO.methods.buyPhaseStartBlock().call());
             console.log('buyPhaseEndBlock ', await this.ReversibleICO.methods.buyPhaseEndBlock().call());
             console.log('buyPhaseBlockCount ', await this.ReversibleICO.methods.buyPhaseBlockCount().call());

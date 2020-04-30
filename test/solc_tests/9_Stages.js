@@ -77,7 +77,7 @@ describe("ReversibleICO", function () {
 
         await TokenContractInstance.methods.init(
             helpers.addresses.Rico,
-            holder, holder,
+            holder, holder, holder,
             setup.settings.token.supply.toString()
         ).send({
             from: holder,  // initial token supply holder
@@ -121,7 +121,7 @@ describe("ReversibleICO", function () {
 
         before(async function () {
 
-            currentBlock = await this.ReversibleICO.methods.getCurrentBlockNumber().call();
+            currentBlock = await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
 
             // starts in one day
             commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;

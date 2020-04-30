@@ -94,16 +94,16 @@ describe("Javascript Validator - Tests", function () {
 
         });
 
-        describe("getCurrentBlockNumber()", function () {
+        describe("getCurrentEffectiveBlockNumber()", function () {
             it("returns default block correctly", function() {
-                expect(Validator.getCurrentBlockNumber()).is.equal(0);
+                expect(Validator.getCurrentEffectiveBlockNumber()).is.equal(0);
             });
         });
 
         describe("setBlockNumber()", function () {
             it("sets block correctly", function() {
                 Validator.setBlockNumber(2);
-                expect(Validator.getCurrentBlockNumber()).is.equal(2);
+                expect(Validator.getCurrentEffectiveBlockNumber()).is.equal(2);
             });
         });
     });

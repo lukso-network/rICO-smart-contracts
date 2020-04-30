@@ -99,7 +99,7 @@ class Validator {
     }
 
     getCurrentGlobalUnlockRatio() {
-        const currentBlock = new BN( this.getCurrentBlockNumber() );
+        const currentBlock = new BN( this.getCurrentEffectiveBlockNumber() );
         const BuyPhaseStartBlock = new BN( this.buyPhaseStartBlock - 1 );
         const BuyPhaseEndBlock   = new BN( this.buyPhaseEndBlock );
         const precision = new BN(20);
@@ -136,7 +136,7 @@ class Validator {
     }
 
     getCurrentStage() {
-        return this.getStageAtBlock(this.getCurrentBlockNumber());
+        return this.getStageAtBlock(this.getCurrentEffectiveBlockNumber());
     }
 
     getStageAtBlock(_blockNumber) {
@@ -160,7 +160,7 @@ class Validator {
     }
 
     getCurrentPrice() {
-        return this.getPriceAtBlock(this.getCurrentBlockNumber());
+        return this.getPriceAtBlock(this.getCurrentEffectiveBlockNumber());
     }
 
     getPriceAtBlock(_blockNumber) {
@@ -237,7 +237,7 @@ class Validator {
         this.block = parseInt(block, 10);
     }
 
-    getCurrentBlockNumber() {
+    getCurrentEffectiveBlockNumber() {
         return this.block;
     }
 
