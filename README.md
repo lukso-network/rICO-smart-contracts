@@ -105,7 +105,7 @@ Outputs the merged contracts in `./contracts-merged`
 9 stages require ~650k GAS when whitelisting contributions,
 the whitelisting function could run out of gas with a high number of stages, preventing accepting contributions.
 
-Test before using the `/test/solc_tests/flows/random_tests.js`
+Test before using the `npm run test-random-standalone` and adjust `/test/solc_tests/0_standalone_random_tests.js`
 
 
 ## Main Contributors

@@ -59,7 +59,7 @@ module.exports = {
         await rICOToken.methods.init(
             helpers.addresses.Rico,
             ContractsDeployer,
-            ContractsDeployer
+            ContractsDeployer,
             ContractsDeployer,
             init.setup.settings.token.supply.toString()
         ).send({
@@ -253,9 +253,6 @@ module.exports = {
         );
         expect(await rICOToken.methods.granularity().call()).to.be.equal(
             "1"
-        );
-        expect(await rICOToken.methods.totalSupply().call()).to.be.equal(
-            setup.settings.token.supply.toString()
         );
 
         helpers.addresses.Token = rICOToken.receipt.contractAddress;
