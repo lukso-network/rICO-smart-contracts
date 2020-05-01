@@ -26,7 +26,7 @@ async function deployContract(name, args = {}) {
 
 async function deployTokenContract() {
    return await deployContract(
-       "RicoToken", 
+       "ReversibleICOToken",
        {
             from: holder,
             arguments: [
@@ -146,7 +146,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
     }
 
     // reinitialize instances so revert works properly.
-    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOToken", TokenContractAddress);
     TokenContractInstance.receipt = TokenContractReceipt;
     ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
     ReversibleICOInstance.receipt = ReversibleICOReceipt;

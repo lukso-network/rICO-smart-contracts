@@ -42,7 +42,7 @@ module.exports = {
                 projectAddress: null,
             },
             contracts: {
-                rICOToken: null,
+                ReversibleICOToken: null,
                 rICO: null,
             },
             whitelister: null,
@@ -60,7 +60,7 @@ module.exports = {
         init.deployment = deployment;
 
         // contract instances
-        const rICOToken = deployment.contracts.rICOToken;
+        const ReversibleICOToken = deployment.contracts.ReversibleICOToken;
         const rICO = deployment.contracts.rICO;
 
         // contract addresses
@@ -108,9 +108,9 @@ module.exports = {
                 // const stages = await rICO.methods.getParticipantDetailsByStage(participants[0].address, 0).call();
                 // console.log(stages);
 
-                const boughtToken = new helpers.BN( await rICOToken.methods.getUnlockedBalance(participants[0].address).call() );
-                const reservedToken = new helpers.BN( await rICOToken.methods.getLockedBalance(participants[0].address).call() );
-                const balanceOf = new helpers.BN( await rICOToken.methods.balanceOf(participants[0].address).call() );
+                const boughtToken = new helpers.BN( await ReversibleICOToken.methods.getUnlockedBalance(participants[0].address).call() );
+                const reservedToken = new helpers.BN( await ReversibleICOToken.methods.getLockedBalance(participants[0].address).call() );
+                const balanceOf = new helpers.BN( await ReversibleICOToken.methods.balanceOf(participants[0].address).call() );
                 
                 console.log("boughtTokens:        ", participants[0].toEth(boughtToken));
                 console.log("reservedTokens:          ", participants[0].toEth(reservedToken));
@@ -156,7 +156,7 @@ module.exports = {
             await participants[1].executeAction('sendAllTokensBack');
             await participants[1].displayBalances();
             await Project.displayBalances();
-            await displayRicoBalances(helpers, rICO, rICOToken);
+            await displayRicoBalances(helpers, rICO, ReversibleICOToken);
 
 
             // block = 69;
@@ -166,7 +166,7 @@ module.exports = {
             // await participants[2].executeAction('sendAllTokensBack');
             // await participants[2].displayBalances();
             // await Project.displayBalances();
-            // await displayRicoBalances(helpers, rICO, rICOToken);
+            // await displayRicoBalances(helpers, rICO, ReversibleICOToken);
 
 
         } catch(e) {
@@ -176,10 +176,10 @@ module.exports = {
     }
 } 
 
-async function displayRicoBalances(helpers, rICO, rICOToken) {
+async function displayRicoBalances(helpers, rICO, ReversibleICOToken) {
     
     const realContractBalance = await helpers.utils.getBalance(helpers, helpers.addresses.Rico);
-    const realtokenSupply               = new helpers.BN(await rICOToken.methods.balanceOf(helpers.addresses.Rico).call());
+    const realtokenSupply               = new helpers.BN(await ReversibleICOToken.methods.balanceOf(helpers.addresses.Rico).call());
 
     const tokenSupply                   = new helpers.BN(await rICO.methods.tokenSupply().call());
     const committedETH                  = new helpers.BN(await rICO.methods.committedETH().call());

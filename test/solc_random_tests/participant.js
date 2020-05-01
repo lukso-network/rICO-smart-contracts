@@ -290,13 +290,13 @@ class Participant extends Actor {
         // console.log("this.expectedBalances.unlockedToken", this.toEth(this.expectedBalances.unlockedToken), "tokens");
         // console.log("unlockPercentage                   ", this.toEth(unlockPercentage), "%");
         
-        // const unlockedTokenBalance = await this.rICOToken.methods.getUnlockedBalance(this.address).call();
+        // const unlockedTokenBalance = await this.ReversibleICOToken.methods.getUnlockedBalance(this.address).call();
         // console.log("unlockedTokenBalance               ", this.toEth(unlockedTokenBalance), "tokens");
         
-        // const balanceOf = await this.rICOToken.methods.balanceOf(this.address).call();
+        // const balanceOf = await this.ReversibleICOToken.methods.balanceOf(this.address).call();
         // console.log("balanceOf                          ", this.toEth(balanceOf), "tokens");
 
-        // const getLockedBalance = await this.rICOToken.methods.getLockedBalance(this.address).call();
+        // const getLockedBalance = await this.ReversibleICOToken.methods.getLockedBalance(this.address).call();
         // console.log("getLockedBalance                   ", this.toEth(getLockedBalance), "tokens");
 
 
@@ -683,8 +683,8 @@ class Participant extends Actor {
             this.extraETH.sub(this.txCosts)
         );
 
-        this.currentBalances.Token = new BN( await this.rICOToken.methods.balanceOf(this.address).call() );
-        this.currentBalances.unlockedToken = new BN( await this.rICOToken.methods.getUnlockedBalance(this.address).call() );
+        this.currentBalances.Token = new BN( await this.ReversibleICOToken.methods.balanceOf(this.address).call() );
+        this.currentBalances.unlockedToken = new BN( await this.ReversibleICOToken.methods.getUnlockedBalance(this.address).call() );
 
         const AvailableForWithdraw = await this.getAvailableEthAndTokensForWithdraw();
         this.currentBalances.withdrawableETH = AvailableForWithdraw.eth;
@@ -774,7 +774,7 @@ class Participant extends Actor {
 
     async getAvailableEthAndTokensForWithdraw(_returnedTokenAmount = null) {
 
-        const fullTokenBalance = new BN( await this.rICOToken.methods.balanceOf(this.address).call() );
+        const fullTokenBalance = new BN( await this.ReversibleICOToken.methods.balanceOf(this.address).call() );
         const participantStats = await this.getParticipantRecord();
         let returnedTokenAmount = fullTokenBalance;
         
@@ -838,8 +838,8 @@ class Participant extends Actor {
         return this.properties.init.deployment.contracts.rICO;
     }
 
-    get rICOToken() {
-        return this.properties.init.deployment.contracts.rICOToken;
+    get ReversibleICOToken() {
+        return this.properties.init.deployment.contracts.ReversibleICOToken;
     }
 
     get startAndEndBlocks() {

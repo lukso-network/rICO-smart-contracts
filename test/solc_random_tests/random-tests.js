@@ -42,7 +42,7 @@ module.exports = {
                 projectAddress: null,
             },
             contracts: {
-                rICOToken: null,
+                ReversibleICOToken: null,
                 rICO: null,
             },
             whitelister: null,
@@ -60,7 +60,7 @@ module.exports = {
         init.deployment = deployment;
 
         // contract instances
-        const rICOToken = deployment.contracts.rICOToken;
+        const ReversibleICOToken = deployment.contracts.ReversibleICOToken;
         const rICO = deployment.contracts.rICO;
 
         // contract addresses

@@ -77,7 +77,7 @@ async function doFreshDeployment(name) {
     */
 
     TokenContractInstance = await helpers.utils.deployNewContractInstance(
-        helpers, "RicoToken", {
+        helpers, "ReversibleICOToken", {
             from: holder,
             arguments: [
                 defaultOperators

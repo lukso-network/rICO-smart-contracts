@@ -64,7 +64,7 @@ describe("ReversibleICO", function () {
 
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers,
-            "RicoToken",
+            "ReversibleICOToken",
             {
                 from: holder,
                 arguments: [[]],
@@ -274,7 +274,7 @@ describe("ReversibleICO", function () {
         const ERC777data = web3.utils.sha3('777TestData');
 
         before(async function () {
-            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOToken", TokenContractAddress);
             await TokenContractInstance.methods.send(
                 helpers.addresses.Rico,
                 RicoSaleSupply,

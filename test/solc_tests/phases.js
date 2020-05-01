@@ -200,7 +200,7 @@ describe("ReversibleICO - Phases", function () {
             TokenContractAddress = TokenContractInstance.receipt.contractAddress;
             RICOContractAddress = this.ReversibleICO.receipt.contractAddress;
 
-            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+            TokenContractInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOToken", TokenContractAddress);
             await TokenContractInstance.methods.send(
                 RICOContractAddress,
                 RicoSaleSupply,

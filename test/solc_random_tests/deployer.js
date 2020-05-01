@@ -35,7 +35,7 @@ module.exports = {
          * Deployment - rICO Token Contract
          */
         console.log("    Deploying rICO Token Contract");
-        deploymentTx = await this.deployrICOToken(init, ContractsDeployer);
+        deploymentTx = await this.deployReversibleICOToken(init, ContractsDeployer);
         console.log("      Gas used for deployment:", deploymentTx.gasUsed);
         console.log("      Contract Address:", deploymentTx.contractAddress);
         console.log("");
@@ -55,8 +55,8 @@ module.exports = {
          * Setup - Token
          */
         // Add rICO contract into token contract
-        const rICOToken = await helpers.utils.getContractInstance(helpers, "RicoToken", helpers.addresses.Token);
-        await rICOToken.methods.init(
+        const ReversibleICOToken = await helpers.utils.getContractInstance(helpers, "ReversibleICOToken", helpers.addresses.Token);
+        await ReversibleICOToken.methods.init(
             helpers.addresses.Rico,
             ContractsDeployer,
             ContractsDeployer,
@@ -108,7 +108,7 @@ module.exports = {
          * Setup - rICO - 2 - add Tokens
          */
         // send all tokens to projectAddress
-        await rICOToken.methods.send(
+        await ReversibleICOToken.methods.send(
             projectAddress,
             init.setup.settings.token.supply.toString(),
             ERC777data
@@ -118,7 +118,7 @@ module.exports = {
         });
         
         // send sale supply to rico
-        await rICOToken.methods.send(
+        await ReversibleICOToken.methods.send(
             helpers.addresses.Rico,
             RicoSaleSupply,
             ERC777data
@@ -134,7 +134,7 @@ module.exports = {
                 projectAddress: projectAddress,
             },
             contracts: {
-                rICOToken:rICOToken,
+                ReversibleICOToken:ReversibleICOToken,
                 rICO:rICO
             },
             cache: {
@@ -220,7 +220,7 @@ module.exports = {
 
         return deploymentTx;
     },
-    async deployrICOToken(init, ContractsDeployer) {
+    async deployReversibleICOToken(init, ContractsDeployer) {
 
         const helpers = init.setup.helpers;
         const setup = init.setup;
@@ -234,9 +234,9 @@ module.exports = {
             process.exit();
         }
 
-        const rICOToken = await helpers.utils.deployNewContractInstance(
+        const ReversibleICOToken = await helpers.utils.deployNewContractInstance(
             helpers,
-            "RicoToken",
+            "ReversibleICOToken",
             {
                 from: ContractsDeployer,
                 arguments: [defaultOperators],
@@ -245,18 +245,18 @@ module.exports = {
             }
         );
 
-        expect(await rICOToken.methods.name().call()).to.equal(
+        expect(await ReversibleICOToken.methods.name().call()).to.equal(
             setup.settings.token.name
         );
-        expect(await rICOToken.methods.symbol().call()).to.equal(
+        expect(await ReversibleICOToken.methods.symbol().call()).to.equal(
             setup.settings.token.symbol
         );
-        expect(await rICOToken.methods.granularity().call()).to.be.equal(
+        expect(await ReversibleICOToken.methods.granularity().call()).to.be.equal(
             "1"
         );
 
-        helpers.addresses.Token = rICOToken.receipt.contractAddress;
-        return rICOToken.receipt;
+        helpers.addresses.Token = ReversibleICOToken.receipt.contractAddress;
+        return ReversibleICOToken.receipt;
     },
     async deployrICO(init, ContractsDeployer) {
 

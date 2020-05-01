@@ -95,7 +95,7 @@ async function revertToFreshDeployment() {
         *   Deploy Token Contract
         */
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
-            helpers, "RicoToken", {
+            helpers, "ReversibleICOToken", {
                 from: holder,
                 arguments: [
                     defaultOperators
@@ -187,7 +187,7 @@ async function revertToFreshDeployment() {
     }
 
     // reinitialize instances so revert works properly.
-    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "RicoToken", TokenContractAddress);
+    TokenContractInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOToken", TokenContractAddress);
     TokenContractInstance.receipt = TokenContractReceipt;
     ReversibleICOInstance = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", ReversibleICOAddress);
     ReversibleICOInstance.receipt = ReversibleICOReceipt;
@@ -310,7 +310,7 @@ describe("Flow Testing", function () {
                 // deploy everything except sending tokens to rico
 
                 TestTokenContract = await helpers.utils.deployNewContractInstance(
-                    helpers, "RicoToken", {
+                    helpers, "ReversibleICOToken", {
                         from: holder,
                         arguments: [
                             defaultOperators

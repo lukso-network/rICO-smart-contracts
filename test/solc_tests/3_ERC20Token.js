@@ -37,7 +37,7 @@ describe("ERC777 - ERC20 Token compatibility", function () {
 
         _ricoAddress = this.ReversibleICOMock777.receipt.contractAddress;
 
-        HST = await helpers.utils.deployNewContractInstance(helpers, "RicoToken", {
+        HST = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOToken", {
             from: creator,
             arguments: [
                 [] // defaultOperators

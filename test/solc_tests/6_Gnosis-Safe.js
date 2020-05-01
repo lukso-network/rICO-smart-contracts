@@ -92,7 +92,7 @@ describe("Gnosis Safe Integration", function () {
 
             helpers.addresses.CreateCall = this.CreateCall.receipt.contractAddress;
 
-            const deploymentDataToken = await generateDeploymentCode("RicoToken", [
+            const deploymentDataToken = await generateDeploymentCode("ReversibleICOToken", [
                 []
             ]);
             const deploymentDataRico = await generateDeploymentCode(
@@ -150,15 +150,15 @@ describe("Gnosis Safe Integration", function () {
                 manager
             );
             
-            helpers.addresses.RicoToken =
+            helpers.addresses.ReversibleICOToken =
                 tx1.events.ContractCreation.returnValues.newContract;
             helpers.addresses.Rico =
                 tx2.events.ContractCreation.returnValues.newContract;
 
-            this.RicoToken = await helpers.utils.getContractInstance(
+            this.ReversibleICOToken = await helpers.utils.getContractInstance(
                 helpers,
-                "RicoToken",
-                helpers.addresses.RicoToken
+                "ReversibleICOToken",
+                helpers.addresses.ReversibleICOToken
             );
 
             this.Rico = await helpers.utils.getContractInstance(
@@ -177,12 +177,12 @@ describe("Gnosis Safe Integration", function () {
             );
 
             console.log(
-                "      RicoToken Gas used for deployment:",
+                "      ReversibleICOToken Gas used for deployment:",
                 tx1.gasUsed
             );
             console.log(
-                "      RicoToken Contract Address:",
-                helpers.addresses.RicoToken
+                "      ReversibleICOToken Contract Address:",
+                helpers.addresses.ReversibleICOToken
             );
 
             console.log(
@@ -229,17 +229,17 @@ describe("Gnosis Safe Integration", function () {
 
             it("returns the correct manager for token", async function () {
 
-                // console.log(this.RicoToken.methods);
+                // console.log(this.ReversibleICOToken.methods);
 
 
                 // let tx = 
                 // console.log(tx);
                 
-                let tx = await this.RicoToken.methods.name().call();
+                let tx = await this.ReversibleICOToken.methods.name().call();
                 console.log(tx);
 
                 expect(
-                    await this.RicoToken.methods.manager().call()
+                    await this.ReversibleICOToken.methods.manager().call()
                 ).to.deep.equal(
                     helpers.addresses.GnosisSafe
                 );
@@ -248,7 +248,7 @@ describe("Gnosis Safe Integration", function () {
             
             it("Wallet has the correct balance", async function () {
                 expect(
-                    await this.RicoToken.methods.balanceOf().call()
+                    await this.ReversibleICOToken.methods.balanceOf().call()
                 ).to.be.equal(
                     setup.settings.token.sale
                 );
@@ -264,7 +264,7 @@ describe("Gnosis Safe Integration", function () {
 
             it("returns the freezed status", async function () {
                 expect(
-                    await this.RicoToken.methods.freezed().call()
+                    await this.ReversibleICOToken.methods.freezed().call()
                 ).to.be.equal(true);
             });
             
@@ -273,7 +273,7 @@ describe("Gnosis Safe Integration", function () {
         /*
         describe("Correctly setup Token and Rico", async function () {
             it("Setups rICO and Manager", async function () {
-                let setupData = this.RicoToken.methods
+                let setupData = this.ReversibleICOToken.methods
                     .setup(helpers.addresses.Rico)
                     .encodeABI();
                 await helpers.safeUtils.executeTransaction(
@@ -281,13 +281,13 @@ describe("Gnosis Safe Integration", function () {
                     this.GnosisSafe,
                     "Setup Rico",
                     signers,
-                    helpers.addresses.RicoToken,
+                    helpers.addresses.ReversibleICOToken,
                     "0",
                     setupData,
                     0, //CALL
                     manager
                 );
-                expect(await this.RicoToken.methods.rICO().call()).to.be.equal(
+                expect(await this.ReversibleICOToken.methods.rICO().call()).to.be.equal(
                     helpers.addresses.Rico
                 );
             });
@@ -395,7 +395,7 @@ describe("Gnosis Safe Integration", function () {
 
             it("Can transfer tokens to the Rico Contract", async function () {
             
-                let transferData = this.RicoToken.methods
+                let transferData = this.ReversibleICOToken.methods
                     .transfer(
                         helpers.addresses.Rico,
                         setup.settings.token.sale.toString()
@@ -407,7 +407,7 @@ describe("Gnosis Safe Integration", function () {
                     this.GnosisSafe,
                     "Move Tokens",
                     signers,
-                    helpers.addresses.RicoToken,
+                    helpers.addresses.ReversibleICOToken,
                     "0",
                     transferData,
                     0, //CALL
@@ -415,7 +415,7 @@ describe("Gnosis Safe Integration", function () {
                 );
                 // This will fail for now because this method isn'timplemented on Rico itself
                 expect(
-                    await this.RicoToken.methods.balanceOf(helpers.addresses.Rico).call()
+                    await this.ReversibleICOToken.methods.balanceOf(helpers.addresses.Rico).call()
                 ).to.be.equal(setup.settings.token.sale.toString());
             });
         });

@@ -6,7 +6,7 @@ interface ReversibleICO {
     function getParticipantReservedTokens(address) external view returns (uint256);
 }
 
-contract RicoToken is ERC777 {
+contract ReversibleICOToken is ERC777 {
 
     ReversibleICO public rICO;
 

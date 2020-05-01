@@ -64,7 +64,7 @@ describe("ReversibleICO", function () {
 
         TokenContractInstance = await helpers.utils.deployNewContractInstance(
             helpers,
-            "RicoToken",
+            "ReversibleICOToken",
             {
                 from: holder,
                 arguments: [[]],
