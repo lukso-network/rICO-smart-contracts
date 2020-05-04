@@ -41,10 +41,10 @@ contract ReversibleICOToken is ERC777 {
     isNotInitialized
     onlyDeployingAddress
     {
-        require(_ricoAddress != address(0));
-        require(_freezerAddress != address(0));
-        require(_rescuerAddress != address(0));
-        require(_projectAddress != address(0));
+        require(_ricoAddress != address(0), "_ricoAddress cannot be 0x");
+        require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
+        require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
+        require(_projectAddress != address(0), "_projectAddress cannot be 0x");
 
         rICO = ReversibleICO(_ricoAddress);
         freezerAddress = _freezerAddress;

@@ -240,11 +240,11 @@ contract ReversibleICO is IERC777Recipient {
     onlyDeployingAddress
     isNotInitialized
     {
-        require(_tokenAddress != address(0));
-        require(_whitelistingAddress != address(0));
-        require(_freezerAddress != address(0));
-        require(_rescuerAddress != address(0));
-        require(_projectAddress != address(0));
+        require(_tokenAddress != address(0), "_tokenAddress cannot be 0x");
+        require(_whitelistingAddress != address(0), "_whitelistingAddress cannot be 0x");
+        require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
+        require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
+        require(_projectAddress != address(0), "_projectAddress cannot be 0x");
         require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
