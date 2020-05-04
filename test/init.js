@@ -69,7 +69,7 @@ async function runSetup() {
     };
 
     // https://github.com/0xjac/ERC1820
-    const ERC1820 = require("./ERC1820.js");
+    const { ERC1820 } = require("./ERC1820.js");
 
     // edit this to change "funds supplier address"
     ERC1820.FundsSupplierAddress = accounts[10];
