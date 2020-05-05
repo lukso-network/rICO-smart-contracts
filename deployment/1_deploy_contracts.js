@@ -43,7 +43,8 @@ async function runDeployment() {
         rescuerAddress,
         whitelistingAddress, 
         ERC1820FundsSupplierAddress;
-    
+
+    // *** SET ADDRESSES
     if (network == "live") {
     
         utils.toLog("Using live network");
@@ -72,6 +73,8 @@ async function runDeployment() {
         rescuerAddress = rICOConfig.settings.address.liveRescuerAddress;
         whitelistingAddress = rICOConfig.settings.address.liveWhitelistingAddress;
         ERC1820FundsSupplierAddress = deployerAddress;
+
+        console.log('deployerAddress');
 
     } else if (network == "development") {
     
@@ -361,7 +364,8 @@ async function runDeployment() {
     utils.toLog("   - Done");
     gasUsage = gasUsage.add( new BN(tx.gasUsed) );
 
-
+    // *** SEND TOKENS from PROJECT to rICO
+    // Skipped when project key is not present
     if(rICOConfig.settings.address.liveProjectAddress === null ) {
 
         utils.toLog(
