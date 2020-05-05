@@ -99,7 +99,7 @@ async function runSetup() {
         ]
     });
 
-    const rICOConfig = require("../rICO-config.js");
+    const rICOConfig = require("./rICO-config-tests.js");
 
     const setup = {
         network: network,

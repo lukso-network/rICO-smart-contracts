@@ -1,30 +1,6 @@
-// EDIT START
-// Live configuration (rinkeby) uses these!
-
-// valid with ETH on rinkeby ( no 0x )
-const deployerPrivateKey      = "5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0";  
-
-// set to PK to null, and address to valid one if you want to manually transfer tokens from project to rICO
-const projectPrivateKey       = "499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B";
-const liveProjectAddress      = null;
-
-const liveFreezerAddress      = "0x0eCDDb6BdF53Bf36A25BfF59756ed7c1DE2937F5";
-const liveRescuerAddress      = "0x7839919B879250910E8646f3B46EBbCA8438bE32";
-const liveWhitelistingAddress = "0x1c4476B864c4a848374a65ce2c09eFD56163faFA";
-
-const infuraURL               = "https://rinkeby.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c";
-
-const networkGasPrice         = 10000000000; // 10 gwei
-
-// EDIT END
-
-// these get generated from PK
-// const liveDeployerAddress     = "";
-
 const ERC1820FundsSupplierIndex = 0; // 0 is either account[0] or deployerAddress generated from PK
 
 // development network uses testrpc mnemonic and these indexes
-
 const deployerAddressIndex      = 0;
 const projectAddressIndex       = 1;
 const freezerAddressIndex       = 2;
@@ -32,17 +8,20 @@ const rescuerAddressIndex       = 3;
 const whitelistingAddressIndex  = 4;
 
 const fs = require("fs");
+// import our settings
+const rICOConfig = require("./rICO-config-deployment.js");
+
 global.deployment_progress = loadProgress();
 
 try {
-    runDeplyment();
+    runDeployment();
 } catch (e) {
     console.log(e);
     process.exit(1);
 }
 
 
-async function runDeplyment() {
+async function runDeployment() {
     
     const network = process.argv[2];
     let resume = false;
@@ -71,26 +50,26 @@ async function runDeplyment() {
 
         web3Instance = await new Web3(
             new HDWalletProvider(
-                [deployerPrivateKey],
-                infuraURL
+                [rICOConfig.settings.keys.deployerPrivateKey],
+                rICOConfig.settings.provider
             )
         );
 
-        if(liveProjectAddress === null ) {
+        if(rICOConfig.settings.address.liveProjectAddress === null ) {
             projectWeb3Instance = await new Web3(
                 new HDWalletProvider(
-                    [projectPrivateKey],
-                    infuraURL
+                    [rICOConfig.settings.keys.projectPrivateKey],
+                    rICOConfig.settings.provider
                 )
             );
         }
 
 
-        deployerAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+deployerPrivateKey).address;
-        projectAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+projectPrivateKey).address;
-        freezerAddress = liveFreezerAddress;
-        rescuerAddress = liveRescuerAddress;
-        whitelistingAddress = liveWhitelistingAddress;
+        deployerAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.deployerPrivateKey).address;
+        projectAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.projectPrivateKey).address;
+        freezerAddress = rICOConfig.settings.address.liveFreezerAddress;
+        rescuerAddress = rICOConfig.settings.address.liveRescuerAddress;
+        whitelistingAddress = rICOConfig.settings.address.liveWhitelistingAddress;
         ERC1820FundsSupplierAddress = deployerAddress;
 
     } else if (network == "development") {
@@ -145,9 +124,6 @@ async function runDeplyment() {
 
     // edit this to change "funds supplier address"
     ERC1820.FundsSupplierAddress = ERC1820FundsSupplierAddress;
-
-    // import our settings
-    const rICOConfig = require("../rICO-config.js");
 
     const web3util = require("web3-utils");
 
@@ -204,7 +180,7 @@ async function runDeplyment() {
             from: ERC1820.FundsSupplierAddress,
             to: ERC1820.SenderAddress,
             value: ERC1820.deploymentCost.toString(),
-            gasPrice: networkGasPrice,
+            gasPrice: rICOConfig.settings.networkGasPrice,
         });
 
         utils.toLog("   - Hash: " + utils.colors.green + valueTransferTx.transactionHash);
@@ -254,7 +230,7 @@ async function runDeplyment() {
             arguments: [
                 defaultOperators = [], // no operator.. add some in if you want them
             ],
-            gasPrice: networkGasPrice,
+            gasPrice: rICOConfig.settings.networkGasPrice,
             gas: 5500000,   // 4794308
         }
     );
@@ -276,7 +252,7 @@ async function runDeplyment() {
         "ReversibleICO",
         {
             from: deployerAddress,
-            gasPrice: networkGasPrice,
+            gasPrice: rICOConfig.settings.networkGasPrice,
             gas: 6500000,   // 6164643
         }
     );
@@ -315,7 +291,7 @@ async function runDeplyment() {
         rICOConfig.settings.token.supply.toString() // uint256 _initialSupply
     ).send({
         from: deployerAddress,  // initial token supply holder
-        gasPrice: networkGasPrice,
+        gasPrice: rICOConfig.settings.networkGasPrice,
     });
 
     utils.toLog("   - Hash: " + utils.colors.green + tx.transactionHash);
@@ -375,7 +351,7 @@ async function runDeplyment() {
         stagePriceIncrease          // uint256 _StagePriceIncrease in wei
     ).send({
         from: deployerAddress,      // deployer
-        gasPrice: networkGasPrice,
+        gasPrice: rICOConfig.settings.networkGasPrice,
         gas: 3000000
     });
 
@@ -385,7 +361,7 @@ async function runDeplyment() {
     gasUsage = gasUsage.add( new BN(tx.gasUsed) );
 
 
-    if(liveProjectAddress === null ) {
+    if(rICOConfig.settings.address.liveProjectAddress === null ) {
 
         utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -415,7 +391,7 @@ async function runDeplyment() {
             web3.utils.sha3('777TestData')
         ).send({
             from: projectAddress,  // initial token supply holder
-            gasPrice: networkGasPrice,
+            gasPrice: rICOConfig.settings.networkGasPrice,
             gas: 200000
         });
 
@@ -478,9 +454,9 @@ async function runDeplyment() {
     utils.toLog("   rescuerAddress:           " + utils.colors.yellow + rescuerAddress);
     utils.toLog("   whitelistingAddress:      " + utils.colors.yellow + whitelistingAddress);
     utils.toLog("");
-    utils.toLog("   Gas price:                " + web3util.fromWei(new BN(networkGasPrice), "ether") + " ether");
+    utils.toLog("   Gas price:                " + web3util.fromWei(new BN(rICOConfig.settings.networkGasPrice), "ether") + " ether");
     utils.toLog("   Total Gas usage:          " + gasUsage.toString());
-    utils.toLog("   Deployment cost:          " + web3util.fromWei(gasUsage.mul(new BN(networkGasPrice)), "ether") + " ether");
+    utils.toLog("   Deployment cost:          " + web3util.fromWei(gasUsage.mul(new BN(rICOConfig.settings.networkGasPrice)), "ether") + " ether");
     utils.toLog("");
     utils.toLog("   - Done");
     utils.toLog("");
