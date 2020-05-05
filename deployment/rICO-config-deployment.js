@@ -10,7 +10,7 @@ module.exports = {
         networkGasPrice: 10000000000, // 10 gwei
         keys: {
             // valid with ETH on rinkeby ( no 0x )
-            deployerPrivateKey: "5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0",
+            deployerPrivateKey: "5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0", // 0x52b333c238bf73888fdde266e9d2a39b75752807
             // set to PK to null, and address to valid one if you want to manually transfer tokens from project to rICO
             projectPrivateKey: "499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B",
         },

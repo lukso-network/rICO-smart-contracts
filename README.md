@@ -117,18 +117,19 @@ Outputs the merged contracts in `./contracts-merged`
 
 ### Deployment
 
-You can edit the rICO settings in `deployment/rICO-config-deployment.js`
+You can edit the rICO settings in `deployment/rICO-config-deployment.js` before deploying.
 
-To test deploy on a local simulated development network
+To test deploy on a local simulated development network.
+The addresses will not be the one from the config file, but local generate ones.
 
 ```bash
-$ npm run deploy
+$ npm run deploy-test
 ```
 
-To deploy live.
+To deploy live, using the addresses from the config file:
 
 ```bash
-$ npm run deploy.live
+$ npm run deploy-live
 ```
 
 
