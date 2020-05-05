@@ -1,4 +1,5 @@
-const {BN} = require("openzeppelin-test-helpers");
+const web3 = require("web3");
+let BN = web3.utils.BN;
 
 const tokenDecimals = 18;
 const ether = 1000000000000000000;      // 1 ether in wei

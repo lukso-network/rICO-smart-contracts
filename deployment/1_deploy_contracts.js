@@ -8,6 +8,11 @@ const rescuerAddressIndex       = 3;
 const whitelistingAddressIndex  = 4;
 
 const fs = require("fs");
+// contract utils helpers
+const utils = require("../test/solc_tests/helpers/utils.js");
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const Web3 = require("web3");
+let BN = Web3.utils.BN;
 // import our settings
 const rICOConfig = require("./rICO-config-deployment.js");
 
@@ -29,12 +34,6 @@ async function runDeployment() {
         resume = true;
     }
 
-    // contract utils helpers
-    const utils = require("../test/solc_tests/helpers/utils.js");
-
-    const HDWalletProvider = require("truffle-hdwallet-provider");
-    const Web3 = require("web3");
-    
     let web3Instance = null,
         projectWeb3Instance = null,
         deployerAddress,
@@ -109,7 +108,8 @@ async function runDeployment() {
     }
     
     // import chai assert / expect
-    const { assert, expect } = require("chai");
+    const chaiBN = require('chai-bn')(BN);
+    const { assert, expect } = require("chai").use(chaiBN);
 
     utils.toLog(
         " ----------------------------------------------------------------\n" +
@@ -117,10 +117,6 @@ async function runDeployment() {
         "  ----------------------------------------------------------------"
     );
 
-    // global required by openzeppelin-test-helpers
-    global.web3 = web3Instance;
-
-    const {BN} = require("openzeppelin-test-helpers");
 
     // import ERC1820 data
     const { ERC1820 } = require("../test/ERC1820.js");
@@ -235,7 +231,7 @@ async function runDeployment() {
                 defaultOperators = [], // no operator.. add some in if you want them
             ],
             gasPrice: rICOConfig.settings.networkGasPrice,
-            gas: 5500000,   // 4794308
+            gas: 6500000,   // 4794308
         }
     );
     
@@ -314,14 +310,14 @@ async function runDeployment() {
         "  ----------------------------------------------------------------"
     );
 
-    const currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
+    const currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
     const commitPhaseStartBlock = parseInt(currentBlock, 10) + rICOConfig.settings.rico.startBlockDelay;
 
-    // 22 days allocation
+    // allocation phase
     const commitPhaseBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.commitPhaseDays;
     const commitPhasePrice = rICOConfig.settings.rico.commitPhasePrice;
 
-    // 12 x 30 day periods for distribution
+    // buy phase
     stageCount = rICOConfig.settings.rico.stageCount;
     stageBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.stageDays;
     stagePriceIncrease = rICOConfig.settings.rico.stagePriceIncrease;
