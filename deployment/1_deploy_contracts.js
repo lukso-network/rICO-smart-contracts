@@ -62,11 +62,12 @@ async function runDeployment() {
                     rICOConfig.settings.provider
                 )
             );
+            projectAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.projectPrivateKey).address;
+        } else {
+            projectAddress = rICOConfig.settings.keys.liveProjectAddress;
         }
 
-
         deployerAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.deployerPrivateKey).address;
-        projectAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.projectPrivateKey).address;
         freezerAddress = rICOConfig.settings.address.liveFreezerAddress;
         rescuerAddress = rICOConfig.settings.address.liveRescuerAddress;
         whitelistingAddress = rICOConfig.settings.address.liveWhitelistingAddress;
