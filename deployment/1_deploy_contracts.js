@@ -253,7 +253,7 @@ async function runDeployment() {
         {
             from: deployerAddress,
             gasPrice: rICOConfig.settings.networkGasPrice,
-            gas: 6500000,   // 6164643
+            gas: 7000000,   // 6164643
         }
     );
 
