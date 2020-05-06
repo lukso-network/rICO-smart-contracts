@@ -30,6 +30,8 @@ async function deployTokenContract() {
        {
             from: holder,
             arguments: [
+                setup.settings.token.name,
+                setup.settings.token.symbol,
                 defaultOperators = [], // accounts[0] maybe
             ],
             gas: 6500000,

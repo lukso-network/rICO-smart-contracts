@@ -46,7 +46,11 @@ describe("ERC777 - RICO Token", async function () {
                 "ReversibleICOToken",
                 {
                     from: deployer,
-                    arguments: [defaultOperators],
+                    arguments: [
+                        setup.settings.token.name,
+                        setup.settings.token.symbol,
+                        defaultOperators
+                    ],
                     gas: 6500000,
                     gasPrice: helpers.solidity.gwei * 10
                 }
@@ -401,7 +405,11 @@ describe("ERC777 - RICO Token", async function () {
                     "ReversibleICOToken",
                     {
                         from: deployer,
-                        arguments: [defaultOperators],
+                        arguments: [
+                            setup.settings.token.name,
+                            setup.settings.token.symbol,
+                            defaultOperators
+                        ],
                         gas: 6500000,
                         gasPrice: helpers.solidity.gwei * 10
                     }

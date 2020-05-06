@@ -1,9 +1,8 @@
 pragma solidity ^0.5.0;
 
-import "../../GSN/Context.sol";
 import "../Roles.sol";
 
-contract SignerRole is Context {
+contract SignerRole {
     using Roles for Roles.Role;
 
     event SignerAdded(address indexed account);
@@ -12,11 +11,11 @@ contract SignerRole is Context {
     Roles.Role private _signers;
 
     constructor () internal {
-        _addSigner(_msgSender());
+        _addSigner(msg.sender);
     }
 
     modifier onlySigner() {
-        require(isSigner(_msgSender()), "SignerRole: caller does not have the Signer role");
+        require(isSigner(msg.sender), "SignerRole: caller does not have the Signer role");
         _;
     }
 
@@ -29,7 +28,7 @@ contract SignerRole is Context {
     }
 
     function renounceSigner() public {
-        _removeSigner(_msgSender());
+        _removeSigner(msg.sender);
     }
 
     function _addSigner(address account) internal {
