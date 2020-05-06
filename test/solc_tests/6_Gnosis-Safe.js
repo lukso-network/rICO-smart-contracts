@@ -93,6 +93,8 @@ describe("Gnosis Safe Integration", function () {
             helpers.addresses.CreateCall = this.CreateCall.receipt.contractAddress;
 
             const deploymentDataToken = await generateDeploymentCode("ReversibleICOToken", [
+                "LUKSO Token",
+                "LYXe",
                 []
             ]);
             const deploymentDataRico = await generateDeploymentCode(

@@ -46,8 +46,8 @@ module.exports = {
         // tx.receipt.logs[0].topics[2];
     },
     colors,
-    toLog( what ) {
-        console.log(colors.white, what, colors.none);
+    toLog( what, color = colors.white ) {
+        console.log(color, what, colors.none);
     },
     toDate(seconds) {
         return dateFormat(parseInt(seconds) * 1000, "yyyy-mm-dd, HH:MM:ss TT");

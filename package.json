@@ -8,6 +8,8 @@
   },
   "scripts": {
     "compile": "./node_modules/.bin/truffle compile --all",
+    "deploy-test": "scripts/deploy-test.sh",
+    "deploy-live": "scripts/deploy-live.sh",
     "coverage": "scripts/run_coverage.sh",
     "test": "npm run test-fixed && npm run test-solc && npm run test-random-standalone",
     "test-solc": "scripts/run_solc.sh all refresh",
@@ -40,10 +42,17 @@
     "all": true
   },
   "author": "Micky Socaci <micky@nowlive.ro>",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "chai": "^4.2.0",
+    "chai-bn": "^0.2.1",
     "cli-table": "^0.3.1",
     "dateformat": "^3.0.3",
     "ethereumjs-abi": "^0.6.7",

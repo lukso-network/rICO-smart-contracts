@@ -239,7 +239,11 @@ module.exports = {
             "ReversibleICOToken",
             {
                 from: ContractsDeployer,
-                arguments: [defaultOperators],
+                arguments: [
+                    setup.settings.token.name,
+                    setup.settings.token.symbol,
+                    defaultOperators
+                ],
                 gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }

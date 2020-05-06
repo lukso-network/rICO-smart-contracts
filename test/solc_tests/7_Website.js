@@ -80,6 +80,8 @@ async function doFreshDeployment(name) {
         helpers, "ReversibleICOToken", {
             from: holder,
             arguments: [
+                setup.settings.token.name,
+                setup.settings.token.symbol,
                 defaultOperators
             ],
             gas: 6500000,

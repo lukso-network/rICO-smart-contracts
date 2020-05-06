@@ -1,4 +1,4 @@
-pragma solidity 0.5.17;
+pragma solidity ^0.5.0;
 
 
 /// @title Create Call - Allows to use the different create opcodes to deploy a contract

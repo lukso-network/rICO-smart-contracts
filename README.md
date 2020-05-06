@@ -80,9 +80,9 @@ This will deactivate the ability to rescue funds or freeze the contracts all tog
 -   [npm](https://www.npmjs.com/)
 
 ```bash
-sudo apt-get update
-sudo apt-get install nodejs
-sudo apt-get install npm
+$ sudo apt-get update
+$ sudo apt-get install nodejs
+$ sudo apt-get install npm
 ```
 
 ### Recommended
@@ -90,30 +90,47 @@ sudo apt-get install npm
 - [nvm](https://github.com/nvm-sh/nvm)
 
 ```bash
-nvm install v8.17.0
-nvm use v8.17.0
-npm install
-npm run test
+$ nvm install v8.17.0
+$ nvm use v8.17.0
+$ npm install
+$ npm run test
 ```
 
 ### Running Tests
 
 ```bash
-npm test
+$ npm test
 
 // or to run the solc tests
-npm run test-solc
+$ npm run test-solc
 
 // to only run the random tests
-npm run test-random-standalone
+$ npm run test-random-standalone
 ```
 
 ### Merging contracts for deployment
 
 ```bash
-npm run merge-contracts
+$ npm run merge-contracts
 ```
 Outputs the merged contracts in `./contracts-merged`
+
+### Deployment
+
+You can edit the rICO settings in `deployment/rICO-config-deployment.js` before deploying.
+
+To test deploy on a local simulated development network.
+The addresses will not be the one from the config file, but local generate ones.
+
+```bash
+$ npm run deploy-test
+```
+
+To deploy live, using the addresses from the config file:
+
+```bash
+$ npm run deploy-live
+```
 
 
 ### Gas costs
@@ -135,3 +152,7 @@ Test before using the `npm run test-random-standalone` and adjust `/test/solc_te
 - Micky Socaci <micky@binarzone.com>
 - Fabian Vogelsteller <@frozeman>
 - Marjorie Hernandez <marjorie@lukso.io>
+
+## LICENSE
+
+Apache 2.0

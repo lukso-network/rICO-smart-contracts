@@ -98,6 +98,8 @@ async function revertToFreshDeployment() {
             helpers, "ReversibleICOToken", {
                 from: holder,
                 arguments: [
+                    setup.settings.token.name,
+                    setup.settings.token.symbol,
                     defaultOperators
                 ],
                 gas: 6500000,
@@ -313,6 +315,8 @@ describe("Flow Testing", function () {
                     helpers, "ReversibleICOToken", {
                         from: holder,
                         arguments: [
+                            setup.settings.token.name,
+                            setup.settings.token.symbol,
                             defaultOperators
                         ],
                         gas: 6500000,

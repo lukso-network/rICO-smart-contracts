@@ -40,6 +40,8 @@ describe("ERC777 - ERC20 Token compatibility", function () {
         HST = await helpers.utils.deployNewContractInstance(helpers, "ReversibleICOToken", {
             from: creator,
             arguments: [
+                setup.settings.token.name,
+                setup.settings.token.symbol,
                 [] // defaultOperators
             ],
             gas: 6000000,
