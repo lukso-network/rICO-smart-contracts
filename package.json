@@ -42,7 +42,13 @@
     "all": true
   },
   "author": "Micky Socaci <micky@nowlive.ro>",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "chai": "^4.2.0",

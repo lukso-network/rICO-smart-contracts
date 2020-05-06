@@ -55,7 +55,7 @@ async function runDeployment() {
             )
         );
 
-        if(rICOConfig.settings.address.liveProjectAddress === null ) {
+        if(rICOConfig.settings.address.liveProjectAddress == null ) {
             projectWeb3Instance = await new Web3(
                 new HDWalletProvider(
                     [rICOConfig.settings.keys.projectPrivateKey],
@@ -64,7 +64,7 @@ async function runDeployment() {
             );
             projectAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.projectPrivateKey).address;
         } else {
-            projectAddress = rICOConfig.settings.keys.liveProjectAddress;
+            projectAddress = rICOConfig.settings.address.liveProjectAddress;
         }
 
         deployerAddress = await web3Instance.eth.accounts.privateKeyToAccount("0x"+rICOConfig.settings.keys.deployerPrivateKey).address;
@@ -362,7 +362,7 @@ async function runDeployment() {
 
     // *** SEND TOKENS from PROJECT to rICO
     // Skipped when project key is not present
-    if(rICOConfig.settings.address.liveProjectAddress === null ) {
+    if(rICOConfig.settings.address.liveProjectAddress == null ) {
 
         utils.toLog(
             " ----------------------------------------------------------------\n" +
@@ -376,7 +376,7 @@ async function runDeployment() {
 
         utils.toLog("   - Send Token Sale supply from projectAddress to rICO Contract");
 
-        if(projectWeb3Instance === null) {
+        if(projectWeb3Instance == null) {
             projectWeb3Instance = web3Instance;
         }
 

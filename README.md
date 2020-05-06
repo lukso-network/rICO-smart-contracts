@@ -152,3 +152,7 @@ Test before using the `npm run test-random-standalone` and adjust `/test/solc_te
 - Micky Socaci <micky@binarzone.com>
 - Fabian Vogelsteller <@frozeman>
 - Marjorie Hernandez <marjorie@lukso.io>
+
+## LICENSE
+
+Apache 2.0
