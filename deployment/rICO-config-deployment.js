@@ -22,7 +22,7 @@ module.exports = {
             liveWhitelistingAddress: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E", // 499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B
         },
         rico: {
-            startBlockDelay: 6445769, // 2020-05-07 11:00:00 on rinkeby
+            startBlock: 6445769, // 2020-05-07 11:00:00 on rinkeby
             blocksPerDay: 5760,
             commitPhaseDays: 4,
             stageCount: 8,
@@ -31,7 +31,7 @@ module.exports = {
             stagePriceIncrease: ether * 0.0005      // uint256 _StagePriceIncrease in wei
         },
         token: {
-            name: "LYXe Token",
+            name: "LUKSO Token",
             symbol: "LYXe",
             decimals: tokenDecimals,
             supply: new BN(100000000) // 100 million LYX

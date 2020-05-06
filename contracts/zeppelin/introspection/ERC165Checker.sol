@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.9;
 
 /**
- * @dev Library used to query support of an interface declared via `IERC165`.
+ * @dev Library used to query support of an interface declared via {IERC165}.
  *
  * Note that these functions return the actual result of the query: they do not
  * `revert` if an interface is not supported. It is up to the caller to decide
@@ -17,7 +17,7 @@ library ERC165Checker {
     bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
 
     /**
-     * @dev Returns true if `account` supports the `IERC165` interface,
+     * @dev Returns true if `account` supports the {IERC165} interface,
      */
     function _supportsERC165(address account) internal view returns (bool) {
         // Any contract that implements ERC165 must explicitly indicate support of
@@ -28,9 +28,9 @@ library ERC165Checker {
 
     /**
      * @dev Returns true if `account` supports the interface defined by
-     * `interfaceId`. Support for `IERC165` itself is queried automatically.
+     * `interfaceId`. Support for {IERC165} itself is queried automatically.
      *
-     * See `IERC165.supportsInterface`.
+     * See {IERC165-supportsInterface}.
      */
     function _supportsInterface(address account, bytes4 interfaceId) internal view returns (bool) {
         // query support of both ERC165 as per the spec and support of _interfaceId
@@ -40,12 +40,12 @@ library ERC165Checker {
 
     /**
      * @dev Returns true if `account` supports all the interfaces defined in
-     * `interfaceIds`. Support for `IERC165` itself is queried automatically.
+     * `interfaceIds`. Support for {IERC165} itself is queried automatically.
      *
      * Batch-querying can lead to gas savings by skipping repeated checks for
-     * `IERC165` support.
+     * {IERC165} support.
      *
-     * See `IERC165.supportsInterface`.
+     * See {IERC165-supportsInterface}.
      */
     function _supportsAllInterfaces(address account, bytes4[] memory interfaceIds) internal view returns (bool) {
         // query support of ERC165 itself
@@ -94,28 +94,11 @@ library ERC165Checker {
     function _callERC165SupportsInterface(address account, bytes4 interfaceId)
         private
         view
-        returns (bool success, bool result)
+        returns (bool, bool)
     {
         bytes memory encodedParams = abi.encodeWithSelector(_INTERFACE_ID_ERC165, interfaceId);
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let encodedParams_data := add(0x20, encodedParams)
-            let encodedParams_size := mload(encodedParams)
-
-            let output := mload(0x40)    // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-
-            success := staticcall(
-                30000,                   // 30k gas
-                account,                 // To addr
-                encodedParams_data,
-                encodedParams_size,
-                output,
-                0x20                     // Outputs are 32 bytes long
-            )
-
-            result := mload(output)      // Load the result
-        }
+        (bool success, bytes memory result) = account.staticcall.gas(30000)(encodedParams);
+        if (result.length < 32) return (false, false);
+        return (success, abi.decode(result, (bool)));
     }
 }

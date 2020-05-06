@@ -21,9 +21,11 @@ contract ReversibleICOToken is ERC777 {
     // ------------------------------------------------------------------------------------------------
 
     constructor(
+        string memory name,
+        string memory symbol,
         address[] memory _defaultOperators
     )
-    ERC777("LYXe Token", "LYXe", _defaultOperators)
+    ERC777(name, symbol, _defaultOperators)
     public
     {
         deployingAddress = msg.sender;

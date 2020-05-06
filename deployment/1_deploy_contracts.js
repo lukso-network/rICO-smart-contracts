@@ -228,6 +228,8 @@ async function runDeployment() {
         {
             from: deployerAddress,
             arguments: [
+                rICOConfig.settings.token.name,
+                rICOConfig.settings.token.symbol,
                 defaultOperators = [], // no operator.. add some in if you want them
             ],
             gasPrice: rICOConfig.settings.networkGasPrice,
@@ -310,8 +312,7 @@ async function runDeployment() {
         "  ----------------------------------------------------------------"
     );
 
-    const currentBlock = await ReversibleICOInstance.methods.getCurrentBlockNumber().call();
-    const commitPhaseStartBlock = parseInt(currentBlock, 10) + rICOConfig.settings.rico.startBlockDelay;
+    const commitPhaseStartBlock = rICOConfig.settings.rico.startBlock;
 
     // allocation phase
     const commitPhaseBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.commitPhaseDays;

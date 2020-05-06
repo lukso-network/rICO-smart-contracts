@@ -67,7 +67,11 @@ describe("ReversibleICO", function () {
             "ReversibleICOToken",
             {
                 from: holder,
-                arguments: [[]],
+                arguments: [
+                    setup.settings.token.name,
+                    setup.settings.token.symbol,
+                    []
+                ],
                 gas: 6500000,
                 gasPrice: helpers.solidity.gwei * 10
             }
