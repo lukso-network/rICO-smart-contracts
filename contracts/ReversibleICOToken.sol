@@ -15,6 +15,8 @@ contract ReversibleICOToken is ERC777 {
     
     // addresses
     address public deployingAddress;
+    address public projectAddress; // receives the initial amount and can set the migration address
+    address public migrationAddress; // The contract address which will handle the token migration
     address public freezerAddress; // should be same as freezer address in rICO
     address public rescuerAddress; // should be same as rescuerAddress address in rICO
 
@@ -43,18 +45,26 @@ contract ReversibleICOToken is ERC777 {
     isNotInitialized
     onlyDeployingAddress
     {
-        require(_ricoAddress != address(0), "_ricoAddress cannot be 0x");
         require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
         require(_projectAddress != address(0), "_projectAddress cannot be 0x");
 
         rICO = ReversibleICO(_ricoAddress);
+        projectAddress = _projectAddress;
         freezerAddress = _freezerAddress;
         rescuerAddress = _rescuerAddress;
 
         _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
 
         initialized = true;
+    }
+
+    // *** Migration process
+    function addMigrationAddress(address _migrationAddress)
+    public
+    onlyProjectAddress
+    {
+        migrationAddress = _migrationAddress;
     }
 
 
@@ -86,16 +96,24 @@ contract ReversibleICOToken is ERC777 {
 
     // *** Public functions
     function getLockedBalance(address _owner) public view returns(uint256) {
-        return rICO.getParticipantReservedTokens(_owner);
+        if(address(rICO) != address(0)) {
+            return rICO.getParticipantReservedTokens(_owner);
+        } else {
+            return 0;
+        }
     }
 
     function getUnlockedBalance(address _owner) public view returns(uint256) {
         uint256 balance = balanceOf(_owner);
-        uint256 locked = rICO.getParticipantReservedTokens(_owner);
 
-        if(balance > 0 && locked > 0 && balance >= locked) {
-            return balance.sub(locked);
+        if(address(rICO) != address(0)) {
+            uint256 locked = rICO.getParticipantReservedTokens(_owner);
+
+            if(balance > 0 && locked > 0 && balance >= locked) {
+                return balance.sub(locked);
+            }
         }
+
         return balance;
     }
 
@@ -133,9 +151,16 @@ contract ReversibleICOToken is ERC777 {
     isInitialized
     {
 
-        if(_to == address(rICO)) {
+        // If tokens are send to the rICO, OR tokens are sent to the migration contract
+        // OR rICO is not set allow transfers the total balance
+        if(
+            _to == address(rICO) ||
+            _to == migrationAddress ||
+            address(rICO) == address(0)
+        ) {
             // full balance can be sent back to rico
             require(_amount <= balanceOf(_from), "Sending failed: Insufficient funds");
+
         } else {
             // for every other address limit to unlocked balance
             require(_amount <= getUnlockedBalance(_from), "Sending failed: Insufficient funds");
@@ -151,6 +176,14 @@ contract ReversibleICOToken is ERC777 {
      */
     modifier onlyDeployingAddress() {
         require(msg.sender == deployingAddress, "Only the deployer can call this method.");
+        _;
+    }
+
+    /**
+     * @notice Checks if the sender is the deployer.
+     */
+    modifier onlyProjectAddress() {
+        require(msg.sender == projectAddress, "Only the project can call this method.");
         _;
     }
 

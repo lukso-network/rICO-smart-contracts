@@ -286,7 +286,7 @@ async function runDeployment() {
 
     // Setup token contract by adding RICO address
     let tx = await TokenContractInstance.methods.init(
-        ReversibleICOAddress,   // address _ricoAddress,
+        ReversibleICOAddress,   // address _ricoAddress, //'0x0000000000000000000000000000000000000000'
         freezerAddress,         // address _freezerAddress,
         rescuerAddress,         // address _rescuerAddress,
         projectAddress,         // address _projectAddress,
