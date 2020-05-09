@@ -1024,14 +1024,14 @@ contract ReversibleICO is IERC777Recipient {
 
         Participant storage participantStats = participants[_participantAddress];
 
-        require(_returnedTokenAmount > 0, 'You can not withdraw without tokens.');
+        calcParticipantAllocation(_participantAddress);
+
+        require(_returnedTokenAmount > 0, 'You can not withdraw without sending tokens.');
         require(participantStats._currentReservedTokens > 0 && participantStats.reservedTokens > 0, 'You can not withdraw, you have no locked tokens.');
 
         uint256 returnedTokenAmount = _returnedTokenAmount;
         uint256 overflowingTokenAmount;
         uint256 returnEthAmount;
-
-        calcParticipantAllocation(_participantAddress);
 
         // Only allow reserved tokens be returned, return the overflow.
         if (returnedTokenAmount > participantStats._currentReservedTokens) {

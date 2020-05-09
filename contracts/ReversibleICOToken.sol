@@ -15,10 +15,21 @@ contract ReversibleICOToken is ERC777 {
     
     // addresses
     address public deployingAddress;
-    address public projectAddress; // receives the initial amount and can set the migration address
+    address public projectAddress; // Receives the initial amount and can set the migration address, as well as the rICO, if not set
     address public migrationAddress; // The contract address which will handle the token migration
     address public freezerAddress; // should be same as freezer address in rICO
     address public rescuerAddress; // should be same as rescuerAddress address in rICO
+
+    /*
+     * Events
+     */
+    event SetRICOaddress(address indexed rICOAddress);
+    event SetMigrationAddress(address indexed migrationAddress);
+    event Frozen(address indexed freezerAddress);
+    event Unfrozen(address indexed freezerAddress);
+    event RemovedFreezer(address indexed freezerAddress);
+    event ChangedRICO(address indexed rICOAddress, address indexed rescuerAddress);
+
 
     // ------------------------------------------------------------------------------------------------
 
@@ -49,22 +60,37 @@ contract ReversibleICOToken is ERC777 {
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
         require(_projectAddress != address(0), "_projectAddress cannot be 0x");
 
-        rICO = ReversibleICO(_ricoAddress);
         projectAddress = _projectAddress;
         freezerAddress = _freezerAddress;
         rescuerAddress = _rescuerAddress;
 
         _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
 
+        if(_ricoAddress != address(0)) {
+            rICO = ReversibleICO(_ricoAddress);
+            emit SetRICOaddress(_ricoAddress);
+        }
+
         initialized = true;
     }
 
+    function setRICOaddress(address _ricoAddress)
+    public
+    onlyProjectAddress
+    {
+        require(address(rICO) == address(0), "rICO address already set!");
+
+        rICO = ReversibleICO(_ricoAddress);
+        emit SetRICOaddress(_ricoAddress);
+    }
+
     // *** Migration process
-    function addMigrationAddress(address _migrationAddress)
+    function setMigrationAddress(address _migrationAddress)
     public
     onlyProjectAddress
     {
         migrationAddress = _migrationAddress;
+        emit SetMigrationAddress(migrationAddress);
     }
 
 
@@ -75,14 +101,17 @@ contract ReversibleICOToken is ERC777 {
     isNotFrozen
     {
         freezerAddress = address(0);
+        emit RemovedFreezer(freezerAddress);
     }
 
     function freeze() public onlyFreezerAddress {
         frozen = true;
+        emit Frozen(freezerAddress);
     }
 
     function unfreeze() public onlyFreezerAddress {
         frozen = false;
+        emit Unfrozen(freezerAddress);
     }
 
     // The rICO address can only be changed when the contract is frozen
@@ -92,10 +121,12 @@ contract ReversibleICOToken is ERC777 {
     isFrozen
     {
         rICO = ReversibleICO(_newRicoAddress);
+        emit ChangedRICO(_newRicoAddress, rescuerAddress);
     }
 
     // *** Public functions
     function getLockedBalance(address _owner) public view returns(uint256) {
+        // only check the locked balance, if a rICO is set
         if(address(rICO) != address(0)) {
             return rICO.getParticipantReservedTokens(_owner);
         } else {
@@ -106,11 +137,16 @@ contract ReversibleICOToken is ERC777 {
     function getUnlockedBalance(address _owner) public view returns(uint256) {
         uint256 balance = balanceOf(_owner);
 
+        // only check the locked balance, if a rICO is set
         if(address(rICO) != address(0)) {
             uint256 locked = rICO.getParticipantReservedTokens(_owner);
 
-            if(balance > 0 && locked > 0 && balance >= locked) {
-                return balance.sub(locked);
+            if(balance > 0 && locked > 0) {
+                if(balance >= locked) {
+                    return balance.sub(locked);
+                } else {
+                    return 0;
+                }
             }
         }
 
@@ -119,22 +155,6 @@ contract ReversibleICOToken is ERC777 {
 
 
     // *** Internal functions
-
-    // We override burn as well. So users can not burn locked tokens.
-    function _burn(
-        address _operator,
-        address _from,
-        uint256 _amount,
-        bytes memory _data,
-        bytes memory _operatorData
-    )
-    internal
-    isNotFrozen
-    isInitialized
-    {
-        require(_amount <= getUnlockedBalance(_from), "Burning failed: Insufficient funds");
-        ERC777._burn(_operator, _from, _amount, _data, _operatorData);
-    }
 
     // We need to override send / transfer methods in order to only allow transfers within RICO unlocked calculations
     // The rico address can receive any amount for withdraw functionality
@@ -151,14 +171,12 @@ contract ReversibleICOToken is ERC777 {
     isInitialized
     {
 
-        // If tokens are send to the rICO, OR tokens are sent to the migration contract
-        // OR rICO is not set allow transfers the total balance
+        // If tokens are send to the rICO, OR tokens are sent to the migration contract allow transfers of the total balance
         if(
             _to == address(rICO) ||
-            _to == migrationAddress ||
-            address(rICO) == address(0)
+            _to == migrationAddress
         ) {
-            // full balance can be sent back to rico
+            // full balance can be sent back to rico or migration address
             require(_amount <= balanceOf(_from), "Sending failed: Insufficient funds");
 
         } else {
@@ -167,6 +185,22 @@ contract ReversibleICOToken is ERC777 {
         }
 
         ERC777._move(_operator, _from, _to, _amount, _userData, _operatorData);
+    }
+
+    // We override burn as well. So users can not burn locked tokens.
+    function _burn(
+        address _operator,
+        address _from,
+        uint256 _amount,
+        bytes memory _data,
+        bytes memory _operatorData
+    )
+    internal
+    isNotFrozen
+    isInitialized
+    {
+        require(_amount <= getUnlockedBalance(_from), "Burning failed: Insufficient funds");
+        ERC777._burn(_operator, _from, _amount, _data, _operatorData);
     }
 
 

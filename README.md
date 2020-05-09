@@ -5,7 +5,7 @@ Reversible ICO is a way to collect funding over time. While conventional ICOs co
 
 The rICO tries to solve that by keeping investors in control of their funds over a defined period of time, while buying tokens gradually.
 
-## Functionality
+## Reversible ICO Functionality
 
 The rICO is set in stages that can be defined in the `init` function.
 
@@ -15,8 +15,8 @@ investors can commit or reverse their commitment by sending back the tokens.
 **Stage 1-x** is called **"buy phase"**, this is where the committed ETH gradually buys the token over time. 
 ETH that already bought tokens is available to the project for withdraw.
 
-Tokens that are still "reserved" (meaning they haven't been unlocked for the participant),
-can be returned to withdraw their corresponding ETH by any investor at any point in time.
+Tokens that are still returnable (meaning they haven't been unlocked for the participant),
+can be returned to the rICO smart contract, to withdraw their corresponding ETH by any investor at any point in time.
 
 **Each stage has a price increase, so that committing early is rewarded.**
 The scheme looks a little bit as follows:
@@ -25,7 +25,7 @@ The scheme looks a little bit as follows:
 
 ### How do I reserve tokens?
 
-To reserve tokens at any stage, call the `commit()` function and send the amount of ETH along for which you want to reserve tokens with.
+To reserve tokens at any stage, call the `commit() ` function (ABI: "0x3C7A3AFF") and send the amount of ETH along for which you want to reserve tokens with.
 
 ### What happens if somebody commits during stage 1-x
 
@@ -39,9 +39,9 @@ E.g. If you come in at month 3 of 10, your rICO will take place over 7 months an
 This is done so that normal token wallets can function as an interface to the rICO.
 You will see the full token balance at your address, but will only be able to move the amount you have actually bought by the current point in time.
 
-While in reverse you will only be able to send back the amount of tokens that you have still reserved. 
-Should you send a higher than reserved token balance you will only return the amount of ETH matching your total reserved token balance, 
-and get the rest tokens returned automatically.
+While in reverse you will only be able to send back the amount of tokens that are returnable. 
+Should you send a higher than the returnable token balance you will only return the amount of ETH matching your total returnable token balance, 
+and get the rest tokens returned to your address automatically.
 
 ### What is the pending state?
 
@@ -71,6 +71,28 @@ It can also point the token contract to another rICO contract, but only *when th
 
 The `freezerAddress` has the ability to to deactivate the freeze function in both token, and rICO contract, should the contracts deemed fully secure.
 This will deactivate the ability to rescue funds or freeze the contracts all together.
+
+## Token functionality
+
+The token contract is a basic ERC777 with some modifications.
+
+For the balance the the contract checks with the rICOs `getParticipantReservedTokens(address)` function
+to see how much tokens are still returnable, and prevents them from being movable.
+
+## Migration address
+
+The project can set a migration address at any point in time, which is - besides the rICO address,
+the only address where locked (returnable) tokens can also be sent to.
+
+This is there so that when the project migrates the token to e.g. a native token on a Blockchain,
+it can provide a smart contract that handles such an migration. This can happen even before the rICO is finished. 
+
+## Security Measurements
+
+The token has a similar security scheme like the rICO contract (seperate `freezerAddress` and `rescuerAddress`), but when frozen only the rICO address can be set to a new one.
+This is there to be able to upgrade to a different rICO in case the old one needs to be replaced.
+
+It has the same
 
 ## Development
 
