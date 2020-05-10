@@ -163,32 +163,28 @@ contract ReversibleICO is IERC777Recipient {
     /*
      * Events
      */
-    event ApplicationEvent (
-        uint8 indexed typeId,
-        uint32 indexed id,
-        address indexed relatedAddress,
-        uint256 value
-    );
+    event PendingContributionAdded(address indexed participantAddress, uint256 indexed amount, uint32 indexed contributionId);
+    event PendingContributionsCanceled(address indexed participantAddress, uint256 indexed amount, uint32 indexed contributionId);
+
+    event WhitelistApproved(address indexed participantAddress, uint256 indexed pendingETH, uint32 indexed contributions);
+    event WhitelistRejected(address indexed participantAddress, uint256 indexed pendingETH, uint32 indexed contributions);
+
+    event ContributionsAccepted(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint8 stageId);
+
+    event ProjectWithdraw(address indexed projectAddress, uint256 indexed amount, uint32 indexed withdrawCount);
+    event ParticipantWithdraw(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint32 withdrawCount);
+
+    event SecurityFreeze(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
+    event SecurityUnfreeze(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
+    event SecurityDisableEscapeHatch(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
+    event SecurityEscapeHatch(address indexed rescuerAddress, address indexed to, uint8 indexed stageId, uint256 effectiveBlockNumber);
+
 
     event TransferEvent (
         uint8 indexed typeId,
         address indexed relatedAddress,
         uint256 indexed value
     );
-
-    enum ApplicationEventTypes {
-        NOT_SET, // 0; will match default value of a mapping result
-        CONTRIBUTION_ADDED, // 1
-        CONTRIBUTION_CANCELED, // 2
-        CONTRIBUTION_ACCEPTED, // 3
-        WHITELIST_APPROVED, // 4
-        WHITELIST_REJECTED, // 5
-        PROJECT_WITHDRAWN, // 6
-        FROZEN_FREEZE, // 7
-        FROZEN_UNFREEZE, // 8
-        FROZEN_DISBALEHATCH, // 9
-        FROZEN_ESCAPEHATCH // 10
-    }
 
     enum TransferTypes {
         NOT_SET, // 0
@@ -391,11 +387,10 @@ contract ReversibleICO is IERC777Recipient {
         // UPDATE GLOBAL STATS
         pendingETH = pendingETH.add(msg.value);
 
-        emit ApplicationEvent(
-            uint8(ApplicationEventTypes.CONTRIBUTION_ADDED),
-            uint32(participantStats.contributions),
+        emit PendingContributionAdded(
             msg.sender,
-            msg.value
+            msg.value,
+            uint32(participantStats.contributions)
         );
 
         // If whitelisted, process the contribution automatically
@@ -440,15 +435,15 @@ contract ReversibleICO is IERC777Recipient {
                 if (!participantStats.whitelisted) {
                     // If participants are approved: whitelist them and accept their contributions
                     participantStats.whitelisted = true;
-                    emit ApplicationEvent(uint8(ApplicationEventTypes.WHITELIST_APPROVED), getCurrentStage(), participantAddress, 0);
+                    emit WhitelistApproved(participantAddress, participantStats.pendingETH, uint32(participantStats.contributions));
                 }
 
                 // accept any pending ETH
                 acceptContributions(participantAddress);
 
             } else {
-                emit ApplicationEvent(uint8(ApplicationEventTypes.WHITELIST_REJECTED), getCurrentStage(), participantAddress, 0);
                 participantStats.whitelisted = false;
+                emit WhitelistRejected(participantAddress, participantStats.pendingETH, uint32(participantStats.contributions));
 
                 // Cancel participants pending contributions.
                 cancelPendingContributions(participantAddress, 0);
@@ -479,11 +474,10 @@ contract ReversibleICO is IERC777Recipient {
         projectWithdrawnETH = projectWithdrawnETH.add(_ethAmount);
 
         // Event emission
-        emit ApplicationEvent(
-            uint8(ApplicationEventTypes.PROJECT_WITHDRAWN),
-            uint32(projectWithdrawCount),
+        emit ProjectWithdraw(
             projectAddress,
-            _ethAmount
+            _ethAmount,
+            uint32(projectWithdrawCount)
         );
         emit TransferEvent(
             uint8(TransferTypes.PROJECT_WITHDRAWN),
@@ -513,7 +507,7 @@ contract ReversibleICO is IERC777Recipient {
         freezeStart = getCurrentEffectiveBlockNumber();
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_FREEZE), uint32(getCurrentStage()), freezerAddress, getCurrentEffectiveBlockNumber());
+        emit SecurityFreeze(freezerAddress, getCurrentStage(), freezeStart);
     }
 
     /**
@@ -532,7 +526,7 @@ contract ReversibleICO is IERC777Recipient {
         );
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_UNFREEZE), uint32(getCurrentStage()), freezerAddress, currentBlock);
+        emit SecurityUnfreeze(freezerAddress, getCurrentStage(), currentBlock);
     }
 
     /**
@@ -547,7 +541,7 @@ contract ReversibleICO is IERC777Recipient {
         rescuerAddress = address(0);
 
         // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_DISBALEHATCH), uint32(getCurrentStage()), freezerAddress, getCurrentEffectiveBlockNumber());
+        emit SecurityDisableEscapeHatch(freezerAddress, getCurrentStage(), getCurrentEffectiveBlockNumber());
     }
 
     /**
@@ -570,8 +564,9 @@ contract ReversibleICO is IERC777Recipient {
         // sent all ETH from the contract to the _to address
         address(uint160(_to)).transfer(ethBalance);
 
-        // Emit event
-        emit ApplicationEvent(uint8(ApplicationEventTypes.FROZEN_ESCAPEHATCH), uint32(getCurrentStage()), _to, getCurrentEffectiveBlockNumber());
+        // Emit events
+        emit SecurityEscapeHatch(rescuerAddress, _to, getCurrentStage(), getCurrentEffectiveBlockNumber());
+
         emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_TOKEN), _to, tokenBalance);
         emit TransferEvent(uint8(TransferTypes.FROZEN_ESCAPEHATCH_ETH), _to, ethBalance);
     }
@@ -902,18 +897,14 @@ contract ReversibleICO is IERC777Recipient {
         canceledETH = canceledETH.add(participantPendingEth);
         pendingETH = pendingETH.sub(participantPendingEth);
 
-        // event emission
+        // Emit events
+        emit PendingContributionsCanceled(_participantAddress, participantPendingEth, uint32(participantStats.contributions));
         emit TransferEvent(
             uint8(TransferTypes.CONTRIBUTION_CANCELED),
             _participantAddress,
             participantPendingEth
         );
-        emit ApplicationEvent(
-            uint8(ApplicationEventTypes.CONTRIBUTION_CANCELED),
-            uint32(participantStats.contributions),
-            _participantAddress,
-            participantPendingEth
-        );
+
 
         // transfer ETH back to participant including received value
         address(uint160(_participantAddress)).transfer(participantPendingEth.add(_sentValue));
@@ -991,7 +982,7 @@ contract ReversibleICO is IERC777Recipient {
             _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
 
             // Emit event
-            emit ApplicationEvent(uint8(ApplicationEventTypes.CONTRIBUTION_ACCEPTED), uint32(stageId), _participantAddress, newlyCommittedEth);
+            emit ContributionsAccepted(_participantAddress, newlyCommittedEth, newTokenAmount, stageId);
         }
 
         // Refund what couldn't be accepted
@@ -1072,11 +1063,15 @@ contract ReversibleICO is IERC777Recipient {
             // send tokens back to participant
             bytes memory data;
 
-            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
             // solium-disable-next-line security/no-send
             IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
+
+            // Emit event
+            emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
         }
 
+        // Emit events
+        emit ParticipantWithdraw(_participantAddress, returnEthAmount, returnedTokenAmount, uint32(participantStats.withdraws));
         emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW), _participantAddress, returnEthAmount);
 
         // Return ETH back to participant

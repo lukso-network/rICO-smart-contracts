@@ -70,15 +70,6 @@ class Contract extends Validator {
         this.totalSentETH = new BN("0");
         this.returnedETH = new BN("0");
 
-        this.ApplicationEventTypes = {
-            "NOT_SET": 0,
-            "CONTRIBUTION_ADDED": 1,
-            "CONTRIBUTION_CANCELED": 2,
-            "CONTRIBUTION_ACCEPTED": 3,
-            "WHITELIST_APPROVED": 4,
-            "WHITELIST_REJECTED": 5,
-            "PROJECT_WITHDRAWN": 6
-        }
 
         this.TransferTypes = {
             "NOT_SET": 0,
@@ -133,7 +124,7 @@ class Contract extends Validator {
 
         // If whitelisted, process the contribution automatically
         if (participantRecord.whitelisted == true) {
-            this.acceptContributions(msg_sender, this.ApplicationEventTypes.CONTRIBUTION_ACCEPTED);
+            this.acceptContributions(msg_sender);
         }
     }
 
@@ -167,16 +158,9 @@ class Contract extends Validator {
         // Update participant's reserved tokens
         stages.pendingTokens = stages.pendingTokens.add(newTokenAmount);
         participantRecord.pendingTokens = participantRecord.pendingTokens.add(newTokenAmount);
-
-        this.ApplicationEvent(
-            this.ApplicationEventTypes.CONTRIBUTION_ADDED,
-            participantRecord.contributions,
-            _from,
-            _receivedValue
-        );
     }
 
-    acceptContributions(_from, _eventType) {
+    acceptContributions(_from) {
 
         
         const participantRecord = this.getParticipantRecordByAddress(_from);
@@ -243,8 +227,6 @@ class Contract extends Validator {
                     this.address(this.uint160(_from)).transfer(returnValue);
                     this.TransferEvent(this.TransferTypes.CONTRIBUTION_ACCEPTED_OVERFLOW, _from, returnValue);
                 }
-
-                this.ApplicationEvent(_eventType, stageId, _from, newAcceptedValue);
             }
         }
     }
@@ -286,11 +268,11 @@ class Contract extends Validator {
         if (_approve) {
             // If participants are approved: whitelist them and accept their contributions
             participantRecord.whitelisted = true;
-            this.acceptContributions(_address, this.ApplicationEventTypes.WHITELIST_APPROVED);
+            this.acceptContributions(_address);
         } else {
             // If participants are not approved: remove them from whitelist and cancel their contributions
             participantRecord.whitelisted = false;
-            this.cancelContributionsForAddress(_address, 0, this.ApplicationEventTypes.WHITELIST_REJECTED);
+            this.cancelContributionsForAddress(_address, 0);
         }
     }
 
@@ -342,7 +324,7 @@ class Contract extends Validator {
         return participantRecord.committedETH.sub(participantRecord.withdrawnETH);
     }
 
-    cancelContributionsForAddress(_from, _value, _eventType) {
+    cancelContributionsForAddress(_from, _value) {
 
         // Participant should only be able to cancel if they haven't been whitelisted yet...
         // ...but just to make sure take withdrawn and returned into account.
@@ -369,20 +351,14 @@ class Contract extends Validator {
             this.address(this.uint160(_from)).transfer(participantAvailableETH.add(new BN(_value)));
 
             let currentTransferEventType;
-            if (_eventType == this.ApplicationEventTypes.WHITELIST_REJECTED) {
+            if (_eventType == this.TransferTypes.WHITELIST_REJECTED) {
                 currentTransferEventType = this.TransferTypes.WHITELIST_REJECTED;
-            } else if (_eventType == this.ApplicationEventTypes.CONTRIBUTION_CANCELED) {
+            } else if (_eventType == this.TransferTypes.CONTRIBUTION_CANCELED) {
                 currentTransferEventType = this.TransferTypes.CONTRIBUTION_CANCELED;
             }
 
             // event emission
             this.TransferEvent(currentTransferEventType, _from, participantAvailableETH);
-            this.ApplicationEvent(
-                _eventType,
-                participantRecord.contributions,
-                _from,
-                participantAvailableETH
-            );
 
         } else {
             throw ("Participant has no available ETH to withdraw.");
@@ -524,12 +500,6 @@ class Contract extends Validator {
         address(uint160(projectAddress)).transfer(_ethAmount);
 
         // Event emission
-        ApplicationEvent(
-            ApplicationEventTypes.PROJECT_WITHDRAWN,
-            projectWithdrawCount,
-            projectAddress,
-            _ethAmount
-        );
         TransferEvent(
             TransferTypes.PROJECT_WITHDRAWN,
             projectAddress,
@@ -570,11 +540,6 @@ class Contract extends Validator {
     TransferEvent(_type, _address, _value) {
         // call listeners for _type
         // console.log("TransferEvent: ", _type, _address, _value);
-    }
-
-    ApplicationEvent(_type, _id, _address, _value) {
-        // call listeners for _type
-        // console.log("ApplicationEvent: ", _type, _id, _address, _value);
     }
 
 }

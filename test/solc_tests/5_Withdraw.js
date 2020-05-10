@@ -15,15 +15,6 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 1000;
 
-const ApplicationEventTypes = {
-    NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_ADDED:1,
-    CONTRIBUTION_CANCELED:2,
-    CONTRIBUTION_ACCEPTED:3,
-    WHITELIST_APPROVED:4,
-    WHITELIST_REJECTED:5,
-    PROJECT_WITHDRAWN:6
-}
 
 const TransferTypes = {
     NOT_SET: 0,

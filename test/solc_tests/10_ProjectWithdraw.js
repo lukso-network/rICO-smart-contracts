@@ -18,16 +18,6 @@ const commitPhaseDays = 4;   // 22;
 const StageDays = 2;         // 30;
 
 
-const ApplicationEventTypes = {
-    NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_ADDED:1,
-    CONTRIBUTION_CANCELED:2,
-    CONTRIBUTION_ACCEPTED:3,
-    WHITELIST_APPROVED:4,
-    WHITELIST_REJECTED:5,
-    PROJECT_WITHDRAWN:6
-}
-
 const TransferTypes = {
     NOT_SET: 0,
     WHITELIST_REJECTED: 1,

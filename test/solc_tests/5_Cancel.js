@@ -15,15 +15,6 @@ const participant_6 = accounts[9];
 const RicoSaleSupply = setup.settings.token.sale.toString();
 const blocksPerDay = 6450;
 
-const ApplicationEventTypes = {
-    NOT_SET:0,        // will match default value of a mapping result
-    CONTRIBUTION_ADDED:1,
-    CONTRIBUTION_CANCELED:2,
-    CONTRIBUTION_ACCEPTED:3,
-    WHITELIST_APPROVED:4,
-    WHITELIST_REJECTED:5,
-    PROJECT_WITHDRAWN:6
-}
 
 const TransferTypes = {
     NOT_SET: 0,
@@ -549,7 +540,7 @@ describe("Testing canceling", function () {
                 assert.equal(eventFilter.length, 1, 'TransferEvent event not received.');
 
                 eventFilter = helpers.utils.hasEvent(
-                    cancelTx, 'ApplicationEvent(uint8,uint32,address,uint256)'
+                    cancelTx, 'PendingContributionsCanceled(address,uint256,uint32)'
                 );
                 assert.equal(eventFilter.length, 1, 'ApplicationEvent event not received.');
 
