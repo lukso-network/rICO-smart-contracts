@@ -159,6 +159,7 @@ $ npm run deploy-live
 
 - Contribution before whitelisting: ~60-130k GAS (first contribution is more expensive ~130k GAS)
 - Contribution after whitelisting: ~190k GAS
+- User Withdraw: ~160K GAS
 - Project Withdraw: ~70k GAS
 - Whitelisting: ~200k-650k GAS (with max 9 stages) (depends in how much stages were contributions)
 
