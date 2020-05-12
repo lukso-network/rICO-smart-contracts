@@ -5,6 +5,12 @@ Reversible ICO is a way to collect funding over time. While conventional ICOs co
 
 The rICO tries to solve that by keeping investors in control of their funds over a defined period of time, while buying tokens gradually.
 
+## Basic ways of interaction for participants
+
+- Committing ETH: call `commit()` (data: `0x3c7a3aff`) and send ETH along to the rICO.
+- Cancel pending ETH (Before participant is whitelisted): Send less than `minContribution` (e.g. 0.1) to the rICO, or call `cancel()` (data: `0xea8a1af0`)
+- Withdrawing ETH (Before participant is whitelisted): Send tokens back to the rICO.
+
 ## Reversible ICO Functionality
 
 The rICO is set in stages that can be defined in the `init` function.
