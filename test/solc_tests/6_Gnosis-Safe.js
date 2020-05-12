@@ -202,7 +202,7 @@ describe("Gnosis Safe Integration", function () {
             expect(this.GnosisSafe.receipt.gasUsed).to.be.below(6700000);
         });
 
-        describe("Correclty Sets Up", async function () {
+        describe("Correctly Sets Up", async function () {
 
             it("returns the signers", async function () {
                 expect(
@@ -225,202 +225,199 @@ describe("Gnosis Safe Integration", function () {
         // transactions need to be approved in order for the contracts to be deployed
         // enable this after that is implemented
 
-        /*
+        // describe("Correctly Deploys contracts through wallet", async function () {
+        //
+        //     it("returns the correct manager for token", async function () {
+        //
+        //         // console.log(this.ReversibleICOToken.methods);
+        //
+        //
+        //         // let tx =
+        //         // console.log(tx);
+        //
+        //         let tx = await this.ReversibleICOToken.methods.name().call();
+        //         console.log(tx);
+        //
+        //         expect(
+        //             await this.ReversibleICOToken.methods.deployerAddress().call()
+        //         ).to.deep.equal(
+        //             helpers.addresses.GnosisSafe
+        //         );
+        //     });
+        //
+        //
+        //     it("Wallet has the correct balance", async function () {
+        //         expect(
+        //             await this.ReversibleICOToken.methods.balanceOf().call()
+        //         ).to.be.equal(
+        //             setup.settings.token.sale
+        //         );
+        //     });
+        //
+        //     it("returns the correct deployer for Rico", async function () {
+        //         expect(
+        //             await this.Rico.methods.deployingAddress().call()
+        //         ).to.be.equal(
+        //             this.addresses.GnosisSafe
+        //         );
+        //     });
+        //
+        //     it("returns the freezed status", async function () {
+        //         expect(
+        //             await this.ReversibleICOToken.methods.freezed().call()
+        //         ).to.be.equal(true);
+        //     });
+        //
+        // });
+        //
+        // describe("Correctly setup Token and Rico", async function () {
+        //     it("Setups rICO and Manager", async function () {
+        //         let setupData = this.ReversibleICOToken.methods
+        //             .setup(helpers.addresses.Rico)
+        //             .encodeABI();
+        //         await helpers.safeUtils.executeTransaction(
+        //             safeAccounts,
+        //             this.GnosisSafe,
+        //             "Setup Rico",
+        //             signers,
+        //             helpers.addresses.ReversibleICOToken,
+        //             "0",
+        //             setupData,
+        //             0, //CALL
+        //             manager
+        //         );
+        //         expect(await this.ReversibleICOToken.methods.rICO().call()).to.be.equal(
+        //             helpers.addresses.Rico
+        //         );
+        //     });
+        //
+        //     describe("Can add settings to Rico Contract", async function () {
+        //
+        //         const blocksPerDay = 6450;
+        //         currentBlock = await this.ReversibleICO.methods
+        //             .getCurrentEffectiveBlockNumber()
+        //             .call();
+        //
+        //         // starts in one day
+        //         commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
+        //
+        //         // 22 days allocation
+        //         commitPhaseBlockCount = blocksPerDay * 22;
+        //         commitPhasePrice = helpers.solidity.ether * 0.002;
+        //
+        //         // 12 x 30 day periods for distribution
+        //         StageCount = 12;
+        //         StageBlockCount = blocksPerDay * 30;
+        //         StagePriceIncrease = helpers.solidity.ether * 0.0001;
+        //
+        //         commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
+        //
+        //         // for validation
+        //         BuyPhaseEndBlock = commitPhaseEndBlock + (StageBlockCount + 1) * StageCount;
+        //
+        //         const StageStartBlock = commitPhaseEndBlock;
+        //         let lastStageBlockEnd = StageStartBlock;
+        //
+        //         for (let i = 0; i < StageCount; i++) {
+        //             const start_block = lastStageBlockEnd + 1;
+        //             const end_block = lastStageBlockEnd + StageBlockCount + 1;
+        //             const token_price = commitPhasePrice + StagePriceIncrease * (i + 1);
+        //
+        //             stageValidation.push({
+        //                 start_block: start_block,
+        //                 end_block: end_block,
+        //                 token_price: token_price
+        //             });
+        //
+        //             lastStageBlockEnd = end_block;
+        //         }
+        //
+        //         let settingsData = this.Rico.methods.init(
+        //             TokenContractAddress,            // address _TokenContractAddress
+        //             whitelistingAddress,     // address _whitelistingAddress
+        //             projectAddress,        // address _freezerAddress
+        //             projectAddress,        // address _rescuerAddress
+        //             projectAddress,           // address _projectAddress
+        //             commitPhaseStartBlock,                     // uint256 _commitPhaseStartBlock
+        //             commitPhaseBlockCount,           // uint256 _commitPhaseBlockCount,
+        //             commitPhasePrice,                // uint256 _commitPhasePrice in wei
+        //             StageCount,                     // uint8   _StageCount
+        //             StageBlockCount,                // uint256 _StageBlockCount
+        //             StagePriceIncrease              // uint256 _StagePriceIncrease in wei
+        //         )
+        //         .encodeABI();
+        //
+        //         await helpers.safeUtils.executeTransaction(
+        //             safeAccounts,
+        //             this.GnosisSafe,
+        //             "Move Tokens",
+        //             signers,
+        //             helpers.addresses.Rico,
+        //             "0",
+        //             settingsData,
+        //             0, // CALL
+        //             manager
+        //         );
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.initialized().call()
+        //         ).to.be.equal(true);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.started().call()
+        //         ).to.be.equal(false);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.frozen().call()
+        //         ).to.be.equal(false);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.ended().call()
+        //         ).to.be.equal(false);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.TokenContractAddress().call()
+        //         ).to.be.equal(TokenContractAddress);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.whitelistingAddress().call()
+        //         ).to.be.equal(whitelistingAddress);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.projectAddress().call()
+        //         ).to.be.equal(projectAddress);
+        //
+        //         expect(
+        //             await this.ReversibleICO.methods.BuyPhaseEndBlock().call()
+        //         ).to.be.equal(BuyPhaseEndBlock.toString());
+        //     });
+        //
+        //     it("Can transfer tokens to the Rico Contract", async function () {
+        //
+        //         let transferData = this.ReversibleICOToken.methods
+        //             .transfer(
+        //                 helpers.addresses.Rico,
+        //                 setup.settings.token.sale.toString()
+        //             )
+        //             .encodeABI();
+        //
+        //         await helpers.safeUtils.executeTransaction(
+        //             safeAccounts,
+        //             this.GnosisSafe,
+        //             "Move Tokens",
+        //             signers,
+        //             helpers.addresses.ReversibleICOToken,
+        //             "0",
+        //             transferData,
+        //             0, //CALL
+        //             manager
+        //         );
+        //         // This will fail for now because this method isn'timplemented on Rico itself
+        //         expect(
+        //             await this.ReversibleICOToken.methods.balanceOf(helpers.addresses.Rico).call()
+        //         ).to.be.equal(setup.settings.token.sale.toString());
+        //     });
+        // });
 
-        describe("Correclty Deploys contracts through wallet", async function () {
-
-            it("returns the correct manager for token", async function () {
-
-                // console.log(this.ReversibleICOToken.methods);
-
-
-                // let tx = 
-                // console.log(tx);
-                
-                let tx = await this.ReversibleICOToken.methods.name().call();
-                console.log(tx);
-
-                expect(
-                    await this.ReversibleICOToken.methods.manager().call()
-                ).to.deep.equal(
-                    helpers.addresses.GnosisSafe
-                );
-            });
-
-            
-            it("Wallet has the correct balance", async function () {
-                expect(
-                    await this.ReversibleICOToken.methods.balanceOf().call()
-                ).to.be.equal(
-                    setup.settings.token.sale
-                );
-            });
-
-            it("returns the correct deployer for Rico", async function () {
-                expect(
-                    await this.Rico.methods.deployingAddress().call()
-                ).to.be.equal(
-                    this.addresses.GnosisSafe
-                );
-            });
-
-            it("returns the freezed status", async function () {
-                expect(
-                    await this.ReversibleICOToken.methods.freezed().call()
-                ).to.be.equal(true);
-            });
-            
-        });
-
-        /*
-        describe("Correctly setup Token and Rico", async function () {
-            it("Setups rICO and Manager", async function () {
-                let setupData = this.ReversibleICOToken.methods
-                    .setup(helpers.addresses.Rico)
-                    .encodeABI();
-                await helpers.safeUtils.executeTransaction(
-                    safeAccounts,
-                    this.GnosisSafe,
-                    "Setup Rico",
-                    signers,
-                    helpers.addresses.ReversibleICOToken,
-                    "0",
-                    setupData,
-                    0, //CALL
-                    manager
-                );
-                expect(await this.ReversibleICOToken.methods.rICO().call()).to.be.equal(
-                    helpers.addresses.Rico
-                );
-            });
-
-            describe("Can add settings to Rico Contract", async function () {
-                
-                const blocksPerDay = 6450;
-                currentBlock = await this.ReversibleICO.methods
-                    .getCurrentEffectiveBlockNumber()
-                    .call();
-
-                // starts in one day
-                commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-                // 22 days allocation
-                commitPhaseBlockCount = blocksPerDay * 22;
-                commitPhasePrice = helpers.solidity.ether * 0.002;
-
-                // 12 x 30 day periods for distribution
-                StageCount = 12;
-                StageBlockCount = blocksPerDay * 30;
-                StagePriceIncrease = helpers.solidity.ether * 0.0001;
-
-                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-                // for validation
-                BuyPhaseEndBlock = commitPhaseEndBlock + (StageBlockCount + 1) * StageCount;
-
-                const StageStartBlock = commitPhaseEndBlock;
-                let lastStageBlockEnd = StageStartBlock;
-
-                for (let i = 0; i < StageCount; i++) {
-                    const start_block = lastStageBlockEnd + 1;
-                    const end_block = lastStageBlockEnd + StageBlockCount + 1;
-                    const token_price = commitPhasePrice + StagePriceIncrease * (i + 1);
-
-                    stageValidation.push({
-                        start_block: start_block,
-                        end_block: end_block,
-                        token_price: token_price
-                    });
-
-                    lastStageBlockEnd = end_block;
-                }
-
-                let settingsData = this.Rico.methods.init(
-                    TokenContractAddress,            // address _TokenContractAddress
-                    whitelistingAddress,     // address _whitelistingAddress
-                    projectAddress,        // address _freezerAddress
-                    projectAddress,        // address _rescuerAddress
-                    projectAddress,           // address _projectAddress
-                    commitPhaseStartBlock,                     // uint256 _commitPhaseStartBlock
-                    commitPhaseBlockCount,           // uint256 _commitPhaseBlockCount,
-                    commitPhasePrice,                // uint256 _commitPhasePrice in wei
-                    StageCount,                     // uint8   _StageCount
-                    StageBlockCount,                // uint256 _StageBlockCount
-                    StagePriceIncrease              // uint256 _StagePriceIncrease in wei
-                )
-                .encodeABI();
-
-                await helpers.safeUtils.executeTransaction(
-                    safeAccounts,
-                    this.GnosisSafe,
-                    "Move Tokens",
-                    signers,
-                    helpers.addresses.Rico,
-                    "0",
-                    settingsData,
-                    0, // CALL
-                    manager
-                );
-
-                expect(
-                    await this.ReversibleICO.methods.initialized().call()
-                ).to.be.equal(true);
-
-                expect(
-                    await this.ReversibleICO.methods.started().call()
-                ).to.be.equal(false);
-
-                expect(
-                    await this.ReversibleICO.methods.frozen().call()
-                ).to.be.equal(false);
-
-                expect(
-                    await this.ReversibleICO.methods.ended().call()
-                ).to.be.equal(false);
-
-                expect(
-                    await this.ReversibleICO.methods.TokenContractAddress().call()
-                ).to.be.equal(TokenContractAddress);
-
-                expect(
-                    await this.ReversibleICO.methods.whitelistingAddress().call()
-                ).to.be.equal(whitelistingAddress);
-
-                expect(
-                    await this.ReversibleICO.methods.projectAddress().call()
-                ).to.be.equal(projectAddress);
-
-                expect(
-                    await this.ReversibleICO.methods.BuyPhaseEndBlock().call()
-                ).to.be.equal(BuyPhaseEndBlock.toString());
-            });
-
-            it("Can transfer tokens to the Rico Contract", async function () {
-            
-                let transferData = this.ReversibleICOToken.methods
-                    .transfer(
-                        helpers.addresses.Rico,
-                        setup.settings.token.sale.toString()
-                    )
-                    .encodeABI();
-    
-                await helpers.safeUtils.executeTransaction(
-                    safeAccounts,
-                    this.GnosisSafe,
-                    "Move Tokens",
-                    signers,
-                    helpers.addresses.ReversibleICOToken,
-                    "0",
-                    transferData,
-                    0, //CALL
-                    manager
-                );
-                // This will fail for now because this method isn'timplemented on Rico itself
-                expect(
-                    await this.ReversibleICOToken.methods.balanceOf(helpers.addresses.Rico).call()
-                ).to.be.equal(setup.settings.token.sale.toString());
-            });
-        });
-        */
     });
 });

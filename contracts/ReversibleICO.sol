@@ -319,6 +319,8 @@ contract ReversibleICO is IERC777Recipient {
 
         // Participant cancels pending contributions.
         cancelPendingContributions(msg.sender, msg.value);
+
+        // TODO allow contribution here, if participant exist already and is whitelisted and has more than 0 contributions and 0 pendingETH already
     }
 
     /**
@@ -356,6 +358,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Allows a participant to reserve tokens by committing ETH as contributions.
+     *
+     *  Function signature: 0x3c7a3aff
      */
     function commit()
     external
@@ -401,6 +405,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Allows a participant to cancel pending contributions
+     *
+     *  Function signature: 0xea8a1af0
      */
     function cancel()
     external
@@ -497,6 +503,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Freezes the rICO in case of emergency.
+     *
+     * Function signature: 0x62a5af3b
      */
     function freeze()
     external
@@ -512,6 +520,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Un-freezes the rICO.
+     *
+     * Function signature: 0x6a28f000
      */
     function unfreeze()
     external
@@ -531,6 +541,8 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Sets the freeze address to 0x0
+     *
+     * Function signature: 0xeb10dec7
      */
     function disableEscapeHatch()
     external
