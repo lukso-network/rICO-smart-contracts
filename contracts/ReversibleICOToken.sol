@@ -79,6 +79,7 @@ contract ReversibleICOToken is ERC777 {
     onlyProjectAddress
     {
         require(address(rICO) == address(0), "rICO address already set!");
+        require(_ricoAddress != address(0), "rICO address cannot be 0x.");
 
         rICO = ReversibleICO(_ricoAddress);
         emit SetRICOaddress(_ricoAddress);

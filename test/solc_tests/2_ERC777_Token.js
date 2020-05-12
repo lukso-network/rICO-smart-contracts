@@ -144,7 +144,7 @@ describe("ERC777 - RICO Token", async function () {
                 );
             });
 
-            it("returns corrctly the frozen status", async function () {
+            it("returns the frozen status correctly", async function () {
                 expect(await this.ReversibleICOToken.methods.frozen().call()).to.be.equal(
                     false
                 );
