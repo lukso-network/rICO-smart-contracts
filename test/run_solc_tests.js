@@ -30,7 +30,7 @@ async function runTests(init) {
     "6_Gnosis-Safe",
     "7_Website",
     "10_ProjectWithdraw",
-
+    "rico_roken",
 
     // Needs fixing
     // "flows/whitelist",
