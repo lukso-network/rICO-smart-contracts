@@ -5,6 +5,9 @@ const tokenDecimals = 18;
 const ether = 1000000000000000000;      // 1 ether in wei
 const etherBN = new BN(ether.toString());
 
+// LIVE main ner deployment
+// rescuer: 0x87bD0fBD87C846e37193f79E7BF97b6d3AF625e3
+
 module.exports = {
     settings: {
         provider: "https://rinkeby.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c",

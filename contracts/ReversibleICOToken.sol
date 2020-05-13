@@ -215,7 +215,7 @@ contract ReversibleICOToken is ERC777 {
     }
 
     /**
-     * @notice Checks if the sender is the deployer.
+     * @notice Checks if the sender is the project.
      */
     modifier onlyProjectAddress() {
         require(msg.sender == projectAddress, "Only the project can call this method.");
