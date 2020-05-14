@@ -190,15 +190,22 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                             const stageId = await ReversibleICO.methods.getCurrentStage().call();
                             const currentPrice = await ReversibleICO.methods.getCurrentPrice().call();
 
+                            // console.log('BEFORE', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
+
+                            const data = (particip.whitelisted && particip.contributions > 2) ? '' : '0x3c7a3aff'; // commit()
+
                             if (contribTokenAmount.toString() > '0') {
                                 const ContributionAmount = priceInStage(stageId).mul(contribTokenAmount);
                                 await helpers.web3Instance.eth.sendTransaction({
                                     from: participant.address,
                                     to: ReversibleICO.receipt.contractAddress,
                                     value: ContributionAmount.toString(),
-                                    data: '0x3c7a3aff', // commit()
+                                    data: data, // commit()
                                     gasPrice: helpers.networkConfig.gasPrice
-                                }).then((receipt) => {
+                                }).then(async (receipt) => {
+                                    // let particip = await ReversibleICO.methods.participants(participant.address).call();
+                                    // console.log('AFTER', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
+
 
                                     let text = (particip.whitelisted) ? 'with auto accepting :': ':';
 
@@ -207,6 +214,8 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                                     // update his balance
                                     participant.pricesPaid.push(new BN(currentPrice));
                                     participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
+
+
 
                                     done();
                                 }, (error) => {

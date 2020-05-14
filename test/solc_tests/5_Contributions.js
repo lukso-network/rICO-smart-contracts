@@ -271,7 +271,7 @@ describe("Contribution Testing", function () {
 
             });
 
-            it("even after time passed, everything on top should result in a full refund", async function () {
+            it("commit sending only money, no commit() function call", async function () {
 
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 3);
 
@@ -282,7 +282,7 @@ describe("Contribution Testing", function () {
                     from: participant_1,
                     to: ReversibleICOInstance.receipt.contractAddress,
                     value: ContributionAmount.toString(),
-                    data: '0x3c7a3aff', // commit()
+                    // data: '0x3c7a3aff', // commit()
                     gasPrice: helpers.networkConfig.gasPrice
                 });
                 const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(

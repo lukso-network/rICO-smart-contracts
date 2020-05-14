@@ -862,7 +862,7 @@ describe("Flow Testing", function () {
                         from: TestParticipantAddress,
                         to: ReversibleICOInstance.receipt.contractAddress,
                         value: ContributionAmount.toString(),
-                        data: '0x3c7a3aff', // commit()
+                        // data: '0x3c7a3aff', // commit() // dont use the commit function the second time
                         gasPrice: helpers.networkConfig.gasPrice
                     });
 

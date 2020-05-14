@@ -85,7 +85,7 @@ contract ReversibleICO is IERC777Recipient {
     /// @dev Maps participants stats by their address.
     mapping(address => Participant) public participants;
     /// @dev Maps participants address to a unique participant ID (incremental IDs, based on "participantCount").
-    mapping(uint256 => address) public participantsById; // TODO remove?
+    mapping(uint256 => address) public participantsById;
     /// @dev Total number of rICO participants.
     uint256 public participantCount;
 
@@ -308,6 +308,7 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice FALLBACK function: If the amount sent is smaller than `minContribution` it cancels all pending contributions.
+     * IF you are a known contributor with at least 1 contribution and you are whitelisted, you can send ETH without calling "commit()" to contribute more.
      */
     function()
     external
@@ -315,12 +316,19 @@ contract ReversibleICO is IERC777Recipient {
     isInitialized
     isNotFrozen
     {
-        require(msg.value < minContribution, 'To contribute, call the commit() function and send ETH along.');
+        Participant storage participantStats = participants[msg.sender];
 
-        // Participant cancels pending contributions.
-        cancelPendingContributions(msg.sender, msg.value);
+        // allow to commit directly if its a known user with at least 1 contribution
+        if (participantStats.whitelisted == true && participantStats.contributions > 0) {
+            commit();
 
-        // TODO allow contribution here, if participant exist already and is whitelisted and has more than 0 contributions and 0 pendingETH already
+        // otherwise try to cancel
+        } else {
+            require(msg.value < minContribution, 'To contribute call commit() [0x3c7a3aff] and send ETH along.');
+
+            // Participant cancels pending contributions.
+            cancelPendingContributions(msg.sender, msg.value);
+        }
     }
 
     /**
@@ -362,14 +370,14 @@ contract ReversibleICO is IERC777Recipient {
      *  Function signature: 0x3c7a3aff
      */
     function commit()
-    external
+    public
     payable
     isInitialized
     isNotFrozen
     isRunning
     {
         // Reject contributions lower than the minimum amount
-        require(msg.value >= minContribution, "Value sent is less than minimum contribution.");
+        require(msg.value >= minContribution, "Value sent is less than the minimum contribution.");
 
         // Participant initial state record
         Participant storage participantStats = participants[msg.sender];
@@ -438,7 +446,7 @@ contract ReversibleICO is IERC777Recipient {
             Participant storage participantStats = participants[participantAddress];
 
             if (_approve) {
-                if (!participantStats.whitelisted) {
+                if (participantStats.whitelisted == false) {
                     // If participants are approved: whitelist them and accept their contributions
                     participantStats.whitelisted = true;
                     emit WhitelistApproved(participantAddress, participantStats.pendingETH, uint32(participantStats.contributions));
