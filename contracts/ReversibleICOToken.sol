@@ -15,7 +15,7 @@ contract ReversibleICOToken is ERC777 {
     
     // addresses
     address public deployingAddress;
-    address public projectAddress; // Receives the initial amount and can set the migration address, as well as the rICO, if not set
+    address public tokenGenesisAddress; // Receives the initial amount and can set the migration address, as well as the rICO, if not set initially
     address public migrationAddress; // The contract address which will handle the token migration
     address public freezerAddress; // should be same as freezer address in rICO
     address public rescuerAddress; // should be same as rescuerAddress address in rICO
@@ -49,7 +49,7 @@ contract ReversibleICOToken is ERC777 {
         address _ricoAddress,
         address _freezerAddress,
         address _rescuerAddress,
-        address _projectAddress,
+        address _tokenGenesisAddress,
         uint256 _initialSupply
     )
     public
@@ -58,13 +58,13 @@ contract ReversibleICOToken is ERC777 {
     {
         require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
-        require(_projectAddress != address(0), "_projectAddress cannot be 0x");
+        require(_tokenGenesisAddress != address(0), "_tokenGenesisAddress cannot be 0x");
 
-        projectAddress = _projectAddress;
+        tokenGenesisAddress = _tokenGenesisAddress;
         freezerAddress = _freezerAddress;
         rescuerAddress = _rescuerAddress;
 
-        _mint(_projectAddress, _projectAddress, _initialSupply, "", "");
+        _mint(_tokenGenesisAddress, _tokenGenesisAddress, _initialSupply, "", "");
 
         if(_ricoAddress != address(0)) {
             rICO = ReversibleICO(_ricoAddress);
@@ -76,7 +76,7 @@ contract ReversibleICOToken is ERC777 {
 
     function setRICOaddress(address _ricoAddress)
     public
-    onlyProjectAddress
+    onlyTokenGenesisAddress
     {
         require(address(rICO) == address(0), "rICO address already set!");
         require(_ricoAddress != address(0), "rICO address cannot be 0x.");
@@ -88,7 +88,7 @@ contract ReversibleICOToken is ERC777 {
     // *** Migration process
     function setMigrationAddress(address _migrationAddress)
     public
-    onlyProjectAddress
+    onlyTokenGenesisAddress
     {
         migrationAddress = _migrationAddress;
         emit SetMigrationAddress(migrationAddress);
@@ -215,10 +215,10 @@ contract ReversibleICOToken is ERC777 {
     }
 
     /**
-     * @notice Checks if the sender is the project.
+     * @notice Checks if the sender is the tokenGenesisAddress.
      */
-    modifier onlyProjectAddress() {
-        require(msg.sender == projectAddress, "Only the project can call this method.");
+    modifier onlyTokenGenesisAddress() {
+        require(msg.sender == tokenGenesisAddress, "Only the tokenGenesisAddress can call this method.");
         _;
     }
 

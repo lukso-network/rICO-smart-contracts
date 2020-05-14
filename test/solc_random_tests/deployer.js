@@ -15,9 +15,9 @@ module.exports = {
         const ContractsDeployer = settings.ContractsDeployer;
         const whitelistingAddress = settings.whitelistingAddress;
         const projectAddress = settings.projectAddress;
-        const blocksPerDay = settings.blocksPerDay // 6450;
-        const commitPhaseDays = settings.commitPhaseDays // 22;
-        const StageDays = settings.StageDays // 30;
+        const blocksPerDay = settings.blocksPerDay; // 6450;
+        const commitPhaseDays = settings.commitPhaseDays; // 22;
+        const StageDays = settings.StageDays; // 30;
         
         const RicoSaleSupply = init.setup.settings.token.sale.toString();
         const ERC777data = helpers.web3Instance.utils.sha3('777TestData');

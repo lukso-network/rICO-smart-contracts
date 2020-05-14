@@ -96,7 +96,7 @@ describe("rICO Token - Phases", function () {
         });
 
         it("returns the projectAddress", async function () {
-            expect(await TokenContractInstance.methods.projectAddress().call()).to.be.equal(
+            expect(await TokenContractInstance.methods.tokenGenesisAddress().call()).to.be.equal(
                 projectAddress
             );
         });
@@ -282,14 +282,14 @@ describe("rICO Token - Phases", function () {
 
             describe("Token.setRICOaddress(address)", function () {
 
-                it("will revert if called by other address than projectAddress", async function () {
+                it("will revert if called by other address than tokenGenesisAddress", async function () {
                     helpers.utils.resetAccountNonceCache(helpers);
 
                     await helpers.assertInvalidOpcode( async () => {
                         await TokenContractInstance.methods.setRICOaddress(RICOContractAddress).send({
                             from: deployingAddress, gas: 200000
                         });
-                    }, "Only the project can call this method.");
+                    }, "Only the tokenGenesisAddress can call this method.");
                 });
 
                 it("will revert if provided address is 0x", async function () {
@@ -684,14 +684,14 @@ describe("rICO Token - Phases", function () {
                     ).to.be.equal("0x0000000000000000000000000000000000000000");
                 });
                 
-                it("will revert if called by other address than projectAddress", async function () {
+                it("will revert if called by other address than tokenGenesisAddress", async function () {
                     helpers.utils.resetAccountNonceCache(helpers);
 
                     await helpers.assertInvalidOpcode( async () => {
                         await TokenContractInstance.methods.setMigrationAddress(tokenMigrationAddress).send({
                             from: deployingAddress, gas: 200000
                         });
-                    }, "Only the project can call this method.");
+                    }, "Only the tokenGenesisAddress can call this method.");
                 });
 
                 it("will set migrationAddress address if called by projectAddress", async function () {
