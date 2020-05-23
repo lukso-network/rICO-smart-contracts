@@ -145,6 +145,7 @@ contract ReversibleICO is IERC777Recipient {
         bool whitelisted;
         uint32 contributions;
         uint32 withdraws;
+        uint256 firstContributionBlock;
         uint256 reservedTokens;
         uint256 committedETH;
         uint256 pendingETH;
@@ -957,6 +958,11 @@ contract ReversibleICO is IERC777Recipient {
         uint256 totalNewReservedTokens;
 
         calcParticipantAllocation(_participantAddress);
+
+        // set the first contribution block
+        if(participantStats.committedETH == 0) {
+            participantStats.firstContributionBlock = participantStats._lastBlock; // `_lastBlock` was set in calcParticipantAllocation()
+        }
 
         // Iterate over all stages and their pending contributions
         for (uint8 stageId = 0; stageId <= currentStage; stageId++) {

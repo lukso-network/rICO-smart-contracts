@@ -31,7 +31,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
 
-    customTestSettings.rico.commitPhasePrice = "25000000000000000"; // 0.025 ETH
+    customTestSettings.rico.commitPhasePrice = "25000000000000"; // 0.025 ETH
     customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
@@ -131,6 +131,20 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                 });
             }
 
+            // project increases the rICO holding
+            if(blockNumber == 40) {
+                it("Project adds more token to the rICO at block "+ blockNumber, async function () {
+
+                    console.log('rICO TOKENS before', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
+
+                    await TokenContractInstance.methods.transfer(ReversibleICOAddress, '85000000000000000000000000').send({
+                        from: projectAddress
+                    });
+
+                    console.log('rICO TOKENS after', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
+                });
+            }
+
             if(blockNumber < 22 || blockNumber > 33) {
 
                 // go over every participant
@@ -196,6 +210,13 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                             if (contribTokenAmount.toString() > '0') {
                                 const ContributionAmount = priceInStage(stageId).mul(contribTokenAmount);
+
+                                // check if above min contribution
+                                if(ContributionAmount.lte(new BN("1000000000000000"))) {
+                                    done();
+                                    return;
+                                }
+
                                 await helpers.web3Instance.eth.sendTransaction({
                                     from: participant.address,
                                     to: ReversibleICO.receipt.contractAddress,
@@ -234,11 +255,10 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                     // participants[i].withdCount++;
 
-
                     it(participant.address + ": Return tokens", function (done) {
 
-
                         ( async function(){
+
                             const maxTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
                             // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
@@ -389,8 +409,12 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
             let participant = participants[i];
 
             it(participant.address + ": compare full token balances", async function () {
+                console.log('rICO TOKENS end balance', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
+
+
                 const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
                 expect(balance).to.be.equal(participant.tokenBalance.toString());
+
             });
             it(participant.address + ": reserved token balance should be 0", async function () {
                 const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
