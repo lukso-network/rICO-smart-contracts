@@ -211,8 +211,8 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                             if (contribTokenAmount.toString() > '0') {
                                 const ContributionAmount = priceInStage(stageId).mul(contribTokenAmount);
 
-                                // check if above min contribution
-                                if(ContributionAmount.lte(new BN("1000000000000000"))) {
+                                // check if above min contribution 0.1 eth
+                                if(ContributionAmount.lte(new BN("100000000000000000"))) {
                                     done();
                                     return;
                                 }

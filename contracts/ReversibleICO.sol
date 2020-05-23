@@ -76,7 +76,7 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectWithdrawnETH;
 
     /// @dev Minimum amount of ETH accepted for a contribution. Everything lower than that will trigger a canceling of pending ETH.
-    uint256 public minContribution = 0.001 ether;
+    uint256 public minContribution = 0.1 ether;
 
     mapping(uint8 => Stage) public stages;
     uint256 public stageBlockCount;
