@@ -54,13 +54,13 @@ module.exports = {
             whitelistingAddress: '0x774C67dA65373c9922c528E232B718174dFCa116', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E", // 499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B
         },
         rico: {
-            startBlock: 6445769, // 2020-05-07 11:00:00 on rinkeby
-            blocksPerDay: 5760,
-            commitPhaseDays: 4,
+            startBlock: 10147598, // 2020-05-27 14:00:00 on mainnet
+            blocksPerDay: 6400,
+            commitPhaseDays: 22,
             stageCount: 8,
-            stageDays: 1,
-            commitPhasePrice: ether * 0.001,        // uint256 _commitPhasePrice in wei
-            stagePriceIncrease: ether * 0.0005      // uint256 _StagePriceIncrease in wei
+            stageDays: 30,
+            commitPhasePrice: ether * 0.002,        // uint256 _commitPhasePrice in wei
+            stagePriceIncrease: ether * 0.0002      // uint256 _StagePriceIncrease in wei
         },
         token: {
             name: "LUKSO Token",
@@ -68,7 +68,7 @@ module.exports = {
             decimals: tokenDecimals,
             supply: new BN(100000000) // 100 million LYX
                 .mul(new BN("10").pow(new BN( tokenDecimals ))),
-            sale: new BN(200000) // 200k LYX
+            sale: new BN(10000000) // 1M LYX
                 .mul(new BN("10").pow(new BN( tokenDecimals ))),
         }
     }
