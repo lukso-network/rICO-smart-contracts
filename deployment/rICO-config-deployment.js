@@ -9,7 +9,7 @@ const etherBN = new BN(ether.toString());
 //0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b
 
 /*
- * Submitted for verification at Etherscan.io on 2020-05-25
+ * Submitted for verification at etherscan.io on 2020-05-25
  *
  *   ________            ____                           _ __    __        ______________
  *  /_  __/ /_  ___     / __ \___ _   _____  __________(_) /_  / /__     /  _/ ____/ __ \
@@ -45,7 +45,7 @@ const etherBN = new BN(ether.toString());
 module.exports = {
     settings: {
         provider: "https://mainnet.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c",
-        networkGasPrice: 30000000000, // 10 gwei
+        networkGasPrice: 40000000000, // 10 gwei
         deployToken: false,
         deployrICO: true,
         keys: {
