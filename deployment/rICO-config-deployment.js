@@ -38,8 +38,8 @@ module.exports = {
     settings: {
         provider: "https://mainnet.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c",
         networkGasPrice: 30000000000, // 10 gwei
-        deployToken: true,
-        deployrICO: false,
+        deployToken: false,
+        deployrICO: true,
         keys: {
             // valid with ETH on rinkeby ( no 0x )
             deployerPrivateKey: "5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0", // // 5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0 // 0x52b333c238bf73888fdde266e9d2a39b75752807

@@ -76,7 +76,8 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public projectWithdrawnETH;
 
     /// @dev Minimum amount of ETH accepted for a contribution. Everything lower than that will trigger a canceling of pending ETH.
-    uint256 public minContribution = 0.1 ether;
+    uint256 public minContribution = 0.001 ether;
+    uint256 public maxContribution = 4000 ether;
 
     mapping(uint8 => Stage) public stages;
     uint256 public stageBlockCount;
@@ -377,12 +378,14 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     isRunning
     {
-        // Reject contributions lower than the minimum amount
+        // Reject contributions lower than the minimum amount, and max than maxContribution
         require(msg.value >= minContribution, "Value sent is less than the minimum contribution.");
 
         // Participant initial state record
         Participant storage participantStats = participants[msg.sender];
         ParticipantStageDetails storage byStage = participantStats.stages[getCurrentStage()];
+
+        require(participantStats.committedETH.add(msg.value) <= maxContribution, "Value sent is more than the maximum contribution.");
 
         // Check if participant already exists
         if (participantStats.contributions == 0) {

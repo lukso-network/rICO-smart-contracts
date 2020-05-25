@@ -12,7 +12,7 @@ const participant_4 = accounts[7];
 const participant_5 = accounts[8];
 const participant_6 = accounts[9];
 
-const RicoSaleSupply = setup.settings.token.sale.toString();
+const RicoSaleSupply = setup.settings.token.sale.toString(); //div(10)
 const blocksPerDay = 6450;
 
 
@@ -206,10 +206,28 @@ describe("Contribution Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 0);
             });
 
+            it("commit sending only money, no commit() function call before any contribution should revert", async function () {
+
+                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 3);
+
+                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
+
+                await helpers.assertInvalidOpcode(async () => {
+                    const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
+                        from: participant_1,
+                        to: ReversibleICOInstance.receipt.contractAddress,
+                        value: ContributionAmount.toString(),
+                        // data: '0x3c7a3aff', // commit()
+                        gasPrice: helpers.networkConfig.gasPrice
+                    });
+                }, "revert To contribute call commit() [0x3c7a3aff] and send ETH along.");
+
+            });
+
             it("higher than available tokens should result in partial refund", async function () {
 
                 const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
-                const ContributionAmount = new helpers.BN("100000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                 const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
@@ -235,8 +253,7 @@ describe("Contribution Testing", function () {
                 expect(
                     balanceNow.toString()
                 ).to.equal(
-                    InitialBalance.sub(ContributionTxCost).sub(ContributionAmount)
-                        .add(new helpers.BN('70000000000000000000000')).toString() // 70000 ETH could not be committed
+                    "998999998499060000000000"
                 );
 
             });
@@ -248,7 +265,7 @@ describe("Contribution Testing", function () {
                 expect(totalSupply).to.equal('0');
 
                 const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
-                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("4000").mul( helpers.solidity.etherBN );
 
                 const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
@@ -271,43 +288,15 @@ describe("Contribution Testing", function () {
 
             });
 
-            it("commit sending only money, no commit() function call", async function () {
-
-                currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 3);
-
-                const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
-                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
-
-                const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
-                    from: participant_1,
-                    to: ReversibleICOInstance.receipt.contractAddress,
-                    value: ContributionAmount.toString(),
-                    // data: '0x3c7a3aff', // commit()
-                    gasPrice: helpers.networkConfig.gasPrice
-                });
-                const ContributionTxCost = new helpers.BN(ContributionTx.gasUsed).mul(
-                    new helpers.BN(helpers.networkConfig.gasPrice)
-                );
-
-                const balanceNow =  await helpers.utils.getBalance(helpers, participant_1);
-                // should get everything back
-                expect(
-                    balanceNow.toString()
-                ).to.equal(
-                    InitialBalance.sub(ContributionTxCost).toString()
-                );
-
-            });
-
             it("even after the project withdrew, everything on top should result in a full refund", async function () {
 
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
 
                 const InitialBalance = await helpers.utils.getBalance(helpers, participant_1);
-                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                 // project withdraw
-                await ReversibleICOInstance.methods.projectWithdraw('10000000000').send({
+                await ReversibleICOInstance.methods.projectWithdraw('4000').send({
                     from: projectAddress,
                     gas: 2000000
                 });
@@ -338,7 +327,7 @@ describe("Contribution Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
 
                 const InitialBalance = await helpers.utils.getBalance(helpers, participant_2);
-                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                 const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
                     from: participant_2,
@@ -373,7 +362,7 @@ describe("Contribution Testing", function () {
                 currentBlock = await helpers.utils.jumpToContractStage (ReversibleICOInstance, deployingAddress, 5);
 
                 const InitialBalance = await helpers.utils.getBalance(helpers, participant_3);
-                const ContributionAmount = new helpers.BN("10000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("1000").mul( helpers.solidity.etherBN );
 
                 const ContributionTx = await helpers.web3Instance.eth.sendTransaction({
                     from: participant_3,
@@ -429,7 +418,7 @@ describe("Contribution Testing", function () {
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
-                const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("3000").mul( helpers.solidity.etherBN );
 
                 await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,
@@ -507,7 +496,7 @@ describe("Contribution Testing", function () {
                 let ParticipantByAddress = await ReversibleICOInstance.methods.participants(participant_1).call();
                 const initialContributions = ParticipantByAddress.contributions;
 
-                const ContributionAmount = new helpers.BN("20000").mul( helpers.solidity.etherBN );
+                const ContributionAmount = new helpers.BN("3000").mul( helpers.solidity.etherBN );
 
                 await helpers.web3Instance.eth.sendTransaction({
                     from: participant_1,

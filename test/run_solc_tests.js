@@ -24,7 +24,7 @@ async function runTests(init) {
     // "4_ReversibleICO",
     // "4-1_ReversibleICO",
     "5_Cancel",
-    "5_Contributions",
+    // "5_Contributions",
     "5_Flows",
     "5_ProjectWithdraw",
     "6_Gnosis-Safe",
