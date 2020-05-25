@@ -45,7 +45,9 @@ async function runDeployment() {
         whitelistingAddress, 
         ERC1820FundsSupplierAddress,
         TokenContractInstance,
-        TokenContractAddress;
+        TokenContractAddress,
+        ReversibleICOAddress,
+        ReversibleICOInstance;
 
     // *** SET ADDRESSES
     if (network == "live") {
@@ -270,9 +272,9 @@ async function runDeployment() {
             }
         );
 
-        const ReversibleICOInstance = RICOContract;
-        const ReversibleICOAddress = RICOContract.receipt.contractAddress;
+        ReversibleICOInstance = RICOContract;
         const ReversibleICOReceipt = RICOContract.receipt;
+        ReversibleICOAddress = RICOContract.receipt.contractAddress;
 
         utils.toLog("    - Contract deployed: ReversibleICO");
         utils.toLog("       Hash:             " + utils.colors.green + ReversibleICOReceipt.transactionHash);
@@ -291,8 +293,7 @@ async function runDeployment() {
     utils.toLog("       - ReversibleICOAddress: " + utils.colors.yellow + rICOaddressForToken);
     utils.toLog("       - freezerAddress:       " + utils.colors.yellow + freezerAddress);
     utils.toLog("       - rescuerAddress:       " + utils.colors.yellow + rescuerAddress);
-    utils.toLog("       - tokenGenesisAddress:  " + utils.colors.yellow + tokenGenesisAddress);
-    utils.toLog("       - initialSupply:        " + utils.colors.yellow + web3util.fromWei(rICOConfig.settings.token.supply.toString(), "ether") + " tokens");
+    utils.toLog("       - projectAddress:       " + utils.colors.yellow + projectAddress);
 
     if(rICOConfig.settings.deployToken) {
 
@@ -301,6 +302,9 @@ async function runDeployment() {
             "  Step 4 - Initialise Token Contract \n" +
             "  ----------------------------------------------------------------"
         );
+
+        utils.toLog("       - tokenGenesisAddress:  " + utils.colors.yellow + tokenGenesisAddress);
+        utils.toLog("       - initialSupply:        " + utils.colors.yellow + web3util.fromWei(rICOConfig.settings.token.supply.toString(), "ether") + " tokens");
 
         TokenContractInstance = new web3Instance.eth.Contract(
             await utils.getAbi("ReversibleICOToken"),
@@ -351,6 +355,9 @@ async function runDeployment() {
         stageBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.stageDays;
         stagePriceIncrease = rICOConfig.settings.rico.stagePriceIncrease;
 
+        // set the token addres
+        TokenContractAddress = TokenContractAddress || rICOConfig.settings.address.tokenContractAddress;
+
         utils.toLog("   - Settings:");
         utils.toLog("       - TokenContractAddress:     " + utils.colors.yellow + TokenContractAddress);
         utils.toLog("       - whitelistingAddress       " + utils.colors.yellow + whitelistingAddress);
@@ -390,6 +397,13 @@ async function runDeployment() {
         utils.toLog("   - Done");
         gasUsage = gasUsage.add(new BN(tx.gasUsed));
 
+
+        // after deployment stats
+        utils.toLog("       - buyPhaseStartBlock:    " + utils.colors.yellow + await ReversibleICOInstance.methods.buyPhaseStartBlock().call());
+        utils.toLog("       - buyPhaseEndBlock:    " + utils.colors.yellow + await ReversibleICOInstance.methods.buyPhaseEndBlock().call());
+        for (let i = 0; i <= rICOConfig.settings.rico.stageCount; i++) {
+            utils.toLog("       - stage "+ i +":    " + utils.colors.yellow + JSON.stringify(await ReversibleICOInstance.methods.stages(i).call()));
+        }
     }
 
     // *** SEND TOKENS from PROJECT to rICO

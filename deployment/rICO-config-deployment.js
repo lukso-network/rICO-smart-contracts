@@ -47,6 +47,8 @@ module.exports = {
             tokenGenesisPrivateKey: null, //"499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B",
         },
         address: {
+            tokenContractAddress: '0xA8b919680258d369114910511cc87595aec0be6D', // REQUIRE IF deployToken == false !!
+            // when using `npm run deploy-test`, ganache accounts are used instead of these here
             projectAddress: "0xD52306Eabc2BE4e2dC8Fbd1f929aC73008430f3F",
             tokenGenesisAddress: '0xC67810de5816917F1DBc618c084B82441921F55f', // set to PK to null, if you want to manually transfer tokens from project to rICO
             freezerAddress: '0x6109dcd72b8a2485A5b3Ac4E76965159e9893aB7', // rinkeby: "0x4b302ceFF48E2212a761086667195149b3861230",
