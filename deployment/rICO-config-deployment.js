@@ -8,14 +8,22 @@ const etherBN = new BN(ether.toString());
 //bytes32 constant private _TOKENS_RECIPIENT_INTERFACE_HASH =
 //0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b
 
-/**
- *Submitted for verification at Etherscan.io on 2020-05-13
- */
 /*
- * source        https://github.com/lukso-network/rICO-smart-contracts
- * @name       LUKSO Token
- * @author      Micky Socaci <micky@binarzone.com>, Fabian Vogelsteller <@frozeman>
- * @license     Apachae 2.0
+ * Submitted for verification at Etherscan.io on 2020-05-25
+ *
+ *   ________            ____                           _ __    __        ______________
+ *  /_  __/ /_  ___     / __ \___ _   _____  __________(_) /_  / /__     /  _/ ____/ __ \
+ *   / / / __ \/ _ \   / /_/ / _ \ | / / _ \/ ___/ ___/ / __ \/ / _ \    / // /   / / / /
+ *  / / / / / /  __/  / _, _/  __/ |/ /  __/ /  (__  ) / /_/ / /  __/  _/ // /___/ /_/ /
+ * /_/ /_/ /_/\___/  /_/ |_|\___/|___/\___/_/  /____/_/_.___/_/\___/  /___/\____/\____/
+ *
+ *
+ * source      https://github.com/lukso-network/rICO-smart-contracts
+ * @name       Reversible ICO
+ * @author     Fabian Vogelsteller <@frozeman>, Micky Socaci <micky@binarzone.com>, Marjorie Hernandez <marjorie@lukso.io>
+ * @license    Apache 2.0
+ *
+ * Readme more about it here https://medium.com/lukso/rico-the-reversible-ico-5392bf64318b
  */
 
 /**
@@ -60,7 +68,7 @@ module.exports = {
             blocksPerDay: 6400,
             commitPhaseDays: 22,
             stageCount: 8,
-            stageDays: 30,
+            stageDays: 31,
             commitPhasePrice: ether * 0.002,        // uint256 _commitPhasePrice in wei
             stagePriceIncrease: ether * 0.0002      // uint256 _StagePriceIncrease in wei
         },
