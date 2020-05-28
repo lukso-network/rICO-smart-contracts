@@ -50,9 +50,9 @@ module.exports = {
         deployrICO: true,
         keys: {
             // valid with ETH on rinkeby ( no 0x )
-            deployerPrivateKey: "5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0", // // 5EE0CA06B0BFAB9BCFC8AB8BB6CABCBA4DA285F10611A3D17FBDD68A20B4EFB0 // 0x52b333c238bf73888fdde266e9d2a39b75752807
+            deployerPrivateKey: "AAABBBB....", // no 0x
             // set to PK to null, and tokenGenesisAddress to a valid one if you want to manually transfer tokens from tokenGenesisAddress to rICO
-            tokenGenesisPrivateKey: null, //"499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B",
+            tokenGenesisPrivateKey: null,
         },
         address: {
             tokenContractAddress: '0xA8b919680258d369114910511cc87595aec0be6D', // REQUIRE IF deployToken == false !!
@@ -61,7 +61,7 @@ module.exports = {
             tokenGenesisAddress: '0xC67810de5816917F1DBc618c084B82441921F55f', // set to PK to null, if you want to manually transfer tokens from project to rICO
             freezerAddress: '0x6109dcd72b8a2485A5b3Ac4E76965159e9893aB7', // rinkeby: "0x4b302ceFF48E2212a761086667195149b3861230",
             rescuerAddress: '0x87bD0fBD87C846e37193f79E7BF97b6d3AF625e3', // rinkeby: "0x29D869F89f3DC193C17EeE8D2656e69A257E01E9",
-            whitelistingAddress: '0x774C67dA65373c9922c528E232B718174dFCa116', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E", // 499B1E447D0F0EB602CC2D73A2C84378A3248DDED868B80C421CE4C55A26103B
+            whitelistingAddress: '0x774C67dA65373c9922c528E232B718174dFCa116', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E",
         },
         rico: {
             startBlock: 10147598, // 2020-05-27 14:00:00 on mainnet
