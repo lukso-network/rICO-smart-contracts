@@ -260,6 +260,7 @@ async function runDeployment() {
 
     }
 
+    
     if(rICOConfig.settings.deployrICO) {
         const RICOContract = await deployContract(
             utils,
