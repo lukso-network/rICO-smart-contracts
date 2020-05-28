@@ -185,3 +185,54 @@ Test before using the `npm run test-random-standalone` and adjust `/test/solc_te
 ## LICENSE
 
 Apache 2.0
+
+
+### Past Test Deployment on Rinkeby
+
+```
+// RINKEBY deployment
+// rICO: 0x706ce3A2D48F73A879CCC5aB648d3f578BDF34F8
+// Token: 0xA0610e2BE6A66f7AbA8E979a83C46ae9941D7F81
+// ----------------------------------------------------------------
+//     Step 3 - Deploy contracts
+// ----------------------------------------------------------------
+//     - Contract deployed: ReversibleICOToken
+// Hash:             0x18f996b63215b92c376aa6074b42b8733436a2ca1bc4ce2d23cf8481579a49c5
+// Gas used:         2542617
+// Contract Address: 0xA0610e2BE6A66f7AbA8E979a83C46ae9941D7F81
+// - Contract deployed: ReversibleICO
+// Hash:             0xaae3a662767e7dac5674430025fdd9e759866514cea210d0a1a1a1b801f0797f
+// Gas used:         3252326
+// Contract Address: 0x706ce3A2D48F73A879CCC5aB648d3f578BDF34F8
+// ----------------------------------------------------------------
+//     Step 4 - Initialise Token Contract
+// ----------------------------------------------------------------
+//     - Settings:
+// - ReversibleICOAddress: 0x706ce3A2D48F73A879CCC5aB648d3f578BDF34F8
+// - freezerAddress:       0x4b302ceFF48E2212a761086667195149b3861230
+// - rescuerAddress:       0x29D869F89f3DC193C17EeE8D2656e69A257E01E9
+// - projectAddress:       0x01d934D2D2D8a4AF45532B330e67610E7697eca6
+// - initialSupply:        100000000 tokens
+// - Caller: 0x52b333c238Bf73888fDDe266E9D2A39B75752807
+// - Hash: 0x536bed6ab05f5230bb423d4a536651cf49e747714b350f307b5af1541e3f6cc1
+// - Gas used: 141426
+// - Done
+// ----------------------------------------------------------------
+//     Step 5 - Initialise rICO Contract
+// ----------------------------------------------------------------
+//     - Settings:
+// - TokenContractAddress:     0xA0610e2BE6A66f7AbA8E979a83C46ae9941D7F81
+// - whitelistingAddress       0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E
+// - freezerAddress:           0x4b302ceFF48E2212a761086667195149b3861230
+// - rescuerAddress:           0x29D869F89f3DC193C17EeE8D2656e69A257E01E9
+// - projectAddress:           0x01d934D2D2D8a4AF45532B330e67610E7697eca6
+// - commitPhaseStartBlock:    6445769
+// - commitPhaseBlockCount:    23040
+// - commitPhasePrice:         1000000000000000 wei
+// - stagePriceIncrease:       500000000000000 wei
+// - stageCount:               8
+// - stageBlockCount:          5760
+// - Caller: 0x52b333c238Bf73888fDDe266E9D2A39B75752807
+// - Hash: 0x70c428aad19e1aa9f311208e617cf9a42220a3cc4fa24deb9395bf25b50fba33
+// - Gas used: 704054
+```
