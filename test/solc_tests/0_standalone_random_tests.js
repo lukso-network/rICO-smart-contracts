@@ -26,7 +26,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
-    customTestSettings.rico.blocksPerDay = 3;
+    customTestSettings.rico.blocksPerDay = 10;
     customTestSettings.rico.commitPhaseDays = 2;
     customTestSettings.rico.stageDays = 2;
     customTestSettings.rico.stageCount = 10;
@@ -146,6 +146,16 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
             }
 
             if(blockNumber < 22 || blockNumber > 33) {
+
+                if(blockNumber == 15) {
+                    it("Change stage 0 price in commit phase at block "+ blockNumber, async function () {
+                        // change stage price in the commit phase
+                        await ReversibleICO.methods.changeStagePrice(0, '28000000000000').send({
+                            from: projectAddress,
+                            gas: 2000000
+                        });
+                    });
+                }
 
                 // go over every participant
                 for (let i = 0; i < numberOfParticipants; i++) {

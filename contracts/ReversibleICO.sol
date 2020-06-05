@@ -165,7 +165,7 @@ contract ReversibleICO is IERC777Recipient {
     /*
      * Events
      */
-    event PendingContributionAdded(address indexed participantAddress, uint256 indexed amount, uint32 indexed contributionId);
+    event PendingContributionAdded(address indexed participantAddress, uint256 indexed amount, uint32 indexed contributionId, uint8 stageId);
     event PendingContributionsCanceled(address indexed participantAddress, uint256 indexed amount, uint32 indexed contributionId);
 
     event WhitelistApproved(address indexed participantAddress, uint256 indexed pendingETH, uint32 indexed contributions);
@@ -175,6 +175,10 @@ contract ReversibleICO is IERC777Recipient {
 
     event ProjectWithdraw(address indexed projectAddress, uint256 indexed amount, uint32 indexed withdrawCount);
     event ParticipantWithdraw(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint32 withdrawCount);
+
+    event StagePriceChanged(uint8 indexed stageId, uint256 indexed tokenPrice, uint8 indexed currentStageId, uint256 effectiveBlockNumber);
+    event WhitelistingAddressChanged(address indexed whitelistingAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
+    event FreezerAddressChanged(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
 
     event SecurityFreeze(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
     event SecurityUnfreeze(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
@@ -406,7 +410,8 @@ contract ReversibleICO is IERC777Recipient {
         emit PendingContributionAdded(
             msg.sender,
             msg.value,
-            uint32(participantStats.contributions)
+            uint32(participantStats.contributions),
+            getCurrentStage()
         );
 
         // If whitelisted, process the contribution automatically
@@ -505,6 +510,39 @@ contract ReversibleICO is IERC777Recipient {
 
         // Transfer ETH to project wallet
         address(uint160(projectAddress)).transfer(_ethAmount);
+    }
+
+    // TODO set current users
+    // TODO enable receiving of tokens from other rICO
+    // TODO enable receiving of funds from other rICO
+
+    function changeStagePrice(uint8 _stageId, uint256 _newPrice)
+    external
+    onlyProjectAddress
+    isInitialized
+    {
+        stages[_stageId].tokenPrice = _newPrice;
+        emit StagePriceChanged(_stageId, _newPrice, getCurrentStage(), getCurrentEffectiveBlockNumber());
+    }
+
+
+    function changeWhitelistingAddress(address _newAddress)
+    external
+    onlyProjectAddress
+    isInitialized
+    {
+        whitelistingAddress = _newAddress;
+        emit WhitelistingAddressChanged(whitelistingAddress, getCurrentStage(), getCurrentEffectiveBlockNumber());
+    }
+
+
+    function changeFreezerAddress(address _newAddress)
+    external
+    onlyProjectAddress
+    isInitialized
+    {
+        freezerAddress = _newAddress;
+        emit FreezerAddressChanged(freezerAddress, getCurrentStage(), getCurrentEffectiveBlockNumber());
     }
 
 
@@ -1059,18 +1097,11 @@ contract ReversibleICO is IERC777Recipient {
             returnedTokenAmount = participantStats._currentReservedTokens;
         }
 
-        // For STAGE 0, give back the price they put in
-        if(getCurrentStage() == 0) {
-
-            returnEthAmount = getEthAmountForTokensAtStage(returnedTokenAmount, 0);
-
-        // For any other stage, calculate the avg price of all contributions
-        } else {
-            returnEthAmount = participantStats.committedETH.mul(
-                returnedTokenAmount.mul(10 ** 20)
-                .div(participantStats.reservedTokens)
-            ).div(10 ** 20);
-        }
+        // Calculate the return amount
+        returnEthAmount = participantStats.committedETH.mul(
+            returnedTokenAmount.mul(10 ** 20)
+            .div(participantStats.reservedTokens)
+        ).div(10 ** 20);
 
 
         // UPDATE PARTICIPANT STATS

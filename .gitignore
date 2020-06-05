@@ -4,3 +4,5 @@ coverage
 .DS_Store
 build/contracts/*
 scripts/TestRPCData/*
+participants_*.json
+WHITELISTED_participants_*.json
