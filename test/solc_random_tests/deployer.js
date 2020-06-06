@@ -92,10 +92,10 @@ module.exports = {
             projectAddress,        // address _rescuerAddress
             projectAddress,        // address _projectAddress
             commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
-            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,            // uint256 _commitPhasePrice in wei
+            commitPhaseBlockCount,       // uint256 _buyPhaseStartBlock,
+            commitPhasePrice,            // uint256 _initialPrice in wei
             StageCount,                  // uint8   _stageCount
-            StageBlockCount,             // uint256 _stageBlockCount
+            StageBlockCount,             // uint256 _stageLimitAmountIncrease
             StagePriceIncrease           // uint256 _stagePriceIncrease in wei
         ).send({
             from: ContractsDeployer,  // deployer

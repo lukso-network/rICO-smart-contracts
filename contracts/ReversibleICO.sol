@@ -80,7 +80,6 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public maxContribution = 4000 ether;
 
     mapping(uint8 => Stage) public stages;
-    uint256 public stageBlockCount; // TODO remove
     uint8 public stageCount;
 
     /// @dev Maps participants stats by their address.
@@ -134,8 +133,6 @@ contract ReversibleICO is IERC777Recipient {
      *   Stage 1-n = buy phase
      */
     struct Stage {
-        uint128 startBlock; // TODO remove
-        uint128 endBlock; // TODO remove
         uint256 limitAmount; // 500k > 9.5M >
         uint256 tokenPrice;
     }
@@ -220,11 +217,11 @@ contract ReversibleICO is IERC777Recipient {
      * @param _whitelistingAddress The address handling whitelisting.
      * @param _projectAddress The project wallet that can withdraw ETH contributions.
      * @param _commitPhaseStartBlock The block at which the commit phase starts.
-     * @param _commitPhaseBlockCount The duration of the commit phase in blocks.
-     * @param _commitPhasePrice The initial token price (in WEI per token) during the commit phase.
+     * @param _buyPhaseStartBlock The duration of the commit phase in blocks.
+     * @param _initialPrice The initial token price (in WEI per token) during the commit phase.
      * @param _stageCount The number of the rICO stages, excluding the commit phase (Stage 0).
-     * @param _stageBlockCount The duration of each stage in blocks.
-     * @param _stagePriceIncrease A factor used to increase the token price from the _commitPhasePrice at each subsequent stage. The increase already happens in the first stage too.
+     * @param _stageLimitAmountIncrease The duration of each stage in blocks.
+     * @param _stagePriceIncrease A factor used to increase the token price from the _initialPrice at each subsequent stage. The increase already happens in the first stage too.
      */
     function init(
         address _tokenAddress,
@@ -233,10 +230,11 @@ contract ReversibleICO is IERC777Recipient {
         address _rescuerAddress,
         address _projectAddress,
         uint256 _commitPhaseStartBlock,
-        uint256 _commitPhaseBlockCount,
-        uint256 _commitPhasePrice,
+        uint256 _buyPhaseStartBlock,
+        uint256 _buyPhaseEndBlock,
+        uint256 _initialPrice,
         uint8 _stageCount, // Its not recommended to choose more than 50 stages! (9 stages require ~650k GAS when whitelisting contributions, the whitelisting function could run out of gas with a high number of stages, preventing accepting contributions)
-        uint256 _stageBlockCount,
+        uint256 _stageLimitAmountIncrease,
         uint256 _stagePriceIncrease
     )
     public
@@ -248,7 +246,7 @@ contract ReversibleICO is IERC777Recipient {
         require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
         require(_projectAddress != address(0), "_projectAddress cannot be 0x");
-//        require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
+        // require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
         tokenAddress = _tokenAddress;
@@ -259,43 +257,39 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;
-        commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
-        commitPhasePrice = _commitPhasePrice;
+        commitPhaseEndBlock = _buyPhaseStartBlock.sub(1);
+        commitPhaseBlockCount = commitPhaseEndBlock.sub(commitPhaseStartBlock).add(1);
+        commitPhasePrice = _initialPrice;
 
-        stageBlockCount = _stageBlockCount;
         stageCount = _stageCount;
+
 
         // Setup stage 0: The commit phase.
         Stage storage commitPhase = stages[0];
+        commitPhase.limitAmount = _stageLimitAmountIncrease;
+        commitPhase.tokenPrice = _initialPrice;
 
-        commitPhase.startBlock = uint128(_commitPhaseStartBlock);
-        commitPhase.endBlock = uint128(commitPhaseEndBlock);
-        commitPhase.tokenPrice = _commitPhasePrice;
 
         // Setup stage 1 to n: The buy phase stages
-        // Each new stage starts after the previous phase's endBlock
-        uint256 previousStageEndBlock = commitPhase.endBlock;
+        uint256 previousStageLimitAmount = _stageLimitAmountIncrease;
 
         // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
             // Get i-th stage
             Stage storage byStage = stages[i];
-            // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
-            byStage.startBlock = uint128(previousStageEndBlock.add(1));
-            // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
-            byStage.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
+            // set the stage limit amount
+            byStage.limitAmount = previousStageLimitAmount.add(_stageLimitAmountIncrease);
             // Store the current stage endBlock in order to update the next one
-            previousStageEndBlock = byStage.endBlock;
+            previousStageLimitAmount = byStage.limitAmount;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            byStage.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            byStage.tokenPrice = _initialPrice.add(_stagePriceIncrease.mul(i));
         }
 
         // UPDATE global STATS
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-        buyPhaseStartBlock = commitPhaseEndBlock.add(1);
+        buyPhaseStartBlock = _buyPhaseStartBlock;
         // The buy phase ends when the lat stage ends
-        buyPhaseEndBlock = previousStageEndBlock;
+        buyPhaseEndBlock = _buyPhaseEndBlock;
         // The duration of buyPhase in blocks
         buyPhaseBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
 
@@ -535,8 +529,6 @@ contract ReversibleICO is IERC777Recipient {
     // TODO enable receiving of tokens from other rICO
     // TODO enable receiving of funds from other rICO
 
-    // TODO make LYXe movable by project
-
 
     function changeStage(uint8 _stageId, uint256 _limitAmount, uint256 _tokenPrice)
     external
@@ -716,6 +708,16 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
+    * @notice Returns the token amount that is still available at a given stage.
+    * @return The amount of tokens
+    */
+    function getAvailableTokenAtCurrentStage() public view returns (uint256) {
+        return stages[getCurrentStage()].limitAmount.sub(
+            initialTokenSupply.sub(tokenSupply)
+        );
+    }
+
+    /**
      * @notice Returns the current stage at current the left supply.
      * @return The current stage ID
      */
@@ -743,9 +745,10 @@ contract ReversibleICO is IERC777Recipient {
         return 0;
     }
 
+
     /**
-     * @notice Returns the token price at the specified block number.
-     * @param _blockNumber the block number at which we want to retrieve the token price.
+     * @notice Returns the token price when a specifc token amount is reserved
+     * @param _amount  The amount of tokens for which we want to know the respective token price
      * @return The ETH price in wei
      */
     function getPriceAtAmount(uint256 _amount) public view returns (uint256) {
@@ -754,7 +757,7 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
     * @notice Returns the stage when a certain amount of tokens is reserved
-    * @param _supply The amount of tokens for which we want to know the stage ID
+    * @param _amount The amount of tokens for which we want to know the stage ID
     */
     function getStageAtAmount(uint256 _amount) public view returns (uint8) {
 

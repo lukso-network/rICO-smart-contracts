@@ -8,12 +8,13 @@ module.exports = {
     settings: {
         rico: {
             startBlockDelay: 6450,                   // currentBlock number + delay for commitPhaseStartBlock
-            blocksPerDay: 6450,
-            commitPhaseDays: 22,
-            stageCount: 12,
-            stageDays: 30,                           
-            commitPhasePrice: ether * 0.002,        // uint256 _commitPhasePrice in wei
-            stagePriceIncrease: ether * 0.0001      // uint256 _StagePriceIncrease in wei
+            // startBlock: 6450,
+            buyPhaseStartBlock: 6490,
+            buyPhaseEndBlock: 6590, // 100 blocks later
+            stageCount: 20,
+            stageLimitAmountIncrease: ether * 500000, // 500k
+            commitPhasePrice: ether * 0.002,        // uint256 _initialPrice in wei
+            stagePriceIncrease: ether * 0.00007,
         },
         token: {
             name: "LUKSO Token",

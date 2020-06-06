@@ -137,8 +137,8 @@ async function revertToFreshDeployment() {
             projectAddress,        // address _rescuerAddress
             projectAddress,          // address _projectAddress
             commitPhaseStartBlock,                 // uint256 _StartBlock
-            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,            // uint256 _commitPhasePrice in wei
+            commitPhaseBlockCount,       // uint256 _buyPhaseStartBlock,
+            commitPhasePrice,            // uint256 _initialPrice in wei
             StageCount,                 // uint8   _StageCount
             StageBlockCount,            // uint256 _StageBlockCount
             StagePriceIncrease          // uint256 _StagePriceIncrease in wei

@@ -348,12 +348,14 @@ async function runDeployment() {
         const commitPhaseStartBlock = rICOConfig.settings.rico.startBlock;
 
         // allocation phase
-        const commitPhaseBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.commitPhaseDays;
+        const commitPhaseBlockCount = rICOConfig.settings.rico.buyPhaseStartBlock - rICOConfig.settings.rico.startBlock;
         const commitPhasePrice = rICOConfig.settings.rico.commitPhasePrice;
 
         // buy phase
+        const buyPhaseStartBlock = rICOConfig.settings.rico.buyPhaseStartBlock;
+        const buyPhaseEndBlock = rICOConfig.settings.rico.buyPhaseEndBlock;
+        const stageLimitAmountIncrease = rICOConfig.settings.rico.stageLimitAmountIncrease;
         stageCount = rICOConfig.settings.rico.stageCount;
-        stageBlockCount = rICOConfig.settings.rico.blocksPerDay * rICOConfig.settings.rico.stageDays;
         stagePriceIncrease = rICOConfig.settings.rico.stagePriceIncrease;
 
         // set the token addres
@@ -367,11 +369,12 @@ async function runDeployment() {
         utils.toLog("       - projectAddress:           " + utils.colors.yellow + projectAddress);
         utils.toLog("       - tokenGenesisAddress:      " + utils.colors.yellow + tokenGenesisAddress);
         utils.toLog("       - commitPhaseStartBlock:    " + utils.colors.yellow + commitPhaseStartBlock);
-        utils.toLog("       - commitPhaseBlockCount:    " + utils.colors.yellow + commitPhaseBlockCount);
-        utils.toLog("       - commitPhasePrice:         " + utils.colors.yellow + commitPhasePrice + " wei");
+        utils.toLog("       - buyPhaseStartBlock:       " + utils.colors.yellow + buyPhaseStartBlock);
+        utils.toLog("       - buyPhaseEndBlock:         " + utils.colors.yellow + buyPhaseEndBlock);
+        utils.toLog("       - initialPrice:             " + utils.colors.yellow + commitPhasePrice + " wei");
         utils.toLog("       - stagePriceIncrease:       " + utils.colors.yellow + stagePriceIncrease + " wei");
         utils.toLog("       - stageCount:               " + utils.colors.yellow + stageCount);
-        utils.toLog("       - stageBlockCount:          " + utils.colors.yellow + stageBlockCount);
+        utils.toLog("       - stageLimitAmountIncrease: " + utils.colors.yellow + stageLimitAmountIncrease + " token");
 
         utils.toLog("   - Caller: " + utils.colors.yellow + deployerAddress);
 
@@ -382,11 +385,12 @@ async function runDeployment() {
             rescuerAddress,             // address _rescuerAddress
             projectAddress,             // address _projectAddress
             commitPhaseStartBlock,      // uint256 _commitPhaseStartBlock
-            commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,           // uint256 _commitPhasePrice in wei
-            stageCount,                 // uint8   _StageCount
-            stageBlockCount,            // uint256 _StageBlockCount
-            stagePriceIncrease          // uint256 _StagePriceIncrease in wei
+            buyPhaseStartBlock,         // uint256 _buyPhaseStartBlock,
+            buyPhaseEndBlock,           // uint256 _buyPhaseEndBlock,
+            commitPhasePrice,           // uint256 _initialPrice in wei
+            stageCount,                 // uint8   _stageCount
+            stageLimitAmountIncrease,   // uint256 _stageLimitAmountIncrease
+            stagePriceIncrease          // uint256 _stagePriceIncrease in wei
         ).send({
             from: deployerAddress,      // deployer
             gasPrice: rICOConfig.settings.networkGasPrice,

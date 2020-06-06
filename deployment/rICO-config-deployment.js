@@ -65,12 +65,12 @@ module.exports = {
         },
         rico: {
             startBlock: 10147598, // 2020-05-27 14:00:00 on mainnet
-            blocksPerDay: 6400,
-            commitPhaseDays: 22,
+            buyPhaseStartBlock: 10288398,
+            buyPhaseEndBlock: 11875597,
             stageCount: 8,
-            stageDays: 31,
-            commitPhasePrice: ether * 0.002,        // uint256 _commitPhasePrice in wei
-            stagePriceIncrease: ether * 0.0002      // uint256 _StagePriceIncrease in wei
+            stageLimitAmountIncrease: ether * 500000, // 500k
+            commitPhasePrice: ether * 0.0012,        // uint256 _initialPrice in wei
+            stagePriceIncrease: ether * 0.00007      // uint256 _StagePriceIncrease in wei
         },
         token: {
             name: "LUKSO Token",
