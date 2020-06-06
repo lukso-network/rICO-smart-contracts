@@ -160,10 +160,10 @@ class Validator {
     }
 
     getCurrentPrice() {
-        return this.getPriceAtBlock(this.getCurrentEffectiveBlockNumber());
+        return this.getPriceAtSupplyLeft(this.getCurrentEffectiveBlockNumber());
     }
 
-    getPriceAtBlock(_blockNumber) {
+    getPriceAtSupplyLeft(_blockNumber) {
         const stage = this.getStageAtBlock(_blockNumber);
         if (stage <= this.stageCount) {
             return this.getStage(stage).tokenPrice;

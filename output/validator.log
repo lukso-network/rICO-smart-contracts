@@ -63,7 +63,7 @@ Compiling your contracts...
 [0m        1 block after last stage[0m
         [32m  ✓[0m[90m should return 255[0m
 [0m    Price Methods[0m
-[0m      getPriceAtBlock(_blockNumber)[0m
+[0m      getPriceAtSupplyLeft(_blockNumber)[0m
 [0m        edge of commit and buy block range[0m
 [0m          before commitPhaseStartBlock[0m
           [32m  ✓[0m[90m should return commitPhasePrice[0m

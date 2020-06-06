@@ -73,12 +73,12 @@ let run = async function() {
 
     // await rICOcontract.methods.whitelist(list, false).send({
     //     from: acc,
-    //     gas: '550000',
+    //     gas: '850000',
     //     gasPrice: '40000000000',
     //     // nonce: nonce++
     // });
 
 
-    fs.writeFileSync('./participants_'+ new Date().toISOString().replace(':','-').replace('.','-') +'.json', JSON.stringify(participants, null, 4) ,{encoding:'utf8',flag:'w'});
+    // fs.writeFileSync('./participants_'+ new Date().toISOString().replace(':','-').replace('.','-') +'.json', JSON.stringify(participants, null, 4) ,{encoding:'utf8',flag:'w'});
 };
 run();

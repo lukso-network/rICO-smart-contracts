@@ -231,7 +231,7 @@ describe("Javascript Validator - Tests", function () {
 
     describe("Price Methods", function () {
 
-        describe("getPriceAtBlock(_blockNumber)", function () {
+        describe("getPriceAtSupplyLeft(_blockNumber)", function () {
             let _blockNumber = 0;
 
             describe("edge of commit and buy block range", function () {
@@ -245,7 +245,7 @@ describe("Javascript Validator - Tests", function () {
 
                     it("should throw \"Block outside of rICO period.\"", function() {
                         expectThrow(() => {
-                            const price = Validator.getPriceAtBlock(_blockNumber);
+                            const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         }, "Block outside of rICO period.");
                     });
                 });
@@ -258,7 +258,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return commitPhasePrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(0).tokenPrice.toString()
                         );
@@ -273,7 +273,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return commitPhasePrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(Validator.stageCount).tokenPrice.toString()
                         );
@@ -289,7 +289,7 @@ describe("Javascript Validator - Tests", function () {
 
                     it("should throw \"Block outside of rICO period.\"", function() {
                         expectThrow(() => {
-                            const price = Validator.getPriceAtBlock(_blockNumber);
+                            const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         }, "Block outside of rICO period.");
                     });
 
@@ -307,7 +307,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return commitPhasePrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );
@@ -323,7 +323,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return commitPhasePrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );
@@ -350,7 +350,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return stage tokenPrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );
@@ -365,7 +365,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return stage tokenPrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );
@@ -397,7 +397,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return stage tokenPrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );
@@ -412,7 +412,7 @@ describe("Javascript Validator - Tests", function () {
                     });
 
                     it("should return stage tokenPrice", function() {
-                        const price = Validator.getPriceAtBlock(_blockNumber);
+                        const price = Validator.getPriceAtSupplyLeft(_blockNumber);
                         expect(price.toString(), "Incorrect price returned").is.equal(
                             Validator.getStage(stageId).tokenPrice.toString()
                         );

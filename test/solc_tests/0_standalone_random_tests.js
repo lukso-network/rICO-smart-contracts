@@ -150,7 +150,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                 if(blockNumber == 15) {
                     it("Change stage 0 price in commit phase at block "+ blockNumber, async function () {
                         // change stage price in the commit phase
-                        await ReversibleICO.methods.changeStagePrice(0, '28000000000000').send({
+                        await ReversibleICO.methods.changeStage(0, '28000000000000').send({
                             from: projectAddress,
                             gas: 2000000
                         });
