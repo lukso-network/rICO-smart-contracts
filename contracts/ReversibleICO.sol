@@ -247,7 +247,7 @@ contract ReversibleICO is IERC777Recipient {
         require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
         require(_projectAddress != address(0), "_projectAddress cannot be 0x");
-        require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
+//        require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
         tokenAddress = _tokenAddress;
@@ -947,7 +947,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // UPDATE PARTICIPANT STAGES
-        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
+        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) { // TODO max stage
             ParticipantStageDetails storage byStage = participantStats.stages[stageId];
             byStage.pendingETH = 0;
         }
@@ -1006,7 +1006,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // Iterate over all stages and their pending contributions
-        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
+        for (uint8 stageId = 0; stageId <= currentStage; stageId++) { // TODO max stage
             ParticipantStageDetails storage byStage = participantStats.stages[stageId];
 
             // skip if not ETH is pending
