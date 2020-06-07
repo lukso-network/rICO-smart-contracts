@@ -474,6 +474,7 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Allows the project to withdraw tokens.
      * @param _tokenAmount The token amount.
      */
+    // TODO add stageCount increase if higher stageId is supplied?
     function projectTokenWithdraw(uint256 _tokenAmount)
     external
     onlyProjectAddress
@@ -718,7 +719,7 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the current stage at current the left supply.
+     * @notice Returns the current stage at current sold token amount
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
@@ -747,7 +748,7 @@ contract ReversibleICO is IERC777Recipient {
 
 
     /**
-     * @notice Returns the token price when a specifc token amount is reserved
+     * @notice Returns the token price for when a specific amount of tokens is sold
      * @param _amount  The amount of tokens for which we want to know the respective token price
      * @return The ETH price in wei
      */
@@ -759,6 +760,7 @@ contract ReversibleICO is IERC777Recipient {
     * @notice Returns the stage when a certain amount of tokens is reserved
     * @param _amount The amount of tokens for which we want to know the stage ID
     */
+    // TODO check stage overflows, e.g. its higher than the highest stage limit
     function getStageAtAmount(uint256 _amount) public view returns (uint8) {
 
         // Go through all stages, until we find the one that matches the supply
@@ -780,6 +782,7 @@ contract ReversibleICO is IERC777Recipient {
      */
     function committableEthAtStage(uint8 _stageId) public view returns (uint256) {
         return getEthAmountForTokensAtStage(
+            // TODO check against current available amount  getAvailableTokenAtCurrentStage() ?
             tokenSupply // instead of IERC777(tokenAddress).balanceOf(address(this)), as we need to deduct it BEFORE we sent everything
         , _stageId);
     }
