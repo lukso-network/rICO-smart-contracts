@@ -16,7 +16,7 @@ async function runTests(init) {
     "1_ERC1820",
     "flows/token_balances",
     "phases",
-    "methods/stages",
+    // "methods/stages",
     "methods/tokens/getReservedTokenAmount",
     "methods/tokens/buyTokens",
     "2_ERC777_Token",

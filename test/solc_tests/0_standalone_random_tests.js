@@ -30,7 +30,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
     customTestSettings.rico.buyPhaseStartBlock = 40;
     customTestSettings.rico.buyPhaseEndBlock = 140;
     customTestSettings.rico.stageCount = 20;
-    customTestSettings.rico.stageLimitAmountIncrease = "500000000000000000000000"; // 500k
+    customTestSettings.rico.stageLimitAmountIncrease = "5000000000000000000000"; // 500k
 
     customTestSettings.rico.commitPhasePrice = "25000000000000"; // 0.025 ETH
     customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
@@ -261,10 +261,11 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
 
                                         let tokensBought = new BN(0);
-                                        receipt.logs.forEach((log) => {
+                                        receipt.logs.forEach((log, i) => {
                                             if (log.topics[0] === '0xb2164840ce0fc0bd8bb63f912be03052e55ed2918270ca7f3a3d1b28b6df7611') { // event ContributionsAccepted(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint8 stageId);
                                                 let token = new BN(log.topics[3].replace('0x', ''), 16);
-                                                console.log('Token bought', token.toString());
+                                                let stg = new BN(log.data.replace('0x', ''), 16).toString();
+                                                console.log('Token bought in stage '+ stg, token.toString());
                                                 tokensBought = tokensBought.add(token);
                                             }
                                         });
@@ -380,6 +381,9 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
             }
 
             it("Jump to the next block: "+ blockNumber, async function () {
+
+                console.log('Blocknumber', blockNumber);
+
                 // jump to the next block
                 await ReversibleICO.methods.jumpToBlockNumber(blockNumber).send({
                     from: deployingAddress,
