@@ -11,7 +11,7 @@ const {
 } = require('./includes/deployment');
 
 const testKey = "RandomWithdrawTokenTests";
-let minContribution = 0;
+let minContribution, maxContribution = 0;
 
 describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
@@ -99,6 +99,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
             // set minContribution
             minContribution = new BN(await ReversibleICO.methods.minContribution().call());
+            maxContribution = new BN(await ReversibleICO.methods.maxContribution().call());
         });
 
         // iterate over all phases
@@ -156,200 +157,226 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                 // go over every participant
                 for (let i = 0; i < numberOfParticipants; i++) {
-                let participant = participants[i];
+                    let participant = participants[i];
 
-                // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
-                let task = getRandomInt(10);
+                    // we have 10, so that in 70% there is no actions, as only 3 numbers represent actions
+                    let task = getRandomInt(10);
 
-                let taskName = '';
-                if(task === 1)
-                    taskName = 'CONTRIBUTE';
-                if(task === 2)
-                    taskName = 'WITHDRAW';
-                if(task === 3)
-                    taskName = 'PROJECT WITHDRAW';
+                    let taskName = '';
+                    if(task === 1)
+                        taskName = 'CONTRIBUTE';
+                    if(task === 2)
+                        taskName = 'WITHDRAW';
+                    if(task === 3)
+                        taskName = 'PROJECT WITHDRAW';
 
-                console.log(participant.address +' Task: ' + taskName + ' '+ task);
+                    console.log(participant.address +' Task: ' + taskName + ' '+ task);
 
-                // if(!participants[i].contrCount)
-                //     participants[i].contrCount = 0;
-                // if(!participants[i].withdCount)
-                //     participants[i].withdCount = 0;
+                    // if(!participants[i].contrCount)
+                    //     participants[i].contrCount = 0;
+                    // if(!participants[i].withdCount)
+                    //     participants[i].withdCount = 0;
 
-                // CONTRIBUTE
-                if(task === 1) {// && participants[i].contrCount <= 3) {
+                    it(participant.address + ": unlocked + locked tokens should tokens balance", async function () {
+                        const partici = await ReversibleICO.methods.participants(participant.address).call();
+                        const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
+                        const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
+                        const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
-                    // participants[i].contrCount++;
+                        // console.log('-> Unlock percentage', new BN(getParticipantUnlockedTokens).div(new BN(partici.reservedTokens)).mul(new BN(100)).toString());
 
-
-                    it(participant.address + ": Buy tokens", function (done) {
-
-
-                        ( async function(){
-                            // WHITELIST
-                            let particip = await ReversibleICO.methods.participants(participant.address).call();
-                            let stage = await ReversibleICO.methods.getCurrentStage().call();
-
-                            if (!particip.whitelisted && blockNumber >= 20) { // make some users not whitelist on their first contribution
-                                await ReversibleICO.methods.whitelist(
-                                    [participant.address],
-                                    true
-                                ).send({
-                                    from: whitelistingAddress
-                                }).then((receipt) => {
-
-                                    particip.whitelisted = true;
-
-                                    console.log('---> Whitelisting: ', receipt.gasUsed + ' GAS');
-
-                                }).catch(done);
-                            }
-
-                            // calc random token amount
-                            // user balance: 1000000 ETH?
-                            const contribTokenAmount = new BN(getRandomInt(100000)); // 0-100 tokens //
-                            const stageId = await ReversibleICO.methods.getCurrentStage().call();
-                            const currentPrice = await ReversibleICO.methods.getCurrentPrice().call();
-
-                            // console.log('BEFORE', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
+                        expect(new BN(getParticipantUnlockedTokens).add(new BN(getParticipantReservedTokens)).toString()).to.be.equal(balance);
+                    });
 
 
-                            // TEST that contributing without data works too
-                            const data = (particip.whitelisted && particip.contributions > 2) ? '' : '0x3c7a3aff'; // commit()
+                    // CONTRIBUTE
+                    if(task === 1) {// && participants[i].contrCount <= 3) {
 
-                            if (contribTokenAmount.toString() > '0') {
-                                const ContributionAmount = new BN(currentPrice).mul(contribTokenAmount);
+                        // participants[i].contrCount++;
 
 
-                                // check if above min contribution 0.xxx eth
-                                if(ContributionAmount.lte(minContribution)) {
-                                    done();
-                                    return;
+                        it(participant.address + ": Buy tokens", function (done) {
+
+
+                            ( async function(){
+                                let particip = await ReversibleICO.methods.participants(participant.address).call();
+                                let stage = await ReversibleICO.methods.getCurrentStage().call();
+
+                                // WHITELIST
+                                if (!particip.whitelisted && blockNumber >= 20) { // make some users not whitelist on their first contribution
+                                    await ReversibleICO.methods.whitelist(
+                                        [participant.address],
+                                        true
+                                    ).send({
+                                        from: whitelistingAddress
+                                    }).then((receipt) => {
+
+                                        particip.whitelisted = true;
+
+                                        console.log('---> Whitelisting: ', receipt.gasUsed + ' GAS');
+
+                                    }).catch(done);
                                 }
 
-                                await helpers.web3Instance.eth.sendTransaction({
-                                    from: participant.address,
-                                    to: ReversibleICO.receipt.contractAddress,
-                                    value: ContributionAmount.toString(),
-                                    data: data, // commit()
-                                    gasPrice: helpers.networkConfig.gasPrice
-                                }).then(async (receipt) => {
-                                    // let particip = await ReversibleICO.methods.participants(participant.address).call();
-                                    // console.log('AFTER', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
+                                // calc random token amount
+                                // user balance: 1000000 ETH?
+                                const contribTokenAmount = new BN(getRandomInt(100000)); // 0-100 tokens //
+                                const stageId = await ReversibleICO.methods.getCurrentStage().call();
+                                const currentPrice = await ReversibleICO.methods.getCurrentPrice().call();
+
+                                // console.log('BEFORE', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
 
 
-                                    let text = (particip.whitelisted) ? 'with auto accepting :': ':';
+                                // TEST that contributing without data works too
+                                const data = (particip.whitelisted && particip.contributions > 2) ? '' : '0x3c7a3aff'; // commit()
 
-                                    console.log('---> Contribution '+ text, receipt.gasUsed + ' GAS');
-
-                                    // update his balance
-                                    participant.pricesPaid.push(new BN(currentPrice));
-                                    participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
+                                if (contribTokenAmount.toString() > '0') {
+                                    const ContributionAmount = new BN(currentPrice).mul(contribTokenAmount);
 
 
+                                    // Require ito be above min contribution AND to be below max contribution
+                                    if(
+                                        ContributionAmount.lte(minContribution) ||
+                                        new BN(particip.committedETH).add(ContributionAmount).gte(maxContribution)
+                                    ) {
+                                        done();
+                                        return;
+                                    }
 
-                                    done();
-                                }, (error) => {
-                                    console.log('Error', error);
-                                    helpers.utils.resetAccountNonceCache(helpers);
-                                    done(error);
-                                });
 
-                            } else {
-                                done();
-                            }
-                        })();
-                    });
-                }
-                // WITHDRAW
-                if(task === 2) {// && participants[i].withdCount <= 3) {
+                                    await helpers.web3Instance.eth.sendTransaction({
+                                        from: participant.address,
+                                        to: ReversibleICO.receipt.contractAddress,
+                                        value: ContributionAmount.toString(),
+                                        data: data, // commit()
+                                        gasPrice: helpers.networkConfig.gasPrice
+                                    }).then(async (receipt) => {
+                                        // let particip = await ReversibleICO.methods.participants(participant.address).call();
+                                        // console.log('AFTER', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
 
-                    // participants[i].withdCount++;
 
-                    it(participant.address + ": Return tokens", function (done) {
+                                        let text = (particip.whitelisted) ? 'with auto accepting :': ':';
 
-                        ( async function(){
+                                        console.log('---> Contribution '+ text, receipt.gasUsed + ' GAS');
 
-                            const maxTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
-                            // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
-                            // calc random token amount
-                            const returnTokenAmount = new BN(String(getRandomInt(maxTokens)));//getRandomInt(maxTokens))); // 0-max reserved tokens
-
-                            if(returnTokenAmount.toString() > '0') {
-
-                                await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 2000000})
-                                    .then(async (receipt) => {
-
-                                        // console.log('returnTokenAmount', returnTokenAmount.toString());
-                                        // console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                        // console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
-                                        // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
-                                        // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
-
-                                        console.log('---> Withdraw: ', receipt.gasUsed + ' GAS');
-
+                                        let tokensBought = new BN(0);
+                                        receipt.logs.forEach((log) => {
+                                            if (log.topics[0] === '0xb2164840ce0fc0bd8bb63f912be03052e55ed2918270ca7f3a3d1b28b6df7611') { // event ContributionsAccepted(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint8 stageId);
+                                                let token = new BN(log.topics[3].replace('0x', ''), 16);
+                                                console.log('Token bought', token.toString());
+                                                tokensBought = tokensBought.add(token);
+                                            }
+                                        });
+                                        console.log('Tokens bought ', tokensBought.toString());
 
                                         // update his balance
-                                        participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);
+                                        participant.tokenBalance = participant.tokenBalance.add(tokensBought);
+                                        // participant.tokenBalance = participant.tokenBalance.add(contribTokenAmount.mul(new BN('1000000000000000000')));
+                                        participant.pricesPaid.push(new BN(currentPrice)); // TODO incorrect right now, would need to check stages
 
-                                        if(receipt.events['0']) {
-                                            let pow18 = new BN(10).pow(new BN(18));
 
-                                            // console.log('RET TOKEN', returnTokenAmount.toString());
-                                            // console.log('ETH RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
-
-                                            participant.pricesAtWithdraw.push(
-                                                new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).mul(pow18)
-                                                    .div(returnTokenAmount)
-                                                    // .mul(new BN('1000000000000000000')) // * 1 ETH
-                                            );
-                                        }
 
                                         done();
                                     }, (error) => {
+                                        console.log('Error', error);
                                         helpers.utils.resetAccountNonceCache(helpers);
                                         done(error);
                                     });
 
-                            } else {
-                                done();
-                            }
-                        })();
+                                } else {
+                                    done();
+                                }
+                            })();
+                        });
+                    }
+                    // WITHDRAW
+                    if(task === 2) {// && participants[i].withdCount <= 3) {
 
-                    });
+                        // participants[i].withdCount++;
+
+                        it(participant.address + ": Return tokens", function (done) {
+
+                            ( async function(){
+
+                                const maxTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
+                                // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
+
+                                // calc random token amount
+                                const returnTokenAmount = new BN(String(getRandomInt(new BN(maxTokens).sub(new BN(1)).toString())));//getRandomInt(maxTokens))); // 0-max reserved tokens
+
+                                if(returnTokenAmount.toString() > '0') {
+
+                                    await TokenContractInstance.methods.transfer(ReversibleICO.receipt.contractAddress, returnTokenAmount.toString()).send({from: participant.address, gas: 2000000})
+                                        .then(async (receipt) => {
+
+                                            // console.log('returnTokenAmount', returnTokenAmount.toString());
+                                            // console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
+                                            // console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                            // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
+                                            // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
+
+                                            console.log('---> Withdraw: ', receipt.gasUsed + ' GAS');
+
+
+                                            // update his balance
+                                            participant.tokenBalance = participant.tokenBalance.sub(returnTokenAmount);
+
+                                            if(receipt.events['0']) {
+                                                let pow18 = new BN(10).pow(new BN(18));
+
+                                                // console.log('RET TOKEN', returnTokenAmount.toString());
+                                                // console.log('ETH RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
+
+                                                participant.pricesAtWithdraw.push( // TODO incorrect? As transfer events are coming from token contract, not rICO
+                                                    new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).mul(pow18)
+                                                        .div(returnTokenAmount)
+                                                        // .mul(new BN('1000000000000000000')) // * 1 ETH
+                                                );
+                                            }
+
+                                            done();
+                                        }, (error) => {
+                                            helpers.utils.resetAccountNonceCache(helpers);
+                                            done(error);
+                                        });
+
+                                } else {
+                                    done();
+                                }
+                            })();
+
+                        });
+                    }
+
+
+                    // PROJECT WITHDRAW
+                    if(task === 3) {
+                        it(project.address +" Project: Withdraws ETH", function (done) {
+
+                            ( async function(){
+                                const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
+
+                                // withdraw everything the project can at that point in time
+                                await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
+                                    from: project.address,
+                                    gas: 2000000
+                                }).then((receipt) => {
+
+                                    console.log('---> Project withdraw: ', receipt.gasUsed + ' GAS');
+
+
+                                    project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
+
+                                    done();
+                                }, (error) => {
+                                    helpers.utils.resetAccountNonceCache(helpers);
+                                    done(error);
+                                });
+                            })();
+                        });
+                    }
                 }
-
-
-                // PROJECT WITHDRAW
-                if(task === 3) {
-                    it(project.address +" Project: Withdraws ETH", function (done) {
-
-                        ( async function(){
-                            const getAvailableProjectETH = await ReversibleICO.methods.getAvailableProjectETH().call();
-
-                            // withdraw everything the project can at that point in time
-                            await ReversibleICO.methods.projectWithdraw(getAvailableProjectETH).send({
-                                from: project.address,
-                                gas: 2000000
-                            }).then((receipt) => {
-
-                                console.log('---> Project withdraw: ', receipt.gasUsed + ' GAS');
-
-
-                                project.weiBalance = project.weiBalance.add(new BN(getAvailableProjectETH));
-
-                                done();
-                            }, (error) => {
-                                helpers.utils.resetAccountNonceCache(helpers);
-                                done(error);
-                            });
-                        })();
-                    });
-                }
-
-            }
-
             }
 
             it("Jump to the next block: "+ blockNumber, async function () {
@@ -419,25 +446,28 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
         for (let i = 0; i < numberOfParticipants; i++) {
             let participant = participants[i];
 
-            it(participant.address + ": compare full token balances", async function () {
-                console.log('rICO TOKENS end balance', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
-
-
+            // it(participant.address + ": compare full token balances", async function () {
+            //     console.log('rICO TOKENS end balance', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
+            //
+            //     const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
+            //     expect(balance).to.be.equal(participant.tokenBalance.toString());
+            //
+            // });
+            // it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
+            //     const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
+            //     // const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
+            //     expect(getParticipantUnlockedTokens).to.be.equal(participant.tokenBalance.toString());
+            // });
+            it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
+                const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
                 const balance = await TokenContractInstance.methods.balanceOf(participant.address).call();
-                expect(balance).to.be.equal(participant.tokenBalance.toString());
-
+                expect(getParticipantUnlockedTokens).to.be.equal(balance);
             });
+
             it(participant.address + ": reserved token balance should be 0", async function () {
                 const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
                 expect(getParticipantReservedTokens).to.be.equal("0");
             });
-            it(participant.address + ": unlocked token balance should be all bought tokens", async function () {
-                // const getParticipantReservedTokens = await ReversibleICO.methods.getParticipantReservedTokens(participant.address).call();
-                // expect(participant.tokenBalance.sub(getParticipantReservedTokens).toString()).to.be.equal(participant.tokenBalance.toString());
-                const getParticipantUnlockedTokens = await ReversibleICO.methods.getParticipantUnlockedTokens(participant.address).call();
-                expect(getParticipantUnlockedTokens).to.be.equal(participant.tokenBalance.toString());
-            });
-
             it(participant.address + ": compare price average, should be 0", async function () {
 
                 let pricesPaidSum = new BN(0);

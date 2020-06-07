@@ -133,7 +133,7 @@ contract ReversibleICO is IERC777Recipient {
      *   Stage 1-n = buy phase
      */
     struct Stage {
-        uint256 limitAmount; // 500k > 9.5M >
+        uint256 tokenLimit; // 500k > 9.5M >
         uint256 tokenPrice;
     }
 
@@ -174,7 +174,7 @@ contract ReversibleICO is IERC777Recipient {
     event ProjectWithdraw(address indexed projectAddress, uint256 indexed amount, uint32 indexed withdrawCount);
     event ParticipantWithdraw(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint32 withdrawCount);
 
-    event StageChanged(uint8 indexed stageId, uint256 indexed limitAmount, uint256 indexed tokenPrice, uint256 effectiveBlockNumber);
+    event StageChanged(uint8 indexed stageId, uint256 indexed tokenLimit, uint256 indexed tokenPrice, uint256 effectiveBlockNumber);
     event WhitelistingAddressChanged(address indexed whitelistingAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
     event FreezerAddressChanged(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
 
@@ -266,7 +266,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Setup stage 0: The commit phase.
         Stage storage commitPhase = stages[0];
-        commitPhase.limitAmount = _stageLimitAmountIncrease;
+        commitPhase.tokenLimit = _stageLimitAmountIncrease;
         commitPhase.tokenPrice = _initialPrice;
 
 
@@ -278,9 +278,9 @@ contract ReversibleICO is IERC777Recipient {
             // Get i-th stage
             Stage storage byStage = stages[i];
             // set the stage limit amount
-            byStage.limitAmount = previousStageLimitAmount.add(_stageLimitAmountIncrease);
+            byStage.tokenLimit = previousStageLimitAmount.add(_stageLimitAmountIncrease);
             // Store the current stage endBlock in order to update the next one
-            previousStageLimitAmount = byStage.limitAmount;
+            previousStageLimitAmount = byStage.tokenLimit;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
             byStage.tokenPrice = _initialPrice.add(_stagePriceIncrease.mul(i));
         }
@@ -531,15 +531,15 @@ contract ReversibleICO is IERC777Recipient {
     // TODO enable receiving of funds from other rICO
 
 
-    function changeStage(uint8 _stageId, uint256 _limitAmount, uint256 _tokenPrice)
+    function changeStage(uint8 _stageId, uint256 _tokenLimit, uint256 _tokenPrice)
     external
     onlyProjectAddress
     isInitialized
     {
-        stages[_stageId].limitAmount = _limitAmount;
+        stages[_stageId].tokenLimit = _tokenLimit;
         stages[_stageId].tokenPrice = _tokenPrice;
 
-        emit StageChanged(_stageId, _limitAmount, _tokenPrice, getCurrentEffectiveBlockNumber());
+        emit StageChanged(_stageId, _tokenLimit, _tokenPrice, getCurrentEffectiveBlockNumber());
     }
 
 
@@ -709,21 +709,22 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-    * @notice Returns the token amount that is still available at a given stage.
+    * @notice Returns the token amount that are still available at the current stage
     * @return The amount of tokens
     */
     function getAvailableTokenAtCurrentStage() public view returns (uint256) {
-        return stages[getCurrentStage()].limitAmount.sub(
+        return stages[getCurrentStage()].tokenLimit.sub(
             initialTokenSupply.sub(tokenSupply)
         );
     }
+
 
     /**
      * @notice Returns the current stage at current sold token amount
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
-        return getStageAtAmount(initialTokenSupply.sub(tokenSupply));
+        return getStageForTokenLimit(initialTokenSupply.sub(tokenSupply));
     }
 
     /**
@@ -749,41 +750,61 @@ contract ReversibleICO is IERC777Recipient {
 
     /**
      * @notice Returns the token price for when a specific amount of tokens is sold
-     * @param _amount  The amount of tokens for which we want to know the respective token price
+     * @param _tokenLimit  The amount of tokens for which we want to know the respective token price
      * @return The ETH price in wei
      */
-    function getPriceAtAmount(uint256 _amount) public view returns (uint256) {
-        return getPriceAtStage(getStageAtAmount(_amount));
+    function getPriceForTokenLimit(uint256 _tokenLimit) public view returns (uint256) {
+        return getPriceAtStage(getStageForTokenLimit(_tokenLimit));
     }
 
     /**
     * @notice Returns the stage when a certain amount of tokens is reserved
-    * @param _amount The amount of tokens for which we want to know the stage ID
+    * @param _tokenLimit The amount of tokens for which we want to know the stage ID
     */
-    // TODO check stage overflows, e.g. its higher than the highest stage limit
-    function getStageAtAmount(uint256 _amount) public view returns (uint8) {
+    function getStageForTokenLimit(uint256 _tokenLimit) public view returns (uint8) {
 
         // Go through all stages, until we find the one that matches the supply
         for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
             Stage storage byStage = stages[stageId];
 
-            if(_amount <= byStage.limitAmount) {
+            if(_tokenLimit <= byStage.tokenLimit) {
                 return uint8(stageId);
                 break;
             }
         }
-        return uint8(0);
+        // if amount is more than available stages return last stage with the highest price
+        return uint8(stageCount);
     }
 
     /**
      * @notice Returns the rICOs available ETH to reserve tokens at a given stage.
      * @param _stageId the stage ID.
-     * TODO we use such functions in the main commit calculations, are there chances of rounding errors?
      */
     function committableEthAtStage(uint8 _stageId) public view returns (uint256) {
+        uint8 currentStage = getCurrentStage();
+        uint256 supply;
+
+        // past stages
+        if(_stageId < currentStage) {
+            return 0;
+
+        // last stage
+        } else if(_stageId == stageCount) {
+            supply = tokenSupply;
+
+        // current stage
+        } else if(_stageId == currentStage) {
+            supply = stages[currentStage].tokenLimit.sub(
+                initialTokenSupply.sub(tokenSupply)
+            );
+
+        // later stages
+        } else if(_stageId > currentStage) {
+            supply = stages[_stageId].tokenLimit.sub(stages[_stageId - 1].tokenLimit); // calc difference to last stage
+        }
+
         return getEthAmountForTokensAtStage(
-            // TODO check against current available amount  getAvailableTokenAtCurrentStage() ?
-            tokenSupply // instead of IERC777(tokenAddress).balanceOf(address(this)), as we need to deduct it BEFORE we sent everything
+            supply
         , _stageId);
     }
 
@@ -1005,6 +1026,7 @@ contract ReversibleICO is IERC777Recipient {
             return;
         }
 
+        uint8 currentStage = getCurrentStage();
         uint256 totalRefundedETH;
         uint256 totalNewReservedTokens;
 
@@ -1022,19 +1044,40 @@ contract ReversibleICO is IERC777Recipient {
             // skip if not ETH is pending
             if (byStage.pendingETH == 0) {
                 continue;
+
             }
 
+            // skip if stage is below "currentStage" (as they have no available tokens)
+            if(stageId < currentStage) {
+                // add this stage pendingETH to the "currentStage"
+                participantStats.stages[currentStage].pendingETH = participantStats.stages[currentStage].pendingETH.add(byStage.pendingETH);
+                // and reset this stage
+                byStage.pendingETH = 0;
+                continue;
+            }
+
+            // Continue only if in "currentStage" and later stages
             uint256 maxCommittableEth = committableEthAtStage(stageId);
             uint256 newlyCommittedEth = byStage.pendingETH;
             uint256 returnEth = 0;
+            uint256 overflowEth = 0;
 
             // If incoming value is higher than what we can accept,
             // just accept the difference and return the rest
             if (newlyCommittedEth > maxCommittableEth) {
-                returnEth = newlyCommittedEth.sub(maxCommittableEth);
+                overflowEth = newlyCommittedEth.sub(maxCommittableEth);
                 newlyCommittedEth = maxCommittableEth;
 
-                totalRefundedETH = totalRefundedETH.add(returnEth);
+                // if in the last stage, return ETH
+                if (stageId == stageCount) {
+                    returnEth = overflowEth;
+                    totalRefundedETH = totalRefundedETH.add(returnEth);
+
+                // if below the last stage, move pending ETH to the next stage
+                } else {
+                    participantStats.stages[stageId + 1].pendingETH = participantStats.stages[stageId + 1].pendingETH.add(overflowEth);
+                    byStage.pendingETH = byStage.pendingETH.sub(overflowEth);
+                }
             }
 
             // convert ETH to TOKENS
