@@ -474,12 +474,13 @@ contract ReversibleICO is IERC777Recipient {
      * @notice Allows the project to withdraw tokens.
      * @param _tokenAmount The token amount.
      */
-    // TODO add stageCount increase if higher stageId is supplied?
     function projectTokenWithdraw(uint256 _tokenAmount)
     external
     onlyProjectAddress
     isInitialized
     {
+        require(_tokenAmount <= tokenSupply, "Requested amount too high, not enough tokens available.");
+
         // decrease the supply
         tokenSupply = tokenSupply.sub(_tokenAmount);
         initialTokenSupply = initialTokenSupply.sub(_tokenAmount);
@@ -527,9 +528,6 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(projectAddress)).transfer(_ethAmount);
     }
 
-    // TODO enable receiving of tokens from other rICO
-    // TODO enable receiving of funds from other rICO
-
 
     function changeStage(uint8 _stageId, uint256 _tokenLimit, uint256 _tokenPrice)
     external
@@ -538,6 +536,10 @@ contract ReversibleICO is IERC777Recipient {
     {
         stages[_stageId].tokenLimit = _tokenLimit;
         stages[_stageId].tokenPrice = _tokenPrice;
+
+        if(_stageId > stageCount) {
+            stageCount = _stageId;
+        }
 
         emit StageChanged(_stageId, _tokenLimit, _tokenPrice, getCurrentEffectiveBlockNumber());
     }
@@ -724,7 +726,9 @@ contract ReversibleICO is IERC777Recipient {
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
-        return getStageForTokenLimit(initialTokenSupply.sub(tokenSupply));
+        return getStageForTokenLimit(
+            initialTokenSupply.sub(tokenSupply)
+        );
     }
 
     /**

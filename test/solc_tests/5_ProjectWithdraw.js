@@ -110,33 +110,19 @@ async function revertToFreshDeployment() {
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
-        // starts in one day
-        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-        // 22 days allocation
-        commitPhaseBlockCount = blocksPerDay * 22;
-        commitPhasePrice = helpers.solidity.ether * 0.002;
-
-        // 12 x 30 day periods for distribution
-        StageCount = 12;
-        StageBlockCount = blocksPerDay * 30;
-        StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
-
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,       // address _TokenContractAddress
-            whitelistingAddress, // address _whitelistingAddress
-            projectAddress,        // address _freezerAddress
-            projectAddress,        // address _rescuerAddress
-            projectAddress,       // address _projectAddress
-            commitPhaseStartBlock,      // uint256 _StartBlock
-            commitPhaseBlockCount,      // uint256 _buyPhaseStartBlock,
-            commitPhasePrice,           // uint256 _initialPrice in wei
-            StageCount,                 // uint8   _StageCount
-            StageBlockCount,            // uint256 _StageBlockCount
-            StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+            helpers.addresses.Token,                 // address _tokenAddress
+            whitelistingAddress,                     // address _whitelistingAddress
+            projectAddress,                          // address _freezerAddress
+            projectAddress,                          // address _rescuerAddress
+            projectAddress,                          // address _projectAddress
+            setup.settings.startBlockDelay,                // uint256 _commitPhaseStartBlock
+            setup.settings.buyPhaseStartBlock,             // uint256 _buyPhaseStartBlock,
+            setup.settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
+            setup.settings.commitPhasePrice,                        // uint256 _initialPrice in wei
+            setup.settings.StageCount,                     // uint8   _stageCount
+            setup.settings.stageLimitAmountIncrease,       // uint256 _stageLimitAmountIncrease
+            setup.settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
         ).send({
             from: deployingAddress,  // deployer
             gas: 3000000

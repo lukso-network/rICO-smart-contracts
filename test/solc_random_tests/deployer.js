@@ -71,32 +71,19 @@ module.exports = {
          */
         const rICO = await helpers.utils.getContractInstance(helpers, "ReversibleICOMock", helpers.addresses.Rico);
 
-        const currentBlock = await helpers.web3Instance.eth.getBlockNumber();
-
-        // starts in one day
-        const commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-        // 22 days allocation
-        const commitPhaseBlockCount = blocksPerDay * commitPhaseDays;
-        const commitPhasePrice = settings.commitPhasePrice; //  helpers.solidity.ether * 0.002;
-
-        // 12 x 30 day periods for distribution
-        const StageCount = settings.StageCount;
-        const StageBlockCount = blocksPerDay * StageDays;
-        const StagePriceIncrease = settings.StagePriceIncrease; // helpers.solidity.ether * 0.0001;
-
         await rICO.methods.init(
-            helpers.addresses.Token,     // address _tokenAddress
-            whitelistingAddress,  // address _whitelistingAddress
-            projectAddress,        // address _freezerAddress
-            projectAddress,        // address _rescuerAddress
-            projectAddress,        // address _projectAddress
-            commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
-            commitPhaseBlockCount,       // uint256 _buyPhaseStartBlock,
-            commitPhasePrice,            // uint256 _initialPrice in wei
-            StageCount,                  // uint8   _stageCount
-            StageBlockCount,             // uint256 _stageLimitAmountIncrease
-            StagePriceIncrease           // uint256 _stagePriceIncrease in wei
+            helpers.addresses.Token,                 // address _tokenAddress
+            whitelistingAddress,                     // address _whitelistingAddress
+            projectAddress,                          // address _freezerAddress
+            projectAddress,                          // address _rescuerAddress
+            projectAddress,                          // address _projectAddress
+            settings.startBlockDelay,                // uint256 _commitPhaseStartBlock
+            settings.buyPhaseStartBlock,             // uint256 _buyPhaseStartBlock,
+            settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
+            settings.commitPhasePrice,                        // uint256 _initialPrice in wei
+            settings.StageCount,                     // uint8   _stageCount
+            settings.stageLimitAmountIncrease,       // uint256 _stageLimitAmountIncrease
+            settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
         ).send({
             from: ContractsDeployer,  // deployer
             gas: 3000000
