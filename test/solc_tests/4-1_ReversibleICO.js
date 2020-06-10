@@ -107,10 +107,10 @@ describe("ReversibleICO", function () {
                 projectAddress,        // address _rescuerAddress
                 projectAddress,       // address _projectAddress
                 commitPhaseStartBlock,                 // uint256 _commitPhaseStartBlock
-                commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-                commitPhasePrice,            // uint256 _commitPhasePrice in wei
+                commitPhaseBlockCount,       // uint256 _buyPhaseStartBlock,
+                commitPhasePrice,            // uint256 _initialPrice in wei
                 StageCount,                 // uint8   _stageCount
-                StageBlockCount,            // uint256 _stageBlockCount
+                StageBlockCount,            // uint256 _stageTokenLimitIncrease
                 StagePriceIncrease          // uint256 _stagePriceIncrease in wei
             ).send({
                 from: deployingAddress,  // deployer
@@ -461,13 +461,13 @@ describe("ReversibleICO", function () {
             });
         });
 
-        describe("view getPriceAtBlock(uint256)", async function () {
+        describe("view getPriceAtSupplyLeft(uint256)", async function () {
 
             it("Returns correct value for commit phase", async function () {
                 const stageId = 0;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call()
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call()
                 ).to.be.equal( commitPhasePrice.toString() );
             });
 
@@ -475,7 +475,7 @@ describe("ReversibleICO", function () {
                 const stageId = 1;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call()
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call()
                 ).to.be.equal(
                     stageValidation[stageId - 1].token_price.toString()
                 );
@@ -485,7 +485,7 @@ describe("ReversibleICO", function () {
                 const stageId = 5;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call()
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call()
                 ).to.be.equal(
                     stageValidation[stageId - 1].token_price.toString()
                 );
@@ -495,7 +495,7 @@ describe("ReversibleICO", function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 expect(
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call()
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call()
                 ).to.be.equal(
                     stageValidation[stageId - 1].token_price.toString()
                 );
@@ -505,7 +505,7 @@ describe("ReversibleICO", function () {
                 const stageId = StageCount;
                 const stageData = await this.ReversibleICO.methods.stages(stageId).call();
                 await helpers.assertInvalidOpcode( async () => {
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call();
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.endBlock + 1).call();
                 }, "Block outside of rICO period.");
             });
         });

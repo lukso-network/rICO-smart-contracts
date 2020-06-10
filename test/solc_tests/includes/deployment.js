@@ -1,3 +1,4 @@
+const utils = require("../helpers/utils.js");
 
 function requiresERC1820Instance() {
     // test requires ERC1820.instance
@@ -95,28 +96,46 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
             currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
             commitPhaseStartBlock = parseInt(currentBlock, 10) + settings.rico.startBlockDelay;
+            buyPhaseStartBlock = parseInt(currentBlock, 10) + settings.rico.buyPhaseStartBlock;
+            buyPhaseEndBlock = parseInt(currentBlock, 10) + settings.rico.buyPhaseEndBlock;
 
-            // 22 days allocation
-            commitPhaseBlockCount = settings.rico.blocksPerDay * settings.rico.commitPhaseDays;
-            commitPhasePrice = settings.rico.commitPhasePrice;
 
             // 12 x 30 day periods for distribution
             stageCount = settings.rico.stageCount;
-            stageBlockCount = settings.rico.blocksPerDay * settings.rico.stageDays;
+            stageTokenLimitIncrease = settings.rico.stageTokenLimitIncrease;
+
+            initialPrice = settings.rico.commitPhasePrice;
             stagePriceIncrease = settings.rico.stagePriceIncrease;
+
+            utils.toLog("   - Settings:");
+            utils.toLog("       - TokenContractAddress:     " + utils.colors.yellow + TokenContractAddress);
+            utils.toLog("       - whitelistingAddress       " + utils.colors.yellow + whitelistingAddress);
+            utils.toLog("       - freezerAddress:           " + utils.colors.yellow + projectAddress);
+            utils.toLog("       - rescuerAddress:           " + utils.colors.yellow + projectAddress);
+            utils.toLog("       - projectAddress:           " + utils.colors.yellow + projectAddress);
+            utils.toLog("       - commitPhaseStartBlock:    " + utils.colors.yellow + commitPhaseStartBlock);
+            utils.toLog("       - buyPhaseStartBlock:       " + utils.colors.yellow + buyPhaseStartBlock);
+            utils.toLog("       - buyPhaseEndBlock:         " + utils.colors.yellow + buyPhaseEndBlock);
+            utils.toLog("       - initialPrice:             " + utils.colors.yellow + initialPrice + " wei");
+            utils.toLog("       - stagePriceIncrease:       " + utils.colors.yellow + stagePriceIncrease + " wei");
+            utils.toLog("       - stageCount:               " + utils.colors.yellow + stageCount);
+            utils.toLog("       - stageTokenLimitIncrease: " + utils.colors.yellow + stageTokenLimitIncrease);
+
+            utils.toLog("   - Caller: " + utils.colors.yellow + deployingAddress);
 
             await ReversibleICOInstance.methods.init(
                 TokenContractAddress,       // address _TokenContractAddress
-                whitelistingAddress, // address _whitelistingAddress
-                projectAddress,        // address _freezerAddress
-                projectAddress,        // address _rescuerAddress
-                projectAddress,       // address _projectAddress
+                whitelistingAddress,        // address _whitelistingAddress
+                projectAddress,             // address _freezerAddress
+                projectAddress,             // address _rescuerAddress
+                projectAddress,             // address _projectAddress
                 commitPhaseStartBlock,      // uint256 _commitPhaseStartBlock
-                commitPhaseBlockCount,      // uint256 _commitPhaseBlockCount,
-                commitPhasePrice,           // uint256 _commitPhasePrice in wei
-                stageCount,                 // uint8   _StageCount
-                stageBlockCount,            // uint256 _StageBlockCount
-                stagePriceIncrease          // uint256 _StagePriceIncrease in wei
+                buyPhaseStartBlock,         // uint256 _buyPhaseStartBlock,
+                buyPhaseEndBlock,           // uint256 _buyPhaseEndBlock,
+                initialPrice,               // uint256 _initialPrice in wei
+                stageCount,                 // uint8   _stageCount
+                stageTokenLimitIncrease,   // uint256 _stageTokenLimitIncrease
+                stagePriceIncrease          // uint256 _stagePriceIncrease in wei
             ).send({
                 from: deployingAddress,  // deployer
                 gas: 3000000

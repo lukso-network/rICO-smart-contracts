@@ -80,7 +80,6 @@ contract ReversibleICO is IERC777Recipient {
     uint256 public maxContribution = 4000 ether;
 
     mapping(uint8 => Stage) public stages;
-    uint256 public stageBlockCount;
     uint8 public stageCount;
 
     /// @dev Maps participants stats by their address.
@@ -134,8 +133,7 @@ contract ReversibleICO is IERC777Recipient {
      *   Stage 1-n = buy phase
      */
     struct Stage {
-        uint128 startBlock;
-        uint128 endBlock;
+        uint256 tokenLimit; // 500k > 9.5M >
         uint256 tokenPrice;
     }
 
@@ -176,7 +174,7 @@ contract ReversibleICO is IERC777Recipient {
     event ProjectWithdraw(address indexed projectAddress, uint256 indexed amount, uint32 indexed withdrawCount);
     event ParticipantWithdraw(address indexed participantAddress, uint256 indexed ethAmount, uint256 indexed tokenAmount, uint32 withdrawCount);
 
-    event StagePriceChanged(uint8 indexed stageId, uint256 indexed tokenPrice, uint8 indexed currentStageId, uint256 effectiveBlockNumber);
+    event StageChanged(uint8 indexed stageId, uint256 indexed tokenLimit, uint256 indexed tokenPrice, uint256 effectiveBlockNumber);
     event WhitelistingAddressChanged(address indexed whitelistingAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
     event FreezerAddressChanged(address indexed freezerAddress, uint8 indexed stageId, uint256 indexed effectiveBlockNumber);
 
@@ -219,11 +217,11 @@ contract ReversibleICO is IERC777Recipient {
      * @param _whitelistingAddress The address handling whitelisting.
      * @param _projectAddress The project wallet that can withdraw ETH contributions.
      * @param _commitPhaseStartBlock The block at which the commit phase starts.
-     * @param _commitPhaseBlockCount The duration of the commit phase in blocks.
-     * @param _commitPhasePrice The initial token price (in WEI per token) during the commit phase.
+     * @param _buyPhaseStartBlock The duration of the commit phase in blocks.
+     * @param _initialPrice The initial token price (in WEI per token) during the commit phase.
      * @param _stageCount The number of the rICO stages, excluding the commit phase (Stage 0).
-     * @param _stageBlockCount The duration of each stage in blocks.
-     * @param _stagePriceIncrease A factor used to increase the token price from the _commitPhasePrice at each subsequent stage. The increase already happens in the first stage too.
+     * @param _stageTokenLimitIncrease The duration of each stage in blocks.
+     * @param _stagePriceIncrease A factor used to increase the token price from the _initialPrice at each subsequent stage.
      */
     function init(
         address _tokenAddress,
@@ -232,10 +230,11 @@ contract ReversibleICO is IERC777Recipient {
         address _rescuerAddress,
         address _projectAddress,
         uint256 _commitPhaseStartBlock,
-        uint256 _commitPhaseBlockCount,
-        uint256 _commitPhasePrice,
+        uint256 _buyPhaseStartBlock,
+        uint256 _buyPhaseEndBlock,
+        uint256 _initialPrice,
         uint8 _stageCount, // Its not recommended to choose more than 50 stages! (9 stages require ~650k GAS when whitelisting contributions, the whitelisting function could run out of gas with a high number of stages, preventing accepting contributions)
-        uint256 _stageBlockCount,
+        uint256 _stageTokenLimitIncrease,
         uint256 _stagePriceIncrease
     )
     public
@@ -247,7 +246,7 @@ contract ReversibleICO is IERC777Recipient {
         require(_freezerAddress != address(0), "_freezerAddress cannot be 0x");
         require(_rescuerAddress != address(0), "_rescuerAddress cannot be 0x");
         require(_projectAddress != address(0), "_projectAddress cannot be 0x");
-        require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
+        // require(_commitPhaseStartBlock > getCurrentBlockNumber(), "Start block cannot be set in the past.");
 
         // Assign address variables
         tokenAddress = _tokenAddress;
@@ -258,43 +257,39 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE global STATS
         commitPhaseStartBlock = _commitPhaseStartBlock;
-        commitPhaseBlockCount = _commitPhaseBlockCount;
-        commitPhaseEndBlock = _commitPhaseStartBlock.add(_commitPhaseBlockCount).sub(1);
-        commitPhasePrice = _commitPhasePrice;
+        commitPhaseEndBlock = _buyPhaseStartBlock.sub(1);
+        commitPhaseBlockCount = commitPhaseEndBlock.sub(commitPhaseStartBlock).add(1);
+        commitPhasePrice = _initialPrice;
 
-        stageBlockCount = _stageBlockCount;
         stageCount = _stageCount;
+
 
         // Setup stage 0: The commit phase.
         Stage storage commitPhase = stages[0];
+        commitPhase.tokenLimit = _stageTokenLimitIncrease;
+        commitPhase.tokenPrice = _initialPrice;
 
-        commitPhase.startBlock = uint128(_commitPhaseStartBlock);
-        commitPhase.endBlock = uint128(commitPhaseEndBlock);
-        commitPhase.tokenPrice = _commitPhasePrice;
 
         // Setup stage 1 to n: The buy phase stages
-        // Each new stage starts after the previous phase's endBlock
-        uint256 previousStageEndBlock = commitPhase.endBlock;
+        uint256 previousStageTokenLimit = _stageTokenLimitIncrease;
 
         // Update stages: start, end, price
         for (uint8 i = 1; i <= _stageCount; i++) {
             // Get i-th stage
             Stage storage byStage = stages[i];
-            // Start block is previous phase end block + 1, e.g. previous stage end=0, start=1;
-            byStage.startBlock = uint128(previousStageEndBlock.add(1));
-            // End block is previous phase end block + stage duration e.g. start=1, duration=10, end=0+10=10;
-            byStage.endBlock = uint128(previousStageEndBlock.add(_stageBlockCount));
+            // set the stage limit amount
+            byStage.tokenLimit = previousStageTokenLimit.add(_stageTokenLimitIncrease);
             // Store the current stage endBlock in order to update the next one
-            previousStageEndBlock = byStage.endBlock;
+            previousStageTokenLimit = byStage.tokenLimit;
             // At each stage the token price increases by _stagePriceIncrease * stageCount
-            byStage.tokenPrice = _commitPhasePrice.add(_stagePriceIncrease.mul(i));
+            byStage.tokenPrice = _initialPrice.add(_stagePriceIncrease.mul(i));
         }
 
         // UPDATE global STATS
         // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-        buyPhaseStartBlock = commitPhaseEndBlock.add(1);
+        buyPhaseStartBlock = _buyPhaseStartBlock;
         // The buy phase ends when the lat stage ends
-        buyPhaseEndBlock = previousStageEndBlock;
+        buyPhaseEndBlock = _buyPhaseEndBlock;
         // The duration of buyPhase in blocks
         buyPhaseBlockCount = buyPhaseEndBlock.sub(buyPhaseStartBlock).add(1);
 
@@ -356,7 +351,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // rICO should only receive tokens from the rICO token contract.
         // Transactions from any other token contract revert
-        require(msg.sender == tokenAddress, "Invalid token contract sent tokens.");
+        require(msg.sender == tokenAddress, "Unknown token contract sent tokens.");
 
         // Project wallet adds tokens to the sale
         if (_from == projectAddress) {
@@ -386,10 +381,11 @@ contract ReversibleICO is IERC777Recipient {
         require(msg.value >= minContribution, "Value sent is less than the minimum contribution.");
 
         // Participant initial state record
+        uint8 currentStage = getCurrentStage();
         Participant storage participantStats = participants[msg.sender];
-        ParticipantStageDetails storage byStage = participantStats.stages[getCurrentStage()];
+        ParticipantStageDetails storage byStage = participantStats.stages[currentStage];
 
-        require(participantStats.committedETH.add(msg.value) <= maxContribution, "Value sent is more than the maximum contribution.");
+        require(participantStats.committedETH.add(msg.value) <= maxContribution, "Value sent is larger than the maximum contribution.");
 
         // Check if participant already exists
         if (participantStats.contributions == 0) {
@@ -411,7 +407,7 @@ contract ReversibleICO is IERC777Recipient {
             msg.sender,
             msg.value,
             uint32(participantStats.contributions),
-            getCurrentStage()
+            currentStage
         );
 
         // If whitelisted, process the contribution automatically
@@ -475,6 +471,26 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
+     * @notice Allows the project to withdraw tokens.
+     * @param _tokenAmount The token amount.
+     */
+    function projectTokenWithdraw(uint256 _tokenAmount)
+    external
+    onlyProjectAddress
+    isInitialized
+    {
+        require(_tokenAmount <= tokenSupply, "Requested amount too high, not enough tokens available.");
+
+        // decrease the supply
+        tokenSupply = tokenSupply.sub(_tokenAmount);
+        initialTokenSupply = initialTokenSupply.sub(_tokenAmount);
+
+        // sent all tokens from the contract to the _to address
+        // solium-disable-next-line security/no-send
+        IERC777(tokenAddress).send(projectAddress, _tokenAmount, "");
+    }
+
+    /**
      * @notice Allows for the project to withdraw ETH.
      * @param _ethAmount The ETH amount in wei.
      */
@@ -512,17 +528,20 @@ contract ReversibleICO is IERC777Recipient {
         address(uint160(projectAddress)).transfer(_ethAmount);
     }
 
-    // TODO set current users
-    // TODO enable receiving of tokens from other rICO
-    // TODO enable receiving of funds from other rICO
 
-    function changeStagePrice(uint8 _stageId, uint256 _newPrice)
+    function changeStage(uint8 _stageId, uint256 _tokenLimit, uint256 _tokenPrice)
     external
     onlyProjectAddress
     isInitialized
     {
-        stages[_stageId].tokenPrice = _newPrice;
-        emit StagePriceChanged(_stageId, _newPrice, getCurrentStage(), getCurrentEffectiveBlockNumber());
+        stages[_stageId].tokenLimit = _tokenLimit;
+        stages[_stageId].tokenPrice = _tokenPrice;
+
+        if(_stageId > stageCount) {
+            stageCount = _stageId;
+        }
+
+        emit StageChanged(_stageId, _tokenLimit, _tokenPrice, getCurrentEffectiveBlockNumber());
     }
 
 
@@ -692,41 +711,34 @@ contract ReversibleICO is IERC777Recipient {
     }
 
     /**
-     * @notice Returns the current stage at the current block number.
+    * @notice Returns the token amount that are still available at the current stage
+    * @return The amount of tokens
+    */
+    function getAvailableTokenAtCurrentStage() public view returns (uint256) {
+        return stages[getCurrentStage()].tokenLimit.sub(
+            initialTokenSupply.sub(tokenSupply)
+        );
+    }
+
+
+    /**
+     * @notice Returns the current stage at current sold token amount
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
-        uint blockNumber;
-        if (frozen) {
-            blockNumber = freezeStart;
-        } else {
-            blockNumber = getCurrentBlockNumber(); // frozenPeriod is deducted in getStageAtBlock()
-        }
-        return getStageAtBlock(blockNumber);
+        return getStageByTokenLimit(
+            initialTokenSupply.sub(tokenSupply)
+        );
     }
 
     /**
-     * @notice Returns the current token price at the current block number.
+     * @notice Returns the current token price at the current stage.
      * @return The current ETH price in wei.
      */
     function getCurrentPrice() public view returns (uint256) {
-        uint blockNumber;
-        if (frozen) {
-            blockNumber = freezeStart;
-        } else {
-            blockNumber = getCurrentBlockNumber(); // frozenPeriod is deducted in getStageAtBlock()
-        }
-        return getPriceAtBlock(blockNumber);
+        return getPriceAtStage(getCurrentStage());
     }
 
-    /**
-     * @notice Returns the token price at the specified block number.
-     * @param _blockNumber the block number at which we want to retrieve the token price.
-     * @return The ETH price in wei
-     */
-    function getPriceAtBlock(uint256 _blockNumber) public view returns (uint256) {
-        return getPriceAtStage(getStageAtBlock(_blockNumber));
-    }
 
     /**
      * @notice Returns the token price at the specified stage ID.
@@ -736,56 +748,64 @@ contract ReversibleICO is IERC777Recipient {
         if (_stageId <= stageCount) {
             return stages[_stageId].tokenPrice;
         }
-        revert("No price data found.");
+        return stages[stageCount].tokenPrice;
+    }
+
+
+    /**
+     * @notice Returns the token price for when a specific amount of tokens is sold
+     * @param _tokenLimit  The amount of tokens for which we want to know the respective token price
+     * @return The ETH price in wei
+     */
+    function getPriceForTokenLimit(uint256 _tokenLimit) public view returns (uint256) {
+        return getPriceAtStage(getStageByTokenLimit(_tokenLimit));
     }
 
     /**
-    * @notice Returns the stage which a given block belongs to.
-    * @param _blockNumber The block number.
-    * TODO check math
+    * @notice Returns the stage at a point where a certain amount of tokens is sold
+    * @param _tokenLimit The amount of tokens for which we want to know the stage ID
     */
-    function getStageAtBlock(uint256 _blockNumber) public view returns (uint8) {
+    function getStageByTokenLimit(uint256 _tokenLimit) public view returns (uint8) {
 
-        // remove the frozen period from the given block, as it is assumed to be a real block number (not adjusted)
-        uint256 blockNumber = _blockNumber.sub(frozenPeriod);
-
-        // check that we are within the rICO period
-        require(blockNumber >= commitPhaseStartBlock && blockNumber <= buyPhaseEndBlock, "Block outside of rICO period.");
-
-        if (blockNumber <= commitPhaseEndBlock) {
-            return 0;
+        // Go through all stages, until we find the one that matches the supply
+        for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
+            if(_tokenLimit <= stages[stageId].tokenLimit) {
+                return stageId;
+            }
         }
-
-        // This is the number of blocks starting from the first stage.
-        uint256 distance = blockNumber - (commitPhaseEndBlock + 1);
-        // Get the stageId (1..stageCount), commitPhase is stage 0
-        // e.g. distance = 5, stageBlockCount = 5, stageID = 2
-        uint256 stageID = 1 + (distance / stageBlockCount);
-
-        return uint8(stageID);
+        // if amount is more than available stages return last stage with the highest price
+        return stageCount;
     }
 
     /**
      * @notice Returns the rICOs available ETH to reserve tokens at a given stage.
      * @param _stageId the stage ID.
-     * TODO we use such functions in the main commit calculations, are there chances of rounding errors?
      */
-    function committableEthAtStage(uint8 _stageId) public view returns (uint256) {
-        return getEthAmountForTokensAtStage(
-            tokenSupply // instead of IERC777(tokenAddress).balanceOf(address(this)), as we need to deduct it BEFORE we sent everything
-        , _stageId);
-    }
+    function committableEthAtStage(uint8 _stageId, uint8 _currentStage) public view returns (uint256) {
+        uint256 supply;
 
-    /**
-     * @notice Returns the amount of tokens that given ETH would buy at a given stage.
-     * @param _ethAmount The ETH amount in wei.
-     * @param _stageId the stage ID.
-     * @return The token amount in its smallest unit (token "wei")
-     */
-    function getTokenAmountForEthAtStage(uint256 _ethAmount, uint8 _stageId) public view returns (uint256) {
-        return _ethAmount
-        .mul(10 ** 18)
-        .div(stages[_stageId].tokenPrice);
+        // past stages
+        if(_stageId < _currentStage) {
+            return 0;
+
+        // last stage
+        } else if(_stageId >= stageCount) {
+            supply = tokenSupply;
+
+        // current stage
+        } else if(_stageId == _currentStage) {
+            supply = stages[_currentStage].tokenLimit.sub(
+                initialTokenSupply.sub(tokenSupply)
+            );
+
+        // later stages
+        } else if(_stageId > _currentStage) {
+            supply = stages[_stageId].tokenLimit.sub(stages[_stageId - 1].tokenLimit); // calc difference to last stage
+        }
+
+        return getEthAmountForTokensAtStage(
+            supply
+        , _stageId);
     }
 
     /**
@@ -798,6 +818,18 @@ contract ReversibleICO is IERC777Recipient {
         return _tokenAmount
         .mul(stages[_stageId].tokenPrice)
         .div(10 ** 18);
+    }
+
+    /**
+     * @notice Returns the amount of tokens that given ETH would buy at a given stage.
+     * @param _ethAmount The ETH amount in wei.
+     * @param _stageId the stage ID.
+     * @return The token amount in its smallest unit (token "wei")
+     */
+    function getTokenAmountForEthAtStage(uint256 _ethAmount, uint8 _stageId) public view returns (uint256) {
+        return _ethAmount
+        .mul(10 ** 18)
+        .div(stages[_stageId].tokenPrice);
     }
 
     /**
@@ -947,9 +979,8 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // UPDATE PARTICIPANT STAGES
-        for (uint8 stageId = 0; stageId <= getCurrentStage(); stageId++) {
-            ParticipantStageDetails storage byStage = participantStats.stages[stageId];
-            byStage.pendingETH = 0;
+        for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
+            participantStats.stages[stageId].pendingETH = 0;
         }
 
         // UPDATE PARTICIPANT STATS
@@ -1006,7 +1037,7 @@ contract ReversibleICO is IERC777Recipient {
         }
 
         // Iterate over all stages and their pending contributions
-        for (uint8 stageId = 0; stageId <= currentStage; stageId++) {
+        for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
             ParticipantStageDetails storage byStage = participantStats.stages[stageId];
 
             // skip if not ETH is pending
@@ -1014,22 +1045,43 @@ contract ReversibleICO is IERC777Recipient {
                 continue;
             }
 
-            uint256 maxCommittableEth = committableEthAtStage(stageId);
-            uint256 newlyCommittedEth = byStage.pendingETH;
+            // skip if stage is below "currentStage" (as they have no available tokens)
+            if(stageId < currentStage) {
+                // add this stage pendingETH to the "currentStage"
+                participantStats.stages[currentStage].pendingETH = participantStats.stages[currentStage].pendingETH.add(byStage.pendingETH);
+                // and reset this stage
+                byStage.pendingETH = 0;
+                continue;
+            }
+
+            // --> We continue only if in "currentStage" or later stages
+
+            uint256 maxCommittableEth = committableEthAtStage(stageId, currentStage);
+            uint256 newlyCommittableEth = byStage.pendingETH;
             uint256 returnEth = 0;
+            uint256 overflowEth = 0;
 
             // If incoming value is higher than what we can accept,
             // just accept the difference and return the rest
-            if (newlyCommittedEth > maxCommittableEth) {
-                returnEth = newlyCommittedEth.sub(maxCommittableEth);
-                newlyCommittedEth = maxCommittableEth;
+            if (newlyCommittableEth > maxCommittableEth) {
+                overflowEth = newlyCommittableEth.sub(maxCommittableEth);
+                newlyCommittableEth = maxCommittableEth;
 
-                totalRefundedETH = totalRefundedETH.add(returnEth);
+                // if in the last stage, return ETH
+                if (stageId == stageCount) {
+                    returnEth = overflowEth;
+                    totalRefundedETH = totalRefundedETH.add(returnEth);
+
+                // if below the last stage, move pending ETH to the next stage
+                } else {
+                    participantStats.stages[stageId + 1].pendingETH = participantStats.stages[stageId + 1].pendingETH.add(overflowEth);
+                    byStage.pendingETH = byStage.pendingETH.sub(overflowEth);
+                }
             }
 
             // convert ETH to TOKENS
             uint256 newTokenAmount = getTokenAmountForEthAtStage(
-                newlyCommittedEth, stageId
+                newlyCommittableEth, stageId
             );
 
             totalNewReservedTokens = totalNewReservedTokens.add(newTokenAmount);
@@ -1037,19 +1089,19 @@ contract ReversibleICO is IERC777Recipient {
             // UPDATE PARTICIPANT STATS
             participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
             participantStats.reservedTokens = participantStats.reservedTokens.add(newTokenAmount);
-            participantStats.committedETH = participantStats.committedETH.add(newlyCommittedEth);
-            participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittedEth).sub(returnEth);
+            participantStats.committedETH = participantStats.committedETH.add(newlyCommittableEth);
+            participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittableEth).sub(returnEth);
 
-            byStage.pendingETH = byStage.pendingETH.sub(newlyCommittedEth).sub(returnEth);
+            byStage.pendingETH = byStage.pendingETH.sub(newlyCommittableEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
             tokenSupply = tokenSupply.sub(newTokenAmount);
-            pendingETH = pendingETH.sub(newlyCommittedEth).sub(returnEth);
-            committedETH = committedETH.add(newlyCommittedEth);
-            _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
+            pendingETH = pendingETH.sub(newlyCommittableEth).sub(returnEth);
+            committedETH = committedETH.add(newlyCommittableEth);
+            _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittableEth);
 
             // Emit event
-            emit ContributionsAccepted(_participantAddress, newlyCommittedEth, newTokenAmount, stageId);
+            emit ContributionsAccepted(_participantAddress, newlyCommittableEth, newTokenAmount, stageId);
         }
 
         // Refund what couldn't be accepted
@@ -1079,7 +1131,6 @@ contract ReversibleICO is IERC777Recipient {
     isNotFrozen
     isRunning
     {
-
         Participant storage participantStats = participants[_participantAddress];
 
         calcParticipantAllocation(_participantAddress);
@@ -1099,7 +1150,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Calculate the return amount
         returnEthAmount = participantStats.committedETH.mul(
-            returnedTokenAmount.mul(10 ** 20)
+            returnedTokenAmount.sub(1).mul(10 ** 20) // deduct 1 token-wei to minimize rounding issues
             .div(participantStats.reservedTokens)
         ).div(10 ** 20);
 
@@ -1123,11 +1174,11 @@ contract ReversibleICO is IERC777Recipient {
             // send tokens back to participant
             bytes memory data;
 
-            // solium-disable-next-line security/no-send
-            IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
-
             // Emit event
             emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
+
+            // solium-disable-next-line security/no-send
+            IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
         }
 
         // Emit events

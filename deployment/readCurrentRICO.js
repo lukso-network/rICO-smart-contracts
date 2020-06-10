@@ -47,31 +47,38 @@ let run = async function() {
     let participants = await makeBatchRequest(web3, participantRequests);
 
     // add lister
-    // web3.eth.accounts.wallet.add('0x');
-    // let acc = web3.eth.accounts.wallet[0].address;
-    // let nonce = await web3.eth.getTransactionCount(acc);
-    // console.log(acc, nonce);
+    web3.eth.accounts.wallet.add('0x');
+    let acc = web3.eth.accounts.wallet[0].address;
+    let nonce = await web3.eth.getTransactionCount(acc);
+    console.log(acc, nonce);
 
-    // let unwhitelist = [];
+    let list = [];
     participants.forEach((partici, i)=>{
         partici.address = participantsAddresses[i];
 
-        if(partici.whitelisted) {
-            console.log('whitlisted', partici.address);
+        if(partici.committedETH > 0) {
+            // console.log('committedETH', partici.address);
 
-            // unwhitelist.push(partici.address);
+            // list.push(partici.address);
+        }
+        if(partici.pendingETH > 0) {
+            console.log('pendingETH', partici.address);
+
+            list.push(partici.address);
         }
 
     });
 
-    // await rICOcontract.methods.whitelist(unwhitelist, false).send({
+    console.log(list.length);
+
+    // await rICOcontract.methods.whitelist(list, false).send({
     //     from: acc,
-    //     gas: '550000',
+    //     gas: '850000',
     //     gasPrice: '40000000000',
     //     // nonce: nonce++
     // });
 
 
-    fs.writeFileSync('./participants_'+ new Date().toISOString().replace(':','-').replace('.','-') +'.json', JSON.stringify(participants, null, 4) ,{encoding:'utf8',flag:'w'});
+    // fs.writeFileSync('./participants_'+ new Date().toISOString().replace(':','-').replace('.','-') +'.json', JSON.stringify(participants, null, 4) ,{encoding:'utf8',flag:'w'});
 };
 run();

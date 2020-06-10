@@ -117,7 +117,7 @@ describe("ReversibleICO", function () {
 
         before(async function () {
 
-            currentBlock = await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
+            let currentBlock = await this.ReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
 
             // starts in one day
             commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
@@ -152,25 +152,21 @@ describe("ReversibleICO", function () {
 
                 lastStageBlockEnd = endBlock;
             }
-    
-            // The buy phase starts on the subsequent block of the commitPhase's (stage0) endBlock
-            BuyPhaseStartBlock = commitPhaseEndBlock + 1;
-            BuyPhaseEndBlock = lastStageBlockEnd;
-            // The duration of buyPhase in blocks
-            BuyPhaseBlockCount = BuyPhaseEndBlock - BuyPhaseStartBlock;
+
 
             await this.ReversibleICO.methods.init(
-                TokenContractAddress,        // address _tokenAddress
-                whitelistingAddress,  // address _whitelistingAddress
-                projectAddress,        // address _freezerAddress
-                projectAddress,        // address _rescuerAddress
-                projectAddress,        // address _projectAddress
-                commitPhaseStartBlock,       // uint256 _commitPhaseStartBlock
-                commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-                commitPhasePrice,            // uint256 _commitPhasePrice in wei
-                StageCount,                  // uint8   _stageCount
-                StageBlockCount,             // uint256 _stageBlockCount
-                StagePriceIncrease           // uint256 _stagePriceIncrease in wei
+                helpers.addresses.Token,                 // address _tokenAddress
+                whitelistingAddress,                     // address _whitelistingAddress
+                projectAddress,                          // address _freezerAddress
+                projectAddress,                          // address _rescuerAddress
+                projectAddress,                          // address _projectAddress
+                setup.settings.startBlockDelay,                // uint256 _commitPhaseStartBlock
+                setup.settings.buyPhaseStartBlock,             // uint256 _buyPhaseStartBlock,
+                setup.settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
+                setup.settings.commitPhasePrice,                        // uint256 _initialPrice in wei
+                setup.settings.StageCount,                     // uint8   _stageCount
+                setup.settings.stageTokenLimitIncrease,       // uint256 _stageTokenLimitIncrease
+                setup.settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
             ).send({
                 from: deployingAddress,  // deployer
                 gas: 3000000

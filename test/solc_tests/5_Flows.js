@@ -125,33 +125,19 @@ async function revertToFreshDeployment() {
         */
         currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
-        // starts in one day
-        commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-        // 22 days allocation
-        commitPhaseBlockCount = blocksPerDay * 22;
-        commitPhasePrice = helpers.solidity.ether * 0.002;
-
-        // 12 x 30 day periods for distribution
-        StageCount = 12;
-        StageBlockCount = blocksPerDay * 30;
-        StagePriceIncrease = helpers.solidity.ether * 0.0001;
-        commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-        BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
-
         await ReversibleICOInstance.methods.init(
-            TokenContractAddress,        // address _TokenContractAddress
-            whitelistingAddress, // address _whitelistingAddress
-            projectAddress,        // address _freezerAddress
-            projectAddress,        // address _rescuerAddress
-            projectAddress,          // address _projectAddress
-            commitPhaseStartBlock,                 // uint256 _StartBlock
-            commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-            commitPhasePrice,            // uint256 _commitPhasePrice in wei
-            StageCount,                 // uint8   _StageCount
-            StageBlockCount,            // uint256 _StageBlockCount
-            StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+            helpers.addresses.Token,                 // address _tokenAddress
+            whitelistingAddress,                     // address _whitelistingAddress
+            projectAddress,                          // address _freezerAddress
+            projectAddress,                          // address _rescuerAddress
+            projectAddress,                          // address _projectAddress
+            setup.settings.startBlockDelay,                // uint256 _commitPhaseStartBlock
+            setup.settings.buyPhaseStartBlock,             // uint256 _buyPhaseStartBlock,
+            setup.settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
+            setup.settings.commitPhasePrice,                        // uint256 _initialPrice in wei
+            setup.settings.StageCount,                     // uint8   _stageCount
+            setup.settings.stageTokenLimitIncrease,       // uint256 _stageTokenLimitIncrease
+            setup.settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
         ).send({
             from: deployingAddress,  // deployer
             gas: 3000000
@@ -332,36 +318,21 @@ describe("Flow Testing", function () {
                 /*
                 *   Add RICO Settings
                 */
-                currentBlock = await TestReversibleICO.methods.getCurrentEffectiveBlockNumber().call();
-
-                // starts in one day
-                commitPhaseStartBlock = parseInt(currentBlock, 10) + blocksPerDay * 1;
-
-                // 22 days allocation
-                commitPhaseBlockCount = blocksPerDay * 22;
-                commitPhasePrice = helpers.solidity.ether * 0.002;
-
-                // 12 x 30 day periods for distribution
-                StageCount = 12;
-                StageBlockCount = blocksPerDay * 30;
-                StagePriceIncrease = helpers.solidity.ether * 0.0001;
-                commitPhaseEndBlock = commitPhaseStartBlock + commitPhaseBlockCount - 1;
-
-                // for validation
-                BuyPhaseEndBlock = commitPhaseEndBlock + ( (StageBlockCount + 1) * StageCount );
+                currentBlock = await ReversibleICOInstance.methods.getCurrentEffectiveBlockNumber().call();
 
                 await TestReversibleICO.methods.init(
-                    TestTokenContractAddress,    // address _TokenContractAddress
-                    whitelistingAddress, // address _whitelistingAddress
-                    projectAddress,        // address _freezerAddress
-                    projectAddress,        // address _rescuerAddress
-                    projectAddress,       // address _projectAddress
-                    commitPhaseStartBlock,                 // uint256 _StartBlock
-                    commitPhaseBlockCount,       // uint256 _commitPhaseBlockCount,
-                    commitPhasePrice,            // uint256 _commitPhasePrice in wei
-                    StageCount,                 // uint8   _StageCount
-                    StageBlockCount,            // uint256 _StageBlockCount
-                    StagePriceIncrease          // uint256 _StagePriceIncrease in wei
+                    helpers.addresses.Token,                 // address _tokenAddress
+                    whitelistingAddress,                     // address _whitelistingAddress
+                    projectAddress,                          // address _freezerAddress
+                    projectAddress,                          // address _rescuerAddress
+                    projectAddress,                          // address _projectAddress
+                    setup.settings.startBlockDelay,                // uint256 _commitPhaseStartBlock
+                    setup.settings.buyPhaseStartBlock,             // uint256 _buyPhaseStartBlock,
+                    setup.settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
+                    setup.settings.commitPhasePrice,                        // uint256 _initialPrice in wei
+                    setup.settings.StageCount,                     // uint8   _stageCount
+                    setup.settings.stageTokenLimitIncrease,       // uint256 _stageTokenLimitIncrease
+                    setup.settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
                 ).send({
                     from: deployingAddress,  // deployer
                     gas: 3000000
@@ -451,7 +422,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is projectAddress", async function () {
 
-                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
+                    it("transaction reverts \"Unknown token contract sent tokens.\"", async function () {
 
                         helpers.utils.resetAccountNonceCache(helpers);
 
@@ -474,14 +445,14 @@ describe("Flow Testing", function () {
                                 gas: 200000
                             });
 
-                        }, "Invalid token contract sent tokens.");
+                        }, "Unknown token contract sent tokens.");
 
                     });
                 });
 
                 describe("token sender is deployingAddress ", async function () {
 
-                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
+                    it("transaction reverts \"Unknown token contract sent tokens.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -513,7 +484,7 @@ describe("Flow Testing", function () {
                                 gas: 200000
                             });
 
-                        }, "Invalid token contract sent tokens.");
+                        }, "Unknown token contract sent tokens.");
 
                     });
 

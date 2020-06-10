@@ -22,8 +22,8 @@ describe("ReversibleICO - Withdraw Token Balance", function () {
     const customTestSettings = clone(setup.settings);
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 11;
-    customTestSettings.rico.blocksPerDay = 10;
-    customTestSettings.rico.stageDays = 10;
+    customTestSettings.rico.buyPhaseStartBlock = 30;
+    customTestSettings.rico.buyPhaseEndBlock = 90;
     customTestSettings.rico.stageCount = 10;
 
     const commitPhasePrice = helpers.solidity.ether * 0.002;

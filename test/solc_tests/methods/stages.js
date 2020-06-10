@@ -261,38 +261,38 @@ describe("ReversibleICO - Methods - Stages", function () {
             });
         });
 
-        describe("view getPriceAtBlock(uint256)", async function () {
+        describe("view getPriceAtSupplyLeft(uint256)", async function () {
 
             it("Returns correct value for commit phase", async function () {
                 const stageId = 0;
                 const stageData = this.jsValidator.stages[stageId];
-                const result = await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call();
+                const result = await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call();
                 expect(result).to.be.equal( commitPhasePrice.toString());
-                expect(result).to.be.equal( this.jsValidator.getPriceAtBlock(stageData.startBlock).toString());
+                expect(result).to.be.equal( this.jsValidator.getPriceAtSupplyLeft(stageData.startBlock).toString());
             });
 
             it("Returns correct value for stage 1", async function () {
                 const stageId = 1;
                 const stageData = this.jsValidator.stages[stageId];
-                const result = await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call();
+                const result = await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call();
                 expect(result).to.be.equal( this.jsValidator.stages[stageId].tokenPrice.toString());
-                expect(result).to.be.equal( this.jsValidator.getPriceAtBlock(stageData.startBlock).toString());
+                expect(result).to.be.equal( this.jsValidator.getPriceAtSupplyLeft(stageData.startBlock).toString());
             });
 
             it("Returns correct value for stage 5", async function () {
                 const stageId = 5;
                 const stageData = this.jsValidator.stages[stageId];
-                const result = await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call();
+                const result = await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call();
                 expect(result).to.be.equal( this.jsValidator.stages[stageId].tokenPrice.toString());
-                expect(result).to.be.equal( this.jsValidator.getPriceAtBlock(stageData.startBlock).toString());
+                expect(result).to.be.equal( this.jsValidator.getPriceAtSupplyLeft(stageData.startBlock).toString());
             });
 
             it("Returns correct value for last stage", async function () {
                 const stageId = this.jsValidator.stageCount;
                 const stageData = this.jsValidator.stages[stageId];
-                const result = await this.ReversibleICO.methods.getPriceAtBlock(stageData.startBlock).call();
+                const result = await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.startBlock).call();
                 expect(result).to.be.equal( this.jsValidator.stages[stageId].tokenPrice.toString());
-                expect(result).to.be.equal( this.jsValidator.getPriceAtBlock(stageData.startBlock).toString());
+                expect(result).to.be.equal( this.jsValidator.getPriceAtSupplyLeft(stageData.startBlock).toString());
 
             });
 
@@ -300,7 +300,7 @@ describe("ReversibleICO - Methods - Stages", function () {
                 const stageId = this.jsValidator.stageCount;
                 const stageData = this.jsValidator.stages[stageId];
                 await helpers.assertInvalidOpcode( async () => {
-                    await this.ReversibleICO.methods.getPriceAtBlock(stageData.endBlock + 1).call();
+                    await this.ReversibleICO.methods.getPriceAtSupplyLeft(stageData.endBlock + 1).call();
                 }, "Block outside of rICO period.");
             });
         });
