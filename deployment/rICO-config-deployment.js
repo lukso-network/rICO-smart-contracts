@@ -61,9 +61,9 @@ module.exports = {
             tokenGenesisAddress: '0xC67810de5816917F1DBc618c084B82441921F55f', // set to PK to null, if you want to manually transfer tokens from project to rICO
             freezerAddress: '0x6109dcd72b8a2485A5b3Ac4E76965159e9893aB7', // rinkeby: "0x4b302ceFF48E2212a761086667195149b3861230",
             rescuerAddress: '0x87bD0fBD87C846e37193f79E7BF97b6d3AF625e3', // rinkeby: "0x29D869F89f3DC193C17EeE8D2656e69A257E01E9",
-            whitelistingAddress: '0x774C67dA65373c9922c528E232B718174dFCa116', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E",
+            whitelistingAddress: '0x98A68e5e632ce8F2F0caf0F30F69cDFa5E137bBF', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E",
         },
-        rico: {1
+        rico: {
             startBlock: 10237777, // 10237777 2020-05-10 14:00:00 on mainnet || 10147598 2020-05-27 14:00:00 on mainnet
             buyPhaseStartBlock: 10288400, //10288400
             buyPhaseEndBlock: 11875222, //11875222
