@@ -28,12 +28,12 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
     // custom settings for this test
     customTestSettings.rico.startBlockDelay = 10; // current block + this = commitPhaseStart
     customTestSettings.rico.buyPhaseStartBlock = 40;
-    customTestSettings.rico.buyPhaseEndBlock = 140;
+    customTestSettings.rico.buyPhaseEndBlock = 180;
     customTestSettings.rico.stageCount = 20;
     customTestSettings.rico.stageTokenLimitIncrease = "50000000000000000000000"; // 500k
 
     customTestSettings.rico.commitPhasePrice = "25000000000000"; // 0.025 ETH
-    customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
+    customTestSettings.rico.stagePriceIncrease = "1000000000000"; // 0.003333... ETH //3333333333333333
 
     let commitPhaseStartBlock = customTestSettings.rico.startBlockDelay;
     // let buyPhaseStartBlock = customTestSettings.rico.buyPhaseStartBlock;
@@ -104,7 +104,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
         // iterate over all phases
         //commitPhaseStartBlock
-        for (let blockNumber = commitPhaseStartBlock; blockNumber <= buyPhaseEndBlock + 11 /* add frozen period */; blockNumber++) {
+        for (let blockNumber = commitPhaseStartBlock; blockNumber <= buyPhaseEndBlock+ 11  /*  add frozen period */; blockNumber++) {
 
             console.log('Current Block: ', blockNumber);
 
@@ -172,10 +172,10 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                     console.log(participant.address +' Task: ' + taskName + ' '+ task);
 
-                    // if(!participants[i].contrCount)
-                    //     participants[i].contrCount = 0;
-                    // if(!participants[i].withdCount)
-                    //     participants[i].withdCount = 0;
+                    if(!participant.contrCount)
+                        participant.contrCount = 0;
+                    if(!participant.withdCount)
+                        participant.withdCount = 0;
 
                     it(participant.address + ": unlocked + locked tokens should tokens balance", async function () {
                         const partici = await ReversibleICO.methods.participants(participant.address).call();
@@ -190,9 +190,9 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
 
                     // CONTRIBUTE
-                    if(task === 1) {// && participants[i].contrCount <= 3) {
+                    if(task === 1 && participant.contrCount <= 10) {
 
-                        // participants[i].contrCount++;
+                        participant.contrCount++;
 
 
                         it(participant.address + ": Buy tokens", function (done) {
@@ -200,7 +200,6 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                             ( async function(){
                                 let particip = await ReversibleICO.methods.participants(participant.address).call();
-                                let stage = await ReversibleICO.methods.getCurrentStage().call();
 
                                 // WHITELIST
                                 if (!particip.whitelisted && blockNumber >= 2) { // make some users not whitelist on their first contribution
@@ -220,8 +219,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
 
                                 // calc random token amount
                                 // user balance: 1000000 ETH?
-                                const contribTokenAmount = new BN(getRandomInt(100000)); // 0-100 tokens //
-                                const stageId = await ReversibleICO.methods.getCurrentStage().call();
+                                const contribTokenAmount = new BN(getRandomInt(500000)); // 0-100 tokens //
                                 const currentPrice = await ReversibleICO.methods.getCurrentPrice().call();
 
                                 // console.log('BEFORE', particip.whitelisted && particip.contributions > 0, particip.reservedTokens);
@@ -292,9 +290,9 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                         });
                     }
                     // WITHDRAW
-                    if(task === 2) {// && participants[i].withdCount <= 3) {
+                    if(task === 2 && participant.contrCount > 5 && blockNumber > 40) {
 
-                        // participants[i].withdCount++;
+                        participant.withdCount++;
 
                         it(participant.address + ": Return tokens", function (done) {
 
@@ -304,7 +302,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                                 // const maxTokens = await TokenContractInstance.methods.balanceOf(participant.address).call();
 
                                 // calc random token amount
-                                const returnTokenAmount = new BN(String(getRandomInt(new BN(maxTokens).sub(new BN(1)).toString())));//getRandomInt(maxTokens))); // 0-max reserved tokens
+                                const returnTokenAmount = new BN(maxTokens);//new BN(String(getRandomInt(new BN(maxTokens).toString())));//getRandomInt(maxTokens))); // 0-max reserved tokens
 
                                 if(returnTokenAmount.toString() > '0') {
 
@@ -312,8 +310,18 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                                         .then(async (receipt) => {
 
                                             // console.log('returnTokenAmount', returnTokenAmount.toString());
-                                            // console.log('DEBUG1', await ReversibleICO.methods.DEBUG1().call());
-                                            // console.log('DEBUG2', await ReversibleICO.methods.DEBUG2().call());
+                                            // const DEBUG1 = await ReversibleICO.methods.DEBUG1().call();
+                                            // const DEBUG2 = await ReversibleICO.methods.DEBUG2().call();
+                                            // console.log('DEBUG1', DEBUG1);
+                                            // console.log('DEBUG2', DEBUG2);
+                                            // expect(DEBUG1).to.be.equal(DEBUG2);
+                                            //
+                                            // const DEBUG3 = await ReversibleICO.methods.DEBUG3().call();
+                                            // const DEBUG4 = await ReversibleICO.methods.DEBUG4().call();
+                                            // console.log('DEBUG1', DEBUG3);
+                                            // console.log('DEBUG2', DEBUG3);
+                                            // expect(DEBUG3).to.be.equal(DEBUG4);
+
                                             // console.log('DEBUG3', await ReversibleICO.methods.DEBUG3().call());
                                             // console.log('DEBUG4', await ReversibleICO.methods.DEBUG4().call());
 
@@ -327,7 +335,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                                                 let pow18 = new BN(10).pow(new BN(18));
 
                                                 // console.log('RET TOKEN', returnTokenAmount.toString());
-                                                // console.log('ETH RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
+                                                console.log('TOKEN RETURNED', new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).toString());
 
                                                 participant.pricesAtWithdraw.push( // TODO incorrect? As transfer events are coming from token contract, not rICO
                                                     new BN(receipt.events[0].raw.topics[3].replace('0x',''), 16).mul(pow18)

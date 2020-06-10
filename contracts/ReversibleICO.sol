@@ -351,7 +351,7 @@ contract ReversibleICO is IERC777Recipient {
     {
         // rICO should only receive tokens from the rICO token contract.
         // Transactions from any other token contract revert
-        require(msg.sender == tokenAddress, "Invalid token contract sent tokens.");
+        require(msg.sender == tokenAddress, "Unknown token contract sent tokens.");
 
         // Project wallet adds tokens to the sale
         if (_from == projectAddress) {
@@ -726,7 +726,7 @@ contract ReversibleICO is IERC777Recipient {
      * @return The current stage ID
      */
     function getCurrentStage() public view returns (uint8) {
-        return getStageForTokenLimit(
+        return getStageByTokenLimit(
             initialTokenSupply.sub(tokenSupply)
         );
     }
@@ -748,7 +748,7 @@ contract ReversibleICO is IERC777Recipient {
         if (_stageId <= stageCount) {
             return stages[_stageId].tokenPrice;
         }
-        return 0;
+        return stages[stageCount].tokenPrice;
     }
 
 
@@ -758,26 +758,23 @@ contract ReversibleICO is IERC777Recipient {
      * @return The ETH price in wei
      */
     function getPriceForTokenLimit(uint256 _tokenLimit) public view returns (uint256) {
-        return getPriceAtStage(getStageForTokenLimit(_tokenLimit));
+        return getPriceAtStage(getStageByTokenLimit(_tokenLimit));
     }
 
     /**
-    * @notice Returns the stage when a certain amount of tokens is reserved
+    * @notice Returns the stage at a point where a certain amount of tokens is sold
     * @param _tokenLimit The amount of tokens for which we want to know the stage ID
     */
-    function getStageForTokenLimit(uint256 _tokenLimit) public view returns (uint8) {
+    function getStageByTokenLimit(uint256 _tokenLimit) public view returns (uint8) {
 
         // Go through all stages, until we find the one that matches the supply
         for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
-            Stage storage byStage = stages[stageId];
-
-            if(_tokenLimit <= byStage.tokenLimit) {
-                return uint8(stageId);
-                break;
+            if(_tokenLimit <= stages[stageId].tokenLimit) {
+                return stageId;
             }
         }
         // if amount is more than available stages return last stage with the highest price
-        return uint8(stageCount);
+        return stageCount;
     }
 
     /**
@@ -792,7 +789,7 @@ contract ReversibleICO is IERC777Recipient {
             return 0;
 
         // last stage
-        } else if(_stageId == stageCount) {
+        } else if(_stageId >= stageCount) {
             supply = tokenSupply;
 
         // current stage
@@ -983,8 +980,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // UPDATE PARTICIPANT STAGES
         for (uint8 stageId = 0; stageId <= stageCount; stageId++) {
-            ParticipantStageDetails storage byStage = participantStats.stages[stageId];
-            byStage.pendingETH = 0;
+            participantStats.stages[stageId].pendingETH = 0;
         }
 
         // UPDATE PARTICIPANT STATS
@@ -1058,18 +1054,18 @@ contract ReversibleICO is IERC777Recipient {
                 continue;
             }
 
-            // --> We continue only if in "currentStage" and later stages
+            // --> We continue only if in "currentStage" or later stages
 
             uint256 maxCommittableEth = committableEthAtStage(stageId, currentStage);
-            uint256 newlyCommittedEth = byStage.pendingETH;
+            uint256 newlyCommittableEth = byStage.pendingETH;
             uint256 returnEth = 0;
             uint256 overflowEth = 0;
 
             // If incoming value is higher than what we can accept,
             // just accept the difference and return the rest
-            if (newlyCommittedEth > maxCommittableEth) {
-                overflowEth = newlyCommittedEth.sub(maxCommittableEth);
-                newlyCommittedEth = maxCommittableEth;
+            if (newlyCommittableEth > maxCommittableEth) {
+                overflowEth = newlyCommittableEth.sub(maxCommittableEth);
+                newlyCommittableEth = maxCommittableEth;
 
                 // if in the last stage, return ETH
                 if (stageId == stageCount) {
@@ -1085,7 +1081,7 @@ contract ReversibleICO is IERC777Recipient {
 
             // convert ETH to TOKENS
             uint256 newTokenAmount = getTokenAmountForEthAtStage(
-                newlyCommittedEth, stageId
+                newlyCommittableEth, stageId
             );
 
             totalNewReservedTokens = totalNewReservedTokens.add(newTokenAmount);
@@ -1093,19 +1089,19 @@ contract ReversibleICO is IERC777Recipient {
             // UPDATE PARTICIPANT STATS
             participantStats._currentReservedTokens = participantStats._currentReservedTokens.add(newTokenAmount);
             participantStats.reservedTokens = participantStats.reservedTokens.add(newTokenAmount);
-            participantStats.committedETH = participantStats.committedETH.add(newlyCommittedEth);
-            participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittedEth).sub(returnEth);
+            participantStats.committedETH = participantStats.committedETH.add(newlyCommittableEth);
+            participantStats.pendingETH = participantStats.pendingETH.sub(newlyCommittableEth).sub(returnEth);
 
-            byStage.pendingETH = byStage.pendingETH.sub(newlyCommittedEth).sub(returnEth);
+            byStage.pendingETH = byStage.pendingETH.sub(newlyCommittableEth).sub(returnEth);
 
             // UPDATE GLOBAL STATS
             tokenSupply = tokenSupply.sub(newTokenAmount);
-            pendingETH = pendingETH.sub(newlyCommittedEth).sub(returnEth);
-            committedETH = committedETH.add(newlyCommittedEth);
-            _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittedEth);
+            pendingETH = pendingETH.sub(newlyCommittableEth).sub(returnEth);
+            committedETH = committedETH.add(newlyCommittableEth);
+            _projectCurrentlyReservedETH = _projectCurrentlyReservedETH.add(newlyCommittableEth);
 
             // Emit event
-            emit ContributionsAccepted(_participantAddress, newlyCommittedEth, newTokenAmount, stageId);
+            emit ContributionsAccepted(_participantAddress, newlyCommittableEth, newTokenAmount, stageId);
         }
 
         // Refund what couldn't be accepted
@@ -1154,7 +1150,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Calculate the return amount
         returnEthAmount = participantStats.committedETH.mul(
-            returnedTokenAmount.mul(10 ** 20)
+            returnedTokenAmount.sub(1).mul(10 ** 20) // deduct 1 token-wei to minimize rounding issues
             .div(participantStats.reservedTokens)
         ).div(10 ** 20);
 

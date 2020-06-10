@@ -422,7 +422,7 @@ describe("Flow Testing", function () {
 
                 describe("token sender is projectAddress", async function () {
 
-                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
+                    it("transaction reverts \"Unknown token contract sent tokens.\"", async function () {
 
                         helpers.utils.resetAccountNonceCache(helpers);
 
@@ -445,14 +445,14 @@ describe("Flow Testing", function () {
                                 gas: 200000
                             });
 
-                        }, "Invalid token contract sent tokens.");
+                        }, "Unknown token contract sent tokens.");
 
                     });
                 });
 
                 describe("token sender is deployingAddress ", async function () {
 
-                    it("transaction reverts \"Invalid token contract sent tokens.\"", async function () {
+                    it("transaction reverts \"Unknown token contract sent tokens.\"", async function () {
 
                         const initialized = await TestReversibleICO.methods.initialized().call();
                         expect( initialized ).to.be.equal( true );
@@ -484,7 +484,7 @@ describe("Flow Testing", function () {
                                 gas: 200000
                             });
 
-                        }, "Invalid token contract sent tokens.");
+                        }, "Unknown token contract sent tokens.");
 
                     });
 
