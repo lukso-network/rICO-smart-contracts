@@ -354,7 +354,7 @@ async function runDeployment() {
         // buy phase
         const buyPhaseStartBlock = rICOConfig.settings.rico.buyPhaseStartBlock;
         const buyPhaseEndBlock = rICOConfig.settings.rico.buyPhaseEndBlock;
-        const stageLimitAmountIncrease = rICOConfig.settings.rico.stageLimitAmountIncrease;
+        const stageTokenLimitIncrease = rICOConfig.settings.rico.stageTokenLimitIncrease;
         stageCount = rICOConfig.settings.rico.stageCount;
         stagePriceIncrease = rICOConfig.settings.rico.stagePriceIncrease;
 
@@ -374,7 +374,7 @@ async function runDeployment() {
         utils.toLog("       - initialPrice:             " + utils.colors.yellow + commitPhasePrice + " wei");
         utils.toLog("       - stagePriceIncrease:       " + utils.colors.yellow + stagePriceIncrease + " wei");
         utils.toLog("       - stageCount:               " + utils.colors.yellow + stageCount);
-        utils.toLog("       - stageLimitAmountIncrease: " + utils.colors.yellow + stageLimitAmountIncrease + " token");
+        utils.toLog("       - stageTokenLimitIncrease: " + utils.colors.yellow + stageTokenLimitIncrease + " token");
 
         utils.toLog("   - Caller: " + utils.colors.yellow + deployerAddress);
 
@@ -389,7 +389,7 @@ async function runDeployment() {
             buyPhaseEndBlock,           // uint256 _buyPhaseEndBlock,
             commitPhasePrice,           // uint256 _initialPrice in wei
             stageCount,                 // uint8   _stageCount
-            stageLimitAmountIncrease,   // uint256 _stageLimitAmountIncrease
+            stageTokenLimitIncrease,   // uint256 _stageTokenLimitIncrease
             stagePriceIncrease          // uint256 _stagePriceIncrease in wei
         ).send({
             from: deployerAddress,      // deployer

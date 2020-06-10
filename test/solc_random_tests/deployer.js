@@ -82,7 +82,7 @@ module.exports = {
             settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
             settings.commitPhasePrice,                        // uint256 _initialPrice in wei
             settings.StageCount,                     // uint8   _stageCount
-            settings.stageLimitAmountIncrease,       // uint256 _stageLimitAmountIncrease
+            settings.stageTokenLimitIncrease,       // uint256 _stageTokenLimitIncrease
             settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
         ).send({
             from: ContractsDeployer,  // deployer

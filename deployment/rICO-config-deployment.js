@@ -9,7 +9,7 @@ const etherBN = new BN(ether.toString());
 //0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b
 
 /*
- * Submitted for verification at etherscan.io on 2020-05-25
+ * Submitted for verification at etherscan.io on 2020-06-10
  *
  *   ________            ____                           _ __    __        ______________
  *  /_  __/ /_  ___     / __ \___ _   _____  __________(_) /_  / /__     /  _/ ____/ __ \
@@ -44,33 +44,33 @@ const etherBN = new BN(ether.toString());
 
 module.exports = {
     settings: {
-        provider: "https://mainnet.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c",
+        provider: "https://rinkeby.infura.io/v3/69617d2389bc4d508550e9a81e47fb3c",
         networkGasPrice: 40000000000, // 10 gwei
         deployToken: false,
         deployrICO: true,
         keys: {
             // valid with ETH on rinkeby ( no 0x )
-            deployerPrivateKey: "AAABBBB....", // no 0x
+            deployerPrivateKey: "0x", // no 0x
             // set to PK to null, and tokenGenesisAddress to a valid one if you want to manually transfer tokens from tokenGenesisAddress to rICO
             tokenGenesisPrivateKey: null,
         },
         address: {
-            tokenContractAddress: '0xA8b919680258d369114910511cc87595aec0be6D', // REQUIRE IF deployToken == false !!
+            tokenContractAddress: '0xA0610e2BE6A66f7AbA8E979a83C46ae9941D7F81', // REQUIRE IF deployToken == false !!
             // when using `npm run deploy-test`, ganache accounts are used instead of these here
-            projectAddress: "0xD52306Eabc2BE4e2dC8Fbd1f929aC73008430f3F",
+            projectAddress: "0x01d934D2D2D8a4AF45532B330e67610E7697eca6", // rinkeby: 0x01d934D2D2D8a4AF45532B330e67610E7697eca6
             tokenGenesisAddress: '0xC67810de5816917F1DBc618c084B82441921F55f', // set to PK to null, if you want to manually transfer tokens from project to rICO
-            freezerAddress: '0x6109dcd72b8a2485A5b3Ac4E76965159e9893aB7', // rinkeby: "0x4b302ceFF48E2212a761086667195149b3861230",
-            rescuerAddress: '0x87bD0fBD87C846e37193f79E7BF97b6d3AF625e3', // rinkeby: "0x29D869F89f3DC193C17EeE8D2656e69A257E01E9",
-            whitelistingAddress: '0x774C67dA65373c9922c528E232B718174dFCa116', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E",
+            freezerAddress: '0x4b302ceFF48E2212a761086667195149b3861230', // rinkeby: "0x4b302ceFF48E2212a761086667195149b3861230",
+            rescuerAddress: '0x29D869F89f3DC193C17EeE8D2656e69A257E01E9', // rinkeby: "0x29D869F89f3DC193C17EeE8D2656e69A257E01E9",
+            whitelistingAddress: '0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E', // rinkeby: "0xc9e82F820F69C67263c0abd220f31bD0Cf73D28E",
         },
         rico: {
-            startBlock: 10147598, // 2020-05-27 14:00:00 on mainnet
-            buyPhaseStartBlock: 10288398,
-            buyPhaseEndBlock: 11875597,
-            stageCount: 8,
-            stageLimitAmountIncrease: ether * 500000, // 500k
-            commitPhasePrice: ether * 0.0012,        // uint256 _initialPrice in wei
-            stagePriceIncrease: ether * 0.00007      // uint256 _StagePriceIncrease in wei
+            startBlock: 10237777, // 10237777 2020-05-10 14:00:00 on mainnet || 10147598 2020-05-27 14:00:00 on mainnet
+            buyPhaseStartBlock: 10288400, //10288400
+            buyPhaseEndBlock: 11875222, //11875222
+            stageCount: 20,
+            stageTokenLimitIncrease: etherBN.mul(new BN(500000)).toString(), // 500k
+            commitPhasePrice: '1200000000000000',        // uint256 _initialPrice in wei
+            stagePriceIncrease: '100000000000000'      // uint256 _StagePriceIncrease in wei
         },
         token: {
             name: "LUKSO Token",

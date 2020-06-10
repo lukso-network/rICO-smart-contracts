@@ -236,7 +236,7 @@ describe("rICO Token - Phases", function () {
                     setup.settings.buyPhaseEndBlock,               // uint256 _buyPhaseEndBlock,
                     setup.settings.commitPhasePrice,                        // uint256 _initialPrice in wei
                     setup.settings.StageCount,                     // uint8   _stageCount
-                    setup.settings.stageLimitAmountIncrease,       // uint256 _stageLimitAmountIncrease
+                    setup.settings.stageTokenLimitIncrease,       // uint256 _stageTokenLimitIncrease
                     setup.settings.StagePriceIncrease                       // uint256 _stagePriceIncrease in wei
                 ).send({
                     from: deployingAddress,  // deployer

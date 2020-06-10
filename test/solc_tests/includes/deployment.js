@@ -102,7 +102,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
 
             // 12 x 30 day periods for distribution
             stageCount = settings.rico.stageCount;
-            stageLimitAmountIncrease = settings.rico.stageLimitAmountIncrease;
+            stageTokenLimitIncrease = settings.rico.stageTokenLimitIncrease;
 
             initialPrice = settings.rico.commitPhasePrice;
             stagePriceIncrease = settings.rico.stagePriceIncrease;
@@ -119,7 +119,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
             utils.toLog("       - initialPrice:             " + utils.colors.yellow + initialPrice + " wei");
             utils.toLog("       - stagePriceIncrease:       " + utils.colors.yellow + stagePriceIncrease + " wei");
             utils.toLog("       - stageCount:               " + utils.colors.yellow + stageCount);
-            utils.toLog("       - stageLimitAmountIncrease: " + utils.colors.yellow + stageLimitAmountIncrease);
+            utils.toLog("       - stageTokenLimitIncrease: " + utils.colors.yellow + stageTokenLimitIncrease);
 
             utils.toLog("   - Caller: " + utils.colors.yellow + deployingAddress);
 
@@ -134,7 +134,7 @@ async function doFreshDeployment(testKey, phase = 0, settings = null ) {
                 buyPhaseEndBlock,           // uint256 _buyPhaseEndBlock,
                 initialPrice,               // uint256 _initialPrice in wei
                 stageCount,                 // uint8   _stageCount
-                stageLimitAmountIncrease,   // uint256 _stageLimitAmountIncrease
+                stageTokenLimitIncrease,   // uint256 _stageTokenLimitIncrease
                 stagePriceIncrease          // uint256 _stagePriceIncrease in wei
             ).send({
                 from: deployingAddress,  // deployer

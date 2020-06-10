@@ -12,7 +12,7 @@ module.exports = {
             buyPhaseStartBlock: 6490,
             buyPhaseEndBlock: 6590, // 100 blocks later
             stageCount: 20,
-            stageLimitAmountIncrease: etherBN.mul(new BN(500000)).toString(), // 500k
+            stageTokenLimitIncrease: etherBN.mul(new BN(500000)).toString(), // 500k
             commitPhasePrice: etherBN.mul(new BN(0.002)).toString(),        // uint256 _initialPrice in wei
             stagePriceIncrease: etherBN.mul(new BN(0.00007)).toString(),
         },

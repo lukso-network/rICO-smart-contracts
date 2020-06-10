@@ -110,7 +110,7 @@ describe("ReversibleICO", function () {
                 commitPhaseBlockCount,       // uint256 _buyPhaseStartBlock,
                 commitPhasePrice,            // uint256 _initialPrice in wei
                 StageCount,                 // uint8   _stageCount
-                StageBlockCount,            // uint256 _stageLimitAmountIncrease
+                StageBlockCount,            // uint256 _stageTokenLimitIncrease
                 StagePriceIncrease          // uint256 _stagePriceIncrease in wei
             ).send({
                 from: deployingAddress,  // deployer

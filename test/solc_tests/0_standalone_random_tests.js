@@ -30,7 +30,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
     customTestSettings.rico.buyPhaseStartBlock = 40;
     customTestSettings.rico.buyPhaseEndBlock = 140;
     customTestSettings.rico.stageCount = 20;
-    customTestSettings.rico.stageLimitAmountIncrease = "5000000000000000000000"; // 500k
+    customTestSettings.rico.stageTokenLimitIncrease = "50000000000000000000000"; // 500k
 
     customTestSettings.rico.commitPhasePrice = "25000000000000"; // 0.025 ETH
     customTestSettings.rico.stagePriceIncrease = "3333333333333333"; // 0.003333... ETH
@@ -118,7 +118,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                 });
             }
 
-            if(blockNumber == 33) {
+            if(blockNumber === 33) {
                 it("Unfreeze contract at block "+ blockNumber, async function () {
                     // freeze contract in the middle
                     await ReversibleICO.methods.unfreeze().send({
@@ -129,7 +129,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
             }
 
             // project increases the rICO holding
-            if(blockNumber == 40) {
+            if(blockNumber === 40) {
                 it("Project added more token to the rICO at block "+ blockNumber, async function () {
 
                     console.log('rICO TOKENS before', await TokenContractInstance.methods.balanceOf(ReversibleICOAddress).call());
@@ -203,7 +203,7 @@ describe("ReversibleICO - Random Withdraw Token Balance", function () {
                                 let stage = await ReversibleICO.methods.getCurrentStage().call();
 
                                 // WHITELIST
-                                if (!particip.whitelisted && blockNumber >= 20) { // make some users not whitelist on their first contribution
+                                if (!particip.whitelisted && blockNumber >= 2) { // make some users not whitelist on their first contribution
                                     await ReversibleICO.methods.whitelist(
                                         [participant.address],
                                         true
