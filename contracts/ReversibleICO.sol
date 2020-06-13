@@ -633,7 +633,7 @@ contract ReversibleICO is IERC777Recipient {
     onlyRescuerAddress
     isFrozen
     {
-        require(getCurrentEffectiveBlockNumber() == freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
+        require(getCurrentEffectiveBlockNumber() >= freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
 
         uint256 tokenBalance = IERC777(tokenAddress).balanceOf(address(this));
         uint256 ethBalance = address(this).balance;
