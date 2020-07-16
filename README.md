@@ -64,7 +64,7 @@ Or call the `cancel()` function directly. This will trigger a cancel of all your
 ## Security Measurements
 
 The rICO as well as the token contract was audited by (ConsenSys Diligence)[https://github.com/ConsenSys] in April 2020.
-No severe issues were found. Find the audit report here: TODO add
+No severe issues were found. You can find the audit report here: [diligence.consensys.net/audits/2020/04/rico/](https://diligence.consensys.net/audits/2020/04/rico/)
  
 ### Escape hatch
 The current version includes a security escape hatch in case of malfunction.
