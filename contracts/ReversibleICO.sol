@@ -9,7 +9,7 @@
 pragma solidity ^0.5.0;
 
 import "./zeppelin/math/SafeMath.sol";
-import "./zeppelin/token/ERC777/IERC777.sol";
+import "./zeppelin/token/ERC20/IERC20.sol";
 import "./zeppelin/token/ERC777/IERC777Recipient.sol";
 import "./zeppelin/introspection/IERC1820Registry.sol";
 
@@ -487,7 +487,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // sent all tokens from the contract to the _to address
         // solium-disable-next-line security/no-send
-        IERC777(tokenAddress).send(projectAddress, _tokenAmount, "");
+        IERC20(tokenAddress).transfer(projectAddress, _tokenAmount);
     }
 
     /**
@@ -635,12 +635,12 @@ contract ReversibleICO is IERC777Recipient {
     {
         require(getCurrentEffectiveBlockNumber() >= freezeStart.add(18000), 'Let it cool.. Wait at least ~3 days (18000 blk) before moving anything.');
 
-        uint256 tokenBalance = IERC777(tokenAddress).balanceOf(address(this));
+        uint256 tokenBalance = IERC20(tokenAddress).balanceOf(address(this));
         uint256 ethBalance = address(this).balance;
 
         // sent all tokens from the contract to the _to address
         // solium-disable-next-line security/no-send
-        IERC777(tokenAddress).send(_to, tokenBalance, "");
+        IERC20(tokenAddress).transfer(_to, tokenBalance);
 
         // sent all ETH from the contract to the _to address
         address(uint160(_to)).transfer(ethBalance);
@@ -1112,7 +1112,7 @@ contract ReversibleICO is IERC777Recipient {
 
         // Transfer tokens to the participant
         // solium-disable-next-line security/no-send
-        IERC777(tokenAddress).send(_participantAddress, totalNewReservedTokens, "");
+        IERC20(tokenAddress).transfer(_participantAddress, totalNewReservedTokens);
 
         // SANITY CHECK
         sanityCheckParticipant(_participantAddress);
@@ -1171,14 +1171,13 @@ contract ReversibleICO is IERC777Recipient {
 
         // Return overflowing tokens received
         if (overflowingTokenAmount > 0) {
-            // send tokens back to participant
-            bytes memory data;
 
             // Emit event
             emit TransferEvent(uint8(TransferTypes.PARTICIPANT_WITHDRAW_OVERFLOW), _participantAddress, overflowingTokenAmount);
 
+            // send tokens back to participant
             // solium-disable-next-line security/no-send
-            IERC777(tokenAddress).send(_participantAddress, overflowingTokenAmount, data);
+            IERC20(tokenAddress).transfer(_participantAddress, overflowingTokenAmount);
         }
 
         // Emit events
